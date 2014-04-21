@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean parent="daoCollection" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list merge="true">
+                <bean class="com.noe.hypercube.dao.DbxEntityDao" />
+                <bean class="com.noe.hypercube.dao.DbxMappingDao" />
+            </list>
+        </property>
+    </bean>
+
+    <bean id="downstreamTaskCollection" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list merge="true">
+                <ref bean="dbxDownSynchTask" />
+            </list>
+        </property>
+    </bean>
+
+    <bean id="dbxDownSynchTask" class="com.noe.hypercube.synchronization.downstream.DbxDownstreamSynchTask" >
+        <constructor-arg index="0" ref="dbxClient"/>
+        <constructor-arg index="1" ref="dbxDirectoryMapper"/>
+    </bean>
+
+    <bean id="dbxClient" class="com.noe.hypercube.service.DbxClientWrapper">
+        <constructor-arg>
+            <bean class="com.dropbox.core.DbxClient">
+                <constructor-arg index="0" ref="config" />
+                <constructor-arg index="1" value="${accessToken}" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="dbxDirectoryMapper" class="com.noe.hypercube.mapping.DbxDirectoryMapper"/>
+
+    <bean id="config" class="com.dropbox.core.DbxRequestConfig">
+        <constructor-arg value="HyperCube/0.0.1" />
+        <constructor-arg value="en" />
+    </bean>
+
+    <bean id="dbxWebAuth" class="com.dropbox.core.DbxWebAuthNoRedirect">
+        <constructor-arg ref="config" />
+        <constructor-arg ref="appInfo" />
+    </bean>
+
+    <bean id="appInfo" class="com.dropbox.core.DbxAppInfo">
+        <constructor-arg value="${app.key}" />
+        <constructor-arg value="${app.secret}" />
+    </bean>
+
+</beans>
