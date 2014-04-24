@@ -8,14 +8,14 @@ import java.nio.file.Paths;
 public final class DirectoryConverter {
 
     public static Path convertToRemotePath(Path localDir, MappingEntity mapping) {
-        Path mappedRemoteDir = mapping.getRemoteDir();
-        Path mappedLocalDir = mapping.getLocalDir();
+        Path mappedRemoteDir = Paths.get(mapping.getRemoteDir());
+        Path mappedLocalDir = Paths.get(mapping.getLocalDir());
         return addSubDirsTo(mappedRemoteDir, localDir, mappedLocalDir);
     }
 
     public static Path convertToLocalPath(Path remoteDir, MappingEntity mapping) {
-        Path mappedLocalDir = mapping.getLocalDir();
-        Path mappedRemoteDir = mapping.getRemoteDir();
+        Path mappedLocalDir = Paths.get(mapping.getLocalDir());
+        Path mappedRemoteDir = Paths.get(mapping.getRemoteDir());
         return addSubDirsTo(mappedLocalDir, remoteDir, mappedRemoteDir);
     }
 

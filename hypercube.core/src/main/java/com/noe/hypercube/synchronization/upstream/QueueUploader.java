@@ -1,8 +1,8 @@
 package com.noe.hypercube.synchronization.upstream;
 
 
-import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.UploadEntity;
+import com.noe.hypercube.service.AccountType;
 import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.slf4j.Logger;
@@ -12,20 +12,20 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 
-public abstract class QueueUploader<ENTITY_TYPE extends FileEntity> implements Runnable {
+public abstract class QueueUploader<ACCOUNT_TYPE extends AccountType> implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(QueueUploader.class);
 
     private BlockingQueue<UploadEntity> queue;
-    private IUploader<ENTITY_TYPE> uploader;
+    private IUploader<ACCOUNT_TYPE> uploader;
     private boolean stop = false;
 
-    public QueueUploader(IUploader<ENTITY_TYPE> uploader, BlockingQueue<UploadEntity> queue) {
+    public QueueUploader(IUploader<ACCOUNT_TYPE> uploader, BlockingQueue<UploadEntity> queue) {
         this.uploader = uploader;
         this.queue = queue;
     }
 
-    public abstract Class<ENTITY_TYPE> getEntityClass();
+    public abstract Class<ACCOUNT_TYPE> getAccountType();
 
     @Override
     public void run() {

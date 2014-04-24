@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 
 import static java.lang.String.format;
@@ -74,7 +73,7 @@ public abstract class Uploader<ENTITY_TYPE> implements IUploader {
     }
 
     private synchronized void upload(Path remotePath, Path localPath, Action action) throws SynchronizationException {
-        File fileToUpload = new File(localPath.toUri());
+        File fileToUpload = localPath.toFile();
         ServerEntry uploadedFile = null;
         try(FileInputStream inputStream = FileUtils.openInputStream(fileToUpload)) {
             switch(action) {
@@ -105,7 +104,7 @@ public abstract class Uploader<ENTITY_TYPE> implements IUploader {
     public synchronized void delete(File fileToUpload, Path remotePath) throws SynchronizationException {
         if(client.exist(remotePath)) {
             client.delete(remotePath);
-            Path localPath = Paths.get(fileToUpload.toURI());
+            Path localPath = fileToUpload.toPath();
             persistenceController.delete(localPath.toString(), client.getEntityClass());
             LOG.debug("Successfully deleted file '{}' from {}", remotePath, client.getAccountName());
         }

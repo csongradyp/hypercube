@@ -1,13 +1,14 @@
 package com.noe.hypercube.mapping;
 
 import com.noe.hypercube.controller.MappingController;
-import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.mapping.collector.Collector;
 import com.noe.hypercube.mapping.collector.LocalDirectoryCollector;
 import com.noe.hypercube.mapping.collector.RemoteDirectoryCollector;
+import com.noe.hypercube.service.AccountType;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -17,8 +18,9 @@ import java.util.List;
 import static com.noe.hypercube.converter.DirectoryConverter.convertToLocalPath;
 import static com.noe.hypercube.converter.DirectoryConverter.convertToRemotePath;
 
-public abstract class DirectoryMapper<MAPPING_TYPE extends MappingEntity, ENTITY_TYPE extends FileEntity> {
+public abstract class DirectoryMapper<MAPPING_TYPE extends MappingEntity, ACCOUNT_TYPE extends AccountType> {
 
+    @Inject
     private MappingController mappingController;
     @Inject
     private LocalDirectoryCollector localDirectoryCollector;
@@ -26,7 +28,7 @@ public abstract class DirectoryMapper<MAPPING_TYPE extends MappingEntity, ENTITY
     private RemoteDirectoryCollector remoteDirectoryCollector;
 
     public abstract Class<MAPPING_TYPE> getMappingClass();
-    public abstract Class<ENTITY_TYPE> getEntityClass();
+    public abstract Class<ACCOUNT_TYPE> getAccountType();
 
     public List<Path> getLocals(final String remotePath) {
         Path path = Paths.get(remotePath);
@@ -43,8 +45,8 @@ public abstract class DirectoryMapper<MAPPING_TYPE extends MappingEntity, ENTITY
         return localDirs;
     }
 
-    public List<Path> getRemotes(final String localPath) {
-        final Path path = Paths.get(localPath);
+    public List<Path> getRemotes(final File localPath) {
+        final Path path = localPath.toPath();
         return getRemotes(path);
     }
 

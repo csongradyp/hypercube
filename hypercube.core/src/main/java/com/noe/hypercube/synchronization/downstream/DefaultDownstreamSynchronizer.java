@@ -7,6 +7,7 @@ import com.noe.hypercube.domain.IEntity;
 import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.mapping.DirectoryMapper;
+import com.noe.hypercube.service.AccountType;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.apache.commons.io.FileUtils;
@@ -29,7 +30,7 @@ public abstract class DefaultDownstreamSynchronizer implements DownstreamSynchro
     private static final Logger LOG = Logger.getLogger(DefaultDownstreamSynchronizer.class);
 
     private final IClient client;
-    private final DirectoryMapper<? extends MappingEntity, ? extends IEntity> directoryMapper;
+    private final DirectoryMapper<? extends MappingEntity, ? extends AccountType> directoryMapper;
     @Inject
     private IPersistenceController persistenceController;
 
@@ -39,7 +40,7 @@ public abstract class DefaultDownstreamSynchronizer implements DownstreamSynchro
         this.persistenceController = persistenceController;
     }
 
-    protected DefaultDownstreamSynchronizer(IClient client, DirectoryMapper<? extends MappingEntity, ? extends IEntity> directoryMapper) {
+    protected DefaultDownstreamSynchronizer(IClient client, DirectoryMapper<? extends MappingEntity, ? extends AccountType> directoryMapper) {
         this.client = client;
         this.directoryMapper = directoryMapper;
     }
@@ -97,7 +98,7 @@ public abstract class DefaultDownstreamSynchronizer implements DownstreamSynchro
             List<Path> localPaths = directoryMapper.getLocals(entry.getPath());
             for(Path localPath : localPaths) {
                 if(isNew(entry, localPath)) {
-                    File newLocalFile = new File(localPath.toUri());
+                    File newLocalFile = localPath.toFile();
                     createDirsFor(newLocalFile);
                     try (FileOutputStream outputStream = new FileOutputStream(newLocalFile)) {
                         client.download(entry, outputStream);
@@ -122,7 +123,7 @@ public abstract class DefaultDownstreamSynchronizer implements DownstreamSynchro
             for(Path localPath : localPaths) {
                 if(isNew(entry, localPath)) {
 
-                    File newLocalFile = new File(localPath.toUri());
+                    File newLocalFile = localPath.toFile();
                     createDirsFor(newLocalFile);
 
                     try (FileOutputStream outputStream = new FileOutputStream(newLocalFile)) {
@@ -166,7 +167,7 @@ public abstract class DefaultDownstreamSynchronizer implements DownstreamSynchro
         }
     }
     private void delete(Path localPath) {
-        File fileToDelete = new File(localPath.toUri());
+        File fileToDelete = localPath.toFile();
         if (!fileToDelete.isDirectory()) {
             try {
                 persistenceController.delete(localPath.toString(), client.getEntityClass());

@@ -1,12 +1,14 @@
 package com.noe.hypercube.domain;
 
-import java.nio.file.Path;
+import com.noe.hypercube.service.AccountType;
 
 public interface MappingEntity extends IEntity<String> {
 
-    Path getRemoteDir();
+    String getRemoteDir();
 
-    Path getLocalDir();
+    String getLocalDir();
 
     Filter getFilter();
+
+    Class<? extends AccountType> getAccountType();
 }

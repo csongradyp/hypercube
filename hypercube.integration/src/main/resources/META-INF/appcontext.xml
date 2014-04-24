@@ -77,7 +77,7 @@
         <constructor-arg ref="synchronizer" />
     </bean>
 
-    <bean id="localFileObserver" class="com.noe.hypercube.observer.LocalFileObserver">
+    <bean id="localFileObserver" class="com.noe.hypercube.observer.OldLocalFileObserver">
         <constructor-arg index="0" ref="fileMonitor" />
         <constructor-arg index="1" ref="fileObserver" />
         <constructor-arg index="2" ref="fileListener" />
@@ -174,4 +174,28 @@
     </bean>
 
 
+    <bean id="observerFactory" class="com.noe.hypercube.observer.ObserverFactory">
+        <constructor-arg ref="uploaders" />
+        <constructor-arg ref="mappers" />
+    </bean>
+
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="5" />
+        <property name="maxPoolSize" value="10" />
+        <property name="WaitForTasksToCompleteOnShutdown" value="true" />
+    </bean>
+
+    <bean id="uploaders" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list merge="true">
+            </list>
+        </property>
+    </bean>
+
+    <bean id="mappers" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list merge="true">
+            </list>
+        </property>
+    </bean>
 </beans>

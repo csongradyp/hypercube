@@ -4,12 +4,13 @@ import com.noe.hypercube.domain.MappingEntity;
 
 import javax.inject.Named;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Named
 public class RemoteDirectoryCollector extends DirectoryCollector {
 
     @Override
     protected Path getDirectoryToMatch(MappingEntity mapping) {
-        return mapping.getLocalDir();
+        return Paths.get(mapping.getLocalDir());
     }
 }

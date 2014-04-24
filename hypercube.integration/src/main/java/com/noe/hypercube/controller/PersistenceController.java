@@ -92,8 +92,11 @@ public class PersistenceController implements IPersistenceController {
     @Override
     public Collection<MappingEntity> getAllMappings() {
         Collection<MappingEntity> allMappings = new LinkedList<>();
-        for (Dao dao : daoMap.values()) {
-            allMappings.addAll(dao.getAll());
+        Collection<Dao> daos = daoMap.values();
+        for (Dao dao : daos) {
+            if(MappingEntity.class.isAssignableFrom(dao.getEntityClass())) {
+                allMappings.addAll(dao.getAll());
+            }
         }
         return allMappings;
     }

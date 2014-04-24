@@ -45,7 +45,7 @@ public class DirectoryMapperTest {
 
     @Test
     public void getRemotesReturnsAllMappingsRelatedToTheGivenLocalFilePathAndSubpaths() {
-        final String localPath = "X:\\A\\B\\C\\test.txt";
+        final Path localPath = Paths.get("X:\\A\\B\\C\\test.txt");
 
         final List list = mapper.getRemotes(localPath);
 
@@ -66,7 +66,7 @@ public class DirectoryMapperTest {
     private List<MappingEntity> createMappingEntity() {
         ArrayList<MappingEntity> mappingEntities = new ArrayList<>();
         for(int i = 0; i < LOCAL_DIRS.length; i++) {
-            mappingEntities.add(new TestMapping(LOCAL_DIRS[i], REMOTE_DIRS[i]));
+            mappingEntities.add(new TestMapping(LOCAL_DIRS[i].toString(), REMOTE_DIRS[i].toString()));
         }
         return mappingEntities;
     }

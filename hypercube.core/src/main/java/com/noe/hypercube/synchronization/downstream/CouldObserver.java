@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 
@@ -52,7 +53,7 @@ public abstract class CouldObserver implements Runnable {
     private boolean isMapped(ServerEntry entry) {
         Collection<MappingEntity> mappings = persistenceController.getMappings(directoryMapper.getMappingClass());
         for (MappingEntity mapping : mappings) {
-            if(overlaps(entry, mapping.getRemoteDir())) {
+            if(overlaps(entry, Paths.get(mapping.getRemoteDir()))) {
                 return true;
             }
         }

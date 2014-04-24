@@ -26,7 +26,7 @@ public class DirectoryConverterTest {
         localDirWithSubdirs = Paths.get("c:/a/b/c/d");
         remoteDir = Paths.get("x/y/z");
         remoteDirWithSubDirs = Paths.get("x/y/z/c/d");
-        mapping = new TestMapping(localDir, remoteDir);
+        mapping = new TestMapping(localDir.toString(), remoteDir.toString());
     }
 
     @Test

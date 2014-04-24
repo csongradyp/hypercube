@@ -1,32 +1,37 @@
 package com.noe.hypercube.domain;
 
-import java.nio.file.Path;
+import com.noe.hypercube.service.TestAccount;
 
 public class TestMapping implements MappingEntity {
 
-    private Path localDir;
-    private Path remoteDir;
+    private String localDir;
+    private String remoteDir;
     private Filter filters;
 
-    public TestMapping(Path localdir, Path remoteDir) {
+    public TestMapping(String localdir, String remoteDir) {
         this.localDir = localdir;
         this.remoteDir = remoteDir;
         filters = new TestFilter();
     }
 
     @Override
-    public Path getRemoteDir() {
-            return remoteDir;
+    public String getRemoteDir() {
+        return remoteDir;
     }
 
     @Override
-    public Path getLocalDir() {
-            return localDir;
+    public String getLocalDir() {
+        return localDir;
     }
 
     @Override
     public Filter getFilter() {
         return filters;
+    }
+
+    @Override
+    public Class<TestAccount> getAccountType() {
+        return TestAccount.class;
     }
 
     @Override

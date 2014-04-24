@@ -1,7 +1,7 @@
 package com.noe.hypercube.synchronization.upstream;
 
-import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.mapping.DirectoryMapper;
+import com.noe.hypercube.service.AccountType;
 import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
 
@@ -18,7 +18,7 @@ public class UpstreamSynchronizer implements IUpstreamSynchronizer {
 
     private final Collection<DirectoryMapper> mapperCollection;
     private final Collection<Uploader> uploaderCollection;
-    private Map<Class<? extends FileEntity>, Uploader> uploaders;
+    private Map<Class<? extends AccountType>, Uploader> uploaders;
 
     public UpstreamSynchronizer(Collection<DirectoryMapper> mapperCollection, Collection<Uploader> uploaderCollection) {
         this.mapperCollection = mapperCollection;
@@ -50,7 +50,7 @@ public class UpstreamSynchronizer implements IUpstreamSynchronizer {
             Path localPath = file.toPath();
             List<Path> remotePaths = mapper.getRemotes(localPath);
             if(isMapped(remotePaths)) {
-                Uploader uploader = uploaders.get(mapper.getEntityClass());
+                Uploader uploader = uploaders.get(mapper.getAccountType());
                 for (Path remotePath : remotePaths) {
                     switch(action) {
                         case ADDED:

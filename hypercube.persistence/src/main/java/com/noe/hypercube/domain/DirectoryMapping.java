@@ -6,8 +6,6 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @MappedSuperclass
 @Table(uniqueConstraints= @UniqueConstraint(columnNames = {"localDir", "remoteDir"}))
@@ -17,52 +15,41 @@ public abstract class DirectoryMapping implements MappingEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
 
-    private Path localDir;
-    private Path remoteDir;
+    private String localDir;
+    private String remoteDir;
     private Filter fileFilters;
 
     protected DirectoryMapping() {
     }
 
-    public DirectoryMapping(Path localDir, Path remoteDir) {
-        this.localDir = localDir;
-        this.remoteDir = remoteDir;
-        fileFilters = new FileFilter();
-    }
-
-    public DirectoryMapping(Path localDir, Path remoteDir, Filter fileFilters) {
-        this.localDir = localDir;
-        this.remoteDir = remoteDir;
-        this.fileFilters = fileFilters;
-    }
-
     public DirectoryMapping(String localDir, String remoteDir) {
-        this.localDir = Paths.get(localDir);
-        this.remoteDir = Paths.get(remoteDir);
+        this.localDir = localDir;
+        this.remoteDir = remoteDir;
         fileFilters = new FileFilter();
     }
 
     public DirectoryMapping(String localDir, String remoteDir, Filter fileFilters) {
-        this.localDir = Paths.get(localDir);
-        this.remoteDir = Paths.get(remoteDir);
+        this.localDir = localDir;
+        this.remoteDir = remoteDir;
         this.fileFilters = fileFilters;
     }
 
+
     @Override
-    public Path getLocalDir() {
+    public String getLocalDir() {
         return localDir;
     }
 
-    public void setLocalDir(Path localDir) {
+    public void setLocalDir(String localDir) {
         this.localDir = localDir;
     }
 
     @Override
-    public Path getRemoteDir() {
+    public String getRemoteDir() {
         return remoteDir;
     }
 
-    public void setRemoteDir(Path remoteDir) {
+    public void setRemoteDir(String remoteDir) {
         this.remoteDir = remoteDir;
     }
 
@@ -77,7 +64,7 @@ public abstract class DirectoryMapping implements MappingEntity {
 
     @Override
     public String getId() {
-        return localDir.normalize().toString();
+        return localDir + remoteDir;
     }
 
     @Override

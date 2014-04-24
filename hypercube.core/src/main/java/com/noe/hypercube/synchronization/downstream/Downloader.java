@@ -78,7 +78,7 @@ public abstract class Downloader implements DownstreamSynchronizer {
             List<Path> localPaths = directoryMapper.getLocals(entry.getPath());
             for(Path localPath : localPaths) {
                 if(isNew(entry, localPath)) {
-                    File newLocalFile = new File(localPath.toUri());
+                    File newLocalFile = localPath.toFile();
                     createDirsFor(newLocalFile);
                     try (FileOutputStream outputStream = FileUtils.openOutputStream(newLocalFile)) {
                         client.download(entry, outputStream);
@@ -125,7 +125,7 @@ public abstract class Downloader implements DownstreamSynchronizer {
         }
     }
     private void delete(Path localPath) {
-        File fileToDelete = new File(localPath.toUri());
+        File fileToDelete = localPath.toFile();
         if (!fileToDelete.isDirectory()) {
             try {
                 persistenceController.delete(localPath.toString(), client.getEntityClass());
