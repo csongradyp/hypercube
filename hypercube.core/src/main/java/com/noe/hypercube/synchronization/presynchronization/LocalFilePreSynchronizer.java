@@ -18,13 +18,13 @@ import java.util.Map;
 
 import static org.apache.commons.io.FileUtils.isFileNewer;
 
-public abstract class LocalFilePreChecker<ACCOUNT_TYPE extends AccountType> implements FilePreSynchronizer {
+public abstract class LocalFilePreSynchronizer<ACCOUNT_TYPE extends AccountType> implements FilePreSynchronizer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LocalFilePreChecker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LocalFilePreSynchronizer.class);
 
     private LocalFileListener<ACCOUNT_TYPE> fileListener;
 
-    protected LocalFilePreChecker(LocalFileListener<ACCOUNT_TYPE> fileListener) {
+    protected LocalFilePreSynchronizer(LocalFileListener<ACCOUNT_TYPE> fileListener) {
         this.fileListener = fileListener;
     }
 
