@@ -3,8 +3,11 @@ package com.noe.hypercube;
 
 import com.noe.hypercube.synchronization.Synchronizer;
 
+import javax.inject.Inject;
+
 public class HyperCubeApp {
 
+    @Inject
     private Synchronizer synchronizer;
 
     public HyperCubeApp(Synchronizer synchronizer) {

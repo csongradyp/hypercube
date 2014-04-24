@@ -52,4 +52,11 @@
         <constructor-arg value="${app.secret}" />
     </bean>
 
+    <bean id="dbxUploader" class="com.noe.hypercube.synchronization.upstream.DbxUploader">
+        <constructor-arg ref="dbxClient" />
+        <constructor-arg ref="persistenceController" />
+    </bean>
+
+    <bean id="dbxDao" class="com.noe.hypercube.dao.DbxEntityDao"/>
+
 </beans>

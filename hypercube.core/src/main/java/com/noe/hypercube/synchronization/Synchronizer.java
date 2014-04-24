@@ -14,7 +14,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @Named
 public class Synchronizer {
 
-    private static final int INITIAL_DELAY = 0;
     private static final int DELAY = 1;
 
     @Inject
@@ -29,10 +28,11 @@ public class Synchronizer {
     public void start() {
 //        observer.precheckAndStart();
         List<FileAlterationObserver> observers = observerFactory.create();
+
         fileMonitor.addObservers(observers);
         fileMonitor.start();
         for (Runnable task : tasks) {
-            executorService.scheduleWithFixedDelay(task, INITIAL_DELAY, DELAY, SECONDS);
+            executorService.scheduleWithFixedDelay(task, 0, DELAY, SECONDS);
         }
     }
 

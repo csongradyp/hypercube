@@ -14,8 +14,18 @@
     <tx:annotation-driven />
 
     <import resource="appcontext-persistence.xml" />
-
     <import resource="*-context.xml" />
+
+
+    <bean id="propertyPlaceholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="locations">
+            <list>
+                <value>classpath:auth.properties</value>
+                <value>classpath:sync.properties</value>
+            </list>
+        </property>
+    </bean>
 
     <bean id="daoCollection" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
@@ -31,160 +41,6 @@
         </property>
     </bean>
 
-    <!--<bean id="entityManager" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">-->
-        <!--<property name="persistenceUnitName" value="entries" />-->
-        <!--<property name="dataSource" ref="dataSource" />-->
-        <!--<property name="packagesToScan" value="com.noe.hypercube" />-->
-        <!--<property name="jpaVendorAdapter">-->
-            <!--<bean class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">-->
-                <!--<property name="generateDdl" value="true" />-->
-                <!--<property name="mappingController" value="H2" />-->
-            <!--</bean>-->
-        <!--</property>-->
-        <!--<property name="loadTimeWeaver">-->
-            <!--<bean class="org.springframework.instrument.classloading.SimpleLoadTimeWeaver" />-->
-        <!--</property>-->
-    <!--</bean>-->
-
-    <!--<bean path="jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect" />-->
-    <!--<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />-->
-    <!--<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">-->
-        <!--<property name="entityManagerFactory" ref="entityManager" />-->
-    <!--</bean>-->
-
-    <!--<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" >-->
-        <!--<property name="driverClassName" value="org.h2.Driver"/>-->
-        <!--<property name="url" value="jdbc:h2:~/hypercube.hdb"/>-->
-        <!--<property name="username" value=""/>-->
-        <!--<property name="password" value=""/>-->
-    <!--</bean>-->
-
-    <bean id="propertyPlaceholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="ignoreUnresolvablePlaceholders" value="true"/>
-        <property name="locations">
-            <list>
-                <value>classpath:auth.properties</value>
-                <value>classpath:sync.properties</value>
-            </list>
-        </property>
-    </bean>
-
-    <bean id="authentication" class="com.noe.hypercube.Authentication" />
-
-    <!--<bean id="driveClient" class="hu.wildanimals.synchronization.drive.Connect" factory-method="createDriveService" />-->
-
-    <bean id="starter" class="com.noe.hypercube.HyperCubeApp">
-        <constructor-arg ref="synchronizer" />
-    </bean>
-
-    <bean id="localFileObserver" class="com.noe.hypercube.observer.OldLocalFileObserver">
-        <constructor-arg index="0" ref="fileMonitor" />
-        <constructor-arg index="1" ref="fileObserver" />
-        <constructor-arg index="2" ref="fileListener" />
-        <constructor-arg>
-            <list>
-                <ref bean="dbxFileSystemPreChecker" />
-                <!--<ref bean="driveFileSystemPreChecker" />-->
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="dbxFileSystemPreChecker" class="com.noe.hypercube.synchronization.presynchronization.DbxLocalFilePreChecker">
-        <constructor-arg index="0" ref="dbxDao" />
-        <constructor-arg index="1" ref="dbxUploader" />
-        <constructor-arg index="2" ref="dbxPathConverter" />
-    </bean>
-
-    <!--<bean id="driveFileSystemPreChecker" class="hu.wildanimals.observer.DriveLocalFilePreChecker">-->
-        <!--<constructor-arg index="0" ref="mappingController" />-->
-        <!--<constructor-arg index="1" ref="driveUploader" />-->
-        <!--<constructor-arg index="2" ref="drivePathConverter" />-->
-    <!--</bean>-->
-
-    <bean id="fileListener" class="com.noe.hypercube.observer.LocalFileListener">
-        <constructor-arg>
-            <list>
-                <ref bean="dbxUploader" />
-                <!--<ref bean="driveUploader" />-->
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="dbxUploader" class="com.noe.hypercube.synchronization.upstream.DbxUploader">
-        <constructor-arg index="0" ref="dbxClient" />
-        <constructor-arg index="1" ref="dbxDao" />
-        <constructor-arg index="2" ref="dbxPathConverter" />
-    </bean>
-
-    <bean id="dbxDao" class="com.noe.hypercube.dao.DbxEntityDao"/>
-
-    <!--<bean id="driveUploader" class="hu.wildanimals.synchronization.drive.DriveUploader">-->
-    <!--<constructor-arg index="0" ref="driveClient" />-->
-    <!--<constructor-arg index="1" ref="mappingController" />-->
-    <!--<constructor-arg index="2" ref="drivePathConverter" />-->
-    <!--</bean>-->
-
-    <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer">
-        <constructor-arg index="0" ref="localFileObserver" />
-        <constructor-arg index="1" ref="executorService" />
-        <property name="tasks">
-            <list>
-                <!--<ref bean="dbxSyncTask" />-->
-                <!--<ref bean="driveSyncTask" />-->
-            </list>
-        </property>
-    </bean>
-
-    <bean id="dbxPathConverter" class="com.noe.hypercube.converter.DropboxPathConverter">
-        <constructor-arg value="${dir}" />
-    </bean>
-
-    <!--<bean id="drivePathConverter" class="hu.wildanimals.synchronization.drive.util.DrivePathConverter">-->
-    <!--<constructor-arg value="${dir}" />-->
-    <!--</bean>-->
-
-    <bean id="executorService" class="java.util.concurrent.Executors" factory-method="newSingleThreadScheduledExecutor" />
-
-    <!--<bean id="dbxSyncTask" class="com.noe.hypercube.synchronization.downstream.DbxSyncTask">-->
-    <!--<constructor-arg index="0" ref="dbxClient" />-->
-    <!--<constructor-arg index="1" ref="dbxDao" />-->
-    <!--<constructor-arg index="2" ref="dbxPathConverter" />-->
-    <!--</bean>-->
-
-    <!--<bean path="driveSyncTask" class="DriveSyncTask">-->
-    <!--<constructor-arg index="0" ref="driveClient" />-->
-    <!--<constructor-arg index="1" ref="mappingController" />-->
-    <!--<constructor-arg index="2" ref="drivePathConverter" />-->
-    <!--</bean>-->
-
-
-    <!--<bean id="driveDao" class="hu.wildanimals.mappingController.dao.implementation.drive.DriveFileEntryDao" />-->
-
-    <bean id="fileMonitor" class="org.apache.commons.io.monitor.FileAlterationMonitor">
-        <constructor-arg value="${poll.delay.in.milisec}" />
-        <constructor-arg ref="fileObserver" />
-    </bean>
-
-    <bean id="fileObserver" class="org.apache.commons.io.monitor.FileAlterationObserver">
-        <constructor-arg ref="contentDir" />
-    </bean>
-
-    <bean id="contentDir" class="java.io.File">
-        <constructor-arg value="${dir}" />
-    </bean>
-
-
-    <bean id="observerFactory" class="com.noe.hypercube.observer.ObserverFactory">
-        <constructor-arg ref="uploaders" />
-        <constructor-arg ref="mappers" />
-    </bean>
-
-    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
-        <property name="corePoolSize" value="5" />
-        <property name="maxPoolSize" value="10" />
-        <property name="WaitForTasksToCompleteOnShutdown" value="true" />
-    </bean>
-
     <bean id="uploaders" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list merge="true">
@@ -198,4 +54,22 @@
             </list>
         </property>
     </bean>
+
+    <bean id="persistenceController" class="com.noe.hypercube.controller.PersistenceController">
+        <constructor-arg ref="daoCollection" />
+    </bean>
+
+    <bean id="fileMonitor" class="com.noe.hypercube.observer.LocalFileMonitor">
+        <constructor-arg value="${poll.delay.in.milisec}" />
+    </bean>
+
+    <bean id="executorService" class="java.util.concurrent.Executors" factory-method="newScheduledThreadPool">
+        <constructor-arg value="10" />
+    </bean>
+
+    <bean id="observerFactory" class="com.noe.hypercube.observer.ObserverFactory">
+        <constructor-arg ref="uploaders" />
+        <constructor-arg ref="mappers" />
+    </bean>
+
 </beans>
