@@ -12,7 +12,7 @@ import java.util.Date;
 
 public class DbxDownstreamSynchTask extends DefaultDownstreamSynchronizer {
 
-    public DbxDownstreamSynchTask(IClient<DbxFileEntity> client, DirectoryMapper<MappingEntity, Dropbox> directoryMapper) {
+    public DbxDownstreamSynchTask(IClient<DbxFileEntity> client, DirectoryMapper<Dropbox, MappingEntity> directoryMapper) {
         super(client, directoryMapper);
     }
 

@@ -1,20 +1,14 @@
 package com.noe.hypercube.domain;
 
+import com.noe.hypercube.service.AccountType;
+import com.noe.hypercube.service.Dropbox;
+
 import javax.persistence.Entity;
-import java.nio.file.Path;
 
 @Entity
 public class DbxDirectoryMapping extends DirectoryMapping {
 
     public DbxDirectoryMapping() {
-    }
-
-    public DbxDirectoryMapping(Path localDir, Path remoteDir) {
-        super(localDir, remoteDir);
-    }
-
-    public DbxDirectoryMapping(Path localDir, Path remoteDir, Filter fileFilters) {
-        super(localDir, remoteDir, fileFilters);
     }
 
     public DbxDirectoryMapping(String localDir, String remoteDir) {
@@ -23,5 +17,10 @@ public class DbxDirectoryMapping extends DirectoryMapping {
 
     public DbxDirectoryMapping(String localDir, String remoteDir, Filter fileFilters) {
         super(localDir, remoteDir, fileFilters);
+    }
+
+    @Override
+    public Class<? extends AccountType> getAccountType() {
+        return Dropbox.class;
     }
 }

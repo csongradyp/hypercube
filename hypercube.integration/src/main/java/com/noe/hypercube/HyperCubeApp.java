@@ -1,10 +1,11 @@
 package com.noe.hypercube;
 
-
 import com.noe.hypercube.synchronization.Synchronizer;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
+@Named
 public class HyperCubeApp {
 
     @Inject

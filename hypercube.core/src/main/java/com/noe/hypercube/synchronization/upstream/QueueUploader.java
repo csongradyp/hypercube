@@ -1,6 +1,7 @@
 package com.noe.hypercube.synchronization.upstream;
 
 
+import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.service.AccountType;
 import com.noe.hypercube.synchronization.Action;
@@ -17,10 +18,10 @@ public abstract class QueueUploader<ACCOUNT_TYPE extends AccountType> implements
     private static final Logger LOG = LoggerFactory.getLogger(QueueUploader.class);
 
     private BlockingQueue<UploadEntity> queue;
-    private IUploader<ACCOUNT_TYPE> uploader;
+    private IUploader<ACCOUNT_TYPE, ? extends FileEntity> uploader;
     private boolean stop = false;
 
-    public QueueUploader(IUploader<ACCOUNT_TYPE> uploader, BlockingQueue<UploadEntity> queue) {
+    public QueueUploader(IUploader<ACCOUNT_TYPE, ? extends FileEntity> uploader, BlockingQueue<UploadEntity> queue) {
         this.uploader = uploader;
         this.queue = queue;
     }

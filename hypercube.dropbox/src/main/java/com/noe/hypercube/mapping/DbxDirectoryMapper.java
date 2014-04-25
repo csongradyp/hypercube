@@ -2,9 +2,9 @@ package com.noe.hypercube.mapping;
 
 
 import com.noe.hypercube.domain.DbxDirectoryMapping;
-import com.noe.hypercube.domain.DbxFileEntity;
+import com.noe.hypercube.service.Dropbox;
 
-public class DbxDirectoryMapper extends DirectoryMapper<DbxDirectoryMapping, DbxFileEntity> {
+public class DbxDirectoryMapper extends DirectoryMapper<Dropbox, DbxDirectoryMapping> {
 
     @Override
     public Class<DbxDirectoryMapping> getMappingClass() {
@@ -12,9 +12,8 @@ public class DbxDirectoryMapper extends DirectoryMapper<DbxDirectoryMapping, Dbx
     }
 
     @Override
-    public Class<DbxFileEntity> getEntityClass() {
-        return DbxFileEntity.class;
+    public Class<Dropbox> getAccountType() {
+        return Dropbox.class;
     }
-
 
 }

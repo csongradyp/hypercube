@@ -1,11 +1,10 @@
 package com.noe.hypercube.synchronization.presynchronization;
 
 import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.observer.LocalFileListener;
-import com.noe.hypercube.service.AccountType;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.io.monitor.FileAlterationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,23 +17,29 @@ import java.util.Map;
 
 import static org.apache.commons.io.FileUtils.isFileNewer;
 
-public abstract class LocalFilePreSynchronizer<ACCOUNT_TYPE extends AccountType> implements FilePreSynchronizer {
+public class LocalFilePreSynchronizer implements FilePreSynchronizer {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalFilePreSynchronizer.class);
 
-    private LocalFileListener<ACCOUNT_TYPE> fileListener;
+    private FileAlterationListener fileListener;
+    private Collection<? extends FileEntity> mappedFiles;
 
-    protected LocalFilePreSynchronizer(LocalFileListener<ACCOUNT_TYPE> fileListener) {
+    public LocalFilePreSynchronizer(FileAlterationListener fileListener) {
         this.fileListener = fileListener;
     }
 
-    protected abstract Collection<? extends FileEntity> getMappedFiles();
+    public LocalFilePreSynchronizer(FileAlterationListener fileListener, Collection<? extends FileEntity> mappedFiles) {
+        this.fileListener = fileListener;
+        this.mappedFiles = mappedFiles;
+    }
+
+//    protected abstract Collection<? extends FileEntity> getMappedFiles();
 
     @Override
     public void run(Collection<File> currentLocalFiles)  {
-        Collection<? extends FileEntity> databaseEntries = getMappedFiles();
+//        Collection<? extends FileEntity> mappedFiles1 = getMappedFiles();
         try {
-            Map<Path, FileEntity> dbEntryMap = uploadChanged(currentLocalFiles, toMap(databaseEntries));
+            Map<Path, FileEntity> dbEntryMap = uploadChanged(currentLocalFiles, toMap(mappedFiles));
             deleteUnexistingFiles(dbEntryMap);
         } catch (SynchronizationException e) {
             LOG.error("Error @ Pre-Synchronization state", e);

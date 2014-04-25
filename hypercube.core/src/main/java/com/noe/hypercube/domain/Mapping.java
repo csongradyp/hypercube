@@ -1,5 +1,6 @@
 package com.noe.hypercube.domain;
 
+import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
@@ -24,6 +25,7 @@ public abstract class Mapping implements MappingEntity {
     }
 
     @Override
+    @Id
     public String getId() {
         return localDir + ":" + remoteDir;
     }

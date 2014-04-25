@@ -8,14 +8,14 @@ import com.noe.hypercube.service.IClient;
 
 import java.util.Date;
 
-public class DbxUploader extends Uploader<DbxFileEntity> {
+public class DbxUploader extends Uploader<Dropbox, DbxFileEntity> {
 
     public DbxUploader(IClient client, IPersistenceController persistenceController) {
         super(client, persistenceController);
     }
 
     @Override
-    public Class<DbxFileEntity> getEntityClass() {
+    public Class<DbxFileEntity> getEntityType() {
         return DbxFileEntity.class;
     }
 

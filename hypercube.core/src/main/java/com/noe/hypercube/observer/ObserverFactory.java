@@ -4,6 +4,7 @@ import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.mapping.DirectoryMapper;
 import com.noe.hypercube.service.AccountType;
+import com.noe.hypercube.synchronization.presynchronization.LocalFilePreSynchronizer;
 import com.noe.hypercube.synchronization.upstream.IUploader;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ public class ObserverFactory {
     private static final Logger LOG = LoggerFactory.getLogger(ObserverFactory.class);
 
     @Inject
-    private IPersistenceController controller;
+    private IPersistenceController persistenceController;
     @Inject
     private Collection<? extends IUploader> uploaders;
     @Inject
@@ -37,30 +38,30 @@ public class ObserverFactory {
     }
 
     public List<FileAlterationObserver> create() {
-//        controller.save(new AMappingEntity("C:\\temp", "/x/y"));
         List<FileAlterationObserver> observers = new LinkedList<>();
-        Collection<MappingEntity> mappings = controller.getAllMappings();
+        final Map<Class<? extends AccountType>, ? extends IUploader> uploaderMap = createUploaderMap(uploaders);
+        final Map<Class<? extends AccountType>, ? extends DirectoryMapper> mapperMap = createMapperMap(directoryMappers);
+        final Collection<MappingEntity> mappings = persistenceController.getAllMappings();
         if(mappings != null) {
             for (MappingEntity entity : mappings) {
-                FileAlterationObserver observer = createObserver(entity, uploaders);
+                FileAlterationObserver observer = createObserver(entity, uploaderMap, mapperMap);
                 observers.add(observer);
             }
         }
         return observers;
     }
 
-    private FileAlterationObserver createObserver(MappingEntity entity, Collection<? extends IUploader> uploaders) {
-        Class<? extends AccountType> accountType = entity.getAccountType();
-        Map<Class<? extends AccountType>, ? extends IUploader> uploaderMap = getUploaderMap(uploaders);
-        Map<Class<? extends AccountType>, ? extends DirectoryMapper> mapperMap = getMapperMap(directoryMappers);
-
-        IUploader uploader = uploaderMap.get(accountType);
-        DirectoryMapper mapper = mapperMap.get(accountType);
+    private FileAlterationObserver createObserver(MappingEntity entity, final Map<Class<? extends AccountType>, ? extends IUploader> uploaderMap,  final Map<Class<? extends AccountType>, ? extends DirectoryMapper> mapperMap) {
+        final Class<? extends AccountType> accountType = entity.getAccountType();
+        final IUploader uploader = uploaderMap.get(accountType);
+        final DirectoryMapper mapper = mapperMap.get(accountType);
         validate(accountType, uploader, mapper);
 
-        Path localDir = Paths.get(entity.getLocalDir());
+        final Path localDir = Paths.get(entity.getLocalDir());
         LOG.info("File observer created for {} in '{}' directoy ", accountType.getSimpleName(), localDir);
-        return new LocalFileObserver(localDir, new LocalFileListener(uploader, mapper));
+        final LocalFileListener listener = new LocalFileListener(uploader, mapper);
+        final LocalFilePreSynchronizer preSynchronizer = new LocalFilePreSynchronizer(listener, persistenceController.getAll(uploader.getEntityType()));
+        return new LocalFileObserver(localDir, listener, preSynchronizer);
     }
 
     private void validate(Class<? extends AccountType> accountType, IUploader uploader, DirectoryMapper mapper) {
@@ -69,7 +70,7 @@ public class ObserverFactory {
         }
     }
 
-    private Map<Class<? extends AccountType>, IUploader> getUploaderMap(Collection<? extends IUploader> uploaders) {
+    private Map<Class<? extends AccountType>, IUploader> createUploaderMap(Collection<? extends IUploader> uploaders) {
         Map<Class<? extends AccountType>, IUploader> uploaderMap = new LinkedHashMap<>();
         for (IUploader uploader : uploaders) {
             uploaderMap.put(uploader.getAccountType(), uploader);
@@ -77,7 +78,7 @@ public class ObserverFactory {
         return uploaderMap;
     }
 
-    private Map<Class<? extends AccountType>, ? extends DirectoryMapper> getMapperMap(Collection<DirectoryMapper> directoryMappers) {
+    private Map<Class<? extends AccountType>, ? extends DirectoryMapper> createMapperMap(Collection<DirectoryMapper> directoryMappers) {
         Map<Class<? extends AccountType>, DirectoryMapper> uploaderMap = new LinkedHashMap<>();
         for (DirectoryMapper mapper : directoryMappers) {
             uploaderMap.put(mapper.getAccountType(), mapper);

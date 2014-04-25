@@ -18,7 +18,7 @@ import java.util.List;
 import static com.noe.hypercube.converter.DirectoryConverter.convertToLocalPath;
 import static com.noe.hypercube.converter.DirectoryConverter.convertToRemotePath;
 
-public abstract class DirectoryMapper<MAPPING_TYPE extends MappingEntity, ACCOUNT_TYPE extends AccountType> {
+public abstract class DirectoryMapper<ACCOUNT_TYPE extends AccountType, MAPPING_TYPE extends MappingEntity> {
 
     @Inject
     private MappingController mappingController;

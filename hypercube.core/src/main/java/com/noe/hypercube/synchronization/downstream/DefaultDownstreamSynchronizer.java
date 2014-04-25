@@ -3,7 +3,6 @@ package com.noe.hypercube.synchronization.downstream;
 
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.IEntity;
 import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.mapping.DirectoryMapper;
@@ -30,17 +29,17 @@ public abstract class DefaultDownstreamSynchronizer implements DownstreamSynchro
     private static final Logger LOG = Logger.getLogger(DefaultDownstreamSynchronizer.class);
 
     private final IClient client;
-    private final DirectoryMapper<? extends MappingEntity, ? extends AccountType> directoryMapper;
+    private final DirectoryMapper<? extends AccountType, ? extends MappingEntity> directoryMapper;
     @Inject
     private IPersistenceController persistenceController;
 
-    protected DefaultDownstreamSynchronizer(IClient client, DirectoryMapper<? extends MappingEntity, ? extends IEntity>  directoryMapper, IPersistenceController persistenceController) {
+    protected DefaultDownstreamSynchronizer(IClient client, DirectoryMapper<? extends AccountType, ? extends MappingEntity> directoryMapper, IPersistenceController persistenceController) {
         this.client = client;
         this.directoryMapper = directoryMapper;
         this.persistenceController = persistenceController;
     }
 
-    protected DefaultDownstreamSynchronizer(IClient client, DirectoryMapper<? extends MappingEntity, ? extends AccountType> directoryMapper) {
+    protected DefaultDownstreamSynchronizer(IClient client, DirectoryMapper<? extends AccountType, ? extends MappingEntity> directoryMapper) {
         this.client = client;
         this.directoryMapper = directoryMapper;
     }

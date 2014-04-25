@@ -3,6 +3,7 @@ package com.noe.hypercube.synchronization.upstream;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
+import com.noe.hypercube.service.AccountType;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
@@ -18,7 +19,7 @@ import java.util.Date;
 
 import static java.lang.String.format;
 
-public abstract class Uploader<ENTITY_TYPE> implements IUploader {
+public abstract class Uploader<ACCOUNT_TYPE extends AccountType, ENTITY_TYPE extends FileEntity> implements IUploader<ACCOUNT_TYPE, ENTITY_TYPE> {
 
     private static final Logger LOG = LoggerFactory.getLogger(Uploader.class);
 
@@ -30,7 +31,7 @@ public abstract class Uploader<ENTITY_TYPE> implements IUploader {
         this.persistenceController = persistenceController;
     }
 
-    public abstract Class<ENTITY_TYPE> getEntityClass();
+    public abstract Class<ENTITY_TYPE> getEntityType();
 
     @Override
     public void uploadNew(File fileToUpload, Path remotePath) throws SynchronizationException {

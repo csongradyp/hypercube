@@ -3,7 +3,7 @@ package com.noe.hypercube.mapping;
 import com.noe.hypercube.domain.TestMapping;
 import com.noe.hypercube.service.TestAccount;
 
-public class TestMapper extends DirectoryMapper<TestMapping, TestAccount> {
+public class TestMapper extends DirectoryMapper<TestAccount, TestMapping> {
 
     @Override
     public Class<TestMapping> getMappingClass() {
