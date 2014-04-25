@@ -11,6 +11,9 @@ public class HyperCubeApp {
     @Inject
     private Synchronizer synchronizer;
 
+    public HyperCubeApp() {
+    }
+
     public HyperCubeApp(Synchronizer synchronizer) {
         this.synchronizer = synchronizer;
     }

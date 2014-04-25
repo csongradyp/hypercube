@@ -22,16 +22,19 @@ public class Synchronizer {
     private ObserverFactory observerFactory;
     @Inject
     private ScheduledExecutorService executorService;
-    @Inject
-    private List<Runnable> tasks;
+
+    private List<Runnable> downstreamTasks;
+
+    public Synchronizer(List<Runnable> downstreamTasks) {
+        this.downstreamTasks = downstreamTasks;
+    }
 
     public void start() {
-//        observer.precheckAndStart();
         List<FileAlterationObserver> observers = observerFactory.create();
 
         fileMonitor.addObservers(observers);
         fileMonitor.start();
-        for (Runnable task : tasks) {
+        for (Runnable task : downstreamTasks) {
             executorService.scheduleWithFixedDelay(task, 0, DELAY, SECONDS);
         }
     }
@@ -40,7 +43,7 @@ public class Synchronizer {
         executorService.shutdown();
     }
 
-    public void setTasks(List<Runnable> tasks) {
-        this.tasks = tasks;
+    public void setDownstreamTasks(List<Runnable> downstreamTasks) {
+        this.downstreamTasks = downstreamTasks;
     }
 }

@@ -16,6 +16,7 @@
     <import resource="appcontext-persistence.xml" />
     <import resource="*-context.xml" />
 
+    <bean id="app" class="com.noe.hypercube.HyperCubeApp"/>
 
     <bean id="propertyPlaceholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
@@ -27,14 +28,18 @@
         </property>
     </bean>
 
-    <bean id="daoCollection" class="org.springframework.beans.factory.config.ListFactoryBean">
+    <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer">
+        <constructor-arg ref="downstreamTasks" />
+    </bean>
+
+    <bean id="daos" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
-            <list merge="true">
+            <list merge="true" value-type="com.noe.hypercube.dao.Dao">
             </list>
         </property>
     </bean>
 
-    <bean id="downstreamTaskCollection" class="org.springframework.beans.factory.config.ListFactoryBean">
+    <bean id="downstreamTasks" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list merge="true">
             </list>
@@ -43,7 +48,7 @@
 
     <bean id="uploaders" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
-            <list merge="true">
+            <list merge="true" value-type="com.noe.hypercube.synchronization.upstream.IUploader">
             </list>
         </property>
     </bean>
@@ -56,7 +61,7 @@
     </bean>
 
     <bean id="persistenceController" class="com.noe.hypercube.controller.PersistenceController">
-        <constructor-arg ref="daoCollection" />
+        <constructor-arg ref="daos" />
     </bean>
 
     <bean id="fileMonitor" class="com.noe.hypercube.observer.LocalFileMonitor">

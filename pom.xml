@@ -19,6 +19,10 @@
         <module>hypercube.integration</module>
     </modules>
 
+    <properties>
+        <springVersion>4.0.3.RELEASE</springVersion>
+    </properties>
+
     <repositories>
         <repository>
             <id>objectdb</id>
@@ -32,12 +36,12 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
-                <version>3.2.1.RELEASE</version>
+                <version>${springVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-beans</artifactId>
-                <version>4.0.3.RELEASE</version>
+                <version>${springVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.data</groupId>
@@ -47,17 +51,17 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-orm</artifactId>
-                <version>3.1.0.RELEASE</version>
+                <version>${springVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-tx</artifactId>
-                <version>3.2.1.RELEASE</version>
+                <version>${springVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-jdbc</artifactId>
-                <version>4.0.3.RELEASE</version>
+                <version>${springVersion}</version>
             </dependency>
 
             <dependency>

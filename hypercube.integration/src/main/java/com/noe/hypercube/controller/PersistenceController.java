@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,22 +20,22 @@ public class PersistenceController implements IPersistenceController {
     private static final Logger LOG = LoggerFactory.getLogger(PersistenceController.class);
 
     private final Map<Class<? extends IEntity>, Dao> daoMap;
-    @Inject
-    private Collection<Dao<String, IEntity>> daoCollection;
+//    @Inject
+    private Collection<Dao<String, IEntity>> daos;
 
     public PersistenceController() {
         daoMap = new HashMap<>();
     }
 
-    public PersistenceController(final Collection<Dao<String, IEntity>> daoCollection) {
+    public PersistenceController(final Collection<Dao<String, IEntity>> daos) {
         this();
-        this.daoCollection = daoCollection;
+        this.daos = daos;
         createDaoMap();
     }
 
     @PostConstruct
     private void createDaoMap() {
-        for (Dao<String, IEntity> entityDao : daoCollection) {
+        for (Dao<String, IEntity> entityDao : daos) {
             daoMap.put(entityDao.getEntityClass(), entityDao);
         }
     }
