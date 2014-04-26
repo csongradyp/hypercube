@@ -1,6 +1,6 @@
 package com.noe.hypercube.domain;
 
-import com.noe.hypercube.service.AccountType;
+import com.noe.hypercube.service.Account;
 
 public interface MappingEntity extends IEntity<String> {
 
@@ -10,5 +10,5 @@ public interface MappingEntity extends IEntity<String> {
 
     Filter getFilter();
 
-    Class<? extends AccountType> getAccountType();
+    Class<? extends Account> getAccountType();
 }

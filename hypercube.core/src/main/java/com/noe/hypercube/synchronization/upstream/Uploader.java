@@ -3,7 +3,7 @@ package com.noe.hypercube.synchronization.upstream;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
-import com.noe.hypercube.service.AccountType;
+import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
@@ -19,7 +19,7 @@ import java.util.Date;
 
 import static java.lang.String.format;
 
-public abstract class Uploader<ACCOUNT_TYPE extends AccountType, ENTITY_TYPE extends FileEntity> implements IUploader<ACCOUNT_TYPE, ENTITY_TYPE> {
+public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> implements IUploader<ACCOUNT_TYPE, ENTITY_TYPE> {
 
     private static final Logger LOG = LoggerFactory.getLogger(Uploader.class);
 
@@ -42,6 +42,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends AccountType, ENTITY_TYPE ext
             LOG.debug("{} conflict - File already exists on server: {}", client.getAccountName(), remotePath.toString());
         }
     }
+
     @Override
     public void uploadUpdated(File fileToUpload, Path remotePath) throws SynchronizationException {
         if(client.exist(remotePath) && isNewer(fileToUpload)) {
@@ -53,7 +54,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends AccountType, ENTITY_TYPE ext
     }
 
     private synchronized void upload(File fileToUpload, Path remotePath, Action action) throws SynchronizationException {
-        Path localPath = fileToUpload.toPath();
+        final Path localPath = fileToUpload.toPath();
         ServerEntry uploadedFile = null;
         try(FileInputStream inputStream = FileUtils.openInputStream(fileToUpload)) {
             switch(action) {
@@ -66,28 +67,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends AccountType, ENTITY_TYPE ext
             }
             if(uploadedFile == null) {
                 throw new SynchronizationException(format("Upload failed - Cannot upload file: '%s' to %s", localPath.toString(), client.getAccountName()));                }
-            persist(localPath, uploadedFile, action);
-            LOG.debug("successfully uploaded file: '{}' with new revision: {}", uploadedFile.getPath(), uploadedFile.getRevision());
-        } catch (IOException e) {
-            throw new SynchronizationException("Upload failed - Cannot read file: " + localPath.toString(), e);
-        }
-    }
-
-    private synchronized void upload(Path remotePath, Path localPath, Action action) throws SynchronizationException {
-        File fileToUpload = localPath.toFile();
-        ServerEntry uploadedFile = null;
-        try(FileInputStream inputStream = FileUtils.openInputStream(fileToUpload)) {
-            switch(action) {
-                case CHANGED:
-                    uploadedFile = client.uploadAsUpdated(remotePath, fileToUpload, inputStream);
-                    break;
-                case ADDED:
-                    uploadedFile = client.uploadAsNew(remotePath, fileToUpload, inputStream);
-                    break;
-            }
-            if(uploadedFile == null) {
-                throw new SynchronizationException(format("Upload failed - Cannot upload file: '%s' to %s", localPath.toString(), client.getAccountName()));                }
-            persist(localPath, uploadedFile, action);
+            persist(localPath, uploadedFile);
             LOG.debug("successfully uploaded file: '{}' with new revision: {}", uploadedFile.getPath(), uploadedFile.getRevision());
         } catch (IOException e) {
             throw new SynchronizationException("Upload failed - Cannot read file: " + localPath.toString(), e);
@@ -96,7 +76,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends AccountType, ENTITY_TYPE ext
 
     protected abstract FileEntity createFileEntity(String localPath, String revision, Date date);
 
-    private void persist(Path localPath, ServerEntry uploadedFile, Action action) throws IOException {
+    private void persist(Path localPath, ServerEntry uploadedFile) throws IOException {
         FileEntity fileEntity = createFileEntity(localPath.toString(), uploadedFile.getRevision(), uploadedFile.lastModified());
         persistenceController.save(fileEntity);
     }

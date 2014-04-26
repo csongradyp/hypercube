@@ -30,6 +30,7 @@
 
     <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer">
         <constructor-arg ref="downstreamTasks" />
+        <constructor-arg ref="uploaders" />
     </bean>
 
     <bean id="daos" class="org.springframework.beans.factory.config.ListFactoryBean">
@@ -66,10 +67,6 @@
 
     <bean id="fileMonitor" class="com.noe.hypercube.observer.LocalFileMonitor">
         <constructor-arg value="${poll.delay.in.milisec}" />
-    </bean>
-
-    <bean id="executorService" class="java.util.concurrent.Executors" factory-method="newScheduledThreadPool">
-        <constructor-arg value="10" />
     </bean>
 
     <bean id="observerFactory" class="com.noe.hypercube.observer.ObserverFactory">

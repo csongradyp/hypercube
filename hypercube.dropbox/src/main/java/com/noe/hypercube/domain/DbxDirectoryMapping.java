@@ -1,6 +1,6 @@
 package com.noe.hypercube.domain;
 
-import com.noe.hypercube.service.AccountType;
+import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.Dropbox;
 
 import javax.persistence.Entity;
@@ -20,7 +20,7 @@ public class DbxDirectoryMapping extends DirectoryMapping {
     }
 
     @Override
-    public Class<? extends AccountType> getAccountType() {
+    public Class<? extends Account> getAccountType() {
         return Dropbox.class;
     }
 }

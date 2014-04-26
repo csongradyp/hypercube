@@ -1,13 +1,13 @@
 package com.noe.hypercube.synchronization.upstream;
 
 import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.service.AccountType;
+import com.noe.hypercube.service.Account;
 import com.noe.hypercube.synchronization.SynchronizationException;
 
 import java.io.File;
 import java.nio.file.Path;
 
-public interface IUploader<ACCOUNT_TYPE extends AccountType, ENTITY_TYPE extends FileEntity> {
+public interface IUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> {
 
     Class<ACCOUNT_TYPE> getAccountType();
 

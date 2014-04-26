@@ -3,7 +3,7 @@ package com.noe.hypercube.observer;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.mapping.DirectoryMapper;
-import com.noe.hypercube.service.AccountType;
+import com.noe.hypercube.service.Account;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.upstream.IUploader;
 import org.apache.commons.io.monitor.FileAlterationListener;
@@ -15,7 +15,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
-public class LocalFileListener<ACCOUNT_TYPE extends AccountType> implements FileAlterationListener {
+public class LocalFileListener<ACCOUNT_TYPE extends Account> implements FileAlterationListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalFileListener.class);
 

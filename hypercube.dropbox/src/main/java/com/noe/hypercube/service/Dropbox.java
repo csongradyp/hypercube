@@ -1,4 +1,4 @@
 package com.noe.hypercube.service;
 
-public class Dropbox implements AccountType {
+public class Dropbox implements Account {
 }

@@ -5,7 +5,7 @@ import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.mapping.collector.Collector;
 import com.noe.hypercube.mapping.collector.LocalDirectoryCollector;
 import com.noe.hypercube.mapping.collector.RemoteDirectoryCollector;
-import com.noe.hypercube.service.AccountType;
+import com.noe.hypercube.service.Account;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -18,7 +18,7 @@ import java.util.List;
 import static com.noe.hypercube.converter.DirectoryConverter.convertToLocalPath;
 import static com.noe.hypercube.converter.DirectoryConverter.convertToRemotePath;
 
-public abstract class DirectoryMapper<ACCOUNT_TYPE extends AccountType, MAPPING_TYPE extends MappingEntity> {
+public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE extends MappingEntity> {
 
     @Inject
     private MappingController mappingController;

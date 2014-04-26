@@ -4,9 +4,12 @@ import com.noe.hypercube.observer.LocalFileMonitor;
 import com.noe.hypercube.observer.ObserverFactory;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -20,13 +23,34 @@ public class Synchronizer {
     private LocalFileMonitor fileMonitor;
     @Inject
     private ObserverFactory observerFactory;
-    @Inject
-    private ScheduledExecutorService executorService;
 
-    private List<Runnable> downstreamTasks;
+    private ScheduledExecutorService downExecutor;
+    private ExecutorService upExecutor;
 
-    public Synchronizer(List<Runnable> downstreamTasks) {
-        this.downstreamTasks = downstreamTasks;
+    private List<Runnable> downloaders;
+    private List<Runnable> uploaders;
+
+    public Synchronizer(final List<Runnable> downloaders, final List<Runnable> uploaders) {
+        this.downloaders = downloaders;
+        this.uploaders = uploaders;
+    }
+
+    @PostConstruct
+    public void createExecutors() {
+        createScheduledExecutor(downloaders);
+        createExecutor(uploaders);
+    }
+
+    private void createExecutor(List<Runnable> uploaders) {
+        if(!uploaders.isEmpty()) {
+            upExecutor = Executors.newFixedThreadPool(uploaders.size());
+        }
+    }
+
+    private void createScheduledExecutor(List<Runnable> downloaders) {
+        if(!downloaders.isEmpty()) {
+            downExecutor = Executors.newScheduledThreadPool(downloaders.size());
+        }
     }
 
     public void start() {
@@ -34,16 +58,27 @@ public class Synchronizer {
 
         fileMonitor.addObservers(observers);
         fileMonitor.start();
-        for (Runnable task : downstreamTasks) {
-            executorService.scheduleWithFixedDelay(task, 0, DELAY, SECONDS);
+        submitDownloads();
+        submitUploads();
+    }
+
+    private void submitDownloads() {
+        for (Runnable task : downloaders) {
+            downExecutor.scheduleWithFixedDelay(task, 0, DELAY, SECONDS);
+        }
+    }
+
+    private void submitUploads() {
+        for (Runnable task : uploaders) {
+            upExecutor.execute(task);
         }
     }
 
     public void shutdown() {
-        executorService.shutdown();
+        downExecutor.shutdown();
     }
 
-    public void setDownstreamTasks(List<Runnable> downstreamTasks) {
-        this.downstreamTasks = downstreamTasks;
+    public void setDownloaders(List<Runnable> downloaders) {
+        this.downloaders = downloaders;
     }
 }
