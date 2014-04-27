@@ -10,9 +10,9 @@ import com.noe.hypercube.service.IClient;
 
 import java.util.Date;
 
-public class DbxDownstreamSynchTask extends DefaultDownstreamSynchronizer {
+public class DbxDownloader extends DefaultDownloader {
 
-    public DbxDownstreamSynchTask(IClient<DbxFileEntity> client, DirectoryMapper<Dropbox, MappingEntity> directoryMapper) {
+    public DbxDownloader(IClient<DbxFileEntity> client, DirectoryMapper<Dropbox, MappingEntity> directoryMapper) {
         super(client, directoryMapper);
     }
 

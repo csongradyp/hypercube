@@ -10,7 +10,7 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Collection;
 
-public interface IClient<ENTITY_TYPE extends FileEntity> {
+public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity>{
 
     /**
      * Returns the official name of the file hosting service.
@@ -21,7 +21,9 @@ public interface IClient<ENTITY_TYPE extends FileEntity> {
     /**
      * Returns the account specific <code>Class</code> which is annotated with @Entity.
      */
-    Class<ENTITY_TYPE> getEntityClass();
+    Class<ENTITY_TYPE> getEntityType();
+
+    Class<ACCOUNT_TYPE> getAccountType();
 
     /**
      * Checks if the file exists on the server for the given server specific path.

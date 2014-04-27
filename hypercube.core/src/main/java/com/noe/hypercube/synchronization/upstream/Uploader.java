@@ -86,7 +86,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
         if(client.exist(remotePath)) {
             client.delete(remotePath);
             Path localPath = fileToUpload.toPath();
-            persistenceController.delete(localPath.toString(), client.getEntityClass());
+            persistenceController.delete(localPath.toString(), client.getEntityType());
             LOG.debug("Successfully deleted file '{}' from {}", remotePath, client.getAccountName());
         }
         else {
@@ -96,7 +96,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
 
     private boolean isNewer(File fileToUpload) {
         Path localPath = fileToUpload.toPath();
-        FileEntity dbEntry = persistenceController.get(localPath.toString(), client.getEntityClass());
+        FileEntity dbEntry = persistenceController.get(localPath.toString(), client.getEntityType());
         if(dbEntry == null) {
             return true;
         }

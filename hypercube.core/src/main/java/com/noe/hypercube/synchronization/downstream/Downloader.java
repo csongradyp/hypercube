@@ -20,10 +20,11 @@ import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static java.lang.String.format;
 
-public abstract class Downloader implements DownstreamSynchronizer {
+public abstract class Downloader implements IDownloader {
 
     private static final Logger LOG = Logger.getLogger(Downloader.class);
 
@@ -31,20 +32,14 @@ public abstract class Downloader implements DownstreamSynchronizer {
     private IPersistenceController persistenceController;
     private final IClient client;
     private final DirectoryMapper<? extends MappingEntity, ? extends FileEntity> directoryMapper;
+    private final BlockingQueue<ServerEntry> downloadQ;
+
     private boolean stop = false;
-    private BlockingQueue<? extends ServerEntry> downloadQ;
 
-    protected Downloader(IClient client, IPersistenceController persistenceController, DirectoryMapper<? extends MappingEntity, ? extends FileEntity> directoryMapper, BlockingQueue<? extends ServerEntry> downloadQ) {
-        this.client = client;
-        this.persistenceController = persistenceController;
-        this.directoryMapper = directoryMapper;
-        this.downloadQ = downloadQ;
-    }
-
-    protected Downloader(IClient client, DirectoryMapper<? extends MappingEntity, ? extends FileEntity> directoryMapper, BlockingQueue<? extends ServerEntry> downloadQ) {
+     protected Downloader(IClient client, DirectoryMapper<? extends MappingEntity, ? extends FileEntity> directoryMapper) {
         this.client = client;
         this.directoryMapper = directoryMapper;
-        this.downloadQ = downloadQ;
+        downloadQ = new LinkedBlockingDeque<>(20);
     }
 
     @Override
@@ -52,7 +47,7 @@ public abstract class Downloader implements DownstreamSynchronizer {
         while(!stop) {
             ServerEntry entry = downloadQ.poll();
             if (client.exist(entry)) {
-                download(entry);
+                downloadFromServer(entry);
             }
             else {
                 deleteLocalFile(entry);
@@ -64,8 +59,18 @@ public abstract class Downloader implements DownstreamSynchronizer {
         stop = true;
     }
 
+    public void restart() {
+        stop = false;
+        run();
+    }
+
+    @Override
+    public void download(ServerEntry entry) {
+        downloadQ.add(entry);
+    }
+
     private boolean isNew(ServerEntry entry, Path localPath){
-        FileEntity fileEntity = persistenceController.get(localPath.toString(), client.getEntityClass());
+        FileEntity fileEntity = persistenceController.get(localPath.toString(), client.getEntityType());
         return fileEntity != null && !isSameRevision(entry, fileEntity);
     }
 
@@ -73,7 +78,7 @@ public abstract class Downloader implements DownstreamSynchronizer {
         return dbEntry.getRevision().equals(entry.getRevision());
     }
 
-    private void download(ServerEntry entry) {
+    private void downloadFromServer(ServerEntry entry) {
         if (entry.isFile()) {
             List<Path> localPaths = directoryMapper.getLocals(entry.getPath());
             for(Path localPath : localPaths) {
@@ -128,7 +133,7 @@ public abstract class Downloader implements DownstreamSynchronizer {
         File fileToDelete = localPath.toFile();
         if (!fileToDelete.isDirectory()) {
             try {
-                persistenceController.delete(localPath.toString(), client.getEntityClass());
+                persistenceController.delete(localPath.toString(), client.getEntityType());
                 FileUtils.forceDelete(fileToDelete);
                 LOG.debug(format("Successfully deleted local file %s", localPath));
             } catch (IOException e) {

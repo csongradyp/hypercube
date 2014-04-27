@@ -24,50 +24,43 @@ public class LocalFilePreSynchronizer implements FilePreSynchronizer {
     private FileAlterationListener fileListener;
     private Collection<? extends FileEntity> mappedFiles;
 
-    public LocalFilePreSynchronizer(FileAlterationListener fileListener) {
-        this.fileListener = fileListener;
-    }
-
-    public LocalFilePreSynchronizer(FileAlterationListener fileListener, Collection<? extends FileEntity> mappedFiles) {
+    public LocalFilePreSynchronizer(final FileAlterationListener fileListener, final Collection<? extends FileEntity> mappedFiles) {
         this.fileListener = fileListener;
         this.mappedFiles = mappedFiles;
     }
 
-//    protected abstract Collection<? extends FileEntity> getMappedFiles();
-
     @Override
-    public void run(Collection<File> currentLocalFiles)  {
-//        Collection<? extends FileEntity> mappedFiles1 = getMappedFiles();
+    public void run(final Collection<File> currentLocalFiles)  {
         try {
-            Map<Path, FileEntity> dbEntryMap = uploadChanged(currentLocalFiles, toMap(mappedFiles));
+            final Map<Path, FileEntity> dbEntryMap = uploadChanged(currentLocalFiles, toMap(mappedFiles));
             deleteUnexistingFiles(dbEntryMap);
         } catch (SynchronizationException e) {
             LOG.error("Error @ Pre-Synchronization state", e);
         }
     }
 
-    private void deleteUnexistingFiles(Map<Path, FileEntity> dbEntryMap) {
+    private void deleteUnexistingFiles(final Map<Path, FileEntity> dbEntryMap) {
         for (Path deletedLocalFile : dbEntryMap.keySet()) {
             fileListener.onFileDelete(deletedLocalFile.toFile());
         }
     }
 
-    private Map<Path, FileEntity> toMap(Collection<? extends FileEntity> list) {
-        Map<Path, FileEntity> map = new HashMap<>();
+    private Map<Path, FileEntity> toMap(final Collection<? extends FileEntity> list) {
+        final Map<Path, FileEntity> map = new HashMap<>();
         for (FileEntity element : list) {
             map.put(Paths.get(element.getLocalPath()), element);
         }
         return map;
     }
 
-    private Map<Path, FileEntity> uploadChanged(Collection<File> currentLocalFiles, Map<Path, FileEntity> mappedLocalFiles) throws SynchronizationException {
+    private Map<Path, FileEntity> uploadChanged(final Collection<File> currentLocalFiles, final Map<Path, FileEntity> mappedLocalFiles) throws SynchronizationException {
         for (File localFile : currentLocalFiles) {
 
             if(!localFile.isDirectory()) {
-                Path localFilePath = localFile.toPath();
+                final Path localFilePath = localFile.toPath();
 
                 if(isMapped(localFilePath, mappedLocalFiles)) {
-                    FileEntity dbEntry = mappedLocalFiles.get(localFilePath);
+                    final FileEntity dbEntry = mappedLocalFiles.get(localFilePath);
                     uploadIfChanged(localFile, dbEntry);
                     mappedLocalFiles.remove(localFilePath);
                 }
@@ -83,12 +76,12 @@ public class LocalFilePreSynchronizer implements FilePreSynchronizer {
         return mappedLocalFiles;
     }
 
-    private boolean isMapped(Path localFilePath, Map<Path, FileEntity> mappedLocalFiles) {
+    private boolean isMapped(final Path localFilePath, final Map<Path, FileEntity> mappedLocalFiles) {
         return mappedLocalFiles.containsKey(localFilePath);
     }
 
-    private void uploadIfChanged(File localFile, FileEntity dbEntry) {
-        Path localFilePath = localFile.toPath();
+    private void uploadIfChanged(final File localFile, final FileEntity dbEntry) {
+        final Path localFilePath = localFile.toPath();
         if(isFileNewer(localFile, dbEntry.lastModified())) {
             LOG.debug("New local file has been updated before start: " + localFilePath);
             fileListener.onFileChange(localFile);

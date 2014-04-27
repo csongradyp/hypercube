@@ -1,35 +1,35 @@
 package com.noe.hypercube.synchronization.downstream;
 
-
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.mapping.DirectoryMapper;
+import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.concurrent.BlockingQueue;
 
-public abstract class CouldObserver implements Runnable {
+public abstract class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CouldObserver.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CloudObserver.class);
 
-    private final IClient client;
-    private final DirectoryMapper<? extends MappingEntity, ? extends FileEntity> directoryMapper;
-    private final IPersistenceController persistenceController;
-    private final BlockingQueue<ServerEntry> entryQueue;
+    @Inject
+    private IPersistenceController persistenceController;
+    private final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
+    private final DirectoryMapper<ACCOUNT_TYPE, ? extends MappingEntity> directoryMapper;
+    private final IDownloader<ACCOUNT_TYPE> downloader;
 
-    protected CouldObserver(IClient client, DirectoryMapper<? extends MappingEntity, ? extends FileEntity> directoryMapper, IPersistenceController persistenceController, BlockingQueue<ServerEntry> entryQueue) {
+    protected CloudObserver(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, DirectoryMapper<ACCOUNT_TYPE, ? extends MappingEntity> directoryMapper, IDownloader<ACCOUNT_TYPE> downloader) {
         this.client = client;
         this.directoryMapper = directoryMapper;
-        this.persistenceController = persistenceController;
-        this.entryQueue = entryQueue;
+        this.downloader = downloader;
     }
 
     @Override
@@ -41,7 +41,7 @@ public abstract class CouldObserver implements Runnable {
                 for (ServerEntry deltaEntry : deltas) {
                     if(isMapped(deltaEntry)) {
                         LOG.debug("Mapped content found: {}", deltaEntry);
-                        entryQueue.add(deltaEntry);
+                        downloader.download(deltaEntry);
                     }
                 }
             }

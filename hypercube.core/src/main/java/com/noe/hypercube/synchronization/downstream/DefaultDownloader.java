@@ -24,22 +24,22 @@ import java.util.List;
 
 import static java.lang.String.format;
 
-public abstract class DefaultDownstreamSynchronizer implements DownstreamSynchronizer {
+public abstract class DefaultDownloader implements IDownloader {
 
-    private static final Logger LOG = Logger.getLogger(DefaultDownstreamSynchronizer.class);
+    private static final Logger LOG = Logger.getLogger(DefaultDownloader.class);
 
     private final IClient client;
     private final DirectoryMapper<? extends Account, ? extends MappingEntity> directoryMapper;
     @Inject
     private IPersistenceController persistenceController;
 
-    protected DefaultDownstreamSynchronizer(IClient client, DirectoryMapper<? extends Account, ? extends MappingEntity> directoryMapper, IPersistenceController persistenceController) {
+    protected DefaultDownloader(IClient client, DirectoryMapper<? extends Account, ? extends MappingEntity> directoryMapper, IPersistenceController persistenceController) {
         this.client = client;
         this.directoryMapper = directoryMapper;
         this.persistenceController = persistenceController;
     }
 
-    protected DefaultDownstreamSynchronizer(IClient client, DirectoryMapper<? extends Account, ? extends MappingEntity> directoryMapper) {
+    protected DefaultDownloader(IClient client, DirectoryMapper<? extends Account, ? extends MappingEntity> directoryMapper) {
         this.client = client;
         this.directoryMapper = directoryMapper;
     }
@@ -84,7 +84,7 @@ public abstract class DefaultDownstreamSynchronizer implements DownstreamSynchro
         return false;
     }
     private boolean isNew(ServerEntry entry, Path localPath){
-        FileEntity fileEntity = persistenceController.get(localPath.toString(), client.getEntityClass());
+        FileEntity fileEntity = persistenceController.get(localPath.toString(), client.getEntityType());
         return fileEntity != null && !isSameRevision(entry, fileEntity);
     }
 
@@ -169,7 +169,7 @@ public abstract class DefaultDownstreamSynchronizer implements DownstreamSynchro
         File fileToDelete = localPath.toFile();
         if (!fileToDelete.isDirectory()) {
             try {
-                persistenceController.delete(localPath.toString(), client.getEntityClass());
+                persistenceController.delete(localPath.toString(), client.getEntityType());
                 FileUtils.forceDelete(fileToDelete);
                 LOG.debug(format("Successfully deleted local file %s", localPath));
             } catch (IOException e) {

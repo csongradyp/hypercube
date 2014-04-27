@@ -24,18 +24,18 @@ public abstract class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE ex
 
     private static final Logger LOG = LoggerFactory.getLogger(QueueUploader.class);
 
-    private BlockingQueue<UploadEntity> queue;
+    private BlockingQueue<UploadEntity> uploadQ;
     private boolean stop = false;
 
     protected QueueUploader(IClient client, IPersistenceController persistenceController) {
         super(client, persistenceController);
-        queue = new LinkedBlockingDeque<>(20);
+        uploadQ = new LinkedBlockingDeque<>(20);
     }
 
     @Override
     public void run() {
         while(!stop) {
-            UploadEntity uploadEntity = queue.poll();
+            UploadEntity uploadEntity = uploadQ.poll();
             Path remotePath = uploadEntity.getRemotePath();
             File file = uploadEntity.getFile();
             try {
@@ -81,6 +81,6 @@ public abstract class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE ex
     }
 
     public void submit(final File file, final Path remotePath, final Action action) throws SynchronizationException {
-        queue.add(new UploadEntity(file, remotePath, action));
+        uploadQ.add(new UploadEntity(file, remotePath, action));
     }
 }

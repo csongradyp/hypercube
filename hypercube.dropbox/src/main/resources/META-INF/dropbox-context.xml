@@ -21,7 +21,7 @@
         </property>
     </bean>
 
-    <bean id="dbxDownSynchTask" class="com.noe.hypercube.synchronization.downstream.DbxDownstreamSynchTask" >
+    <bean id="dbxDownSynchTask" class="com.noe.hypercube.synchronization.downstream.DbxDownloader" >
         <constructor-arg index="0" ref="dbxClient"/>
         <constructor-arg index="1" ref="dbxDirectoryMapper"/>
     </bean>

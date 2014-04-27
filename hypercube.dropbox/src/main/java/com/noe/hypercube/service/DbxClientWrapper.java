@@ -41,7 +41,7 @@ public class DbxClientWrapper implements IClient<DbxFileEntity> {
     }
 
     @Override
-    public Class<DbxFileEntity> getEntityClass() {
+    public Class<DbxFileEntity> getEntityType() {
         return DbxFileEntity.class;
     }
 
