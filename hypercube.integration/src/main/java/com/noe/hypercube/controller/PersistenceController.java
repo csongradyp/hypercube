@@ -20,15 +20,10 @@ public class PersistenceController implements IPersistenceController {
     private static final Logger LOG = LoggerFactory.getLogger(PersistenceController.class);
 
     private final Map<Class<? extends IEntity>, Dao> daoMap;
-//    @Inject
-    private Collection<Dao<String, IEntity>> daos;
-
-    public PersistenceController() {
-        daoMap = new HashMap<>();
-    }
+    private final Collection<Dao<String, IEntity>> daos;
 
     public PersistenceController(final Collection<Dao<String, IEntity>> daos) {
-        this();
+        daoMap = new HashMap<>();
         this.daos = daos;
         createDaoMap();
     }
