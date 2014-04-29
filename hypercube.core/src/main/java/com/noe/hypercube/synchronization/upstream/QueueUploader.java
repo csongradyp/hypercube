@@ -2,10 +2,10 @@ package com.noe.hypercube.synchronization.upstream;
 
 
 import com.noe.hypercube.controller.IPersistenceController;
+import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.service.Account;
-import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.slf4j.Logger;
@@ -16,19 +16,17 @@ import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import static com.noe.hypercube.synchronization.Action.ADDED;
-import static com.noe.hypercube.synchronization.Action.CHANGED;
-import static com.noe.hypercube.synchronization.Action.REMOVED;
+import static com.noe.hypercube.synchronization.Action.*;
 
-public abstract class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> extends Uploader<ACCOUNT_TYPE, ENTITY_TYPE> implements Runnable {
+public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> extends Uploader<ACCOUNT_TYPE, ENTITY_TYPE> {
 
     private static final Logger LOG = LoggerFactory.getLogger(QueueUploader.class);
 
     private BlockingQueue<UploadEntity> uploadQ;
     private boolean stop = false;
 
-    protected QueueUploader(IClient client, IPersistenceController persistenceController) {
-        super(client, persistenceController);
+    public QueueUploader(AccountBox accountBox, IPersistenceController persistenceController) {
+        super(accountBox, persistenceController);
         uploadQ = new LinkedBlockingDeque<>(20);
     }
 

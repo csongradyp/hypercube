@@ -7,7 +7,7 @@ import com.noe.hypercube.synchronization.SynchronizationException;
 import java.io.File;
 import java.nio.file.Path;
 
-public interface IUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> {
+public interface IUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> extends Runnable {
 
     Class<ACCOUNT_TYPE> getAccountType();
 

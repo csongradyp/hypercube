@@ -65,13 +65,15 @@
         <constructor-arg ref="daos" />
     </bean>
 
-    <bean id="fileMonitor" class="com.noe.hypercube.observer.LocalFileMonitor">
+    <bean id="fileMonitor" class="com.noe.hypercube.observer.local.LocalFileMonitor">
         <constructor-arg value="${poll.delay.in.milisec}" />
     </bean>
 
-    <bean id="observerFactory" class="com.noe.hypercube.observer.ObserverFactory">
-        <constructor-arg ref="uploaders" />
-        <constructor-arg ref="mappers" />
+    <bean id="cloudMonitor" class="com.noe.hypercube.observer.remote.CloudMonitor">
+        <constructor-arg value="${poll.delay.in.milisec}" />
     </bean>
+
+    <bean id="localObserverFactory" class="com.noe.hypercube.observer.local.LocalObserverFactory" />
+    <bean id="cloudObserverFactory" class="com.noe.hypercube.observer.remote.CloudObserverFactory" />
 
 </beans>

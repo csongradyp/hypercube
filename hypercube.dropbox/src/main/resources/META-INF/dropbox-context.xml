@@ -21,11 +21,6 @@
         </property>
     </bean>
 
-    <bean id="dbxDownSynchTask" class="com.noe.hypercube.synchronization.downstream.DbxDownloader" >
-        <constructor-arg index="0" ref="dbxClient"/>
-        <constructor-arg index="1" ref="dbxDirectoryMapper"/>
-    </bean>
-
     <bean id="dbxClient" class="com.noe.hypercube.service.DbxClientWrapper">
         <constructor-arg>
             <bean class="com.dropbox.core.DbxClient">
@@ -50,11 +45,6 @@
     <bean id="appInfo" class="com.dropbox.core.DbxAppInfo">
         <constructor-arg value="${app.key}" />
         <constructor-arg value="${app.secret}" />
-    </bean>
-
-    <bean id="dbxUploader" class="com.noe.hypercube.synchronization.upstream.DbxUploader">
-        <constructor-arg ref="dbxClient" />
-        <constructor-arg ref="persistenceController" />
     </bean>
 
 </beans>

@@ -1,4 +1,4 @@
-package com.noe.hypercube.observer;
+package com.noe.hypercube.observer.local;
 
 
 import org.apache.commons.io.monitor.FileAlterationMonitor;
@@ -15,9 +15,9 @@ public class LocalFileMonitor {
     private static final Logger LOG = LoggerFactory.getLogger(LocalFileMonitor.class);
 
     private final FileAlterationMonitor fileMonitor;
-    private List<FileAlterationObserver> observers;
+    private List<LocalFileObserver> observers;
 
-    public LocalFileMonitor(long pollInterval, List<FileAlterationObserver> observers) {
+    public LocalFileMonitor(long pollInterval, List<LocalFileObserver> observers) {
         this(pollInterval);
         this.observers = observers;
         addObservers(observers);
@@ -31,13 +31,13 @@ public class LocalFileMonitor {
         this(1000);
     }
 
-    public void addObservers(List<FileAlterationObserver> observers) {
+    public void addObservers(List<LocalFileObserver> observers) {
         for (FileAlterationObserver observer : observers) {
             fileMonitor.addObserver(observer);
         }
     }
 
-    public void addObserver(FileAlterationObserver observer) {
+    public void addObserver(LocalFileObserver observer) {
         fileMonitor.addObserver(observer);
     }
 
@@ -47,6 +47,7 @@ public class LocalFileMonitor {
         } catch (Exception e) {
             LOG.error("Failed to start File monitoring", e);
         }
+        LOG.info("Local file monitoring has been started");
     }
 
     public void stop() {
@@ -55,9 +56,10 @@ public class LocalFileMonitor {
         } catch (Exception e) {
             LOG.error("Failed to stop File monitoring", e);
         }
+        LOG.info("Local file monitoring has been stopped");
     }
 
-    public List<FileAlterationObserver> getObservers() {
+    public List<LocalFileObserver> getObservers() {
         return observers;
     }
 }

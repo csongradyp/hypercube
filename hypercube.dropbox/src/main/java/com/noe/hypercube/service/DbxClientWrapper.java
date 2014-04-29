@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class DbxClientWrapper implements IClient<DbxFileEntity> {
+public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DbxClientWrapper.class);
 
@@ -38,6 +38,11 @@ public class DbxClientWrapper implements IClient<DbxFileEntity> {
     @Override
     public String getAccountName() {
         return "Dropbox";
+    }
+
+    @Override
+    public Class<Dropbox> getAccountType() {
+        return Dropbox.class;
     }
 
     @Override
@@ -91,7 +96,6 @@ public class DbxClientWrapper implements IClient<DbxFileEntity> {
 
     @Override
     public void download(String serverEntry, OutputStream outputStream, Object... extraArgs) {
-        download(serverEntry, outputStream);
     }
 
     @Override

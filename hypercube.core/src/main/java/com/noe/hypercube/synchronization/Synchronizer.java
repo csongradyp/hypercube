@@ -1,84 +1,91 @@
 package com.noe.hypercube.synchronization;
 
-import com.noe.hypercube.observer.LocalFileMonitor;
-import com.noe.hypercube.observer.ObserverFactory;
-import org.apache.commons.io.monitor.FileAlterationObserver;
+import com.noe.hypercube.observer.local.LocalFileMonitor;
+import com.noe.hypercube.observer.local.LocalFileObserver;
+import com.noe.hypercube.observer.local.LocalObserverFactory;
+import com.noe.hypercube.observer.remote.CloudMonitor;
+import com.noe.hypercube.observer.remote.CloudObserver;
+import com.noe.hypercube.observer.remote.CloudObserverFactory;
+import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Named
 public class Synchronizer {
 
-    private static final int DELAY = 1;
+    private static final Logger LOG = Logger.getLogger(Synchronizer.class);
 
     @Inject
     private LocalFileMonitor fileMonitor;
     @Inject
-    private ObserverFactory observerFactory;
+    private CloudMonitor cloudMonitor;
+    @Inject
+    private LocalObserverFactory localObserverFactory;
+    @Inject
+    private CloudObserverFactory cloudObserverFactory;
 
-    private ScheduledExecutorService downExecutor;
-    private ExecutorService upExecutor;
+    private ExecutorService executorService;
 
-    private List<Runnable> downloaders;
-    private List<Runnable> uploaders;
+    private List<LocalFileObserver> localObservers;
+    private Collection<CloudObserver> cloudObservers;
 
-    public Synchronizer(final List<Runnable> downloaders, final List<Runnable> uploaders) {
-        this.downloaders = downloaders;
-        this.uploaders = uploaders;
+    public Synchronizer() {
+        localObservers = localObserverFactory.create();
+        cloudObservers = cloudObserverFactory.create();
     }
 
     @PostConstruct
     public void createExecutors() {
-        createScheduledExecutor(downloaders);
-        createExecutor(uploaders);
+        fileMonitor.addObservers(localObservers);
+        cloudMonitor.addObservers(cloudObservers);
+        createExecutor(localObservers);
+
     }
 
-    private void createExecutor(List<Runnable> uploaders) {
-        if(!uploaders.isEmpty()) {
-            upExecutor = Executors.newFixedThreadPool(uploaders.size());
-        }
-    }
-
-    private void createScheduledExecutor(List<Runnable> downloaders) {
-        if(!downloaders.isEmpty()) {
-            downExecutor = Executors.newScheduledThreadPool(downloaders.size());
+    private void createExecutor(List<LocalFileObserver> localObservers) {
+        if(!localObservers.isEmpty()) {
+            executorService = Executors.newFixedThreadPool(localObservers.size());
         }
     }
 
     public void start() {
-        List<FileAlterationObserver> observers = observerFactory.create();
-
-        fileMonitor.addObservers(observers);
+        cloudMonitor.start();
         fileMonitor.start();
-        submitDownloads();
-        submitUploads();
+        submitDownloaders();
+        submitUploaders();
+        LOG.info("Synchronization has been fully started");
     }
 
-    private void submitDownloads() {
-        for (Runnable task : downloaders) {
-            downExecutor.scheduleWithFixedDelay(task, 0, DELAY, SECONDS);
+    private void submitDownloaders() {
+        for (CloudObserver observer : cloudObservers) {
+            executorService.submit(observer.getDownloader());
         }
     }
 
-    private void submitUploads() {
-        for (Runnable task : uploaders) {
-            upExecutor.execute(task);
+    private void submitUploaders() {
+        for (LocalFileObserver observer : localObservers) {
+            executorService.submit(observer.getUploader());
         }
     }
 
     public void shutdown() {
-        downExecutor.shutdown();
+        cloudMonitor.stop();
+        fileMonitor.stop();
+        executorService.shutdown();
+        LOG.info("Synchronization has been shutted down");
     }
 
-    public void setDownloaders(List<Runnable> downloaders) {
-        this.downloaders = downloaders;
+    public LocalFileMonitor getFileMonitor() {
+        return fileMonitor;
+    }
+
+    public CloudMonitor getCloudMonitor() {
+        return cloudMonitor;
     }
 }

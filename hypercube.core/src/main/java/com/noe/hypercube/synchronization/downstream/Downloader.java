@@ -1,9 +1,8 @@
 package com.noe.hypercube.synchronization.downstream;
 
-
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.domain.FileEntityFactory;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.mapping.DirectoryMapper;
 import com.noe.hypercube.service.IClient;
@@ -11,35 +10,40 @@ import com.noe.hypercube.synchronization.SynchronizationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static java.lang.String.format;
 
-public abstract class Downloader implements IDownloader {
+public class Downloader implements IDownloader {
 
     private static final Logger LOG = Logger.getLogger(Downloader.class);
 
-    @Inject
-    private IPersistenceController persistenceController;
+    private final IPersistenceController persistenceController;
     private final IClient client;
-    private final DirectoryMapper<? extends MappingEntity, ? extends FileEntity> directoryMapper;
+    private final DirectoryMapper directoryMapper;
+    private final FileEntityFactory entityFactory;
     private final BlockingQueue<ServerEntry> downloadQ;
 
     private boolean stop = false;
 
-     protected Downloader(IClient client, DirectoryMapper<? extends MappingEntity, ? extends FileEntity> directoryMapper) {
-        this.client = client;
-        this.directoryMapper = directoryMapper;
-        downloadQ = new LinkedBlockingDeque<>(20);
+     public Downloader(IClient client, DirectoryMapper directoryMapper, FileEntityFactory entityFactory, IPersistenceController persistenceController) {
+         this.client = client;
+         this.persistenceController = persistenceController;
+         this.directoryMapper = directoryMapper;
+         this.entityFactory = entityFactory;
+         downloadQ = new LinkedBlockingDeque<>(20);
+    }
+
+    @Override
+    public void download(ServerEntry entry) {
+        downloadQ.add(entry);
     }
 
     @Override
@@ -62,11 +66,6 @@ public abstract class Downloader implements IDownloader {
     public void restart() {
         stop = false;
         run();
-    }
-
-    @Override
-    public void download(ServerEntry entry) {
-        downloadQ.add(entry);
     }
 
     private boolean isNew(ServerEntry entry, Path localPath){
@@ -116,12 +115,9 @@ public abstract class Downloader implements IDownloader {
     }
 
     private void persist(ServerEntry entry, Path localPath) {
-        FileEntity fileEntity = createFileEntity(localPath.toString(), entry.getRevision(), entry.lastModified());
+        FileEntity fileEntity = entityFactory.createFileEntity(localPath.toString(), entry.getRevision(), entry.lastModified());
         persistenceController.save(fileEntity);
     }
-
-    protected abstract FileEntity createFileEntity(String localPath, String revision, Date date);
-
 
     private void deleteLocalFile(ServerEntry entry) {
         List<Path> localPaths = directoryMapper.getLocals(entry.getPath());

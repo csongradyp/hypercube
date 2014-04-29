@@ -1,6 +1,7 @@
-package com.noe.hypercube.synchronization.downstream;
+package com.noe.hypercube.observer.remote;
 
 import com.noe.hypercube.controller.IPersistenceController;
+import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.domain.ServerEntry;
@@ -8,28 +9,32 @@ import com.noe.hypercube.mapping.DirectoryMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.SynchronizationException;
+import com.noe.hypercube.synchronization.downstream.IDownloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 
-public abstract class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> implements Runnable {
+public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(CloudObserver.class);
 
-    @Inject
-    private IPersistenceController persistenceController;
+    private final IPersistenceController persistenceController;
     private final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
     private final DirectoryMapper<ACCOUNT_TYPE, ? extends MappingEntity> directoryMapper;
-    private final IDownloader<ACCOUNT_TYPE> downloader;
+    private final IDownloader downloader;
 
-    protected CloudObserver(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, DirectoryMapper<ACCOUNT_TYPE, ? extends MappingEntity> directoryMapper, IDownloader<ACCOUNT_TYPE> downloader) {
-        this.client = client;
-        this.directoryMapper = directoryMapper;
-        this.downloader = downloader;
+    protected CloudObserver(AccountBox<ACCOUNT_TYPE, ENTITY_TYPE, ? extends MappingEntity> accountBox, IPersistenceController persistenceController) {
+        this.persistenceController = persistenceController;
+        this.downloader = accountBox.createDownloader(persistenceController);
+        this.client = accountBox.getClient();
+        this.directoryMapper = accountBox.getMapper();
+    }
+
+    protected Class<ACCOUNT_TYPE> getAccountType() {
+        return client.getAccountType();
     }
 
     @Override
@@ -62,5 +67,9 @@ public abstract class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE ex
 
     private boolean overlaps(ServerEntry entry, Path remoteDir) {
         return entry.getPath().toString().contains(remoteDir.toString().toLowerCase());
+    }
+
+    public IDownloader getDownloader() {
+        return downloader;
     }
 }

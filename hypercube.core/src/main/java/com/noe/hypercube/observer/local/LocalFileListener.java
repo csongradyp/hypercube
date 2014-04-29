@@ -1,4 +1,4 @@
-package com.noe.hypercube.observer;
+package com.noe.hypercube.observer.local;
 
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.MappingEntity;
@@ -102,5 +102,9 @@ public class LocalFileListener<ACCOUNT_TYPE extends Account> implements FileAlte
         } catch (SynchronizationException e) {
             LOG.error(e.getMessage());
         }
+    }
+
+    public IUploader<ACCOUNT_TYPE, ? extends FileEntity> getUploader() {
+        return uploader;
     }
 }

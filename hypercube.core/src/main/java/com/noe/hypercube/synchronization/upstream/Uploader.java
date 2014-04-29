@@ -1,7 +1,9 @@
 package com.noe.hypercube.synchronization.upstream;
 
 import com.noe.hypercube.controller.IPersistenceController;
+import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.domain.FileEntity;
+import com.noe.hypercube.domain.FileEntityFactory;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
@@ -23,15 +25,25 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
 
     private static final Logger LOG = LoggerFactory.getLogger(Uploader.class);
 
-    private final IClient client;
     private final IPersistenceController persistenceController;
+    private final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
+    private final FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory;
 
-    protected Uploader(final IClient client, final IPersistenceController persistenceController) {
-        this.client = client;
+    protected Uploader(AccountBox accountBox, IPersistenceController persistenceController) {
         this.persistenceController = persistenceController;
+        client = accountBox.getClient();
+        entityFactory = accountBox.getEntityFactory();
     }
 
-    public abstract Class<ENTITY_TYPE> getEntityType();
+    @Override
+    public Class<ACCOUNT_TYPE> getAccountType() {
+        return client.getAccountType();
+    }
+
+    @Override
+    public Class<ENTITY_TYPE> getEntityType() {
+        return client.getEntityType();
+    }
 
     @Override
     public void uploadNew(File fileToUpload, Path remotePath) throws SynchronizationException {
@@ -74,10 +86,8 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
         }
     }
 
-    protected abstract FileEntity createFileEntity(String localPath, String revision, Date date);
-
     private void persist(Path localPath, ServerEntry uploadedFile) throws IOException {
-        FileEntity fileEntity = createFileEntity(localPath.toString(), uploadedFile.getRevision(), uploadedFile.lastModified());
+        FileEntity fileEntity = entityFactory.createFileEntity(localPath.toString(), uploadedFile.getRevision(), uploadedFile.lastModified());
         persistenceController.save(fileEntity);
     }
 

@@ -45,6 +45,11 @@ public abstract class DefaultDownloader implements IDownloader {
     }
 
     @Override
+    public void download(ServerEntry entry) {
+        synchronize(entry);
+    }
+
+    @Override
     public void run() {
         try {
             Collection<ServerEntry> delta = client.getChanges();
@@ -59,18 +64,22 @@ public abstract class DefaultDownloader implements IDownloader {
 
     private void synchronize(Collection<ServerEntry> delta) throws Exception {
         for (ServerEntry entry : delta) {
-            if(isMapped(entry)) {
-                LOG.debug("Mapped content found");
-                if (client.exist(entry.getPath())) {
-                    download(entry);
-                }
-                else {
-                    deleteLocalFile(entry);
-                }
+            synchronize(entry);
+        }
+    }
+
+    private void synchronize(ServerEntry entry) {
+        if(isMapped(entry)) {
+            LOG.debug("Mapped content found");
+            if (client.exist(entry.getPath())) {
+                downloadFromServer(entry);
             }
             else {
-                LOG.debug("File not Mapped - will not process " + entry.getPath());
+                deleteLocalFile(entry);
             }
+        }
+        else {
+            LOG.debug("File not Mapped - will not process " + entry.getPath());
         }
     }
 
@@ -92,7 +101,7 @@ public abstract class DefaultDownloader implements IDownloader {
         return dbEntry.getRevision().equals(entry.getRevision());
     }
 
-    private void download(ServerEntry entry) {
+    private void downloadFromServer(ServerEntry entry) {
         if (entry.isFile()) {
             List<Path> localPaths = directoryMapper.getLocals(entry.getPath());
             for(Path localPath : localPaths) {

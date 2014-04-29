@@ -1,6 +1,7 @@
-package com.noe.hypercube.observer;
+package com.noe.hypercube.observer.local;
 
 import com.noe.hypercube.synchronization.presynchronization.FilePreSynchronizer;
+import com.noe.hypercube.synchronization.upstream.IUploader;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.monitor.FileAlterationObserver;
@@ -33,5 +34,9 @@ public class LocalFileObserver extends FileAlterationObserver {
 
     public LocalFileListener getListener() {
         return listener;
+    }
+
+    public IUploader getUploader() {
+        return listener.getUploader();
     }
 }

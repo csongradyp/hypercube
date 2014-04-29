@@ -25,7 +25,6 @@ public class PersistenceController implements IPersistenceController {
     public PersistenceController(final Collection<Dao<String, IEntity>> daos) {
         daoMap = new HashMap<>();
         this.daos = daos;
-        createDaoMap();
     }
 
     @PostConstruct

@@ -1,4 +1,4 @@
-package com.noe.hypercube.observer;
+package com.noe.hypercube.observer.local;
 
 
 import org.apache.commons.io.filefilter.IOFileFilter;
