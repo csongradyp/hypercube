@@ -2,7 +2,7 @@ package com.noe.hypercube.observer.local;
 
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.MappingEntity;
-import com.noe.hypercube.mapping.DirectoryMapper;
+import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.upstream.IUploader;
@@ -19,10 +19,10 @@ public class LocalFileListener<ACCOUNT_TYPE extends Account> implements FileAlte
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalFileListener.class);
 
-    private DirectoryMapper<ACCOUNT_TYPE, ? extends MappingEntity> mapper;
+    private IMapper<ACCOUNT_TYPE, ? extends MappingEntity> mapper;
     private IUploader<ACCOUNT_TYPE, ? extends FileEntity> uploader;
 
-    public LocalFileListener(IUploader<ACCOUNT_TYPE, ? extends FileEntity> uploader, DirectoryMapper<ACCOUNT_TYPE, ? extends MappingEntity> mapper) {
+    public LocalFileListener(IUploader<ACCOUNT_TYPE, ? extends FileEntity> uploader, IMapper<ACCOUNT_TYPE, ? extends MappingEntity> mapper) {
         this.uploader = uploader;
         this.mapper = mapper;
     }

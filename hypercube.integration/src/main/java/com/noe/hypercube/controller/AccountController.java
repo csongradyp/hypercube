@@ -3,7 +3,7 @@ package com.noe.hypercube.controller;
 
 import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.domain.FileEntityFactory;
-import com.noe.hypercube.mapping.DirectoryMapper;
+import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 
@@ -17,12 +17,12 @@ import java.util.Map;
 public class AccountController implements IAccountController {
 
     private Collection<IClient> clients;
-    private Collection<DirectoryMapper> mappers;
+    private Collection<IMapper> mappers;
     private Collection<FileEntityFactory> entityFactories;
 
     private final Map<Class<? extends Account>, AccountBox> accountBoxes;
 
-    public AccountController(final Collection<IClient> clients, final Collection<DirectoryMapper> mappers, final Collection<FileEntityFactory> entityFactories) {
+    public AccountController(final Collection<IClient> clients, final Collection<IMapper> mappers, final Collection<FileEntityFactory> entityFactories) {
         this.clients = clients;
         this.mappers = mappers;
         this.entityFactories = entityFactories;
@@ -32,14 +32,14 @@ public class AccountController implements IAccountController {
     @PostConstruct
     private void createAccountBoxes() {
         Map<Class, IClient> clientMap = toMap(clients);
-        Map<Class, DirectoryMapper> directoryMapperMap = toMap2(mappers);
+        Map<Class, IMapper> directoryMapperMap = toMap2(mappers);
         Map<Class, FileEntityFactory> entityFactoryMap = toMap3(entityFactories);
 
         // TODO validate collections - size, classes, etc
         for (IClient currentClient : clients) {
             Class accountType = currentClient.getAccountType();
             IClient client = clientMap.get(accountType);
-            DirectoryMapper mapper = directoryMapperMap.get(accountType);
+            IMapper mapper = directoryMapperMap.get(accountType);
             FileEntityFactory entityFactory = entityFactoryMap.get(accountType);
             accountBoxes.put(accountType, new AccountBox(client, mapper, entityFactory));
         }
@@ -63,9 +63,9 @@ public class AccountController implements IAccountController {
         return map;
     }
 
-    private Map<Class, DirectoryMapper> toMap2(Collection<DirectoryMapper> mappers) {
-        Map<Class, DirectoryMapper> map = new LinkedHashMap<>();
-        for (DirectoryMapper mapper : mappers) {
+    private Map<Class, IMapper> toMap2(Collection<IMapper> mappers) {
+        Map<Class, IMapper> map = new LinkedHashMap<>();
+        for (IMapper mapper : mappers) {
             map.put(mapper.getAccountType(), mapper);
         }
         return map;

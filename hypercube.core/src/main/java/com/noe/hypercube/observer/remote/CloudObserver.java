@@ -5,7 +5,7 @@ import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.domain.ServerEntry;
-import com.noe.hypercube.mapping.DirectoryMapper;
+import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.SynchronizationException;
@@ -23,7 +23,7 @@ public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
 
     private final IPersistenceController persistenceController;
     private final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
-    private final DirectoryMapper<ACCOUNT_TYPE, ? extends MappingEntity> directoryMapper;
+    private final IMapper<ACCOUNT_TYPE, ? extends MappingEntity> directoryMapper;
     private final IDownloader downloader;
 
     protected CloudObserver(AccountBox<ACCOUNT_TYPE, ENTITY_TYPE, ? extends MappingEntity> accountBox, IPersistenceController persistenceController) {

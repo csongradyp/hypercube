@@ -15,12 +15,12 @@ public class CloudMonitor {
     private static final Logger LOG = LoggerFactory.getLogger(CloudMonitor.class);
 
     private ScheduledExecutorService executorService;
-    private Collection<CloudObserver> observers;
+    private Collection<CloudObserver> cloudObservers;
     private Long pollInterval;
 
-    public CloudMonitor(Long pollInterval, Collection<CloudObserver> observers) {
+    public CloudMonitor(Long pollInterval, Collection<CloudObserver> cloudObservers) {
         this.pollInterval = pollInterval;
-        this.observers = observers;
+        this.cloudObservers = cloudObservers;
     }
 
     public CloudMonitor(Long pollInterval) {
@@ -28,9 +28,11 @@ public class CloudMonitor {
     }
 
     public void start() {
-        addObservers(observers);
-        executorService = Executors.newScheduledThreadPool(observers.size());
-        for (CloudObserver observer : observers) {
+        if(cloudObservers.isEmpty()) {
+            LOG.error("No clients are added for synchronization");
+        }
+        executorService = Executors.newScheduledThreadPool(cloudObservers.size());
+        for (CloudObserver observer : cloudObservers) {
             submit(observer);
             LOG.info("Cloud observer has been started for {}", observer.getAccountType().getName());
         }
@@ -46,13 +48,18 @@ public class CloudMonitor {
     }
 
     public void addObservers(Collection<CloudObserver> observers) {
-        for (CloudObserver observer : observers) {
-            addObserver(observer);
+        if(cloudObservers == null || observers.isEmpty()) {
+            cloudObservers = observers;
+        }
+        else  {
+            for (CloudObserver observer : observers) {
+                addObserver(observer);
+            }
         }
     }
 
     public void addObserver(CloudObserver observer) {
-        observers.add(observer);
+        cloudObservers.add(observer);
         LOG.debug("Cloud observer added for account: {}", observer.getAccountType().getName());
     }
 }

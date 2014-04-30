@@ -18,6 +18,12 @@
 
     <bean id="app" class="com.noe.hypercube.HyperCubeApp"/>
 
+    <bean id="accountController" class="com.noe.hypercube.controller.AccountController">
+        <constructor-arg ref="clients" />
+        <constructor-arg ref="mappers" />
+        <constructor-arg ref="entityFactories" />
+    </bean>
+
     <bean id="propertyPlaceholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
         <property name="locations">
@@ -37,14 +43,14 @@
         </property>
     </bean>
 
-    <bean id="downstreamTasks" class="org.springframework.beans.factory.config.ListFactoryBean">
+    <bean id="entityFactories" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list merge="true">
             </list>
         </property>
     </bean>
 
-    <bean id="uploaders" class="org.springframework.beans.factory.config.ListFactoryBean">
+    <bean id="clients" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list merge="true" value-type="com.noe.hypercube.synchronization.upstream.IUploader">
             </list>

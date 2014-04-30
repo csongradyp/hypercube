@@ -4,7 +4,7 @@ import com.noe.hypercube.controller.IAccountController;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.domain.MappingEntity;
-import com.noe.hypercube.mapping.DirectoryMapper;
+import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.synchronization.presynchronization.LocalFilePreSynchronizer;
 import com.noe.hypercube.synchronization.upstream.IUploader;
@@ -48,7 +48,7 @@ public class LocalObserverFactory {
         final AccountBox accountBox = accountController.getAccountBox(accountType);
 
         final IUploader uploader = new QueueUploader(accountBox, persistenceController);
-        final DirectoryMapper mapper = accountBox.getMapper();
+        final IMapper mapper = accountBox.getMapper();
         validate(accountType, uploader, mapper);
 
         final Path localDir = Paths.get(entity.getLocalDir());
@@ -57,7 +57,7 @@ public class LocalObserverFactory {
         return new LocalFileObserver(localDir, listener, preSynchronizer);
     }
 
-    private void validate(Class<? extends Account> accountType, IUploader uploader, DirectoryMapper mapper) {
+    private void validate(Class<? extends Account> accountType, IUploader uploader, IMapper mapper) {
         if(uploader == null || mapper == null) {
             throw new IllegalStateException("Observer creation failed for " + accountType.getSimpleName());
         }

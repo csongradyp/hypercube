@@ -4,7 +4,7 @@ import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.FileEntityFactory;
 import com.noe.hypercube.domain.ServerEntry;
-import com.noe.hypercube.mapping.DirectoryMapper;
+import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.apache.commons.io.FileUtils;
@@ -27,13 +27,13 @@ public class Downloader implements IDownloader {
 
     private final IPersistenceController persistenceController;
     private final IClient client;
-    private final DirectoryMapper directoryMapper;
+    private final IMapper directoryMapper;
     private final FileEntityFactory entityFactory;
     private final BlockingQueue<ServerEntry> downloadQ;
 
     private boolean stop = false;
 
-     public Downloader(IClient client, DirectoryMapper directoryMapper, FileEntityFactory entityFactory, IPersistenceController persistenceController) {
+     public Downloader(IClient client, IMapper directoryMapper, FileEntityFactory entityFactory, IPersistenceController persistenceController) {
          this.client = client;
          this.persistenceController = persistenceController;
          this.directoryMapper = directoryMapper;

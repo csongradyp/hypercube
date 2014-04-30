@@ -5,7 +5,7 @@ import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.domain.ServerEntry;
-import com.noe.hypercube.mapping.DirectoryMapper;
+import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.SynchronizationException;
@@ -29,17 +29,17 @@ public abstract class DefaultDownloader implements IDownloader {
     private static final Logger LOG = Logger.getLogger(DefaultDownloader.class);
 
     private final IClient client;
-    private final DirectoryMapper<? extends Account, ? extends MappingEntity> directoryMapper;
+    private final IMapper<? extends Account, ? extends MappingEntity> directoryMapper;
     @Inject
     private IPersistenceController persistenceController;
 
-    protected DefaultDownloader(IClient client, DirectoryMapper<? extends Account, ? extends MappingEntity> directoryMapper, IPersistenceController persistenceController) {
+    protected DefaultDownloader(IClient client, IMapper<? extends Account, ? extends MappingEntity> directoryMapper, IPersistenceController persistenceController) {
         this.client = client;
         this.directoryMapper = directoryMapper;
         this.persistenceController = persistenceController;
     }
 
-    protected DefaultDownloader(IClient client, DirectoryMapper<? extends Account, ? extends MappingEntity> directoryMapper) {
+    protected DefaultDownloader(IClient client, IMapper<? extends Account, ? extends MappingEntity> directoryMapper) {
         this.client = client;
         this.directoryMapper = directoryMapper;
     }

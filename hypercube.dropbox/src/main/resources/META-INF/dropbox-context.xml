@@ -13,10 +13,26 @@
         </property>
     </bean>
 
-    <bean parent="downstreamTasks" class="org.springframework.beans.factory.config.ListFactoryBean">
+    <bean parent="clients" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list merge="true">
-                <!--<ref bean="dbxDownSynchTask" />-->
+                <ref bean="dbxClient" />
+            </list>
+        </property>
+    </bean>
+
+    <bean parent="mappers" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list merge="true">
+                <ref bean="dbxDirectoryMapper" />
+            </list>
+        </property>
+    </bean>
+
+    <bean parent="entityFactories" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list merge="true">
+                <ref bean="dbxFileEntityFactory" />
             </list>
         </property>
     </bean>
@@ -46,5 +62,7 @@
         <constructor-arg value="${app.key}" />
         <constructor-arg value="${app.secret}" />
     </bean>
+
+    <bean id="dbxFileEntityFactory" class="com.noe.hypercube.domain.DbxFileEntityFactory" />
 
 </beans>

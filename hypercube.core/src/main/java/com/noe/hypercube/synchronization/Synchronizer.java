@@ -45,7 +45,6 @@ public class Synchronizer {
         fileMonitor.addObservers(localObservers);
         cloudMonitor.addObservers(cloudObservers);
         createExecutor(localObservers);
-
     }
 
     private void createExecutor(List<LocalFileObserver> localObservers) {

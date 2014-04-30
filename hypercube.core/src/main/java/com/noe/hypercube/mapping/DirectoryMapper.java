@@ -18,7 +18,7 @@ import java.util.List;
 import static com.noe.hypercube.converter.DirectoryConverter.convertToLocalPath;
 import static com.noe.hypercube.converter.DirectoryConverter.convertToRemotePath;
 
-public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE extends MappingEntity> {
+public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE extends MappingEntity> implements IMapper<ACCOUNT_TYPE,MAPPING_TYPE> {
 
     @Inject
     private MappingController mappingController;
@@ -27,14 +27,13 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
     @Inject
     private RemoteDirectoryCollector remoteDirectoryCollector;
 
-    public abstract Class<MAPPING_TYPE> getMappingClass();
-    public abstract Class<ACCOUNT_TYPE> getAccountType();
-
+    @Override
     public List<Path> getLocals(final String remotePath) {
         Path path = Paths.get(remotePath);
         return getLocals(path);
     }
 
+    @Override
     public List<Path> getLocals(final Path remotePath) {
         List<MappingEntity> mappedDirectories = getMappedDirectories(remotePath, localDirectoryCollector);
         List<Path> localDirs = new LinkedList<>();
@@ -45,11 +44,13 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
         return localDirs;
     }
 
+    @Override
     public List<Path> getRemotes(final File localPath) {
         final Path path = localPath.toPath();
         return getRemotes(path);
     }
 
+    @Override
     public List<Path> getRemotes(final Path localPath) {
         List<MappingEntity> mappedDirectories = getMappedDirectories(localPath, remoteDirectoryCollector);
         List<Path> remoteDirs = new LinkedList<>();
