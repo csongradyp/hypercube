@@ -28,10 +28,7 @@
         </property>
     </bean>
 
-    <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer">
-        <constructor-arg ref="downstreamTasks" />
-        <constructor-arg ref="uploaders" />
-    </bean>
+    <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer" />
 
     <bean id="daos" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">

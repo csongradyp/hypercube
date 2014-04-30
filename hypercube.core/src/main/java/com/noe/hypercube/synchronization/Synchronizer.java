@@ -36,12 +36,12 @@ public class Synchronizer {
     private Collection<CloudObserver> cloudObservers;
 
     public Synchronizer() {
-        localObservers = localObserverFactory.create();
-        cloudObservers = cloudObserverFactory.create();
     }
 
     @PostConstruct
     public void createExecutors() {
+        localObservers = localObserverFactory.create();
+        cloudObservers = cloudObserverFactory.create();
         fileMonitor.addObservers(localObservers);
         cloudMonitor.addObservers(cloudObservers);
         createExecutor(localObservers);
