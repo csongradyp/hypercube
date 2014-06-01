@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+    <bean id="drive.daos" parent="daos" class="com.noe.hypercube.collector.DaoCollector">
+        <constructor-arg>
+            <list>
+                <bean class="com.noe.hypercube.googledrive.dao.DriveFileEntryDao" />
+                <!--<bean class="com.noe.hypercube.googledrive.dao.DriveMappingDao" />-->
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="drive.clients" parent="clients" class="com.noe.hypercube.collector.ClientCollector">
+        <constructor-arg>
+            <list>
+                <ref bean="driveClient" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="drive.mappers" parent="mappers" class="com.noe.hypercube.collector.MapperCollector">
+        <constructor-arg>
+            <list>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="drive.entityFactories" parent="entityFactories" class="com.noe.hypercube.collector.EntityFactoryCollector">
+        <constructor-arg>
+            <list>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="driveClient" class="com.noe.hypercube.googledrive.service.DriveClient" />
+
+</beans>

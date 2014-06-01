@@ -35,21 +35,18 @@ public class Synchronizer {
     private List<LocalFileObserver> localObservers;
     private Collection<CloudObserver> cloudObservers;
 
-    public Synchronizer() {
-    }
-
     @PostConstruct
     public void createExecutors() {
         localObservers = localObserverFactory.create();
         cloudObservers = cloudObserverFactory.create();
         fileMonitor.addObservers(localObservers);
         cloudMonitor.addObservers(cloudObservers);
-        createExecutor(localObservers);
+        createExecutor();
     }
 
-    private void createExecutor(List<LocalFileObserver> localObservers) {
-        if(!localObservers.isEmpty()) {
-            executorService = Executors.newFixedThreadPool(localObservers.size());
+    private void createExecutor() {
+        if(!(localObservers.isEmpty() && cloudObservers.isEmpty())) {
+            executorService = Executors.newFixedThreadPool(localObservers.size() + cloudObservers.size());
         }
     }
 

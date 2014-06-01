@@ -63,6 +63,11 @@
                 <artifactId>spring-jdbc</artifactId>
                 <version>${springVersion}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${springVersion}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.dropbox.core</groupId>

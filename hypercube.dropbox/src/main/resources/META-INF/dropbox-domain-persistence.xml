@@ -4,7 +4,7 @@
         <provider>com.objectdb.jpa.Provider</provider>
 
         <class>com.noe.hypercube.domain.DbxFileEntity</class>
-        <class>com.noe.hypercube.domain.DbxDirectoryMapping</class>
+        <class>com.noe.hypercube.domain.DbxMapping</class>
 
     </persistence-unit>
 </persistence>

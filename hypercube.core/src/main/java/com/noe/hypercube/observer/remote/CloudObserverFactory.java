@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 @Named
 public class CloudObserverFactory {
@@ -17,7 +18,7 @@ public class CloudObserverFactory {
     @Inject
     private IPersistenceController persistenceController;
 
-    public Collection<CloudObserver> create() {
+    public List<CloudObserver> create() {
         LinkedList<CloudObserver> observers = new LinkedList<>();
         Collection<AccountBox> accountBoxes = accountController.getAll();
         for (AccountBox accountBox : accountBoxes) {

@@ -1,14 +1,13 @@
 package com.noe.hypercube.mapping;
 
-
-import com.noe.hypercube.domain.DbxDirectoryMapping;
+import com.noe.hypercube.domain.DbxMapping;
 import com.noe.hypercube.service.Dropbox;
 
-public class DbxDirectoryMapper extends DirectoryMapper<Dropbox, DbxDirectoryMapping> {
+public class DbxDirectoryMapper extends DirectoryMapper<Dropbox, DbxMapping> {
 
     @Override
-    public Class<DbxDirectoryMapping> getMappingClass() {
-        return DbxDirectoryMapping.class;
+    public Class<DbxMapping> getMappingClass() {
+        return DbxMapping.class;
     }
 
     @Override

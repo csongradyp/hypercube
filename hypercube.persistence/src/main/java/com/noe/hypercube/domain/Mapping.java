@@ -1,7 +1,5 @@
 package com.noe.hypercube.domain;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Table;
@@ -9,26 +7,25 @@ import javax.persistence.UniqueConstraint;
 
 @MappedSuperclass
 @Table(uniqueConstraints= @UniqueConstraint(columnNames = {"localDir", "remoteDir"}))
-public abstract class DirectoryMapping implements MappingEntity {
+public abstract class Mapping implements MappingEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
 
     private String localDir;
     private String remoteDir;
     private Filter fileFilters;
 
-    protected DirectoryMapping() {
+    protected Mapping() {
     }
 
-    public DirectoryMapping(String localDir, String remoteDir) {
+    public Mapping(String localDir, String remoteDir) {
         this.localDir = localDir;
         this.remoteDir = remoteDir;
         fileFilters = new FileFilter();
     }
 
-    public DirectoryMapping(String localDir, String remoteDir, Filter fileFilters) {
+    public Mapping(String localDir, String remoteDir, Filter fileFilters) {
         this.localDir = localDir;
         this.remoteDir = remoteDir;
         this.fileFilters = fileFilters;
@@ -69,7 +66,7 @@ public abstract class DirectoryMapping implements MappingEntity {
 
     @Override
     public String toString() {
-        return "DirectoryMapping{" +
+        return "Mapping{" +
                 "localDir=" + localDir +
                 ", remoteDir=" + remoteDir +
                 ", fileFilters=" + fileFilters +

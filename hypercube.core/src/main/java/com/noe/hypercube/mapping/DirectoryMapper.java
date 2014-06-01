@@ -1,6 +1,6 @@
 package com.noe.hypercube.mapping;
 
-import com.noe.hypercube.controller.MappingController;
+import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.mapping.collector.Collector;
 import com.noe.hypercube.mapping.collector.LocalDirectoryCollector;
@@ -21,7 +21,7 @@ import static com.noe.hypercube.converter.DirectoryConverter.convertToRemotePath
 public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE extends MappingEntity> implements IMapper<ACCOUNT_TYPE,MAPPING_TYPE> {
 
     @Inject
-    private MappingController mappingController;
+    private IPersistenceController persistenceController;
     @Inject
     private LocalDirectoryCollector localDirectoryCollector;
     @Inject
@@ -63,7 +63,7 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
     }
 
     private List<MappingEntity> getMappedDirectories(final Path filePath, final Collector directoryCollector) {
-        final Collection<MappingEntity> mappings = mappingController.getMappings(getMappingClass());
+        final Collection<MappingEntity> mappings = persistenceController.getMappings(getMappingClass());
         final List<MappingEntity> matchedMappings = new LinkedList<>();
         final String fileName = filePath.getFileName().toString();
         Path directory = filePath.normalize().getParent();
@@ -75,8 +75,8 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
         return matchedMappings;
     }
 
-    public void setMappingController(final MappingController mappingController) {
-        this.mappingController = mappingController;
+    public void setPersistenceController(final IPersistenceController persistenceController) {
+        this.persistenceController = persistenceController;
     }
 
     public void setLocalDirectoryCollector(final LocalDirectoryCollector localDirectoryCollector) {

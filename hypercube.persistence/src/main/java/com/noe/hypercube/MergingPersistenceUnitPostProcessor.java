@@ -16,7 +16,7 @@ public class MergingPersistenceUnitPostProcessor implements PersistenceUnitPostP
     public void postProcessPersistenceUnitInfo(MutablePersistenceUnitInfo pui) {
         List<String> classes = puiClasses.get(pui.getPersistenceUnitName());
         if (classes == null) {
-            classes = new ArrayList<String>();
+            classes = new ArrayList<>();
             puiClasses.put(pui.getPersistenceUnitName(), classes);
         }
         pui.getManagedClassNames().addAll(classes);

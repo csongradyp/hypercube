@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Named
@@ -22,11 +23,15 @@ public class AccountController implements IAccountController {
 
     private final Map<Class<? extends Account>, AccountBox> accountBoxes;
 
-    public AccountController(final Collection<IClient> clients, final Collection<IMapper> mappers, final Collection<FileEntityFactory> entityFactories) {
+    public AccountController() {
+        accountBoxes = new LinkedHashMap<>();
+    }
+
+    public AccountController(final List<IClient> clients, final List<IMapper> mappers, final List<FileEntityFactory> entityFactories) {
+        this();
         this.clients = clients;
         this.mappers = mappers;
         this.entityFactories = entityFactories;
-        accountBoxes = new LinkedHashMap<>();
     }
 
     @PostConstruct
@@ -78,4 +83,17 @@ public class AccountController implements IAccountController {
         }
         return map;
     }
+
+    public void setClients(Collection<IClient> clients) {
+        this.clients = clients;
+    }
+
+    public void setMappers(Collection<IMapper> mappers) {
+        this.mappers = mappers;
+    }
+
+    public void setEntityFactories(Collection<FileEntityFactory> entityFactories) {
+        this.entityFactories = entityFactories;
+    }
+
 }

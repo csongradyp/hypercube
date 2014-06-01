@@ -1,6 +1,6 @@
 package com.noe.hypercube.mapping;
 
-import com.noe.hypercube.controller.MappingController;
+import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.domain.TestMapping;
 import com.noe.hypercube.mapping.collector.LocalDirectoryCollector;
@@ -27,7 +27,7 @@ public class DirectoryMapperTest {
     private static final Path[] REMOTE_DIRS = new Path[]{ Paths.get("/x/y"), Paths.get("/g/h/i"), Paths.get("/a/b/c") };
     private static final Path[] EXPECTED_REMOTE_DIRS = new Path[]{ Paths.get("/x/y/C"), Paths.get("/g/h/i/B/C") };
     @Mock
-    private MappingController mockMappingController;
+    private IPersistenceController mockMappingController;
     private List<MappingEntity> mappingEntities;
 
     private DirectoryMapper mapper;
@@ -35,7 +35,7 @@ public class DirectoryMapperTest {
     @Before
     public void setUp() {
         mapper = new TestMapper();
-        mapper.setMappingController(mockMappingController);
+        mapper.setPersistenceController(mockMappingController);
         mapper.setRemoteDirectoryCollector(new RemoteDirectoryCollector());
         mapper.setLocalDirectoryCollector(new LocalDirectoryCollector());
 

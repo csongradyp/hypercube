@@ -4,7 +4,6 @@
         <provider>com.objectdb.jpa.Provider</provider>
 
         <class>com.noe.hypercube.googledrive.domain.DriveFileEntity</class>
-        <class>com.noe.hypercube.googledrive.domain.DriveDirectoryMapping</class>
-
+        <!--<class>com.noe.hypercube.googledrive.domain.DriveMapping</class>-->
     </persistence-unit>
 </persistence>

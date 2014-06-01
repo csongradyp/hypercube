@@ -23,6 +23,7 @@
                 <value>classpath*:META-INF/*-domain-persistence.xml</value>
             </list>
         </property>
+
         <property name="persistenceUnitPostProcessors">
             <bean class="com.noe.hypercube.MergingPersistenceUnitPostProcessor"/>
         </property>
