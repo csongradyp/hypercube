@@ -3,7 +3,7 @@
     <persistence-unit name="myPersistenceUnit" transaction-type="RESOURCE_LOCAL">
         <provider>com.objectdb.jpa.Provider</provider>
 
-        <class>com.noe.hypercube.googledrive.domain.DriveFileEntity</class>
+        <!--<class>com.noe.hypercube.googledrive.domain.DriveFileEntity</class>-->
         <!--<class>com.noe.hypercube.googledrive.domain.DriveMapping</class>-->
     </persistence-unit>
 </persistence>

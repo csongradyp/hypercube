@@ -1,6 +1,5 @@
 package com.noe.hypercube.domain;
 
-
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

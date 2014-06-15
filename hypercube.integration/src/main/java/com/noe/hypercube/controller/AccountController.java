@@ -8,6 +8,7 @@ import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -20,6 +21,8 @@ public class AccountController implements IAccountController {
     private Collection<IClient> clients;
     private Collection<IMapper> mappers;
     private Collection<FileEntityFactory> entityFactories;
+    @Inject
+    private PersistenceController persistenceController;
 
     private final Map<Class<? extends Account>, AccountBox> accountBoxes;
 
@@ -39,6 +42,7 @@ public class AccountController implements IAccountController {
         Map<Class, IClient> clientMap = toMap(clients);
         Map<Class, IMapper> directoryMapperMap = toMap2(mappers);
         Map<Class, FileEntityFactory> entityFactoryMap = toMap3(entityFactories);
+        persistenceController.createDaoMap();
 
         // TODO validate collections - size, classes, etc
         for (IClient currentClient : clients) {

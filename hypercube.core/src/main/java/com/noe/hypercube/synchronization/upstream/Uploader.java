@@ -47,7 +47,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
 
     @Override
     public void uploadNew(File fileToUpload, Path remotePath) throws SynchronizationException {
-        if(!client.exist(remotePath)) {
+        if(!client.exist(fileToUpload, remotePath)) {
             upload(fileToUpload, remotePath, Action.ADDED);
         }
         else {
@@ -57,7 +57,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
 
     @Override
     public void uploadUpdated(File fileToUpload, Path remotePath) throws SynchronizationException {
-        if(client.exist(remotePath) && isNewer(fileToUpload)) {
+        if(client.exist(fileToUpload, remotePath) && isNewer(fileToUpload)) {
             upload(fileToUpload, remotePath, Action.CHANGED);
         }
         else {
@@ -92,10 +92,10 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
     }
 
     @Override
-    public synchronized void delete(File fileToUpload, Path remotePath) throws SynchronizationException {
-        if(client.exist(remotePath)) {
-            client.delete(remotePath);
-            Path localPath = fileToUpload.toPath();
+    public synchronized void delete(File localFile, Path remotePath) throws SynchronizationException {
+        if(client.exist(localFile, remotePath)) {
+            client.delete(localFile, remotePath);
+            Path localPath = localFile.toPath();
             persistenceController.delete(localPath.toString(), client.getEntityType());
             LOG.debug("Successfully deleted file '{}' from {}", remotePath, client.getAccountName());
         }

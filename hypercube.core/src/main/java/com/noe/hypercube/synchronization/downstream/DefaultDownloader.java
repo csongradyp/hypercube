@@ -71,7 +71,7 @@ public abstract class DefaultDownloader implements IDownloader {
     private void synchronize(ServerEntry entry) {
         if(isMapped(entry)) {
             LOG.debug("Mapped content found");
-            if (client.exist(entry.getPath())) {
+            if (client.exist(entry)) {
                 downloadFromServer(entry);
             }
             else {

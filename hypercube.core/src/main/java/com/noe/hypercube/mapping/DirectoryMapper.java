@@ -59,7 +59,6 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
             remoteDirs.add(remoteDir);
         }
         return remoteDirs;
-
     }
 
     private List<MappingEntity> getMappedDirectories(final Path filePath, final Collector directoryCollector) {

@@ -5,8 +5,8 @@ import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.synchronization.SynchronizationException;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Collection;
 
@@ -29,20 +29,20 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
      * Checks if the file exists on the server for the given server specific path.
      * @return {@code true} if the file exists on the server in the given path.
      */
-    boolean exist(Path remotePath);
+    boolean exist(final File fileToUpload, final Path remotePath);
 
-    boolean exist(ServerEntry serverEntry);
+    boolean exist(final ServerEntry serverEntry);
 
-    Collection<ServerEntry> getChanges()  throws SynchronizationException;
+    Collection<ServerEntry> getChanges() throws SynchronizationException;
 
-    void download(ServerEntry serverPath, OutputStream outputStream)  throws SynchronizationException;;
+    void download(final ServerEntry serverPath, final FileOutputStream outputStream) throws SynchronizationException;
 
-    void download(String serverPath, OutputStream outputStream, Object... extraArgs)  throws SynchronizationException;;
+    void download(String serverPath, FileOutputStream outputStream, Object... extraArgs) throws SynchronizationException;
 
-    void delete(Path remotePath) throws SynchronizationException;
+    void delete(final File fileToUpload, final Path remotePath) throws SynchronizationException;
 
-    ServerEntry uploadAsNew(Path remotePath, File fileToUpload, InputStream inputStream) throws SynchronizationException;
+    ServerEntry uploadAsNew(final Path remotePath, final File fileToUpload, final InputStream inputStream) throws SynchronizationException;
 
-    ServerEntry uploadAsUpdated(Path remotePath, File fileToUpload, InputStream inputStream) throws SynchronizationException;
+    ServerEntry uploadAsUpdated(final Path remotePath, final File fileToUpload, final InputStream inputStream) throws SynchronizationException;
 
 }

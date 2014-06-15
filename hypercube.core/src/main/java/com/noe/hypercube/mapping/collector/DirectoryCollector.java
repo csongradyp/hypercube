@@ -26,10 +26,12 @@ public abstract class DirectoryCollector implements Collector<MappingEntity> {
 
     private boolean isMatchingFilter(final String fileName, MappingEntity mapping) {
         Filter fileFilter = mapping.getFilter();
-        Collection<String> filters = fileFilter.getFilters();
-        for (String filter : filters) {
-            if(fileName.matches(filter) && fileFilter.isBlackList()) {
-               return false;
+        if(fileFilter != null) {
+            Collection<String> filters = fileFilter.getFilters();
+            for (String filter : filters) {
+                if(fileName.matches(filter) && fileFilter.isBlackList()) {
+                    return false;
+                }
             }
         }
         return true;

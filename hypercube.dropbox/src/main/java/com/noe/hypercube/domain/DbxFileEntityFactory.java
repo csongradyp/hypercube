@@ -7,7 +7,7 @@ import java.util.Date;
 public class DbxFileEntityFactory implements FileEntityFactory<Dropbox, DbxFileEntity> {
 
     @Override
-    public FileEntity createFileEntity(String localPath, String revision, Date date) {
+    public FileEntity createFileEntity(final String localPath, final String revision, final Date date) {
         return new DbxFileEntity(localPath, revision, date);
     }
 

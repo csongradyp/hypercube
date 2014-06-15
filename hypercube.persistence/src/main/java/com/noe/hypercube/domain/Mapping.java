@@ -14,7 +14,8 @@ public abstract class Mapping implements MappingEntity {
 
     private String localDir;
     private String remoteDir;
-    private Filter fileFilters;
+//    @OneToOne(fetch= FetchType.EAGER)
+//    private FileFilter fileFilters;
 
     protected Mapping() {
     }
@@ -22,14 +23,14 @@ public abstract class Mapping implements MappingEntity {
     public Mapping(String localDir, String remoteDir) {
         this.localDir = localDir;
         this.remoteDir = remoteDir;
-        fileFilters = new FileFilter();
+//        fileFilters = new FileFilter();
     }
 
-    public Mapping(String localDir, String remoteDir, Filter fileFilters) {
-        this.localDir = localDir;
-        this.remoteDir = remoteDir;
-        this.fileFilters = fileFilters;
-    }
+//    public Mapping(String localDir, String remoteDir, FileFilter fileFilters) {
+//        this.localDir = localDir;
+//        this.remoteDir = remoteDir;
+//        this.fileFilters = fileFilters;
+//    }
 
 
     @Override
@@ -52,12 +53,14 @@ public abstract class Mapping implements MappingEntity {
 
     @Override
     public Filter getFilter() {
-        return fileFilters;
+//        return fileFilters;
+        // TODO fix persistence to accept FileFilter
+        return null;
     }
 
-    public void setFileFilters(Filter fileFilters) {
-        this.fileFilters = fileFilters;
-    }
+//    public void setFileFilters(FileFilter fileFilters) {
+//        this.fileFilters = fileFilters;
+//    }
 
     @Override
     public String getId() {
@@ -69,7 +72,7 @@ public abstract class Mapping implements MappingEntity {
         return "Mapping{" +
                 "localDir=" + localDir +
                 ", remoteDir=" + remoteDir +
-                ", fileFilters=" + fileFilters +
+//                ", fileFilters=" + fileFilters +
                 '}';
     }
 }

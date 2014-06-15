@@ -7,7 +7,6 @@ import com.noe.hypercube.domain.MappingEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,8 +26,7 @@ public class PersistenceController implements IPersistenceController {
         this.daos = daos;
     }
 
-    @PostConstruct
-    private void createDaoMap() {
+    public void createDaoMap() {
         for (Dao<String, IEntity> entityDao : daos) {
             daoMap.put(entityDao.getEntityClass(), entityDao);
         }
@@ -92,5 +90,19 @@ public class PersistenceController implements IPersistenceController {
             }
         }
         return allMappings;
+    }
+
+    @Override
+    public void addMapping(MappingEntity mapping) {
+        Class<? extends MappingEntity> entityClass = mapping.getClass();
+        Dao dao = daoMap.get(entityClass);
+        dao.persist(mapping);
+    }
+
+    @Override
+    public void removeMapping(MappingEntity mapping) {
+        Class<? extends MappingEntity> entityClass = mapping.getClass();
+        Dao dao = daoMap.get(entityClass);
+        dao.remove(mapping);
     }
 }

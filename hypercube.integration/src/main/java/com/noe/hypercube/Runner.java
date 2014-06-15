@@ -29,10 +29,11 @@ public class Runner {
 
     public static void main(String[] args) throws IOException {
 //        updateAuthProperty();
-         if (!instanceMonitor.isAlreadyRunning()) {
+        if (!instanceMonitor.isAlreadyRunning()) {
 //            createGui();
             APPLICATION_CONTEXT = new FileSystemXmlApplicationContext(CONTEXT_XML_PATH);
             app = APPLICATION_CONTEXT.getBean(HyperCubeApp.class);
+//            app.test();
             app.start();
         } else {
             JOptionPane.showMessageDialog(new Frame(), ALREADY_RUNNING_ERROR_MSG, ALREADY_RUNNING_ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
