@@ -33,8 +33,7 @@ public class HyperCubeApp {
         synchronizer.shutdown();
     }
 
-    public void test(){
-        DbxMapping testMspping = new DbxMapping("d:\\hyper\\", "/newtest");
+    public void addTestDirectoryMapping(DbxMapping testMspping ){
         persistenceController.addMapping(testMspping);
     }
 }

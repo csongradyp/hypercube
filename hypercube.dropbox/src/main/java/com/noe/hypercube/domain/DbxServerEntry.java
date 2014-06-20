@@ -43,4 +43,13 @@ public class DbxServerEntry implements ServerEntry {
     public Date lastModified() {
         return lastModified;
     }
+
+    @Override
+    public String toString() {
+        return "Dropbox File [ "
+                + path
+                + ", rev: " + revision
+                + ", lastModDate: " + lastModified
+                + " ]";
+    }
 }

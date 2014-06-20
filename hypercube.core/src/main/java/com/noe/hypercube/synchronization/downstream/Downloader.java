@@ -38,7 +38,7 @@ public class Downloader implements IDownloader {
          this.persistenceController = persistenceController;
          this.directoryMapper = directoryMapper;
          this.entityFactory = entityFactory;
-         downloadQ = new LinkedBlockingDeque<>(20);
+         downloadQ = new LinkedBlockingDeque<>(50);
     }
 
     @Override
@@ -49,13 +49,25 @@ public class Downloader implements IDownloader {
     @Override
     public void run() {
         while(!stop) {
-            ServerEntry entry = downloadQ.poll();
+            ServerEntry entry = null;
+            try {
+                entry = downloadQ.take();
+            } catch (InterruptedException e) {
+                LOG.error(client.getAccountName() + " download queue operation has been interrupted");
+            }
             if (client.exist(entry)) {
                 downloadFromServer(entry);
             }
             else {
                 deleteLocalFile(entry);
             }
+            logQueueEmpty();
+        }
+    }
+
+    private void logQueueEmpty() {
+        if(downloadQ.isEmpty()) {
+            LOG.info(client.getAccountName() + " download queue is empty. Waiting for changes from server");
         }
     }
 
@@ -68,9 +80,13 @@ public class Downloader implements IDownloader {
         run();
     }
 
-    private boolean isNew(ServerEntry entry, Path localPath){
-        FileEntity fileEntity = persistenceController.get(localPath.toString(), client.getEntityType());
-        return fileEntity != null && !isSameRevision(entry, fileEntity);
+    private boolean isNew(ServerEntry entry, File localPath){
+        boolean isNewOnServer = true;
+        FileEntity fileEntity = persistenceController.get(localPath.toPath().toString(), client.getEntityType());
+        if(fileEntity != null) {
+            isNewOnServer = !isSameRevision(entry, fileEntity);
+        }
+        return isNewOnServer;
     }
 
     private boolean isSameRevision(ServerEntry entry, FileEntity dbEntry) {
@@ -81,21 +97,25 @@ public class Downloader implements IDownloader {
         if (entry.isFile()) {
             List<Path> localPaths = directoryMapper.getLocals(entry.getPath());
             for(Path localPath : localPaths) {
-                if(isNew(entry, localPath)) {
-                    File newLocalFile = localPath.toFile();
+//                Path localFilePath = Paths.get(localPath.toString(), entry.getPath().getFileName().toString());
+                File newLocalFile = new File(localPath.toString(), entry.getPath().getFileName().toString());
+                if(isNew(entry, newLocalFile)) {
                     createDirsFor(newLocalFile);
                     try (FileOutputStream outputStream = FileUtils.openOutputStream(newLocalFile)) {
                         client.download(entry, outputStream);
-                        persist(entry, localPath);
-                        LOG.debug("Successfully downloaded file " + localPath);
+                        persist(entry, newLocalFile.toPath());
+                        LOG.info(client.getAccountName() + " Successfully downloaded file " + newLocalFile.toPath());
                     } catch (FileNotFoundException e) {
-                        LOG.error("Couldn't write file '" + localPath + "'", e);
+                        LOG.error("Couldn't write file '" + newLocalFile.toPath() + "'", e);
                     } catch (IOException e) {
                         LOG.error("Error occurred while downloading file from " + client.getAccountName(), e);
                     } catch (SynchronizationException e) {
                         LOG.error(e.getMessage(), e);
                     }
                     setLocalFileLastModifiedDate(entry, newLocalFile);
+                }
+                else {
+                    LOG.debug(localPath + "is up to date");
                 }
             }
         }

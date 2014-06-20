@@ -22,18 +22,18 @@ public class Runner {
     public static final String EXIT_PANE_TITLE = "Exit HyperCube";
 
     private static ConfigurableApplicationContext APPLICATION_CONTEXT;
-    private static InstanceMonitor instanceMonitor = new SingleInstanceMonitor();
+    private static InstanceMonitor INSTANCE_MONITOR = new SingleInstanceMonitor();
     private static HyperCubeApp app;
 //    private static Gui gui;
 
 
     public static void main(String[] args) throws IOException {
 //        updateAuthProperty();
-        if (!instanceMonitor.isAlreadyRunning()) {
+        if (!INSTANCE_MONITOR.isAlreadyRunning()) {
 //            createGui();
             APPLICATION_CONTEXT = new FileSystemXmlApplicationContext(CONTEXT_XML_PATH);
             app = APPLICATION_CONTEXT.getBean(HyperCubeApp.class);
-//            app.test();
+//            app.addTestDirectoryMapping(new DbxMapping("d:\\hyper\\", "/newtest"));
             app.start();
         } else {
             JOptionPane.showMessageDialog(new Frame(), ALREADY_RUNNING_ERROR_MSG, ALREADY_RUNNING_ERROR_TITLE, JOptionPane.ERROR_MESSAGE);

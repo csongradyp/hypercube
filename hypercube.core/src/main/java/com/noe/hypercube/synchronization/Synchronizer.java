@@ -45,16 +45,16 @@ public class Synchronizer {
     }
 
     private void createExecutor() {
-        if(!(localObservers.isEmpty() && cloudObservers.isEmpty())) {
+//        if(!(localObservers.isEmpty() && cloudObservers.isEmpty())) {
             executorService = Executors.newFixedThreadPool(localObservers.size() + cloudObservers.size());
-        }
+//        }
     }
 
     public void start() {
-        cloudMonitor.start();
-        fileMonitor.start();
         submitDownloaders();
         submitUploaders();
+        cloudMonitor.start();
+        fileMonitor.start();
         LOG.info("Synchronization has been fully started");
     }
 

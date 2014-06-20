@@ -1,9 +1,6 @@
 package com.noe.hypercube.observer.local;
 
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.mapping.IMapper;
-import com.noe.hypercube.service.Account;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.upstream.IUploader;
 import org.apache.commons.io.monitor.FileAlterationListener;
@@ -15,14 +12,14 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
-public class LocalFileListener<ACCOUNT_TYPE extends Account> implements FileAlterationListener {
+public class LocalFileListener implements FileAlterationListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalFileListener.class);
 
-    private IMapper<ACCOUNT_TYPE, ? extends MappingEntity> mapper;
-    private IUploader<ACCOUNT_TYPE, ? extends FileEntity> uploader;
+    private IMapper mapper;
+    private IUploader uploader;
 
-    public LocalFileListener(IUploader<ACCOUNT_TYPE, ? extends FileEntity> uploader, IMapper<ACCOUNT_TYPE, ? extends MappingEntity> mapper) {
+    public LocalFileListener(IUploader uploader, IMapper mapper) {
         this.uploader = uploader;
         this.mapper = mapper;
     }
@@ -104,7 +101,7 @@ public class LocalFileListener<ACCOUNT_TYPE extends Account> implements FileAlte
         }
     }
 
-    public IUploader<ACCOUNT_TYPE, ? extends FileEntity> getUploader() {
+    public IUploader getUploader() {
         return uploader;
     }
 }

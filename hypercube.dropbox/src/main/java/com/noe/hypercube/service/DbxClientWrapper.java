@@ -20,19 +20,17 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DbxClientWrapper.class);
 
-    private DbxClient client;
-    private AtomicReference<String> cursor = new AtomicReference<>();
+    private final DbxClient client;
+    private String cursor;
 
-    public DbxClientWrapper(DbxClient client) {
+    public DbxClientWrapper(final DbxClient client) {
         this.client = client;
-        cursor.set("");
+        cursor = null;
     }
 
     @Override
@@ -67,6 +65,7 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
         } catch (DbxException e) {
             LOG.error("Failed to get file information from Dropbox: {}", dropboxFilePath);
         }
+        LOG.debug(dropboxFilePath + " exists = " + exists);
         return exists;
     }
 
@@ -74,13 +73,16 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
     public Collection<ServerEntry> getChanges() throws SynchronizationException {
         Collection<ServerEntry> serverEntries = new LinkedList<>();
         try {
-            DbxDelta<DbxEntry> delta = client.getDelta(cursor.get());
-            List<DbxDelta.Entry<DbxEntry>> entries = delta.entries;
-            for (DbxDelta.Entry<DbxEntry> entry : entries) {
-                serverEntries.add(new DbxServerEntry(entry.lcPath, entry.metadata.asFile().rev, entry.metadata.asFile().lastModified, entry.metadata.isFolder()));
+            DbxDelta<DbxEntry> delta = client.getDelta(cursor);
+            for (DbxDelta.Entry<DbxEntry> entry : delta.entries) {
+                if(entry.metadata.isFile()) {
+                    DbxServerEntry dbxServerEntry = new DbxServerEntry(entry.lcPath, entry.metadata.asFile().rev, entry.metadata.asFile().lastModified, entry.metadata.isFolder());
+                    serverEntries.add(dbxServerEntry);
+                }
             }
-        } catch (DbxException e) {
-            throw new SynchronizationException("Could not get changes from Dropbox");
+            cursor = delta.cursor;
+        } catch (Exception e) {
+            throw new SynchronizationException("Could not get changes from Dropbox", e);
         }
         return serverEntries;
     }
