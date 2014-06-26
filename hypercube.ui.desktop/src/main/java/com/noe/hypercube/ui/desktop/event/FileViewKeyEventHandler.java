@@ -1,5 +1,6 @@
-package com.noe.hypercube.ui.desktop;
+package com.noe.hypercube.ui.desktop.event;
 
+import com.noe.hypercube.ui.desktop.util.NavigationUtil;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
@@ -8,8 +9,8 @@ import org.controlsfx.control.BreadCrumbBar;
 
 import java.io.File;
 
-import static com.noe.hypercube.ui.desktop.NavigationUtil.navigateTo;
-import static com.noe.hypercube.ui.desktop.NavigationUtil.stepBack;
+import static com.noe.hypercube.ui.desktop.util.NavigationUtil.navigateTo;
+import static com.noe.hypercube.ui.desktop.util.NavigationUtil.stepBack;
 
 public class FileViewKeyEventHandler implements EventHandler<KeyEvent> {
 

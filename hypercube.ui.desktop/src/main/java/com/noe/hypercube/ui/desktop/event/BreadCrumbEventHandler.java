@@ -1,4 +1,4 @@
-package com.noe.hypercube.ui.desktop;
+package com.noe.hypercube.ui.desktop.event;
 
 import javafx.event.EventHandler;
 import javafx.scene.control.TableView;
@@ -9,8 +9,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.noe.hypercube.ui.desktop.NavigationUtil.SEPARATOR;
-import static com.noe.hypercube.ui.desktop.NavigationUtil.navigateTo;
+import static com.noe.hypercube.ui.desktop.util.NavigationUtil.SEPARATOR;
+import static com.noe.hypercube.ui.desktop.util.NavigationUtil.navigateTo;
 
 public class BreadCrumbEventHandler implements EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> {
 

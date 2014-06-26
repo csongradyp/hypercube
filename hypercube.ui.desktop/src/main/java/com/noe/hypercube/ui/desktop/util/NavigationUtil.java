@@ -1,4 +1,4 @@
-package com.noe.hypercube.ui.desktop;
+package com.noe.hypercube.ui.desktop.util;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

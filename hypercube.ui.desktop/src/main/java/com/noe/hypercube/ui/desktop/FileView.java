@@ -1,7 +1,17 @@
 package com.noe.hypercube.ui.desktop;
 
+import com.noe.hypercube.ui.desktop.event.BreadCrumbEventHandler;
+import com.noe.hypercube.ui.desktop.event.DriveMouseEventHandler;
+import com.noe.hypercube.ui.desktop.event.FileViewKeyEventHandler;
+import com.noe.hypercube.ui.desktop.event.FileViewMouseEventHandler;
+import com.noe.hypercube.ui.desktop.factory.FormattedTableCellFactory;
+import com.noe.hypercube.ui.desktop.factory.StorageButtonFactory;
+import com.noe.hypercube.ui.desktop.observer.LocalStorageObserver;
+import com.noe.hypercube.ui.desktop.util.FileSizeCalculator;
+import com.noe.hypercube.ui.desktop.util.NavigationUtil;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -19,12 +29,13 @@ import org.controlsfx.control.SegmentedButton;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
-
-import static com.noe.hypercube.ui.desktop.NavigationUtil.navigateTo;
 
 
 public class FileView extends VBox implements Initializable {
@@ -45,7 +56,11 @@ public class FileView extends VBox implements Initializable {
     @FXML
     private SegmentedButton localDrives;
     @FXML
+    private SegmentedButton removableDrives;
+    @FXML
     private SegmentedButton remoteDrives;
+
+    private LocalStorageObserver storageObserver;
 
     private boolean selected;
 
@@ -66,62 +81,72 @@ public class FileView extends VBox implements Initializable {
         setupLocalDrives();
         setupRemoteDrives();
         setupFileTableView();
-        breadcrumb.setOnCrumbAction( new BreadCrumbEventHandler( table ) );
+        breadcrumb.setOnCrumbAction(new BreadCrumbEventHandler(table));
+        observeRemovableDrives();
     }
 
     private void setupRemoteDrives() {
-        ToggleButton addButton = new ToggleButton( "+" );
-        addButton.setTooltip( new Tooltip( "Add new remote drive") );
-        remoteDrives.getButtons().add( addButton );
-        addButton.setOnMouseClicked( event -> {
-            remoteDrives.getButtons().add(0, new ToggleButton( "New" ));
-            addButton.setSelected( false );
-        } );
+        ToggleButton addButton = new ToggleButton("+");
+        addButton.setTooltip(new Tooltip("Add new remote drive"));
+        remoteDrives.getButtons().add(addButton);
+        addButton.setOnMouseClicked(event -> {
+            remoteDrives.getButtons().add(0, new ToggleButton("New"));
+            addButton.setSelected(false);
+        });
     }
 
     private void setupFileTableView() {
-        FileViewKeyEventHandler keyEventHandlerRight = new FileViewKeyEventHandler( table, breadcrumb );
-        keyEventHandlerRight.init( new File( "c:/" ) );
-        table.setOnKeyPressed( keyEventHandlerRight );
-        table.setOnMouseClicked( new FileViewMouseEventHandler( breadcrumb ) );
-        Platform.runLater( () -> {
-            if ( isSelected() ) {
+        FileViewKeyEventHandler keyEventHandlerRight = new FileViewKeyEventHandler(table, breadcrumb);
+        keyEventHandlerRight.init(new File("c:/"));
+        table.setOnKeyPressed(keyEventHandlerRight);
+        table.setOnMouseClicked(new FileViewMouseEventHandler(breadcrumb));
+        Platform.runLater(() -> {
+            if (isSelected()) {
                 table.requestFocus();
             }
-        }
-        );
+        });
 
-        fileNameColumn.setCellValueFactory( new PropertyValueFactory<>( "Name" ) );
+        fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("Name"));
 
-        fileSizeColumn.setCellFactory( new FormattedTableCellFactory<>( TextAlignment.RIGHT ) );
-        fileSizeColumn.setCellValueFactory( param -> new ReadOnlyObjectWrapper( isStepBack( param ) ? "" : FileSizeCalculator.calculate( param.getValue() ) ) );
+        fileSizeColumn.setCellFactory(new FormattedTableCellFactory<>(TextAlignment.RIGHT));
+        fileSizeColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper(isStepBack(param) ? "" : FileSizeCalculator.calculate(param.getValue())));
 
-        extColumn.setCellValueFactory( param -> new ReadOnlyObjectWrapper( param.getValue().isFile() ? FilenameUtils.getExtension( param.getValue().getName() ) : "" ) );
+        extColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper(param.getValue().isFile() ? FilenameUtils.getExtension(param.getValue().getName()) : ""));
 
-        dateColumnRight.setCellValueFactory( param -> new ReadOnlyObjectWrapper( isStepBack( param ) ? "" : new Date( param.getValue().lastModified() ).toString() ) );
+        dateColumnRight.setCellValueFactory(param -> new ReadOnlyObjectWrapper(isStepBack(param) ? "" : new Date(param.getValue().lastModified()).toString()));
     }
 
-    private boolean isStepBack( TableColumn.CellDataFeatures<File, String> param ) {
-        return param.getValue().getName().equals( NavigationUtil.TO_PARENT_PLACEHOLDER );
+    private boolean isStepBack(TableColumn.CellDataFeatures<File, String> param) {
+        return param.getValue().getName().equals(NavigationUtil.TO_PARENT_PLACEHOLDER);
     }
 
     private void setupLocalDrives() {
-        File[] roots = File.listRoots();
-        List<ToggleButton> drives = new ArrayList<>( 5 );
-        for ( File root : roots ) {
-            ToggleButton button = new ToggleButton( root.getPath() );
-            button.setOnMouseClicked( event -> {
-                ToggleButton source = (ToggleButton) event.getSource();
-                navigateTo( table, breadcrumb, new File( source.getText() ) );
-                if(!source.isSelected()) {
-                    source.setSelected( true );
-                }
-            } );
-            drives.add( button );
+        List<ToggleButton> drives = new ArrayList<>(5);
+        Iterable<Path> rootDirectories = FileSystems.getDefault().getRootDirectories();
+        for (Path root : rootDirectories) {
+            ToggleButton button = StorageButtonFactory.create(root, new DriveMouseEventHandler(table, breadcrumb));
+            drives.add(button);
         }
-        localDrives.getButtons().addAll( drives );
-        localDrives.getButtons().get( 0 ).setSelected( true );
-        localDrives.setOnMouseClicked( new DriveMouseEventHandler( breadcrumb, table ) );
+        localDrives.getButtons().addAll(drives);
+        localDrives.getButtons().get(0).setSelected(true);
+        localDrives.setOnMouseClicked(new DriveMouseEventHandler(table, breadcrumb));
+    }
+
+    private void observeRemovableDrives() {
+        storageObserver = new LocalStorageObserver();
+        storageObserver.onStorageAttachDetection(newRoot -> {
+            ToggleButton driveButton = StorageButtonFactory.create(newRoot, new DriveMouseEventHandler(table, breadcrumb));
+            Platform.runLater(() -> removableDrives.getButtons().add(driveButton));
+        });
+        storageObserver.onStorageDetachDetection(storage -> {
+            ObservableList<ToggleButton> buttons = removableDrives.getButtons();
+            for (ToggleButton button : buttons) {
+                if (button.getText().contains(storage.toString())) {
+                    Platform.runLater(() -> buttons.remove(button));
+                }
+            }
+        });
+        storageObserver.start();
     }
 
     public boolean isSelected() {
@@ -129,7 +154,12 @@ public class FileView extends VBox implements Initializable {
     }
 
     @FXML
-    public void setSelected( boolean selected ) {
+    public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public Path getCurrentPath() {
+        String current = breadcrumb.getSelectedCrumb().getValue();
+        return Paths.get(current);
     }
 }

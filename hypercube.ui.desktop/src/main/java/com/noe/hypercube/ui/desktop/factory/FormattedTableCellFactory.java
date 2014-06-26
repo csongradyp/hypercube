@@ -1,4 +1,4 @@
-package com.noe.hypercube.ui.desktop;
+package com.noe.hypercube.ui.desktop.factory;
 
 import javafx.geometry.Pos;
 import javafx.scene.Node;

@@ -1,4 +1,4 @@
-package com.noe.hypercube.ui.desktop;
+package com.noe.hypercube.ui.desktop.util;
 
 import java.io.File;
 import java.math.RoundingMode;
