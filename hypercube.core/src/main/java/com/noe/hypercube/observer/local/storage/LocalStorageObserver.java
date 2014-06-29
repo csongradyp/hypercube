@@ -1,4 +1,4 @@
-package com.noe.hypercube.ui.desktop.observer;
+package com.noe.hypercube.observer.local.storage;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -10,8 +10,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class LocalStorageObserver {
 
     private final ScheduledExecutorService service;
-    private final List<StorageEventTask> attachTasks;
-    private final List<StorageEventTask> detachTasks;
+    private final List<StorageCheckTask> attachTasks;
+    private final List<StorageCheckTask> detachTasks;
 
     public LocalStorageObserver() {
         service = Executors.newSingleThreadScheduledExecutor();
@@ -19,24 +19,24 @@ public class LocalStorageObserver {
         detachTasks = new CopyOnWriteArrayList<>();
     }
 
-    public void onStorageAttachDetection(List<StorageEventTask> tasks) {
+    public void onStorageAttachDetection(List<StorageCheckTask> tasks) {
         attachTasks.addAll(tasks);
     }
 
-    public void onStorageAttachDetection(StorageEventTask task) {
+    public void onStorageAttachDetection(StorageCheckTask task) {
         attachTasks.add(task);
     }
 
-    public void onStorageDetachDetection(List<StorageEventTask> tasks) {
+    public void onStorageDetachDetection(List<StorageCheckTask> tasks) {
         detachTasks.addAll(tasks);
     }
 
-    public void onStorageDetachDetection(StorageEventTask task) {
+    public void onStorageDetachDetection(StorageCheckTask task) {
         detachTasks.add(task);
     }
 
     public void start() {
-        StorageCheckTask storageCheck = new StorageCheckTask(attachTasks, detachTasks);
+        StorageCheckTask storageCheck = new StorageCheckTask();
         service.scheduleWithFixedDelay(storageCheck, 0, 5, SECONDS);
     }
 

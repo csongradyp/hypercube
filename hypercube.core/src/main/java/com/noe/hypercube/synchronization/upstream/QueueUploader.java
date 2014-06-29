@@ -2,10 +2,11 @@ package com.noe.hypercube.synchronization.upstream;
 
 
 import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.domain.FileEntity;
+import com.noe.hypercube.domain.FileEntityFactory;
 import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.service.Account;
+import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.slf4j.Logger;
@@ -25,8 +26,8 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     private BlockingQueue<UploadEntity> uploadQ;
     private boolean stop = false;
 
-    public QueueUploader(AccountBox accountBox, IPersistenceController persistenceController) {
-        super(accountBox, persistenceController);
+    public QueueUploader(IClient client, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> persistenceController, IPersistenceController entityFactory) {
+        super(client, entityFactory, persistenceController);
         uploadQ = new LinkedBlockingDeque<>(20);
     }
 

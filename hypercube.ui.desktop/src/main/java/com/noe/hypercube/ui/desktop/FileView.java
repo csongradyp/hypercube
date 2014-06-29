@@ -1,17 +1,16 @@
 package com.noe.hypercube.ui.desktop;
 
+import com.noe.hypercube.observer.local.storage.LocalStorageObserver;
 import com.noe.hypercube.ui.desktop.event.BreadCrumbEventHandler;
 import com.noe.hypercube.ui.desktop.event.DriveMouseEventHandler;
 import com.noe.hypercube.ui.desktop.event.FileViewKeyEventHandler;
 import com.noe.hypercube.ui.desktop.event.FileViewMouseEventHandler;
 import com.noe.hypercube.ui.desktop.factory.FormattedTableCellFactory;
 import com.noe.hypercube.ui.desktop.factory.StorageButtonFactory;
-import com.noe.hypercube.ui.desktop.observer.LocalStorageObserver;
 import com.noe.hypercube.ui.desktop.util.FileSizeCalculator;
 import com.noe.hypercube.ui.desktop.util.NavigationUtil;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -82,7 +81,7 @@ public class FileView extends VBox implements Initializable {
         setupRemoteDrives();
         setupFileTableView();
         breadcrumb.setOnCrumbAction(new BreadCrumbEventHandler(table));
-        observeRemovableDrives();
+//        observeRemovableDrives();
     }
 
     private void setupRemoteDrives() {
@@ -132,22 +131,22 @@ public class FileView extends VBox implements Initializable {
         localDrives.setOnMouseClicked(new DriveMouseEventHandler(table, breadcrumb));
     }
 
-    private void observeRemovableDrives() {
-        storageObserver = new LocalStorageObserver();
-        storageObserver.onStorageAttachDetection(newRoot -> {
-            ToggleButton driveButton = StorageButtonFactory.create(newRoot, new DriveMouseEventHandler(table, breadcrumb));
-            Platform.runLater(() -> removableDrives.getButtons().add(driveButton));
-        });
-        storageObserver.onStorageDetachDetection(storage -> {
-            ObservableList<ToggleButton> buttons = removableDrives.getButtons();
-            for (ToggleButton button : buttons) {
-                if (button.getText().contains(storage.toString())) {
-                    Platform.runLater(() -> buttons.remove(button));
-                }
-            }
-        });
-        storageObserver.start();
-    }
+//    private void observeRemovableDrives() {
+//        storageObserver = new LocalStorageObserver();
+//        storageObserver.onStorageAttachDetection(newRoot -> {
+//            ToggleButton driveButton = StorageButtonFactory.create(newRoot, new DriveMouseEventHandler(table, breadcrumb));
+//            Platform.runLater(() -> removableDrives.getButtons().add(driveButton));
+//        });
+//        storageObserver.onStorageDetachDetection(storage -> {
+//            ObservableList<ToggleButton> buttons = removableDrives.getButtons();
+//            for (ToggleButton button : buttons) {
+//                if (button.getText().contains(storage.toString())) {
+//                    Platform.runLater(() -> buttons.remove(button));
+//                }
+//            }
+//        });
+//        storageObserver.start();
+//    }
 
     public boolean isSelected() {
         return selected;

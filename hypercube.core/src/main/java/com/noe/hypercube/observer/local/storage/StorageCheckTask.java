@@ -1,6 +1,7 @@
-package com.noe.hypercube.ui.desktop.observer;
+package com.noe.hypercube.observer.local.storage;
 
-import com.sun.istack.internal.NotNull;
+import net.engio.mbassy.bus.MBassador;
+import net.engio.mbassy.bus.config.BusConfiguration;
 import org.apache.commons.collections.IteratorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,18 +10,18 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.List;
 
+import static com.noe.hypercube.observer.local.storage.StorageEventType.*;
+
 public class StorageCheckTask implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(StorageCheckTask.class);
 
     private List<Path> lastCheckedRoots;
-    private final List<StorageEventTask> attachTasks;
-    private final List<StorageEventTask> detachTasks;
+    private MBassador<StorageEvent> bus;
 
-    public StorageCheckTask(@NotNull List<StorageEventTask> attachTasks, @NotNull List<StorageEventTask> detachTasks) {
-        this.attachTasks = attachTasks;
-        this.detachTasks = detachTasks;
+    public StorageCheckTask() {
         lastCheckedRoots = IteratorUtils.toList(FileSystems.getDefault().getRootDirectories().iterator());
+        bus = new MBassador<>(BusConfiguration.Default());
     }
 
     @Override
@@ -30,7 +31,7 @@ public class StorageCheckTask implements Runnable {
         for (Path newRoot : newRoots) {
             if (!roots.contains(newRoot)) {
                 LOG.info("Drive has been detected : {}", newRoot);
-                runAttachTasks(newRoot);
+                bus.publishAsync(new StorageEvent(newRoot, ATTACHED));
             } else {
                 roots.remove(newRoot);
             }
@@ -38,21 +39,10 @@ public class StorageCheckTask implements Runnable {
         if (!roots.isEmpty()) {
             for (Path root : roots) {
                 LOG.info("Drive has been removed : {}", root);
-                runDetachTasks(root);
+                bus.publishAsync(new StorageEvent(root, DETACHED));
             }
         }
         lastCheckedRoots = newRoots;
     }
 
-    private void runDetachTasks(Path detachedStorage) {
-        for (StorageEventTask detachTask : detachTasks) {
-            detachTask.run(detachedStorage);
-        }
-    }
-
-    private void runAttachTasks(Path attachedStorage) {
-        for (StorageEventTask attachTask : attachTasks) {
-            attachTask.run(attachedStorage);
-        }
-    }
 }

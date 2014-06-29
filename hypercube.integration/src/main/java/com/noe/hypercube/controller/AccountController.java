@@ -50,7 +50,7 @@ public class AccountController implements IAccountController {
             IClient client = clientMap.get(accountType);
             IMapper mapper = directoryMapperMap.get(accountType);
             FileEntityFactory entityFactory = entityFactoryMap.get(accountType);
-            accountBoxes.put(accountType, new AccountBox(client, mapper, entityFactory));
+            accountBoxes.put(accountType, new AccountBox(client, mapper, entityFactory, persistenceController));
         }
     }
 

@@ -8,7 +8,6 @@ import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.synchronization.presynchronization.LocalFilePreSynchronizer;
 import com.noe.hypercube.synchronization.upstream.IUploader;
-import com.noe.hypercube.synchronization.upstream.QueueUploader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,7 @@ public class LocalObserverFactory {
         final Class<? extends Account> accountType = entity.getAccountType();
         final AccountBox accountBox = accountController.getAccountBox(accountType);
 
-        final IUploader uploader = new QueueUploader(accountBox, persistenceController);
+        final IUploader uploader = accountBox.getUploader();
         final IMapper mapper = accountBox.getMapper();
         validate(accountType, uploader, mapper);
 

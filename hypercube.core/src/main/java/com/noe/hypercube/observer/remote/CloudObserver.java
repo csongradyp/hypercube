@@ -28,7 +28,7 @@ public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
 
     protected CloudObserver(AccountBox<ACCOUNT_TYPE, ENTITY_TYPE, ? extends MappingEntity> accountBox, IPersistenceController persistenceController) {
         this.persistenceController = persistenceController;
-        this.downloader = accountBox.createDownloader(persistenceController);
+        this.downloader = accountBox.getDownloader();
         this.client = accountBox.getClient();
         this.directoryMapper = accountBox.getMapper();
     }

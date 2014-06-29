@@ -13,6 +13,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>net.engio</groupId>
+            <artifactId>mbassador</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
         </dependency>
@@ -24,6 +29,10 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
         </dependency>
 
         <dependency>

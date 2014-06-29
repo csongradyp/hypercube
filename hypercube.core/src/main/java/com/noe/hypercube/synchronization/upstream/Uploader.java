@@ -1,7 +1,6 @@
 package com.noe.hypercube.synchronization.upstream;
 
 import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.FileEntityFactory;
 import com.noe.hypercube.domain.ServerEntry;
@@ -29,10 +28,10 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
     private final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
     private final FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory;
 
-    protected Uploader(AccountBox accountBox, IPersistenceController persistenceController) {
+    protected Uploader(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, IPersistenceController persistenceController, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory) {
         this.persistenceController = persistenceController;
-        client = accountBox.getClient();
-        entityFactory = accountBox.getEntityFactory();
+        this.client = client;
+        this.entityFactory = entityFactory;
     }
 
     @Override
