@@ -1,4 +1,4 @@
-package com.noe.hypercube.observer.local.storage;
+package com.noe.hypercube.event.domain;
 
 
 public enum  StorageEventType {

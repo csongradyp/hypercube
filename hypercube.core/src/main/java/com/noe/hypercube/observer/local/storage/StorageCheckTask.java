@@ -1,7 +1,7 @@
 package com.noe.hypercube.observer.local.storage;
 
-import net.engio.mbassy.bus.MBassador;
-import net.engio.mbassy.bus.config.BusConfiguration;
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.domain.StorageEvent;
 import org.apache.commons.collections.IteratorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,18 +10,17 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.List;
 
-import static com.noe.hypercube.observer.local.storage.StorageEventType.*;
+import static com.noe.hypercube.event.domain.StorageEventType.ATTACHED;
+import static com.noe.hypercube.event.domain.StorageEventType.DETACHED;
 
 public class StorageCheckTask implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(StorageCheckTask.class);
 
     private List<Path> lastCheckedRoots;
-    private MBassador<StorageEvent> bus;
 
     public StorageCheckTask() {
         lastCheckedRoots = IteratorUtils.toList(FileSystems.getDefault().getRootDirectories().iterator());
-        bus = new MBassador<>(BusConfiguration.Default());
     }
 
     @Override
@@ -31,7 +30,7 @@ public class StorageCheckTask implements Runnable {
         for (Path newRoot : newRoots) {
             if (!roots.contains(newRoot)) {
                 LOG.info("Drive has been detected : {}", newRoot);
-                bus.publishAsync(new StorageEvent(newRoot, ATTACHED));
+                EventBus.publish(new StorageEvent(newRoot, ATTACHED));
             } else {
                 roots.remove(newRoot);
             }
@@ -39,7 +38,7 @@ public class StorageCheckTask implements Runnable {
         if (!roots.isEmpty()) {
             for (Path root : roots) {
                 LOG.info("Drive has been removed : {}", root);
-                bus.publishAsync(new StorageEvent(root, DETACHED));
+                EventBus.publish(new StorageEvent(root, DETACHED));
             }
         }
         lastCheckedRoots = newRoots;

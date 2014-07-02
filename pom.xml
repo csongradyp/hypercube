@@ -18,6 +18,7 @@
         <module>hypercube.ui.tray</module>
         <module>hypercube.integration</module>
         <module>Hypercube Commander</module>
+        <module>hypercube.event</module>
     </modules>
 
     <properties>

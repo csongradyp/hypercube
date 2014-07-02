@@ -13,8 +13,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.engio</groupId>
-            <artifactId>mbassador</artifactId>
+            <groupId>com.noe.hypercube</groupId>
+            <artifactId>hypercube.event</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
