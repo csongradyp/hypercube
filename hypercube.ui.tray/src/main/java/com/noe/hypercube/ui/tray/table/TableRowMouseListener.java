@@ -1,8 +1,6 @@
 package com.noe.hypercube.ui.tray.table;
 
 
-import com.noe.hypercube.ui.data.EntryInfoHolder;
-
 import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -27,7 +25,7 @@ public class TableRowMouseListener implements MouseListener {
             JTable table = (JTable)source;
             int selectedRow = table.getSelectedRow();
             String tableName = table.getName();
-            EntryInfoHolder holder;
+//            EntryInfoHolder holder;
             switch (tableName) {
                 case DROPBOX:
 //                    holder = (EntryInfoHolder) DbCache.getInstance().getDbxCacheEntries().get(selectedRow);

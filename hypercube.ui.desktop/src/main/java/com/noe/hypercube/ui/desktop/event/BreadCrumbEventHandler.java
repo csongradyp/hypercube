@@ -1,11 +1,12 @@
 package com.noe.hypercube.ui.desktop.event;
 
+import com.noe.hypercube.ui.desktop.domain.File;
+import com.noe.hypercube.ui.desktop.domain.LocalFile;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
 import org.controlsfx.control.BreadCrumbBar;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,23 +15,24 @@ import static com.noe.hypercube.ui.desktop.util.NavigationUtil.navigateTo;
 
 public class BreadCrumbEventHandler implements EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> {
 
-    private TableView<File> tableLeft;
+    private TableView<File> table;
 
-    public BreadCrumbEventHandler( TableView<File> tableLeft ) {
-        this.tableLeft = tableLeft;
+    public BreadCrumbEventHandler(TableView<File> table) {
+        this.table = table;
     }
 
-    @Override public void handle( BreadCrumbBar.BreadCrumbActionEvent<String> event ) {
+    @Override
+    public void handle(BreadCrumbBar.BreadCrumbActionEvent<String> event) {
         TreeItem<String> selectedCrumb = event.getSelectedCrumb();
         List<String> folders = new ArrayList<>();
-        while ( selectedCrumb != null ) {
-            folders.add( 0, selectedCrumb.getValue() );
+        while (selectedCrumb != null) {
+            folders.add(0, selectedCrumb.getValue());
             selectedCrumb = selectedCrumb.getParent();
         }
         String path = "";
-        for ( String folder : folders ) {
+        for (String folder : folders) {
             path += folder + SEPARATOR;
         }
-        navigateTo(tableLeft, (BreadCrumbBar<String>) event.getSource(), new File( path ) );
+        navigateTo(table, (BreadCrumbBar<String>) event.getSource(), new LocalFile(path));
     }
 }

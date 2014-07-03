@@ -1,14 +1,16 @@
 package com.noe.hypercube.ui.desktop;
 
 import com.noe.hypercube.observer.local.storage.LocalStorageObserver;
+import com.noe.hypercube.ui.desktop.domain.File;
+import com.noe.hypercube.ui.desktop.domain.IFile;
+import com.noe.hypercube.ui.desktop.domain.LocalFile;
 import com.noe.hypercube.ui.desktop.event.BreadCrumbEventHandler;
-import com.noe.hypercube.ui.desktop.event.DriveMouseEventHandler;
+import com.noe.hypercube.ui.desktop.event.LocalStorageMouseEventHandler;
 import com.noe.hypercube.ui.desktop.event.FileViewKeyEventHandler;
 import com.noe.hypercube.ui.desktop.event.FileViewMouseEventHandler;
 import com.noe.hypercube.ui.desktop.factory.FormattedTableCellFactory;
 import com.noe.hypercube.ui.desktop.factory.StorageButtonFactory;
 import com.noe.hypercube.ui.desktop.util.FileSizeCalculator;
-import com.noe.hypercube.ui.desktop.util.NavigationUtil;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXML;
@@ -25,7 +27,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.controlsfx.control.BreadCrumbBar;
 import org.controlsfx.control.SegmentedButton;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.FileSystems;
@@ -96,7 +97,7 @@ public class FileView extends VBox implements Initializable {
 
     private void setupFileTableView() {
         FileViewKeyEventHandler keyEventHandlerRight = new FileViewKeyEventHandler(table, breadcrumb);
-        keyEventHandlerRight.init(new File("c:/"));
+        keyEventHandlerRight.init(new LocalFile( "c:/" ));
         table.setOnKeyPressed(keyEventHandlerRight);
         table.setOnMouseClicked(new FileViewMouseEventHandler(breadcrumb));
         Platform.runLater(() -> {
@@ -110,31 +111,31 @@ public class FileView extends VBox implements Initializable {
         fileSizeColumn.setCellFactory(new FormattedTableCellFactory<>(TextAlignment.RIGHT));
         fileSizeColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper(isStepBack(param) ? "" : FileSizeCalculator.calculate(param.getValue())));
 
-        extColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper(param.getValue().isFile() ? FilenameUtils.getExtension(param.getValue().getName()) : ""));
+        extColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper(!param.getValue().isDirectory() ? FilenameUtils.getExtension(param.getValue().getName()) : ""));
 
         dateColumnRight.setCellValueFactory(param -> new ReadOnlyObjectWrapper(isStepBack(param) ? "" : new Date(param.getValue().lastModified()).toString()));
     }
 
     private boolean isStepBack(TableColumn.CellDataFeatures<File, String> param) {
-        return param.getValue().getName().equals(NavigationUtil.TO_PARENT_PLACEHOLDER);
+        return param.getValue().isStepBack();
     }
 
     private void setupLocalDrives() {
         List<ToggleButton> drives = new ArrayList<>(5);
         Iterable<Path> rootDirectories = FileSystems.getDefault().getRootDirectories();
         for (Path root : rootDirectories) {
-            ToggleButton button = StorageButtonFactory.create(root, new DriveMouseEventHandler(table, breadcrumb));
+            ToggleButton button = StorageButtonFactory.create(root, new LocalStorageMouseEventHandler(table, breadcrumb));
             drives.add(button);
         }
         localDrives.getButtons().addAll(drives);
         localDrives.getButtons().get(0).setSelected(true);
-        localDrives.setOnMouseClicked(new DriveMouseEventHandler(table, breadcrumb));
+        localDrives.setOnMouseClicked(new LocalStorageMouseEventHandler(table, breadcrumb));
     }
 
 //    private void observeRemovableDrives() {
 //        storageObserver = new LocalStorageObserver();
 //        storageObserver.onStorageAttachDetection(newRoot -> {
-//            ToggleButton driveButton = StorageButtonFactory.create(newRoot, new DriveMouseEventHandler(table, breadcrumb));
+//            ToggleButton driveButton = StorageButtonFactory.create(newRoot, new LocalStorageMouseEventHandler(table, breadcrumb));
 //            Platform.runLater(() -> removableDrives.getButtons().add(driveButton));
 //        });
 //        storageObserver.onStorageDetachDetection(storage -> {
@@ -160,5 +161,15 @@ public class FileView extends VBox implements Initializable {
     public Path getCurrentPath() {
         String current = breadcrumb.getSelectedCrumb().getValue();
         return Paths.get(current);
+    }
+
+    public Path getLocation() {
+        IFile IFile = table.getSelectionModel().getSelectedItem();
+        return IFile.getPath();
+    }
+
+    public Path getActiveDirectory() {
+        IFile IFile = table.getSelectionModel().getSelectedItem();
+        return IFile.getPath().getParent();
     }
 }

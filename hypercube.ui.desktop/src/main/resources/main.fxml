@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.noe.hypercube.ui.desktop.FileManager?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="main" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.noe.hypercube.ui.desktop.Controller">
+    <children>
+        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
+            <children>
+                <FileManager />
+            </children>
+        </VBox>
+        <!--<FileManager />-->
+        <ToolBar id="buttonBox" focusTraversable="false" prefHeight="25.0" prefWidth="800.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+            <items>
+                <Button fx:id="refresh" mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false" />
+                <Separator orientation="VERTICAL" prefHeight="20.0" />
+                <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false" />
+                <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false" />
+                <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false" />
+
+            </items>
+        </ToolBar>
+        <MenuBar maxHeight="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <menus>
+                <Menu mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Close">
+                            <accelerator>
+                                <KeyCodeCombination alt="DOWN" code="F4" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                            </accelerator>
+                        </MenuItem>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Delete" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="About" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </children>
+</AnchorPane>

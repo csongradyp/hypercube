@@ -42,23 +42,6 @@ public class Controller implements Initializable {
     @FXML
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-//        FileListKeyEventHandler rightHandler = new FileListKeyEventHandler(tableRight, breadcrumbRight);
-//        rightHandler.init(new File("c:\\"));
-//        tableRight.setOnKeyPressed(rightHandler);
-//        FileListKeyEventHandler leftHandler = new FileListKeyEventHandler(tableLeft, breadcrumbLeft);
-//        leftHandler.init(new File("d:\\"));
-//        tableLeft.setOnKeyPressed(leftHandler);
-//
-//        filenameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-//        filesizeColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper(FileSizeCalculator.calculate(param.getValue())));
-//        extColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper(param.getValue().isFile() ? FilenameUtils.getExtension(param.getValue().getName()) : ""));
-//        dateColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper(new Date(param.getValue().lastModified()).toString()));
-//
-//        filenameColumnRight.setCellValueFactory(new PropertyValueFactory<>("name"));
-//        filesizeColumnRight.setCellValueFactory(param -> new ReadOnlyObjectWrapper(FileSizeCalculator.calculate(param.getValue())));
-//        extColumnRight.setCellValueFactory(param -> new ReadOnlyObjectWrapper(param.getValue().isFile() ? FilenameUtils.getExtension(param.getValue().getName()) : ""));
-//        dateColumnRight.setCellValueFactory(param -> new ReadOnlyObjectWrapper(new Date(param.getValue().lastModified()).toString()));
-//
-//        Platform.runLater(tableLeft::requestFocus);
+
     }
 }
