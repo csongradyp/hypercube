@@ -33,4 +33,8 @@ public class LocalFile extends File {
         return file.lastModified();
     }
 
+    @Override public boolean isRoot() {
+        return file.getParentFile().getParentFile() == null;
+    }
+
 }

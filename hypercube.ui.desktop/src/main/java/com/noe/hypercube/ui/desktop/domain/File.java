@@ -51,4 +51,8 @@ public abstract class File implements IFile {
     public boolean isSelected() {
         return selected;
     }
+
+    @Override public String toString() {
+        return path.toString();
+    }
 }

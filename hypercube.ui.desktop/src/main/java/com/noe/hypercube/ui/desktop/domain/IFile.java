@@ -25,4 +25,6 @@ public interface IFile {
     void setSelected(boolean selected);
 
     boolean isSelected();
+
+    boolean isRoot();
 }

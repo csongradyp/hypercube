@@ -1,8 +1,7 @@
 package com.noe.hypercube.ui.desktop.util;
 
 
-import com.noe.hypercube.ui.desktop.domain.File;
-
+import com.noe.hypercube.ui.desktop.domain.IFile;
 
 public final class FileSizeCalculator {
 
@@ -11,7 +10,7 @@ public final class FileSizeCalculator {
     private FileSizeCalculator() {
     }
 
-    public static String calculate(final File file) {
+    public static String calculate(final IFile file) {
         if (!file.isDirectory()) {
             long length = file.size();
             return humanReadableByteCount(length, false);

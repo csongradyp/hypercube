@@ -35,4 +35,8 @@ public class RemoteFile extends File {
     public long lastModified() {
         return lastModified.getTime();
     }
+
+    @Override public boolean isRoot() {
+        return false;
+    }
 }

@@ -14,14 +14,14 @@
         <ToolBar fx:id="drives" prefHeight="30.0" prefWidth="400.0" VBox.vgrow="NEVER">
             <items>
                 <Label text="Locals" />
-                <SegmentedButton fx:id="localDrives" />
+                <SegmentedButton fx:id="localDrives" onMouseClicked="#onLocalDriveMouseClicked" />
                 <SegmentedButton fx:id="removableDrives" />
                 <Label text="Remotes" />
                 <SegmentedButton fx:id="remoteDrives" />
             </items>
         </ToolBar>
-        <BreadCrumbBar fx:id="breadcrumb" focusTraversable="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="20.0" VBox.vgrow="NEVER" />
-        <TableView fx:id="table" prefHeight="450.0" prefWidth="400.0" VBox.vgrow="ALWAYS">
+        <BreadCrumbBar fx:id="breadcrumb" onCrumbAction="#onCrumbAction" focusTraversable="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="20.0" VBox.vgrow="NEVER" />
+        <TableView fx:id="table" onMouseClicked="#onMouseClicked" onKeyPressed="#onKeyPressed" prefHeight="450.0" prefWidth="400.0" VBox.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="fileNameColumn" minWidth="100.0" prefWidth="200.0" text="Name" />
                 <TableColumn fx:id="extColumn" editable="false" maxWidth="500.0" minWidth="45.0" prefWidth="55.0" text="Ext." />
@@ -32,6 +32,6 @@
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
         </TableView>
-        <Label prefWidth="400.0" VBox.vgrow="NEVER" />
+        <Label fx:id="metaDataInfo" prefWidth="400.0" VBox.vgrow="NEVER" />
     </children>
 </fx:root>
