@@ -1,5 +1,8 @@
 package com.noe.hypercube.ui.desktop.domain;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 import java.nio.file.Path;
 
 public abstract class File implements IFile {
@@ -8,10 +11,11 @@ public abstract class File implements IFile {
 
     protected Path path;
     private boolean stepBack;
-    private boolean selected;
+    private final SimpleBooleanProperty selected;
 
-    protected File( Path path ) {
+    protected File(Path path) {
         this.path = path;
+        selected = new SimpleBooleanProperty(false);
     }
 
     @Override
@@ -20,7 +24,7 @@ public abstract class File implements IFile {
     }
 
     @Override
-    public void setStepBack( boolean stepBack ) {
+    public void setStepBack(boolean stepBack) {
         this.stepBack = stepBack;
     }
 
@@ -36,23 +40,29 @@ public abstract class File implements IFile {
 
     @Override
     public String getName() {
-        if(stepBack) {
+        if (stepBack) {
             return PARENT_DIR_PLACEHOLDER;
         }
         return path.getFileName().toString();
     }
 
     @Override
-    public void setSelected( boolean selected ) {
-        this.selected = selected;
+    public BooleanProperty getSelectionProperty() {
+        return selected;
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        this.selected.set(selected);
     }
 
     @Override
     public boolean isSelected() {
-        return selected;
+        return selected.get();
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return path.toString();
     }
 }

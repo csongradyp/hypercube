@@ -1,5 +1,7 @@
 package com.noe.hypercube.ui.desktop.domain;
 
+import javafx.beans.property.BooleanProperty;
+
 import java.nio.file.Path;
 
 public interface IFile {
@@ -21,6 +23,8 @@ public interface IFile {
     long size();
 
     long lastModified();
+
+    BooleanProperty getSelectionProperty();
 
     void setSelected(boolean selected);
 

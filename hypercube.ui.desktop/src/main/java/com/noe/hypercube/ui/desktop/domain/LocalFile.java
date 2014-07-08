@@ -13,6 +13,16 @@ public class LocalFile extends File {
         this(new java.io.File( path ));
     }
 
+    public LocalFile(final String path, final boolean stepBack) {
+        this(path);
+        setStepBack(stepBack);
+    }
+
+    public LocalFile( java.io.File parentFile, boolean stepBack ) {
+        this( parentFile);
+        setStepBack( stepBack );
+    }
+
     @Override
     public boolean isLocal() {
         return true;

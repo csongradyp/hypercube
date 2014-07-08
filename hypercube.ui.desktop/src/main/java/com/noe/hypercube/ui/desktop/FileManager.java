@@ -1,5 +1,7 @@
 package com.noe.hypercube.ui.desktop;
 
+import com.noe.hypercube.ui.desktop.factory.DialogFactory;
+import com.noe.hypercube.ui.desktop.util.ProgressAwareInputStream;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -9,10 +11,14 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ResourceBundle;
 
 public class FileManager extends VBox implements Initializable {
@@ -62,9 +68,18 @@ public class FileManager extends VBox implements Initializable {
     public void onCopy(ActionEvent e) {
         FileView activeFileView = getActiveFileView();
         FileView inactiveFileView = getInactiveFileView();
-//        FileUtils.copyFile(  );
-        Path location = activeFileView.getLocation();
-        System.out.println(location + " to " + inactiveFileView.getActiveDirectory());
+        Path source = activeFileView.getFocusedFile();
+        Path destination = Paths.get(inactiveFileView.getLocation().toString(), source.getFileName().toString());
+        File localFile = source.toFile();
+        try {
+            ProgressAwareInputStream progressAwareInputStream = new ProgressAwareInputStream(new FileInputStream(localFile), localFile.length(), null);
+            Files.copy(progressAwareInputStream, destination, StandardCopyOption.REPLACE_EXISTING);
+            DialogFactory.createProgressDialog(progressAwareInputStream).show();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+        System.out.println(source + " to " + destination);
     }
 
     @FXML
@@ -103,14 +118,14 @@ public class FileManager extends VBox implements Initializable {
     }
 
     private FileView getActiveFileView() {
-        if (leftFileView.isSelected()) {
+        if (leftFileView.isActive()) {
             return leftFileView;
         }
         return rightFileView;
     }
 
     private FileView getInactiveFileView() {
-        if (!leftFileView.isSelected()) {
+        if (!leftFileView.isActive()) {
             return leftFileView;
         }
         return rightFileView;

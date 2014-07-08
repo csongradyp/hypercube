@@ -12,7 +12,6 @@
                 <FileManager />
             </children>
         </VBox>
-        <!--<FileManager />-->
         <ToolBar id="buttonBox" focusTraversable="false" prefHeight="25.0" prefWidth="800.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
             <items>
                 <Button fx:id="refresh" mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false" />
