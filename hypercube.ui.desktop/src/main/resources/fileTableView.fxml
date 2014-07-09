@@ -9,7 +9,7 @@
 <?import org.controlsfx.control.BreadCrumbBar?>
 <?import org.controlsfx.control.SegmentedButton?>
 
-<fx:root type="javafx.scene.control.TableView" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="javafx.scene.control.TableView" VBox.vgrow="ALWAYS" stylesheets="style/fileTableView.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <columns>
         <TableColumn fx:id="fileNameColumn" editable="false" minWidth="100.0" prefWidth="200.0" text="Name"/>
         <TableColumn fx:id="extColumn" editable="false" maxWidth="80.0" minWidth="45.0" prefWidth="55.0" text="Ext."/>

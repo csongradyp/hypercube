@@ -62,6 +62,11 @@ public abstract class File implements IFile {
     }
 
     @Override
+    public void switchSelection() {
+        selected.set( !selected.get() );
+    }
+
+    @Override
     public String toString() {
         return path.toString();
     }

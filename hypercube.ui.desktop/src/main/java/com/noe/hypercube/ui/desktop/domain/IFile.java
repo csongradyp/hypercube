@@ -30,5 +30,7 @@ public interface IFile {
 
     boolean isSelected();
 
+    void switchSelection();
+
     boolean isRoot();
 }

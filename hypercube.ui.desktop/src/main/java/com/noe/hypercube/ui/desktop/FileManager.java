@@ -48,9 +48,9 @@ public class FileManager extends VBox implements Initializable {
     private Button download;
 
     public FileManager() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fileManager.fxml"));
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource( "fileManager.fxml" ));
+        fxmlLoader.setRoot( this );
+        fxmlLoader.setController( this );
         try {
             fxmlLoader.load();
         } catch (IOException exception) {
@@ -59,9 +59,9 @@ public class FileManager extends VBox implements Initializable {
     }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        leftFileView.setLocation(Paths.get("C:"));
-        rightFileView.setLocation(Paths.get("C:"));
+    public void initialize( URL location, ResourceBundle resources ) {
+        leftFileView.setLocation( Paths.get( "C:" ) );
+        rightFileView.setLocation( Paths.get( "C:" ) );
     }
 
     @FXML
@@ -69,17 +69,17 @@ public class FileManager extends VBox implements Initializable {
         FileView activeFileView = getActiveFileView();
         FileView inactiveFileView = getInactiveFileView();
         Path source = activeFileView.getFocusedFile();
-        Path destination = Paths.get(inactiveFileView.getLocation().toString(), source.getFileName().toString());
+        Path destination = Paths.get( inactiveFileView.getLocation().toString(), source.getFileName().toString() );
         File localFile = source.toFile();
         try {
-            ProgressAwareInputStream progressAwareInputStream = new ProgressAwareInputStream(new FileInputStream(localFile), localFile.length(), null);
-            Files.copy(progressAwareInputStream, destination, StandardCopyOption.REPLACE_EXISTING);
-            DialogFactory.createProgressDialog(progressAwareInputStream).show();
-        } catch (IOException e1) {
+            ProgressAwareInputStream progressAwareInputStream = new ProgressAwareInputStream( new FileInputStream( localFile ), localFile.length(), null );
+            Files.copy( progressAwareInputStream, destination, StandardCopyOption.REPLACE_EXISTING );
+            DialogFactory.createProgressDialog( progressAwareInputStream ).show();
+        } catch ( IOException e1 ) {
             e1.printStackTrace();
         }
 
-        System.out.println(source + " to " + destination);
+        System.out.println( source + " to " + destination );
     }
 
     @FXML
@@ -118,14 +118,14 @@ public class FileManager extends VBox implements Initializable {
     }
 
     private FileView getActiveFileView() {
-        if (leftFileView.isActive()) {
+        if(leftFileView.isActive()) {
             return leftFileView;
         }
         return rightFileView;
     }
 
     private FileView getInactiveFileView() {
-        if (!leftFileView.isActive()) {
+        if(!leftFileView.isActive()) {
             return leftFileView;
         }
         return rightFileView;

@@ -18,7 +18,7 @@ public class FormattedTableCellFactory<S, T> implements Callback<TableColumn<S, 
         this.alignment = alignment;
     }
 
-    public TextAlignment getAlignment() {
+     public TextAlignment getAlignment() {
         return alignment;
     }
 
@@ -35,16 +35,15 @@ public class FormattedTableCellFactory<S, T> implements Callback<TableColumn<S, 
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
     public TableCell<S, T> call( TableColumn<S, T> p ) {
         TableCell<S, T> cell = new TableCell<S, T>() {
 
             @Override
-            public void updateItem( Object item, boolean empty ) {
+            public void updateItem( T item, boolean empty ) {
                 if ( item == getItem() ) {
                     return;
                 }
-                super.updateItem( (T)item, empty );
+                super.updateItem( item, empty );
                 if ( item == null ) {
                     super.setText( null );
                     super.setGraphic( null );
