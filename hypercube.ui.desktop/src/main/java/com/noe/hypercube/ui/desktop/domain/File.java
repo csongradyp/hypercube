@@ -11,11 +11,11 @@ public abstract class File implements IFile {
 
     protected Path path;
     private boolean stepBack;
-    private final SimpleBooleanProperty selected;
+    private final SimpleBooleanProperty marked;
 
     protected File(Path path) {
         this.path = path;
-        selected = new SimpleBooleanProperty(false);
+        marked = new SimpleBooleanProperty(false);
     }
 
     @Override
@@ -39,6 +39,22 @@ public abstract class File implements IFile {
     }
 
     @Override
+    public Path getParentDirectory() {
+        Path currentDir = path.getParent();
+        if ( !stepBack && currentDir != null) {
+            if( isRootDirectory( currentDir ) ) {
+                 return currentDir;
+             }
+             return currentDir.getParent();
+         }
+        return path;
+    }
+
+    private boolean isRootDirectory( Path parentDir ) {
+        return parentDir.getParent() == null;
+    }
+
+    @Override
     public String getName() {
         if (stepBack) {
             return PARENT_DIR_PLACEHOLDER;
@@ -47,23 +63,23 @@ public abstract class File implements IFile {
     }
 
     @Override
-    public BooleanProperty getSelectionProperty() {
-        return selected;
+    public BooleanProperty getMarkedProperty() {
+        return marked;
     }
 
     @Override
-    public void setSelected(boolean selected) {
-        this.selected.set(selected);
+    public void setMarked( boolean marked ) {
+        this.marked.set( marked );
     }
 
     @Override
-    public boolean isSelected() {
-        return selected.get();
+    public boolean isMarked() {
+        return marked.get();
     }
 
     @Override
-    public void switchSelection() {
-        selected.set( !selected.get() );
+    public void mark() {
+        marked.set( !marked.get() );
     }
 
     @Override

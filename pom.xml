@@ -16,8 +16,8 @@
         <module>hypercube.googledrive</module>
         <module>hypercube.ui</module>
         <module>hypercube.ui.tray</module>
+        <module>hypercube.ui.desktop</module>
         <module>hypercube.integration</module>
-        <module>Hypercube Commander</module>
         <module>hypercube.event</module>
     </modules>
 
@@ -63,11 +63,6 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-jdbc</artifactId>
-                <version>${springVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-beans</artifactId>
                 <version>${springVersion}</version>
             </dependency>
 
@@ -146,6 +141,12 @@
                 <groupId>net.engio</groupId>
                 <artifactId>mbassador</artifactId>
                 <version>1.1.10</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.ini4j</groupId>
+                <artifactId>ini4j</artifactId>
+                <version>0.5.2</version>
             </dependency>
 
         </dependencies>

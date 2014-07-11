@@ -4,6 +4,7 @@ import com.noe.hypercube.ui.desktop.domain.IFile;
 import com.noe.hypercube.ui.desktop.domain.LocalFile;
 import com.noe.hypercube.ui.desktop.factory.FileCellFactory;
 import com.noe.hypercube.ui.desktop.factory.IconFactory;
+import com.noe.hypercube.ui.desktop.util.DateUtil;
 import com.noe.hypercube.ui.desktop.util.FileSizeCalculator;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -22,8 +23,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.TextAlignment;
 import org.apache.commons.io.FilenameUtils;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import java.io.IOException;
 import java.net.URL;
@@ -66,36 +65,30 @@ public class FileTableView extends TableView<IFile> implements Initializable {
             }
         });
 
-        fileNameColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-        fileNameColumn.setCellFactory(new FileCellFactory(item -> {
+        fileNameColumn.setCellValueFactory(file -> new ReadOnlyObjectWrapper<>(file.getValue()));
+        fileNameColumn.setCellFactory(new FileCellFactory(file -> {
             HBox box = new HBox(10);
-            ImageView imageview = new ImageView(IconFactory.getFileIcon(item));
-            Label label = new Label(item.getName());
+            ImageView imageview = new ImageView(IconFactory.getFileIcon(file));
+            Label label = new Label(file.getName());
             box.getChildren().addAll(imageview, label);
-            if (item.isSelected()) {
+            if (file.isMarked()) {
                 label.getStyleClass().add("table-row-marked");
                 getStyleClass().add("table-row-marked");
             } else {
                 label.getStyleClass().remove("table-row-marked");
                 getStyleClass().remove("table-row-marked");
             }
-
             return box;
         }));
 
-        fileSizeColumn.setCellFactory(new FileCellFactory(TextAlignment.RIGHT, item -> item.isStepBack() ? "" : FileSizeCalculator.calculate(item)));
+        fileSizeColumn.setCellFactory(new FileCellFactory(TextAlignment.RIGHT, file -> file.isStepBack() ? "" : FileSizeCalculator.calculate(file)));
         fileSizeColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 
-        extColumn.setCellFactory(new FileCellFactory(TextAlignment.CENTER, param -> !param.isDirectory() ? FilenameUtils.getExtension(param.getName()) : ""));
         extColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+        extColumn.setCellFactory(new FileCellFactory(TextAlignment.CENTER, file -> !file.isDirectory() ? FilenameUtils.getExtension(file.getName()) : ""));
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy.MM.dd  HH:mm:ss");
-        dateColumn.setCellFactory(new FileCellFactory(TextAlignment.RIGHT, item -> dateTimeFormatter.print(item.lastModified())));
         dateColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-    }
-
-    private boolean isStepBack(IFile param) {
-        return param.isStepBack();
+        dateColumn.setCellFactory(new FileCellFactory(TextAlignment.RIGHT, file -> DateUtil.format(file.lastModified())));
     }
 
     public void updateLocation(Path dir) {

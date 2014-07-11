@@ -1,0 +1,52 @@
+.table-row-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+.table-row-cell:empty:hover {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.table-row-cell:odd:filled:focused:selected {
+    -fx-background-color: -fx-table-cell-border-color, derive(-fx-control-inner-background,-5%);
+    -fx-background-insets: 0, 0 0 1 0;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #d0d0d0;
+    -fx-text-fill: #ffffff;
+    -fx-alternative-column-fill-visible: false;
+}
+
+/* Selected table row when marked and selected */
+.table-row-cell:selected .table-row-marked {
+    -fx-background-color: gray;
+    /*-fx-text-fill: #ffffff;*/
+    -fx-border-width: 0;
+    -fx-alternative-row-fill-visible: false
+}
+
+/* Selected row when table focused */
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: steelblue;
+    -fx-border-width: 0;
+    -fx-background: -fx-accent;
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
+/* Selected row when table not focused */
+.table-row-cell:filled:focused:selected {
+    /*-fx-background-color: #9fb3cd;*/
+    /*-fx-background-insets: 0, 1, 2;*/
+    /*-fx-background: -fx-accent;*/
+    /*-fx-text-fill: -fx-selection-bar-text;*/
+    -fx-background-color: transparent;
+    -fx-border-color: inherit;
+    -fx-border-width: 0;
+}
+
+.table-row-marked {
+    -fx-text-fill: red;
+}

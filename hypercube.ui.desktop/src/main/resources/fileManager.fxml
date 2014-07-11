@@ -7,8 +7,8 @@
 <fx:root type="javafx.scene.layout.VBox" VBox.vgrow="ALWAYS" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <HBox fx:id="doubleView" VBox.vgrow="ALWAYS">
         <children>
-            <FileView fx:id="leftFileView" active="true" focusTraversable="false"/>
-            <FileView fx:id="rightFileView" focusTraversable="false"/>
+            <FileView fx:id="leftFileView" side="left" active="true" focusTraversable="false"/>
+            <FileView fx:id="rightFileView" side="right" focusTraversable="false"/>
         </children>
     </HBox>
     <HBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" VBox.vgrow="NEVER">

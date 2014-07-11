@@ -18,19 +18,21 @@ public interface IFile {
 
     Path getParentFile();
 
+    Path getParentDirectory();
+
     String getName();
 
     long size();
 
     long lastModified();
 
-    BooleanProperty getSelectionProperty();
+    BooleanProperty getMarkedProperty();
 
-    void setSelected(boolean selected);
+    void setMarked(boolean selected);
 
-    boolean isSelected();
+    boolean isMarked();
 
-    void switchSelection();
+    void mark();
 
     boolean isRoot();
 }

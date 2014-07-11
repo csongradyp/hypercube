@@ -29,45 +29,43 @@ public class FileCellFactory implements Callback<TableColumn<IFile, IFile>, Tabl
     }
 
     @Override
-    public TableCell<IFile, IFile> call(TableColumn<IFile, IFile> iFileIFileTableColumn) {
-        return new TableCell<IFile, IFile>() {
+    public TableCell<IFile, IFile> call(TableColumn<IFile, IFile> tableColumn) {
+        TableCell<IFile, IFile> tableCell = new TableCell<IFile, IFile>() {
             @Override
-            public void updateItem(IFile item, boolean empty) {
-                if ( item == getItem() ) {
-                    return;
-                }
-                super.updateItem(item, empty);
-                if (item != null && !empty) {
-                    item.getSelectionProperty().addListener((observable, oldValue, newValue) -> updateItem(item, false));
-                    if (cellText != null) {
-                        setText(cellText.getCellText(item));
+            public void updateItem( IFile file, boolean empty ) {
+                super.updateItem( file, empty );
+                if ( file != null && !empty ) {
+                    file.getMarkedProperty().addListener( ( observable, oldValue, newValue ) -> updateItem( file, false ) );
+                    if ( cellText != null ) {
+                        setText( cellText.getCellText( file ) );
                     }
-                    if(cellGraphic != null) {
-                        setGraphic(cellGraphic.getCellGraphic(item));
+                    if ( cellGraphic != null ) {
+                        setGraphic( cellGraphic.getCellGraphic( file ) );
                     }
-                    if (item.isSelected()) {
-                        getStyleClass().add("table-row-marked");
+                    if ( file.isMarked() ) {
+                        getStyleClass().add( "table-row-marked" );
                     } else {
-                        getStyleClass().remove("table-row-marked");
+                        getStyleClass().remove( "table-row-marked" );
                     }
-                    setTextAlignment(alignment);
+                    setTextAlignment( alignment );
                     switch ( alignment ) {
-                        case CENTER:
-                            setAlignment( Pos.CENTER );
-                            break;
-                        case RIGHT:
-                            setAlignment( Pos.CENTER_RIGHT );
-                            break;
-                        default:
-                            setAlignment( Pos.CENTER_LEFT );
-                            break;
+                    case CENTER:
+                        setAlignment( Pos.CENTER );
+                        break;
+                    case RIGHT:
+                        setAlignment( Pos.CENTER_RIGHT );
+                        break;
+                    default:
+                        setAlignment( Pos.CENTER_LEFT );
+                        break;
                     }
                 } else {
-                    setText(null);
-                    setGraphic(null);
+                    setText( null );
+                    setGraphic( null );
                 }
             }
         };
+        return tableCell;
     }
 
     public interface CellText {
@@ -78,7 +76,4 @@ public class FileCellFactory implements Callback<TableColumn<IFile, IFile>, Tabl
         public Node getCellGraphic(IFile item);
     }
 
-    public void setCellGraphic(CellGraphic cellGraphic) {
-        this.cellGraphic = cellGraphic;
-    }
 }
