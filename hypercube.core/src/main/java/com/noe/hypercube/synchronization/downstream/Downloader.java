@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.String.format;
 
@@ -31,7 +32,7 @@ public class Downloader implements IDownloader {
     private final FileEntityFactory entityFactory;
     private final BlockingQueue<ServerEntry> downloadQ;
 
-    private boolean stop = false;
+    private AtomicBoolean stop = new AtomicBoolean(false);
 
      public Downloader(IClient client, IMapper directoryMapper, FileEntityFactory entityFactory, IPersistenceController persistenceController) {
          this.client = client;
@@ -48,7 +49,7 @@ public class Downloader implements IDownloader {
 
     @Override
     public void run() {
-        while(!stop) {
+        while(!stop.get()) {
             ServerEntry entry = null;
             try {
                 entry = downloadQ.take();
@@ -72,11 +73,11 @@ public class Downloader implements IDownloader {
     }
 
     public void stop() {
-        stop = true;
+        stop.set(true);
     }
 
     public void restart() {
-        stop = false;
+        stop.set(false);
         run();
     }
 

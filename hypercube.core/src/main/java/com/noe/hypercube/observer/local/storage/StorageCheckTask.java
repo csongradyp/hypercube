@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.noe.hypercube.event.domain.StorageEventType.ATTACHED;
@@ -20,19 +21,24 @@ public class StorageCheckTask implements Runnable {
     private List<Path> lastCheckedRoots;
 
     public StorageCheckTask() {
-        lastCheckedRoots = IteratorUtils.toList(FileSystems.getDefault().getRootDirectories().iterator());
+        Iterable<Path> rootDirectories = getCurrentStorages();
+        lastCheckedRoots = IteratorUtils.toList(rootDirectories.iterator());
     }
 
     @Override
     public void run() {
-        List<Path> roots = lastCheckedRoots;
-        List<Path> newRoots = IteratorUtils.toList(FileSystems.getDefault().getRootDirectories().iterator());
-        for (Path newRoot : newRoots) {
-            if (!roots.contains(newRoot)) {
-                LOG.info("Drive has been detected : {}", newRoot);
-                EventBus.publish(new StorageEvent(newRoot, ATTACHED));
-            } else {
+        final List<Path> roots = lastCheckedRoots;
+        final Iterable<Path> rootDirectories = getCurrentStorages();
+        final List<Path> newRoots = new ArrayList<>();
+
+        for (Path newRoot : rootDirectories) {
+            if (roots.contains(newRoot)) {
+                newRoots.add(newRoot);
                 roots.remove(newRoot);
+            } else {
+                LOG.info("Drive has been detected : {}", newRoot);
+                newRoots.add(newRoot);
+                EventBus.publish(new StorageEvent(newRoot, ATTACHED));
             }
         }
         if (!roots.isEmpty()) {
@@ -42,6 +48,10 @@ public class StorageCheckTask implements Runnable {
             }
         }
         lastCheckedRoots = newRoots;
+    }
+
+    private Iterable<Path> getCurrentStorages() {
+        return FileSystems.getDefault().getRootDirectories();
     }
 
 }
