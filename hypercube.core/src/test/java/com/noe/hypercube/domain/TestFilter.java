@@ -12,7 +12,7 @@ public class TestFilter implements Filter {
     }
 
     public TestFilter() {
-        this(new ArrayList<String>());
+        this(new ArrayList<>());
     }
 
     @Override

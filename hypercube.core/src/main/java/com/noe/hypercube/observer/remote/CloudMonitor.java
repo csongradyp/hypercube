@@ -16,7 +16,7 @@ public class CloudMonitor {
 
     private ScheduledExecutorService executorService;
     private Collection<CloudObserver> cloudObservers;
-    private Long pollInterval;
+    private final Long pollInterval;
 
     public CloudMonitor(Long pollInterval, Collection<CloudObserver> cloudObservers) {
         this.pollInterval = pollInterval;

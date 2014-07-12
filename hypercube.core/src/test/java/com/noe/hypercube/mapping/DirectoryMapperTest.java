@@ -28,7 +28,6 @@ public class DirectoryMapperTest {
     private static final Path[] EXPECTED_REMOTE_DIRS = new Path[]{ Paths.get("/x/y/C"), Paths.get("/g/h/i/B/C") };
     @Mock
     private IPersistenceController mockMappingController;
-    private List<MappingEntity> mappingEntities;
 
     private DirectoryMapper mapper;
 
@@ -39,7 +38,7 @@ public class DirectoryMapperTest {
         mapper.setRemoteDirectoryCollector(new RemoteDirectoryCollector());
         mapper.setLocalDirectoryCollector(new LocalDirectoryCollector());
 
-        mappingEntities = createMappingEntity();
+        List<MappingEntity> mappingEntities = createMappingEntity();
         when(mockMappingController.getMappings(TestMapping.class)).thenReturn(mappingEntities);
     }
 

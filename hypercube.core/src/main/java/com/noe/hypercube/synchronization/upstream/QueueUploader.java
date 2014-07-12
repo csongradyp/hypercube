@@ -23,7 +23,7 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
 
     private static final Logger LOG = LoggerFactory.getLogger(QueueUploader.class);
 
-    private BlockingQueue<UploadEntity> uploadQ;
+    private final BlockingQueue<UploadEntity> uploadQ;
     private boolean stop = false;
 
     public QueueUploader(IClient client, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> persistenceController, IPersistenceController entityFactory) {

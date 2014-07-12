@@ -16,8 +16,8 @@ public class LocalFileListener implements FileAlterationListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalFileListener.class);
 
-    private IMapper mapper;
-    private IUploader uploader;
+    private final IMapper mapper;
+    private final IUploader uploader;
 
     public LocalFileListener(IUploader uploader, IMapper mapper) {
         this.uploader = uploader;

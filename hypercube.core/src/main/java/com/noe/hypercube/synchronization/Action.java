@@ -5,7 +5,7 @@ public enum Action {
 
     ADDED("Added"), REMOVED("Removed"), CHANGED("Changed");
 
-    private String action;
+    private final String action;
 
     private Action(String action) {
         this.action = action;

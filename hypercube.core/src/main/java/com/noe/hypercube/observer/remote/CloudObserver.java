@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 
-public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> implements Runnable {
+class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(CloudObserver.class);
 
@@ -44,8 +44,8 @@ public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
             if (deltas != null && !deltas.isEmpty()) {
                 LOG.debug("Detected {} changes to process on {}", deltas.size(), client.getAccountName());
                 for (ServerEntry deltaEntry : deltas) {
-                    if(isMapped(deltaEntry)) {
-                        LOG.debug("Mapped content found: {}", deltaEntry);
+                    if(isRelevant(deltaEntry)) {
+                        LOG.debug("Relevant content found: {}", deltaEntry);
                         downloader.download(deltaEntry);
                     }
                 }
@@ -55,7 +55,7 @@ public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
         }
     }
 
-    private boolean isMapped(ServerEntry entry) {
+    private boolean isRelevant(ServerEntry entry) {
         Collection<MappingEntity> mappings = persistenceController.getMappings(directoryMapper.getMappingClass());
         for (MappingEntity mapping : mappings) {
             if(overlaps(entry, Paths.get(mapping.getRemoteDir()))) {
@@ -66,7 +66,9 @@ public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     }
 
     private boolean overlaps(ServerEntry entry, Path remoteDir) {
-        return entry.getPath().toString().contains(remoteDir.toString().toLowerCase());
+        String path = entry.getPath().toString();
+        String remotePath = remoteDir.toString();
+        return path.contains(remotePath);
     }
 
     public IDownloader getDownloader() {

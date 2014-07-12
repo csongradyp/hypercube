@@ -8,9 +8,9 @@ import java.nio.file.Path;
 
 public class UploadEntity {
 
-    private File file;
-    private Path remotePath;
-    private Action action;
+    private final File file;
+    private final Path remotePath;
+    private final Action action;
 
     public UploadEntity(File file, Path remotePath, Action action) {
         this.file = file;

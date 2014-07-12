@@ -16,16 +16,16 @@ public class DirectoryConverterTest {
 
     private Path localDir;
     private Path remoteDir;
-    private Path localDirWithSubdirs;
-    private Path remoteDirWithSubDirs;
+    private Path localDirWithSubDirectories;
+    private Path remoteDirWithSubDirectories;
     private TestMapping mapping;
 
     @Before
     public void setUp() {
         localDir = Paths.get("c:/a/b");
-        localDirWithSubdirs = Paths.get("c:/a/b/c/d");
+        localDirWithSubDirectories = Paths.get("c:/a/b/c/d");
         remoteDir = Paths.get("x/y/z");
-        remoteDirWithSubDirs = Paths.get("x/y/z/c/d");
+        remoteDirWithSubDirectories = Paths.get("x/y/z/c/d");
         mapping = new TestMapping(localDir.toString(), remoteDir.toString());
     }
 
@@ -37,8 +37,8 @@ public class DirectoryConverterTest {
 
     @Test
     public void returnsRemoteDirWithExtraSubDirsWhenGivenLocalDirHasMoreSubdirsThanTheMappedLocalDir() {
-        Path resultDir = convertToRemotePath(localDirWithSubdirs, mapping);
-        Assert.assertEquals(remoteDirWithSubDirs, resultDir);
+        Path resultDir = convertToRemotePath(localDirWithSubDirectories, mapping);
+        Assert.assertEquals(remoteDirWithSubDirectories, resultDir);
     }
 
     @Test
@@ -49,7 +49,7 @@ public class DirectoryConverterTest {
 
     @Test
     public void returnsLocalDirWithExtraSubDirsWhenGivenRemoteDirHasMoreSubdirsThanTheMappedRemoteDir() {
-        Path resultDir = convertToLocalPath(remoteDirWithSubDirs, mapping);
-        Assert.assertEquals(localDirWithSubdirs, resultDir);
+        Path resultDir = convertToLocalPath(remoteDirWithSubDirectories, mapping);
+        Assert.assertEquals(localDirWithSubDirectories, resultDir);
     }
 }
