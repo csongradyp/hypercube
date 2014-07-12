@@ -81,16 +81,12 @@ public class Downloader implements IDownloader {
     }
 
     private boolean isNew(ServerEntry entry, File localPath){
-        boolean isNewOnServer = true;
-        FileEntity fileEntity = persistenceController.get(localPath.toPath().toString(), client.getEntityType());
-        if(fileEntity != null) {
-            isNewOnServer = !isSameRevision(entry, fileEntity);
-        }
-        return isNewOnServer;
+        FileEntity fileEntity = persistenceController.get(localPath.toString(), client.getEntityType());
+        return fileEntity != null && isDifferentRevision(entry, fileEntity);
     }
 
-    private boolean isSameRevision(ServerEntry entry, FileEntity dbEntry) {
-        return dbEntry.getRevision().equals(entry.getRevision());
+    private boolean isDifferentRevision(ServerEntry entry, FileEntity dbEntry) {
+        return !dbEntry.getRevision().equals(entry.getRevision());
     }
 
     private void downloadFromServer(ServerEntry entry) {
@@ -123,7 +119,10 @@ public class Downloader implements IDownloader {
 
     private void createDirsFor(File newLocalFile) {
         if (!newLocalFile.getParentFile().exists()) {
-            newLocalFile.getParentFile().mkdirs();
+            boolean success = newLocalFile.getParentFile().mkdirs();
+            if(!success) {
+                LOG.error("Directory creation failed for " + newLocalFile.getPath());
+            }
         }
     }
     private void setLocalFileLastModifiedDate(ServerEntry entry, File newLocalFile) {

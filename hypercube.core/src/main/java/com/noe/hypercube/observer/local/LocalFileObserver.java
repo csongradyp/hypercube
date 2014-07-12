@@ -10,8 +10,8 @@ import java.nio.file.Path;
 
 public class LocalFileObserver extends FileAlterationObserver {
 
-    private Path targetDir;
-    private LocalFileListener listener;
+    private final Path targetDir;
+    private final LocalFileListener listener;
 
     public LocalFileObserver(Path targetDir, LocalFileListener listener) {
         super(targetDir.toFile());

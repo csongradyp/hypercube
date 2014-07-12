@@ -1,5 +1,7 @@
 package com.noe.hypercube.domain;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.Date;
 
 public class TestEntity implements  FileEntity {
@@ -34,7 +36,7 @@ public class TestEntity implements  FileEntity {
     }
 
     @Override
-    public int compareTo(FileEntity o) {
+    public int compareTo(@NotNull FileEntity o) {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

@@ -1,7 +1,6 @@
 package com.noe.hypercube.synchronization.presynchronization;
 
 import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.synchronization.SynchronizationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListener;
@@ -21,8 +20,8 @@ public class LocalFilePreSynchronizer implements FilePreSynchronizer {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalFilePreSynchronizer.class);
 
-    private FileAlterationListener fileListener;
-    private Collection<? extends FileEntity> mappedFiles;
+    private final FileAlterationListener fileListener;
+    private final Collection<? extends FileEntity> mappedFiles;
 
     public LocalFilePreSynchronizer(final FileAlterationListener fileListener, final Collection<? extends FileEntity> mappedFiles) {
         this.fileListener = fileListener;
@@ -31,15 +30,11 @@ public class LocalFilePreSynchronizer implements FilePreSynchronizer {
 
     @Override
     public void run(final Collection<File> currentLocalFiles)  {
-        try {
-            final Map<Path, FileEntity> dbEntryMap = uploadChanged(currentLocalFiles, toMap(mappedFiles));
-            deleteUnexistingFiles(dbEntryMap);
-        } catch (SynchronizationException e) {
-            LOG.error("Error @ Pre-Synchronization state", e);
-        }
+        final Map<Path, FileEntity> deletedLocalFiles = uploadChanged(currentLocalFiles, toMap(mappedFiles));
+        deleteFromServer(deletedLocalFiles);
     }
 
-    private void deleteUnexistingFiles(final Map<Path, FileEntity> dbEntryMap) {
+    private void deleteFromServer(final Map<Path, FileEntity> dbEntryMap) {
         for (Path deletedLocalFile : dbEntryMap.keySet()) {
             fileListener.onFileDelete(deletedLocalFile.toFile());
         }
@@ -53,7 +48,7 @@ public class LocalFilePreSynchronizer implements FilePreSynchronizer {
         return map;
     }
 
-    private Map<Path, FileEntity> uploadChanged(final Collection<File> currentLocalFiles, final Map<Path, FileEntity> mappedLocalFiles) throws SynchronizationException {
+    private Map<Path, FileEntity> uploadChanged(final Collection<File> currentLocalFiles, final Map<Path, FileEntity> mappedLocalFiles) {
         for (File localFile : currentLocalFiles) {
 
             if(!localFile.isDirectory()) {
@@ -61,7 +56,7 @@ public class LocalFilePreSynchronizer implements FilePreSynchronizer {
 
                 if(isMapped(localFilePath, mappedLocalFiles)) {
                     final FileEntity dbEntry = mappedLocalFiles.get(localFilePath);
-                    uploadIfChanged(localFile, dbEntry);
+                    uploadChanged(localFile, dbEntry);
                     mappedLocalFiles.remove(localFilePath);
                 }
                 else {
@@ -80,7 +75,7 @@ public class LocalFilePreSynchronizer implements FilePreSynchronizer {
         return mappedLocalFiles.containsKey(localFilePath);
     }
 
-    private void uploadIfChanged(final File localFile, final FileEntity dbEntry) {
+    private void uploadChanged(final File localFile, final FileEntity dbEntry) {
         final Path localFilePath = localFile.toPath();
         if(isFileNewer(localFile, dbEntry.lastModified())) {
             LOG.debug("New local file has been updated before start: " + localFilePath);

@@ -4,9 +4,9 @@ import com.noe.hypercube.service.TestAccount;
 
 public class TestMapping implements MappingEntity {
 
-    private String localDir;
-    private String remoteDir;
-    private Filter filters;
+    private final String localDir;
+    private final String remoteDir;
+    private final Filter filters;
 
     public TestMapping(String localdir, String remoteDir) {
         this.localDir = localdir;
@@ -36,7 +36,7 @@ public class TestMapping implements MappingEntity {
 
     @Override
     public String getId() {
-        return localDir.toString();
+        return localDir;
     }
 
     @Override

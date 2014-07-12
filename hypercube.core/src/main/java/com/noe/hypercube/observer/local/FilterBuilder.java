@@ -12,9 +12,9 @@ import static org.apache.commons.io.filefilter.FileFilterUtils.trueFileFilter;
 
 public final class FilterBuilder {
 
-    private List<IOFileFilter> orFilters;
-    private List<IOFileFilter> andFilters;
-    private boolean isWhiteList;
+    private final List<IOFileFilter> orFilters;
+    private final List<IOFileFilter> andFilters;
+    private final boolean isWhiteList;
 
     private FilterBuilder(final boolean isWhiteList) {
         this.isWhiteList = isWhiteList;

@@ -13,10 +13,10 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
 
     private final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
     private final IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper;
-    private FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory;
+    private final FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory;
 
-    private IDownloader downloader;
-    private IUploader<ACCOUNT_TYPE, ENTITY_TYPE> uploader;
+    private final IDownloader downloader;
+    private final IUploader<ACCOUNT_TYPE, ENTITY_TYPE> uploader;
 
     public AccountBox(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory, IPersistenceController persistenceController) {
         validate(client, mapper, entityFactory);
