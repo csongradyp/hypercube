@@ -14,6 +14,7 @@
     <tx:annotation-driven />
 
     <import resource="appcontext-persistence.xml" />
+    <import resource="appontext-observation.xml" />
     <import resource="classpath*:**/*-account-context.xml" />
 
     <bean id="app" class="com.noe.hypercube.HyperCubeApp"/>

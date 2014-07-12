@@ -1,5 +1,6 @@
 package com.noe.hypercube.ui.desktop;
 
+import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.ui.desktop.domain.IFile;
 import com.noe.hypercube.ui.desktop.factory.IconFactory;
 import javafx.beans.property.SimpleObjectProperty;
@@ -59,8 +60,6 @@ public class FileView extends VBox implements Initializable {
     @FXML
     private SegmentedButton localDrives;
     @FXML
-    private SegmentedButton removableDrives;
-    @FXML
     private SegmentedButton remoteDrives;
 
     @FXML
@@ -89,7 +88,6 @@ public class FileView extends VBox implements Initializable {
             setBreadCrumb(newValue);
             table.updateLocation(newValue);
         });
-        table.setLocation(Paths.get("C:"));
         table.getActiveProperty().addListener((observable, oldValue, newValue) -> table.getSelectionModel().selectFirst());
         //        MasterDetailPane pane = new MasterDetailPane();
 //        pane.setMasterNode(table);
@@ -128,15 +126,27 @@ public class FileView extends VBox implements Initializable {
         List<ToggleButton> drives = new ArrayList<>(5);
         Iterable<Path> rootDirectories = FileSystems.getDefault().getRootDirectories();
         for (Path root : rootDirectories) {
-            ToggleButton button = new ToggleButton(root.toString(), new ImageView(IconFactory.getStorageIcon(root)));
-            button.setFocusTraversable(false);
-            button.setOnMouseClicked(event -> {
-                table.setLocation(Paths.get(button.getText()));
-                button.setSelected(true);
-            });
-            drives.add(button);
+            drives.add(createLocalStorageButton(root));
         }
+        EventBus.subscribeToStorageEvent(event -> {
+            if (event.isAttached()) {
+                localDrives.getButtons().add(createLocalStorageButton(event.getStorage()));
+            }
+            else if (event.isDetached()) {
+                localDrives.getButtons().removeIf(toggleButton -> toggleButton.getText().equals(event.getStorage().toString()));
+            }
+        });
         return drives;
+    }
+
+    private ToggleButton createLocalStorageButton(Path root) {
+        ToggleButton button = new ToggleButton(root.toString(), new ImageView(IconFactory.getStorageIcon(root)));
+        button.setFocusTraversable(false);
+        button.setOnMouseClicked(event -> {
+            table.setLocation(Paths.get(button.getText()));
+            button.setSelected(true);
+        });
+        return button;
     }
 
     private void initRemoteDrives() {

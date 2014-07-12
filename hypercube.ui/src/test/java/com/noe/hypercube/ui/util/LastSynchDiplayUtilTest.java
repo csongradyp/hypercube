@@ -55,8 +55,8 @@ public class LastSynchDiplayUtilTest {
         int minutesAgo = 59;
         int hoursAgo = 23;
         int daysAgo = 42;
-        DateTime lastSynchDate = new DateTime().minusDays(daysAgo).minusHours(hoursAgo).minusMinutes(minutesAgo);
+        DateTime lastSynchDate = new DateTime(2000,1,1,1,1).minusDays(daysAgo).minusHours(hoursAgo).minusMinutes(minutesAgo);
         String result = LastSynchDiplayUtil.convertToString(lastSynchDate.toDate());
-        Assert.assertThat(result, CoreMatchers.equalTo(lastSynchDate.getYear() + "." + lastSynchDate.getMonthOfYear() + "." + (lastSynchDate.getDayOfMonth()<10 ? "0" + lastSynchDate.getDayOfMonth() : lastSynchDate.getDayOfMonth())));
+        Assert.assertThat(result, CoreMatchers.equalTo("1999.11.19"));
     }
 }

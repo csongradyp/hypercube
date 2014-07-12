@@ -13,7 +13,6 @@
             <items>
                 <Label text="Locals" />
                 <SegmentedButton fx:id="localDrives" onMouseClicked="#onLocalDriveMouseClicked" />
-                <SegmentedButton fx:id="removableDrives" />
                 <Label text="Remotes" />
                 <SegmentedButton fx:id="remoteDrives" />
             </items>

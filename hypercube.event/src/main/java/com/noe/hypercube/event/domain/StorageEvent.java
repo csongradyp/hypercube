@@ -2,7 +2,10 @@ package com.noe.hypercube.event.domain;
 
 import java.nio.file.Path;
 
-public class StorageEvent {
+import static com.noe.hypercube.event.domain.StorageEventType.ATTACHED;
+import static com.noe.hypercube.event.domain.StorageEventType.DETACHED;
+
+public class StorageEvent implements IEvent {
 
     private Path storage;
     private StorageEventType event;
@@ -16,15 +19,11 @@ public class StorageEvent {
         return storage;
     }
 
-    public StorageEventType getEvent() {
-        return event;
-    }
-
     public boolean isAttached() {
-        return StorageEventType.ATTACHED.equals(event);
+        return ATTACHED.equals(event);
     }
 
     public boolean isDetached() {
-        return StorageEventType.DETACHED.equals(event);
+        return DETACHED.equals(event);
     }
 }

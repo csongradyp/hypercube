@@ -7,7 +7,7 @@ import net.engio.mbassy.bus.config.BusConfiguration;
 
 public final class EventBus {
 
-    private final static MBassador<StorageEvent> storageEventBus = new MBassador<>(BusConfiguration.Default());;
+    private final static MBassador<StorageEvent> storageEventBus = new MBassador<>(BusConfiguration.Default());
     private final static MBassador<FileEvent> fileEventBus = new MBassador<>(BusConfiguration.Default());
 
     private EventBus() {
@@ -21,19 +21,19 @@ public final class EventBus {
         storageEventBus.publishAsync(storageEvent);
     }
 
-    public static void subscribeToFileEvent(Object listener) {
-        fileEventBus.subscribe(listener);
+    public static void subscribeToFileEvent(EventHandler<FileEvent> handler) {
+        fileEventBus.subscribe(handler);
     }
 
-    public static void subscribeToStorageEvent(Object listener) {
-        storageEventBus.subscribe(listener);
+    public static void subscribeToStorageEvent(EventHandler<StorageEvent> handler) {
+        storageEventBus.subscribe(handler);
     }
 
-    public static void unsubscribeToFileEvent(Object listener) {
-        fileEventBus.unsubscribe(listener);
+    public static void unsubscribeToFileEvent(EventHandler<FileEvent> handler) {
+        fileEventBus.unsubscribe(handler);
     }
 
-    public static void unsubscribeToStorageEvent(Object listener) {
-        storageEventBus.unsubscribe(listener);
+    public static void unsubscribeToStorageEvent(EventHandler<StorageEvent>  handler) {
+        storageEventBus.unsubscribe(handler);
     }
 }
