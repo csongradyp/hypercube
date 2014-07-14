@@ -18,4 +18,8 @@ public interface IUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     void uploadUpdated(File file, Path remotePath) throws SynchronizationException;
 
     void delete(File file, Path remotePath) throws SynchronizationException;
+
+    void stop();
+
+    void restart();
 }

@@ -17,7 +17,9 @@ import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import static com.noe.hypercube.synchronization.Action.*;
+import static com.noe.hypercube.synchronization.Action.ADDED;
+import static com.noe.hypercube.synchronization.Action.CHANGED;
+import static com.noe.hypercube.synchronization.Action.REMOVED;
 
 public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> extends Uploader<ACCOUNT_TYPE, ENTITY_TYPE> {
 
@@ -26,7 +28,7 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     private final BlockingQueue<UploadEntity> uploadQ;
     private boolean stop = false;
 
-    public QueueUploader(IClient client, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> persistenceController, IPersistenceController entityFactory) {
+    public QueueUploader(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> persistenceController, IPersistenceController entityFactory) {
         super(client, entityFactory, persistenceController);
         uploadQ = new LinkedBlockingDeque<>(20);
     }
@@ -38,16 +40,13 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
             Path remotePath = uploadEntity.getRemotePath();
             File file = uploadEntity.getFile();
             try {
-                switch(uploadEntity.getAction()) {
-                    case ADDED:
-                        super.uploadNew(file, remotePath);
-                        break;
-                    case CHANGED:
-                        super.uploadUpdated(file, remotePath);
-                        break;
-                    case REMOVED:
-                        super.delete(file, remotePath);
-                        break;
+                final Action action = uploadEntity.getAction();
+                if (ADDED == action) {
+                    uploadNew(file, remotePath);
+                } else if (CHANGED == action) {
+                    uploadUpdated(file, remotePath);
+                } else if (REMOVED == action) {
+                    delete(file, remotePath);
                 }
             }catch (SynchronizationException e) {
                 LOG.error(e.getMessage(), e);

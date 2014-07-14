@@ -4,8 +4,9 @@ import com.noe.hypercube.monitoring.InstanceMonitor;
 import com.noe.hypercube.monitoring.SingleInstanceMonitor;
 import com.noe.hypercube.ui.FileCommander;
 import javafx.application.Application;
+import javafx.application.Platform;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +20,7 @@ public class Runner {
     private static final String ALREADY_RUNNING_ERROR_TITLE = "HyperCube - Running Error";
     private static final String ALREADY_RUNNING_ERROR_MSG = "Program is already running!";
 
-    private static final String CONTEXT_XML_PATH = "classpath:/META-INF/appcontext.xml";
+    private static final String CONTEXT_XML_PATH = "META-INF/appcontext.xml";
     public static final String EXIT_CONFIRM_MESSAGE = "Do you really want to exit?\nUnsaved settings will be lost";
     public static final String EXIT_PANE_TITLE = "Exit HyperCube";
 
@@ -36,7 +37,8 @@ public class Runner {
             Runner.exit();
         } else {
             createGui();
-            APPLICATION_CONTEXT = new FileSystemXmlApplicationContext(CONTEXT_XML_PATH);
+            APPLICATION_CONTEXT = new ClassPathXmlApplicationContext(CONTEXT_XML_PATH);
+            APPLICATION_CONTEXT.registerShutdownHook();
             app = APPLICATION_CONTEXT.getBean(HyperCubeApp.class);
 //            app.addTestDirectoryMapping(new DbxMapping("d:\\hyper\\", "/newtest"));
             app.start();
@@ -65,10 +67,8 @@ public class Runner {
 
     public static void exit() {
         if (canExit()) {
-//            gui.removeTrayIcon();
-            app.stop();
-            APPLICATION_CONTEXT.close();
-            System.exit(0);
+            APPLICATION_CONTEXT.stop();
+            Platform.exit();
         }
     }
 

@@ -71,8 +71,6 @@ public class Synchronizer {
     }
 
     public void shutdown() {
-        cloudMonitor.stop();
-        fileMonitor.stop();
         executorService.shutdown();
         LOG.info("Synchronization has been shutted down");
     }

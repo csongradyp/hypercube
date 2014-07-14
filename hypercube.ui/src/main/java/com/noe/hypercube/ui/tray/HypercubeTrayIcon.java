@@ -10,8 +10,7 @@ import java.awt.event.ActionListener;
 
 public class HypercubeTrayIcon {
 
-    private static final SystemTray TRAY = SystemTray.getSystemTray();
-    public static final String ERROR_TITLE = "ERROR";
+    private static final String ERROR_TITLE = "ERROR";
     private HTrayIcon trayIcon;
     private boolean firstTime = true;
 
@@ -19,32 +18,32 @@ public class HypercubeTrayIcon {
         if (SystemTray.isSupported()) {
             final ActionListener closeListener = event -> System.exit(0);
             final ActionListener showListener = event -> Platform.runLater(stage::show);
-            final JPopupMenu popup = createPopupMenu(closeListener, showListener);
+            final PopupMenu popup = createPopupMenu(closeListener, showListener);
             final Image trayIconImage = ImageBundle.getRawImage("tray.default");
             trayIcon = new HTrayIcon(trayIconImage, popup);
             trayIcon.addActionListener(showListener);
             show();
         } else {
-            JOptionPane.showMessageDialog(new Frame(), "Tray icon is not supported in your system!", "ERROR", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(new Frame(), "Tray icon is not supported in your system!", ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void show() {
         final SystemTray tray = SystemTray.getSystemTray();
         try {
-            tray.add(this.trayIcon);
+            tray.add(trayIcon);
         } catch (AWTException e) {
-            JOptionPane.showMessageDialog(new Frame(), "Tray icon can not be shown!", "ERROR", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(new Frame(), "Tray icon can not be shown!", ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private JPopupMenu createPopupMenu(final ActionListener closeListener, final ActionListener showListener) {
-        JPopupMenu popup = new JPopupMenu();
-        JMenuItem showItem = new JMenuItem("Show");
+    private PopupMenu createPopupMenu(final ActionListener closeListener, final ActionListener showListener) {
+        PopupMenu popup = new PopupMenu();
+        MenuItem showItem = new MenuItem("Show");
         showItem.addActionListener(showListener);
         popup.add(showItem);
 
-        JMenuItem closeItem = new JMenuItem("Close");
+        MenuItem closeItem = new MenuItem("Close");
         closeItem.addActionListener(closeListener);
         popup.add(closeItem);
         return popup;

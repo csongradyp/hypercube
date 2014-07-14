@@ -145,6 +145,7 @@ public class Downloader implements IDownloader {
             delete(localPath);
         }
     }
+
     private void delete(Path localPath) {
         File fileToDelete = localPath.toFile();
         if (!fileToDelete.isDirectory()) {

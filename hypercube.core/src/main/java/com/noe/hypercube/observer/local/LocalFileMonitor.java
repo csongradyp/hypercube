@@ -17,14 +17,14 @@ public class LocalFileMonitor {
     private final FileAlterationMonitor fileMonitor;
     private List<LocalFileObserver> observers;
 
+    public LocalFileMonitor(long pollInterval) {
+        fileMonitor = new FileAlterationMonitor(pollInterval);
+    }
+
     public LocalFileMonitor(long pollInterval, List<LocalFileObserver> observers) {
         this(pollInterval);
         this.observers = observers;
         addObservers(observers);
-    }
-
-    public LocalFileMonitor(long pollInterval) {
-        fileMonitor = new FileAlterationMonitor(pollInterval);
     }
 
     public LocalFileMonitor() {

@@ -66,7 +66,9 @@ public class LocalFileListener implements FileAlterationListener {
     }
 
     @Override
-    public void onStop(FileAlterationObserver observer) {}
+    public void onStop(FileAlterationObserver observer) {
+        uploader.stop();
+    }
 
     private void delete(File file) {
         try {

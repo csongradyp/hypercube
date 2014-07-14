@@ -4,31 +4,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("rawtypes")
 @Named
 public class CloudMonitor {
 
     private static final Logger LOG = LoggerFactory.getLogger(CloudMonitor.class);
 
+    private final Long pollInterval;
     private ScheduledExecutorService executorService;
     private Collection<CloudObserver> cloudObservers;
-    private final Long pollInterval;
 
-    public CloudMonitor(Long pollInterval, Collection<CloudObserver> cloudObservers) {
+    public CloudMonitor(final Long pollInterval, final Collection<CloudObserver> cloudObservers) {
         this.pollInterval = pollInterval;
         this.cloudObservers = cloudObservers;
     }
 
     public CloudMonitor(Long pollInterval) {
         this.pollInterval = pollInterval;
+        cloudObservers = new ArrayList<>();
     }
 
     public void start() {
-        if(cloudObservers.isEmpty()) {
+        if (cloudObservers.isEmpty()) {
             LOG.error("No clients are added for synchronization");
         }
         executorService = Executors.newScheduledThreadPool(cloudObservers.size());
@@ -38,23 +41,21 @@ public class CloudMonitor {
         }
     }
 
-    public void submit(CloudObserver observer) {
+    public void submit(ICloudObserver observer) {
         executorService.schedule(observer, pollInterval, TimeUnit.MILLISECONDS);
     }
 
     public void stop() {
+        for (CloudObserver cloudObserver : cloudObservers) {
+            cloudObserver.stop();
+        }
         executorService.shutdown();
         LOG.info("Cloud monitoring has been stopped");
     }
 
     public void addObservers(Collection<CloudObserver> observers) {
-        if(cloudObservers == null || observers.isEmpty()) {
-            cloudObservers = observers;
-        }
-        else  {
-            for (CloudObserver observer : observers) {
-                addObserver(observer);
-            }
+        for (CloudObserver observer : observers) {
+            addObserver(observer);
         }
     }
 

@@ -17,7 +17,7 @@
     <import resource="appontext-observation.xml" />
     <import resource="classpath*:**/*-account-context.xml" />
 
-    <bean id="app" class="com.noe.hypercube.HyperCubeApp"/>
+    <bean id="app" class="com.noe.hypercube.HyperCubeApp" destroy-method="stop"/>
 
     <!--<bean id="accountController" class="com.noe.hypercube.controller.AccountController" >-->
         <!--<property name="clients" ref="clients" />-->
@@ -41,7 +41,7 @@
         </property>
     </bean>
 
-    <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer" />
+    <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer" destroy-method="shutdown" />
 
     <bean id="daos" class="com.noe.hypercube.collector.DaoCollector" />
     <bean id="entityFactories" class="com.noe.hypercube.collector.EntityFactoryCollector" />
@@ -52,11 +52,11 @@
         <constructor-arg ref="daos" />
     </bean>
 
-    <bean id="fileMonitor" class="com.noe.hypercube.observer.local.LocalFileMonitor">
+    <bean id="fileMonitor" class="com.noe.hypercube.observer.local.LocalFileMonitor" destroy-method="stop">
         <constructor-arg value="${poll.delay.in.milisec}" />
     </bean>
 
-    <bean id="cloudMonitor" class="com.noe.hypercube.observer.remote.CloudMonitor">
+    <bean id="cloudMonitor" class="com.noe.hypercube.observer.remote.CloudMonitor" destroy-method="stop">
         <constructor-arg value="${poll.delay.in.milisec}" />
     </bean>
 

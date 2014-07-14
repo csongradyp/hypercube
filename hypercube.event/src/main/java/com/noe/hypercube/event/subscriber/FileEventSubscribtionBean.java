@@ -7,11 +7,11 @@ import com.noe.hypercube.event.domain.FileEvent;
 import javax.annotation.PostConstruct;
 import java.util.List;
 
-public class FileEventSubscriber {
+public class FileEventSubscribtionBean {
 
     private final List<EventHandler<FileEvent>> listeners;
 
-    public FileEventSubscriber(final List<EventHandler<FileEvent>> listeners) {
+    public FileEventSubscribtionBean(final List<EventHandler<FileEvent>> listeners) {
         this.listeners = listeners;
     }
 

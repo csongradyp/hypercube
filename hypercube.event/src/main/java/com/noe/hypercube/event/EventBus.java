@@ -11,6 +11,13 @@ public final class EventBus {
     private final static MBassador<FileEvent> fileEventBus = new MBassador<>(BusConfiguration.Default());
 
     private EventBus() {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                storageEventBus.shutdown();
+                fileEventBus.shutdown();
+            }
+        }));
     }
 
     public static void publish(FileEvent fileEvent) {

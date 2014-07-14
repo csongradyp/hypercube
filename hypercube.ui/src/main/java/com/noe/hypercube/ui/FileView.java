@@ -98,8 +98,15 @@ public class FileView extends VBox implements Initializable {
     }
 
     public void initStartLocation() {
-        setLocation(ConfigurationBundle.getStartLocation(side.get()));
+        Path startLocation = ConfigurationBundle.getStartLocation(side.get());
+        setLocation(startLocation);
         getLocationProperty().addListener((observableValue, path, newLocation) -> ConfigurationBundle.setStartLocation(side.get(), newLocation));
+        ObservableList<ToggleButton> buttons = localDrives.getButtons();
+        for (ToggleButton button : buttons) {
+            if(startLocation.startsWith(button.getText())){
+                button.setSelected(true);
+            }
+        }
     }
 
     private void setBreadCrumb(Path path) {
