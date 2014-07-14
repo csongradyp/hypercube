@@ -2,7 +2,7 @@ package com.noe.hypercube;
 
 import com.noe.hypercube.monitoring.InstanceMonitor;
 import com.noe.hypercube.monitoring.SingleInstanceMonitor;
-import com.noe.hypercube.ui.desktop.FileCommander;
+import com.noe.hypercube.ui.FileCommander;
 import javafx.application.Application;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;

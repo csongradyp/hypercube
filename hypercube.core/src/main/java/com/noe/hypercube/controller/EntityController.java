@@ -17,5 +17,5 @@ public interface EntityController {
 
     FileEntity get(String localPath, Class<? extends FileEntity> entityClass);
 
-    Collection<? extends FileEntity> getAll(Class<? extends FileEntity> entityClass);
+    Collection getAll(Class<? extends FileEntity> entityClass);
 }

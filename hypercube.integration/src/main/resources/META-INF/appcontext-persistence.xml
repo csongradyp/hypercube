@@ -25,7 +25,7 @@
         </property>
 
         <property name="persistenceUnitPostProcessors">
-            <bean class="com.noe.hypercube.MergingPersistenceUnitPostProcessor"/>
+            <bean class="com.noe.hypercube.MergingPersistenceUnitPostProcessor" />
         </property>
     </bean>
 
