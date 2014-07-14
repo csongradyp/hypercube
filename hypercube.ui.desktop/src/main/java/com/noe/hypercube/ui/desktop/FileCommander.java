@@ -1,29 +1,34 @@
 package com.noe.hypercube.ui.desktop;
 
+import com.noe.hypercube.ui.desktop.bundle.ImageBundle;
+import com.noe.hypercube.ui.desktop.tray.HypercubeTrayIcon;
 import javafx.application.Application;
-import javafx.event.EventHandler;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 public class FileCommander extends Application {
 
+    private HypercubeTrayIcon trayIcon;
+
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("main.fxml"));
-        Scene scene = new Scene(root, 1024, 768);
-//        setUserAgentStylesheet(STYLESHEET_CASPIAN);
-//        scene.getStylesheets().add("style/win7.css");
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("HyperCube - Cloud connected");
-//        primaryStage.initStyle(StageStyle.);
-        primaryStage.show();
-        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent windowEvent) {
-            }
+    public void start(final Stage stage) throws Exception {
+        trayIcon = new HypercubeTrayIcon(stage);
+        Parent fileCommander = FXMLLoader.load(getClass().getClassLoader().getResource("main.fxml"));
+        Scene scene = new Scene(fileCommander, 800, 600);
+        stage.setScene(scene);
+        stage.setTitle("HyperCube - Cloud connected");
+        stage.getIcons().add(ImageBundle.getImage("tray.default"));
+        stage.setOnCloseRequest(t -> hide(stage));
+        Platform.setImplicitExit(false);
+    }
+
+    private void hide(final Stage stage) {
+        Platform.runLater(() -> {
+            stage.hide();
+            trayIcon.hide();
         });
     }
 

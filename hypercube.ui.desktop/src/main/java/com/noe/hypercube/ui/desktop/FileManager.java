@@ -59,12 +59,6 @@ public class FileManager extends VBox implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                System.out.println("Hook!!!!!!!!");
-            }
-        });
         leftFileView.initStartLocation();
         rightFileView.initStartLocation();
     }

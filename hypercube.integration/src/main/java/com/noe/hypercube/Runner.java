@@ -2,6 +2,8 @@ package com.noe.hypercube;
 
 import com.noe.hypercube.monitoring.InstanceMonitor;
 import com.noe.hypercube.monitoring.SingleInstanceMonitor;
+import com.noe.hypercube.ui.desktop.FileCommander;
+import javafx.application.Application;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
@@ -29,15 +31,21 @@ public class Runner {
 
     public static void main(String[] args) throws IOException {
 //        updateAuthProperty();
-        if (!INSTANCE_MONITOR.isAlreadyRunning()) {
-//            createGui();
+        if (INSTANCE_MONITOR.isAlreadyRunning()) {
+            JOptionPane.showMessageDialog(new Frame(), ALREADY_RUNNING_ERROR_MSG, ALREADY_RUNNING_ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
+            Runner.exit();
+        } else {
+            createGui();
             APPLICATION_CONTEXT = new FileSystemXmlApplicationContext(CONTEXT_XML_PATH);
             app = APPLICATION_CONTEXT.getBean(HyperCubeApp.class);
 //            app.addTestDirectoryMapping(new DbxMapping("d:\\hyper\\", "/newtest"));
             app.start();
-        } else {
-            JOptionPane.showMessageDialog(new Frame(), ALREADY_RUNNING_ERROR_MSG, ALREADY_RUNNING_ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
-            Runner.exit();
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    exit();
+                }
+            });
         }
     }
 
@@ -92,24 +100,8 @@ public class Runner {
         return exit;
     }
 
-//    private static void createGui() {
-//        SwingUtilities.invokeLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                try(InputStream imagePropertyStream = Runner.class.getResourceAsStream("/images.properties")) {
-//                    PropertyResourceBundle resourceBundle = new PropertyResourceBundle(imagePropertyStream);
-//                    ImageBundle imageBundle = new ImageBundle(resourceBundle);
-//                    JPopupMenu popupMenu = new HPopupMenu();
-//                    HTrayIcon trayIcon = new HTrayIcon(imageBundle, popupMenu);
-//                    gui = new Gui(trayIcon);
-//                    gui.createGUI();
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-//                } catch (IOException e) {
-//                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-//                }
-//            }
-//        });
-//    }
+    private static void createGui() {
+        new Thread(() -> Application.launch(FileCommander.class)).start();
+    }
 
 }

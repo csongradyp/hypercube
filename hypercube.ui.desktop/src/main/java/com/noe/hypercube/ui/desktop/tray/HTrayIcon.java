@@ -1,4 +1,4 @@
-package com.noe.hypercube.ui.tray;
+package com.noe.hypercube.ui.desktop.tray;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +13,5 @@ public class HTrayIcon extends JTrayIcon {
         setImageAutoSize(true);
         setImage(image);
     }
-
 
 }

@@ -1,6 +1,7 @@
 package com.noe.hypercube.ui.desktop;
 
 import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.ui.desktop.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.desktop.domain.IFile;
 import com.noe.hypercube.ui.desktop.factory.IconFactory;
 import javafx.beans.property.SimpleObjectProperty;
@@ -97,8 +98,8 @@ public class FileView extends VBox implements Initializable {
     }
 
     public void initStartLocation() {
-        setLocation(Configuration.getStartLocation(side.get()));
-        getLocationProperty().addListener((observableValue, path, newLocation) -> Configuration.setStartLocation(side.get(), newLocation));
+        setLocation(ConfigurationBundle.getStartLocation(side.get()));
+        getLocationProperty().addListener((observableValue, path, newLocation) -> ConfigurationBundle.setStartLocation(side.get(), newLocation));
     }
 
     private void setBreadCrumb(Path path) {

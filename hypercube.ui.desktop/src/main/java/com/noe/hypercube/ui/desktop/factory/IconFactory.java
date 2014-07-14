@@ -1,6 +1,7 @@
 package com.noe.hypercube.ui.desktop.factory;
 
 
+import com.noe.hypercube.ui.desktop.bundle.ImageBundle;
 import com.noe.hypercube.ui.desktop.domain.IFile;
 import javafx.scene.image.Image;
 
@@ -9,26 +10,25 @@ import java.nio.file.Path;
 
 public final class IconFactory {
 
-    private static final Image FOLDER_ICON = new Image(IconFactory.class.getClassLoader().getResourceAsStream("images/folder.png"));
-    private static final Image FILE_ICON = new Image(IconFactory.class.getClassLoader().getResourceAsStream("images/file.png"));
-
-    private static final Image HARD_DRIVE_ICON = new Image(IconFactory.class.getClassLoader().getResourceAsStream("images/hardDrive_16.png"));
-    public static final Image OPTICAL_DRIVE_ICON = new Image(IconFactory.class.getClassLoader().getResourceAsStream("images/CD_16.png"));
-    public static final Image USB_DRIVE_ICON = new Image(IconFactory.class.getClassLoader().getResourceAsStream("images/USB_16.png"));
+    private static final String FOLDER_ICON = "thumb.folder";
+    private static final String FILE_ICON = "thumb.file";
+    private static final String HARD_DRIVE_ICON = "icon.drive.hdd";
+    public static final String OPTICAL_DRIVE_ICON = "icon.drive.cd";
+    public static final String USB_DRIVE_ICON = "icon.drive.usb";
 
     private IconFactory() {
     }
 
     public static Image getStorageIcon(Path rootPath) {
-        Image hardDriveIcon = HARD_DRIVE_ICON;
+        Image hardDriveIcon = ImageBundle.getImage(HARD_DRIVE_ICON);
         Image icon = hardDriveIcon;
         String driveType = FileSystemView.getFileSystemView().getSystemTypeDescription(rootPath.toFile());
         if (driveType.toLowerCase().contains("local")) {
             icon = hardDriveIcon;
         } else if (driveType.toLowerCase().contains("cd")) {
-            icon = OPTICAL_DRIVE_ICON;
+            icon = ImageBundle.getImage(OPTICAL_DRIVE_ICON);
         } else if (driveType.toLowerCase().contains("removable")) {
-            icon = USB_DRIVE_ICON;
+            icon = ImageBundle.getImage(USB_DRIVE_ICON);
         }
         return icon;
     }
@@ -38,8 +38,8 @@ public final class IconFactory {
             return null;
         }
         if (file.isDirectory()) {
-            return FOLDER_ICON;
+            return ImageBundle.getImage(FOLDER_ICON);
         }
-        return FILE_ICON;
+        return ImageBundle.getImage(FILE_ICON);
     }
 }
