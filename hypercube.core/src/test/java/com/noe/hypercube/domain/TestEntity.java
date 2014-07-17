@@ -1,47 +1,42 @@
 package com.noe.hypercube.domain;
 
-import com.sun.istack.internal.NotNull;
-
 import java.util.Date;
 
 public class TestEntity implements  FileEntity {
     @Override
     public String getLocalPath() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return "A/B";
     }
 
     @Override
-    public void setLocalPath(String dbxPath) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void setLocalPath(String path) {
     }
 
     @Override
     public String getRevision() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return "1";
     }
 
     @Override
     public void setRevision(String revision) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public Date lastModified() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return new Date();
     }
 
     @Override
     public void setLastModified(Date lastModified) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public int compareTo(@NotNull FileEntity o) {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    public int compareTo(FileEntity o) {
+        return 0;
     }
 
     @Override
     public String getId() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 }

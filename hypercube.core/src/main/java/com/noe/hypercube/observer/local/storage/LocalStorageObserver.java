@@ -26,7 +26,7 @@ public class LocalStorageObserver {
     }
 
     public void stop() {
-        service.shutdown();
+        service.shutdownNow();
     }
 
 }

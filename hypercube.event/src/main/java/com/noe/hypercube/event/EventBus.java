@@ -7,40 +7,46 @@ import net.engio.mbassy.bus.config.BusConfiguration;
 
 public final class EventBus {
 
-    private final static MBassador<StorageEvent> storageEventBus = new MBassador<>(BusConfiguration.Default());
-    private final static MBassador<FileEvent> fileEventBus = new MBassador<>(BusConfiguration.Default());
+    private static final EventBus instance = new EventBus();
+
+    private final MBassador<StorageEvent> storageEventBus;
+    private final MBassador<FileEvent> fileEventBus;
 
     private EventBus() {
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                storageEventBus.shutdown();
-                fileEventBus.shutdown();
+        storageEventBus = new MBassador<>(BusConfiguration.Default());
+        fileEventBus = new MBassador<>(BusConfiguration.Default());
+        registerShutdownHook(storageEventBus, fileEventBus);
+    }
+
+    private void registerShutdownHook(MBassador<?>... mBassadors) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            for (MBassador<?> eventBus : mBassadors) {
+                eventBus.shutdown();
             }
         }));
     }
 
     public static void publish(FileEvent fileEvent) {
-        fileEventBus.publishAsync(fileEvent);
+        instance.fileEventBus.publishAsync(fileEvent);
     }
 
     public static void publish(StorageEvent storageEvent) {
-        storageEventBus.publishAsync(storageEvent);
+        instance.storageEventBus.publish(storageEvent);
     }
 
     public static void subscribeToFileEvent(EventHandler<FileEvent> handler) {
-        fileEventBus.subscribe(handler);
-    }
-
-    public static void subscribeToStorageEvent(EventHandler<StorageEvent> handler) {
-        storageEventBus.subscribe(handler);
+        instance.fileEventBus.subscribe(handler);
     }
 
     public static void unsubscribeToFileEvent(EventHandler<FileEvent> handler) {
-        fileEventBus.unsubscribe(handler);
+        instance.fileEventBus.unsubscribe(handler);
+    }
+
+    public static void subscribeToStorageEvent(EventHandler<StorageEvent> handler) {
+        instance.storageEventBus.subscribe(handler);
     }
 
     public static void unsubscribeToStorageEvent(EventHandler<StorageEvent>  handler) {
-        storageEventBus.unsubscribe(handler);
+        instance.storageEventBus.unsubscribe(handler);
     }
 }

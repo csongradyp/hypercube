@@ -9,7 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 public class HypercubeTrayIcon {
-
+    private static final String TRAY_DEFAULT_IMAGE_KEY = "tray.default";
     private static final String ERROR_TITLE = "ERROR";
     private HTrayIcon trayIcon;
     private boolean firstTime = true;
@@ -19,7 +19,7 @@ public class HypercubeTrayIcon {
             final ActionListener closeListener = event -> System.exit(0);
             final ActionListener showListener = event -> Platform.runLater(stage::show);
             final PopupMenu popup = createPopupMenu(closeListener, showListener);
-            final Image trayIconImage = ImageBundle.getRawImage("tray.default");
+            final Image trayIconImage = ImageBundle.getRawImage(TRAY_DEFAULT_IMAGE_KEY);
             trayIcon = new HTrayIcon(trayIconImage, popup);
             trayIcon.addActionListener(showListener);
             show();

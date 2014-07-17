@@ -1,7 +1,6 @@
 package com.noe.hypercube;
 
 import com.noe.hypercube.controller.PersistenceController;
-import com.noe.hypercube.domain.DbxMapping;
 import com.noe.hypercube.synchronization.Synchronizer;
 
 import javax.inject.Inject;
@@ -28,9 +27,5 @@ public class HyperCubeApp {
 
     public void stop() {
         synchronizer.shutdown();
-    }
-
-    public void addTestDirectoryMapping(DbxMapping testMspping ){
-        persistenceController.addMapping(testMspping);
     }
 }

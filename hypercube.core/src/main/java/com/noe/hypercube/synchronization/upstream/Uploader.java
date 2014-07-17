@@ -4,6 +4,9 @@ import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.FileEntityFactory;
 import com.noe.hypercube.domain.ServerEntry;
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.domain.FileEvent;
+import com.noe.hypercube.event.domain.FileEventType;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.Action;
@@ -18,6 +21,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
 
+import static com.noe.hypercube.synchronization.Action.ADDED;
+import static com.noe.hypercube.synchronization.Action.CHANGED;
+import static com.noe.hypercube.synchronization.Action.REMOVED;
 import static java.lang.String.format;
 
 public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> implements IUploader<ACCOUNT_TYPE, ENTITY_TYPE> {
@@ -46,18 +52,17 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
 
     @Override
     public void uploadNew(File fileToUpload, Path remotePath) throws SynchronizationException {
-        if(!client.exist(fileToUpload, remotePath)) {
-            upload(fileToUpload, remotePath, Action.ADDED);
-        }
-        else {
+        if (client.exist(fileToUpload, remotePath)) {
             LOG.debug("{} conflict - File already exists on server: {}", client.getAccountName(), remotePath.toString());
+        } else {
+            upload(fileToUpload, remotePath, ADDED);
         }
     }
 
     @Override
     public void uploadUpdated(File fileToUpload, Path remotePath) throws SynchronizationException {
         if(client.exist(fileToUpload, remotePath) && isNewer(fileToUpload)) {
-            upload(fileToUpload, remotePath, Action.CHANGED);
+            upload(fileToUpload, remotePath, CHANGED);
         }
         else {
             LOG.debug("{} inconsistency - Remote file '{}' is fresher than the local one: {}", client.getAccountName(), remotePath.toString(), fileToUpload.toPath());
@@ -68,16 +73,18 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
         final Path localPath = fileToUpload.toPath();
         ServerEntry uploadedFile = null;
         try(FileInputStream inputStream = FileUtils.openInputStream(fileToUpload)) {
-            switch(action) {
-                case CHANGED:
+            if (REMOVED != action) {
+                if (CHANGED == action) {
+                    EventBus.publish(new FileEvent(localPath, remotePath, FileEventType.UPDATED));
                     uploadedFile = client.uploadAsUpdated(remotePath, fileToUpload, inputStream);
-                    break;
-                case ADDED:
+                } else if (ADDED == action) {
+                    EventBus.publish(new FileEvent(localPath, remotePath, FileEventType.NEW));
                     uploadedFile = client.uploadAsNew(remotePath, fileToUpload, inputStream);
-                    break;
+                }
             }
             if(uploadedFile == null) {
-                throw new SynchronizationException(format("Upload failed - Cannot upload file: '%s' to %s", localPath.toString(), client.getAccountName()));                }
+                throw new SynchronizationException(format("Upload failed - Cannot upload file: '%s' to %s", localPath.toString(), client.getAccountName()));
+            }
             persist(localPath, uploadedFile);
             LOG.debug("successfully uploaded file: '{}' with new revision: {}", uploadedFile.getPath(), uploadedFile.getRevision());
         } catch (IOException e) {

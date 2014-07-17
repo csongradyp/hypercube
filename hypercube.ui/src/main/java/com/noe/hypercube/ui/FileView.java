@@ -1,9 +1,11 @@
 package com.noe.hypercube.ui;
 
-import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.StorageEvent;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.domain.IFile;
 import com.noe.hypercube.ui.factory.IconFactory;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
@@ -24,6 +26,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import net.engio.mbassy.listener.Handler;
+import net.engio.mbassy.listener.Invoke;
 import org.controlsfx.control.BreadCrumbBar;
 import org.controlsfx.control.SegmentedButton;
 
@@ -42,7 +46,7 @@ import java.util.stream.Collectors;
 import static javafx.scene.input.KeyCombination.ModifierValue.DOWN;
 import static javafx.scene.input.KeyCombination.ModifierValue.UP;
 
-public class FileView extends VBox implements Initializable {
+public class FileView extends VBox implements Initializable, EventHandler<StorageEvent> {
 
     private static final String SEPARATOR = System.getProperty("file.separator");
     private static final String SEPARATOR_PATTERN = Pattern.quote(SEPARATOR);
@@ -103,7 +107,7 @@ public class FileView extends VBox implements Initializable {
         getLocationProperty().addListener((observableValue, path, newLocation) -> ConfigurationBundle.setStartLocation(side.get(), newLocation));
         ObservableList<ToggleButton> buttons = localDrives.getButtons();
         for (ToggleButton button : buttons) {
-            if(startLocation.startsWith(button.getText())){
+            if (startLocation.startsWith(button.getText())) {
                 button.setSelected(true);
             }
         }
@@ -136,13 +140,6 @@ public class FileView extends VBox implements Initializable {
         for (Path root : rootDirectories) {
             drives.add(createLocalStorageButton(root));
         }
-        EventBus.subscribeToStorageEvent(event -> {
-            if (event.isAttached()) {
-                localDrives.getButtons().add(createLocalStorageButton(event.getStorage()));
-            } else if (event.isDetached()) {
-                localDrives.getButtons().removeIf(toggleButton -> toggleButton.getText().equals(event.getStorage().toString()));
-            }
-        });
         return drives;
     }
 
@@ -278,5 +275,21 @@ public class FileView extends VBox implements Initializable {
     @FXML
     public void setSide(String side) {
         this.side.set(side);
+    }
+
+    @Override
+    @Handler(delivery = Invoke.Synchronously, rejectSubtypes = true)
+    public void onEvent(StorageEvent event) {
+        System.out.println("side: " + side + " thread: " + Thread.currentThread().getName() + "event: " + event);
+        Platform.runLater(() -> changeStorageButtons(event));
+    }
+
+    private void changeStorageButtons(final StorageEvent event) {
+        final Path storage = event.getStorage();
+        if (event.isAttached()) {
+            localDrives.getButtons().add(createLocalStorageButton(storage));
+        } else if (event.isDetached()) {
+            localDrives.getButtons().removeIf(toggleButton -> toggleButton.getText().equals(storage.toString()));
+        }
     }
 }

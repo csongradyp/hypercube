@@ -1,5 +1,6 @@
 package com.noe.hypercube.ui;
 
+import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.ui.dialog.FileProgressDialog;
 import com.noe.hypercube.ui.domain.IFile;
 import javafx.application.Platform;
@@ -61,6 +62,8 @@ public class FileManager extends VBox implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         leftFileView.initStartLocation();
         rightFileView.initStartLocation();
+        EventBus.subscribeToStorageEvent(leftFileView);
+        EventBus.subscribeToStorageEvent(rightFileView);
     }
 
     @FXML

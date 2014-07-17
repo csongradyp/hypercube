@@ -37,14 +37,16 @@ public class StorageCheckTask implements Runnable {
                 roots.remove(newRoot);
             } else {
                 LOG.info("Drive has been detected : {}", newRoot);
+                final StorageEvent storageEvent = new StorageEvent(newRoot, ATTACHED);
+                EventBus.publish(storageEvent);
                 newRoots.add(newRoot);
-                EventBus.publish(new StorageEvent(newRoot, ATTACHED));
             }
         }
         if (!roots.isEmpty()) {
             for (Path root : roots) {
                 LOG.info("Drive has been removed : {}", root);
-                EventBus.publish(new StorageEvent(root, DETACHED));
+                final StorageEvent storageEvent = new StorageEvent(root, DETACHED);
+                EventBus.publish(storageEvent);
             }
         }
         lastCheckedRoots = newRoots;

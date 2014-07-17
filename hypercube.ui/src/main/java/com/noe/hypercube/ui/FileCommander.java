@@ -9,18 +9,26 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.awt.*;
+
 public class FileCommander extends Application {
+
+    private static final String TRAY_DEFAULT_IMAGE_KEY = "tray.default";
+    private static final GraphicsDevice DEFAULT_SCREEN_DEVICE = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+    private static final Integer WIDTH = DEFAULT_SCREEN_DEVICE.getDisplayMode().getWidth();
+    private static final Integer HEIGHT = DEFAULT_SCREEN_DEVICE.getDisplayMode().getHeight();
 
     private HypercubeTrayIcon trayIcon;
 
     @Override
     public void start(final Stage stage) throws Exception {
+
         trayIcon = new HypercubeTrayIcon(stage);
         Parent fileCommander = FXMLLoader.load(getClass().getClassLoader().getResource("main.fxml"));
-        Scene scene = new Scene(fileCommander, 800, 600);
+        Scene scene = new Scene(fileCommander, WIDTH, HEIGHT);
         stage.setScene(scene);
         stage.setTitle("HyperCube - Cloud connected");
-        stage.getIcons().add(ImageBundle.getImage("tray.default"));
+        stage.getIcons().add(ImageBundle.getImage(TRAY_DEFAULT_IMAGE_KEY));
         stage.setOnCloseRequest(t -> hide(stage));
         Platform.setImplicitExit(false);
     }

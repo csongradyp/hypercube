@@ -1,6 +1,5 @@
 package com.noe.hypercube.event.subscriber;
 
-import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
 import com.noe.hypercube.event.domain.FileEvent;
 
@@ -18,7 +17,7 @@ public class FileEventSubscribtionBean {
     @PostConstruct
     public void subscribeAll() {
         for(EventHandler<FileEvent> listener : listeners) {
-            EventBus.subscribeToFileEvent(listener);
+//            EventBus.subscribeToFileEvent(listener);
         }
     }
 }
