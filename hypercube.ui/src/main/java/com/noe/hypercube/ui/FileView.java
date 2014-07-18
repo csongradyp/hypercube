@@ -1,33 +1,19 @@
 package com.noe.hypercube.ui;
 
-import com.noe.hypercube.event.EventHandler;
-import com.noe.hypercube.event.domain.StorageEvent;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.domain.IFile;
 import com.noe.hypercube.ui.factory.IconFactory;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeItem;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import net.engio.mbassy.listener.Handler;
-import net.engio.mbassy.listener.Invoke;
 import org.controlsfx.control.BreadCrumbBar;
 import org.controlsfx.control.SegmentedButton;
 
@@ -36,17 +22,14 @@ import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static javafx.scene.input.KeyCombination.ModifierValue.DOWN;
 import static javafx.scene.input.KeyCombination.ModifierValue.UP;
 
-public class FileView extends VBox implements Initializable, EventHandler<StorageEvent> {
+public class FileView extends VBox implements Initializable {
 
     private static final String SEPARATOR = System.getProperty("file.separator");
     private static final String SEPARATOR_PATTERN = Pattern.quote(SEPARATOR);
@@ -74,6 +57,7 @@ public class FileView extends VBox implements Initializable, EventHandler<Storag
 
     public FileView() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fileView.fxml"));
+        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage())));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         try {
@@ -83,7 +67,6 @@ public class FileView extends VBox implements Initializable, EventHandler<Storag
         }
     }
 
-    @FXML
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initLocalDrives();
@@ -275,21 +258,5 @@ public class FileView extends VBox implements Initializable, EventHandler<Storag
     @FXML
     public void setSide(String side) {
         this.side.set(side);
-    }
-
-    @Override
-    @Handler(delivery = Invoke.Synchronously, rejectSubtypes = true)
-    public void onEvent(StorageEvent event) {
-        System.out.println("side: " + side + " thread: " + Thread.currentThread().getName() + "event: " + event);
-        Platform.runLater(() -> changeStorageButtons(event));
-    }
-
-    private void changeStorageButtons(final StorageEvent event) {
-        final Path storage = event.getStorage();
-        if (event.isAttached()) {
-            localDrives.getButtons().add(createLocalStorageButton(storage));
-        } else if (event.isDetached()) {
-            localDrives.getButtons().removeIf(toggleButton -> toggleButton.getText().equals(storage.toString()));
-        }
     }
 }

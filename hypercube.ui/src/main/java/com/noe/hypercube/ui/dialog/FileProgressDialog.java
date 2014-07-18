@@ -10,36 +10,27 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.controlsfx.dialog.Dialog;
-import org.controlsfx.dialog.DialogStyle;
 
 import java.nio.file.Path;
+import java.util.ResourceBundle;
 
 public class FileProgressDialog extends Dialog {
 
+    private final static String title = "title.copy";
     private final ProgressBar progressBar = new ProgressBar( 0 );
     private final ProgressIndicator indicator = new ProgressIndicator( 0 );
     private OnProgressListener onProgressListener;
 
-    public FileProgressDialog( Object owner, String title, Path from, Path to ) {
-        super( owner, title );
-        init(from, to);
+    public FileProgressDialog( Object owner, ResourceBundle bundle, Path from, Path to ) {
+        super( owner, bundle.getString( title ) );
+        init(bundle, from, to);
     }
 
-    public FileProgressDialog( Object owner, String title, boolean lightweight, Path from, Path to ) {
-        super( owner, title, lightweight );
-        init(from, to );
-    }
-
-    public FileProgressDialog( Object owner, String title, boolean lightweight, DialogStyle style, Path from, Path to ) {
-        super( owner, title, lightweight, style );
-        init(from, to );
-    }
-
-    private void init(Path from, Path to) {
+    private void init(ResourceBundle bundle, Path from, Path to) {
         progressBar.setPrefWidth( 300 );
         indicator.autosize();
-        final Label fromLabel = new Label( "From: " + from + "*" );
-        final Label toLabel = new Label( "To: " + to + "*");
+        final Label fromLabel = new Label( bundle.getString( "copy.from" ) + from + "*" );
+        final Label toLabel = new Label( bundle.getString( "copy.to" ) + to + "*");
         final Label currentFile = new Label();
         final HBox progressBox = new HBox( 5, progressBar, indicator );
         progressBox.setAlignment( Pos.CENTER );
