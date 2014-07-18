@@ -1,6 +1,6 @@
 package com.noe.hypercube.ui;
 
-
+import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.domain.IFile;
 import com.noe.hypercube.ui.domain.LocalFile;
 import com.noe.hypercube.ui.factory.FileCellFactory;
@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class FileTableView extends TableView<IFile> implements Initializable {
@@ -49,6 +50,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
 
     public FileTableView() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fileTableView.fxml"));
+        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage())));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         try {

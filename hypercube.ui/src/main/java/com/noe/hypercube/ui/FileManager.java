@@ -1,6 +1,6 @@
 package com.noe.hypercube.ui;
 
-import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.dialog.FileProgressDialog;
 import com.noe.hypercube.ui.domain.IFile;
 import javafx.application.Platform;
@@ -19,6 +19,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class FileManager extends VBox implements Initializable {
@@ -47,8 +48,12 @@ public class FileManager extends VBox implements Initializable {
     @FXML
     private Button download;
 
+    @FXML
+    private ResourceBundle resources;
+
     public FileManager() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fileManager.fxml"));
+        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage())));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         try {
@@ -62,8 +67,6 @@ public class FileManager extends VBox implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         leftFileView.initStartLocation();
         rightFileView.initStartLocation();
-        EventBus.subscribeToStorageEvent(leftFileView);
-        EventBus.subscribeToStorageEvent(rightFileView);
     }
 
     @FXML
@@ -72,9 +75,10 @@ public class FileManager extends VBox implements Initializable {
         FileView inactiveFileView = getInactiveFileView();
 
         Collection<IFile> markedFiles = activeFileView.getMarkedFiles();
-        Action action = Dialogs.create().title("Copy file(s)").message(markedFiles.toString()).showConfirm();
+        final String title = resources.getString("title.copy");
+        Action action = Dialogs.create().title(title).message(markedFiles.toString()).showConfirm();
         if ("Yes".equals(action.textProperty().getValue())) {
-            FileProgressDialog test = new FileProgressDialog(this, "Copy file(s)", activeFileView.getLocation(), inactiveFileView.getLocation());
+            FileProgressDialog test = new FileProgressDialog(this, resources, activeFileView.getLocation(), inactiveFileView.getLocation());
             test.show();
             System.out.println(markedFiles);
             for (IFile markedFile : markedFiles) {

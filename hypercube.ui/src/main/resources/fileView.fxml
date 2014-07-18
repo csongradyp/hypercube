@@ -11,9 +11,9 @@
     <children>
         <ToolBar prefHeight="30.0" prefWidth="400.0" VBox.vgrow="NEVER">
             <items>
-                <Label text="Locals" />
+                <Label text="%storage.locals" />
                 <SegmentedButton fx:id="localDrives" onMouseClicked="#onLocalDriveMouseClicked" />
-                <Label text="Remotes" />
+                <Label text="%storage.remotes" />
                 <SegmentedButton fx:id="remoteDrives" />
             </items>
         </ToolBar>
