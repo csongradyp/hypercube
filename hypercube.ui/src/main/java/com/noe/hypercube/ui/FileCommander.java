@@ -16,12 +16,13 @@ import java.util.ResourceBundle;
 public class FileCommander extends Application {
 
     private HypercubeTrayIcon trayIcon;
+    private ResourceBundle messageBundle;
 
     @Override
     public void start(final Stage stage) throws Exception {
         trayIcon = new HypercubeTrayIcon(stage);
-        Parent fileCommander = FXMLLoader.load(getClass().getClassLoader().getResource("main.fxml"),
-                ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage())));
+        messageBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
+        Parent fileCommander = FXMLLoader.load(getClass().getClassLoader().getResource("main.fxml"), messageBundle);
         Scene scene = new Scene(fileCommander, 800, 600);
         stage.setScene(scene);
         stage.setTitle("HyperCube - Cloud connected");
@@ -33,7 +34,7 @@ public class FileCommander extends Application {
     private void hide(final Stage stage) {
         Platform.runLater(() -> {
             stage.hide();
-            trayIcon.hide();
+            trayIcon.hide(messageBundle);
         });
     }
 

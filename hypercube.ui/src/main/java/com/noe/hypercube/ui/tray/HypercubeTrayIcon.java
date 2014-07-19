@@ -1,5 +1,6 @@
 package com.noe.hypercube.ui.tray;
 
+import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -7,6 +8,8 @@ import javafx.stage.Stage;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class HypercubeTrayIcon {
     private static final String TRAY_DEFAULT_IMAGE_KEY = "tray.default";
@@ -18,6 +21,8 @@ public class HypercubeTrayIcon {
         if (SystemTray.isSupported()) {
             final ActionListener closeListener = event -> System.exit(0);
             final ActionListener showListener = event -> Platform.runLater(stage::show);
+            stage.toFront();
+            stage.requestFocus();
             final PopupMenu popup = createPopupMenu(closeListener, showListener);
             final Image trayIconImage = ImageBundle.getRawImage(TRAY_DEFAULT_IMAGE_KEY);
             trayIcon = new HTrayIcon(trayIconImage, popup);
@@ -49,9 +54,9 @@ public class HypercubeTrayIcon {
         return popup;
     }
 
-    public void hide() {
+    public void hide(ResourceBundle messageBundle) {
         if (firstTime) {
-            trayIcon.displayMessage("HyperCube is minimized", "All services will be run in background", TrayIcon.MessageType.INFO);
+            trayIcon.displayMessage(messageBundle.getString("prompt.minimized.title"), messageBundle.getString("prompt.minimized"), TrayIcon.MessageType.INFO);
             firstTime = false;
         }
     }

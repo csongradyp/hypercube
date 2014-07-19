@@ -25,7 +25,6 @@ import java.io.IOException;
 
 public final class DialogFactory {
 
-    // Imagine that this method is called somewhere in your codebase
     public static Dialog createLoginDialog() {
         final TextField txUserName = new TextField();
         final PasswordField txPassword = new PasswordField();
