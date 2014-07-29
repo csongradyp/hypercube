@@ -3,6 +3,7 @@ package com.noe.hypercube.ui.domain;
 import javafx.beans.property.BooleanProperty;
 
 import java.nio.file.Path;
+import java.util.Collection;
 
 public interface IFile {
 
@@ -35,4 +36,10 @@ public interface IFile {
     void mark();
 
     boolean isRoot();
+
+    boolean isShared();
+
+    Collection<String> sharedWith();
+
+    void share(String account);
 }

@@ -9,8 +9,8 @@ public class RemoteFile extends File {
     private final long size;
     private final Date lastModified;
 
-    protected RemoteFile( final Path path, final long size, final boolean directory, final Date lastModified ) {
-        super( path );
+    protected RemoteFile(final Path path, final long size, final boolean directory, final Date lastModified) {
+        super(path);
         this.directory = directory;
         this.size = size;
         this.lastModified = lastModified;
@@ -36,7 +36,9 @@ public class RemoteFile extends File {
         return lastModified.getTime();
     }
 
-    @Override public boolean isRoot() {
+    @Override
+    public boolean isRoot() {
         return false;
     }
+
 }

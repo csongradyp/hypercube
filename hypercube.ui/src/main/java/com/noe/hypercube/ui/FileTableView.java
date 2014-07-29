@@ -7,6 +7,8 @@ import com.noe.hypercube.ui.factory.FileCellFactory;
 import com.noe.hypercube.ui.factory.IconFactory;
 import com.noe.hypercube.ui.util.DateUtil;
 import com.noe.hypercube.ui.util.FileSizeCalculator;
+import de.jensd.fx.fontawesome.AwesomeDude;
+import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -17,11 +19,10 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
 import javafx.scene.text.TextAlignment;
 import org.apache.commons.io.FilenameUtils;
 
@@ -37,9 +38,11 @@ import java.util.ResourceBundle;
 public class FileTableView extends TableView<IFile> implements Initializable {
 
     @FXML
-    private TableColumn<IFile, IFile> extColumn;
+    private TableColumn<IFile, IFile> sharedColumn;
     @FXML
     private TableColumn<IFile, IFile> fileNameColumn;
+    @FXML
+    private TableColumn<IFile, IFile> extColumn;
     @FXML
     private TableColumn<IFile, IFile> fileSizeColumn;
     @FXML
@@ -50,7 +53,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
 
     public FileTableView() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fileTableView.fxml"));
-        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage())));
+        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale( ConfigurationBundle.getLanguage() )));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         try {
@@ -62,36 +65,50 @@ public class FileTableView extends TableView<IFile> implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Platform.runLater(() -> {
-            if (isActive()) {
-                requestFocus();
-            }
-        });
+        setEmptyTablePlaceholder( resources );
+        requestFocusIfActive();
+
+//        sharedColumn.setGraphic( AwesomeDude.createIconLabel( AwesomeIcon.SHARE_ALT, "15" ));
+        sharedColumn.setGraphic( AwesomeDude.createIconLabel( AwesomeIcon.CODE_FORK, "15" ));
 
         fileNameColumn.setCellValueFactory(file -> new ReadOnlyObjectWrapper<>(file.getValue()));
         fileNameColumn.setCellFactory(new FileCellFactory(file -> {
-            HBox box = new HBox(10);
-            ImageView imageview = new ImageView(IconFactory.getFileIcon(file));
-            Label label = new Label(file.getName());
-            box.getChildren().addAll(imageview, label);
+            Label label = IconFactory.getFileIcon( file );
             if (file.isMarked()) {
                 label.getStyleClass().add("table-row-marked");
                 getStyleClass().add("table-row-marked");
+            } else if (file.isShared()) {
+                getStyleClass().add("table-row-special");
+                label.getStyleClass().add("table-row-special");
             } else {
-                label.getStyleClass().remove("table-row-marked");
-                getStyleClass().remove("table-row-marked");
+                label.getStyleClass().removeAll( "table-row-marked", "table-row-special" );
+                getStyleClass().removeAll( "table-row-marked", "table-row-special" );
             }
-            return box;
+            return label;
         }));
 
         fileSizeColumn.setCellFactory(new FileCellFactory(TextAlignment.RIGHT, file -> file.isStepBack() ? "" : FileSizeCalculator.calculate(file)));
         fileSizeColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 
         extColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-        extColumn.setCellFactory(new FileCellFactory(TextAlignment.CENTER, file -> !file.isDirectory() ? FilenameUtils.getExtension(file.getName()) : ""));
+        extColumn.setCellFactory(new FileCellFactory(TextAlignment.CENTER, file -> !file.isDirectory() ? FilenameUtils.getExtension( file.getName() ) : ""));
 
         dateColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
         dateColumn.setCellFactory(new FileCellFactory(TextAlignment.RIGHT, file -> DateUtil.format(file.lastModified())));
+    }
+
+    private void setEmptyTablePlaceholder( ResourceBundle resources ) {
+        final Label iconLabel = AwesomeDude.createIconLabel( AwesomeIcon.PUZZLE_PIECE, resources.getString( "table.empty" ), "100px", "12", ContentDisplay.TOP );
+        iconLabel.getGraphic().setOpacity( 0.3d );
+        setPlaceholder( iconLabel );
+    }
+
+    private void requestFocusIfActive() {
+        Platform.runLater( () -> {
+            if ( isActive() ) {
+                requestFocus();
+            }
+        } );
     }
 
     public void updateLocation(Path dir) {
@@ -102,12 +119,14 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         if (stepBack != null) {
             dirs.add(stepBack);
         }
-        for (java.io.File file : list) {
-            if (!file.isHidden() && Files.isReadable(file.toPath())) {
-                if (file.isDirectory()) {
-                    dirs.add(new LocalFile(file));
-                } else {
-                    files.add(new LocalFile(file));
+        if ( list != null ) {
+            for (java.io.File file : list) {
+                if (!file.isHidden() && Files.isReadable(file.toPath())) {
+                    if (file.isDirectory()) {
+                        dirs.add(new LocalFile(file));
+                    } else {
+                        files.add(new LocalFile(file));
+                    }
                 }
             }
         }

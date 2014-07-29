@@ -5,7 +5,6 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.AnchorPane;
@@ -14,6 +13,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
+
+import static javafx.scene.layout.AnchorPane.*;
 
 public class Controller implements Initializable {
 
@@ -26,14 +27,12 @@ public class Controller implements Initializable {
     @FXML
     private AnchorPane commander;
 
-    private ResourceBundle resources;
-
-    @Override public void initialize( URL location, ResourceBundle resources ) {
-        this.resources = resources;
-        languages.getSelectionModel().selectedItemProperty().addListener( ( observable, oldValue, newValue ) -> {
-            ConfigurationBundle.setLanguage( newValue );
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        languages.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            ConfigurationBundle.setLanguage(newValue);
             changLanguage();
-        } );
+        });
     }
 
     @FXML
@@ -42,17 +41,19 @@ public class Controller implements Initializable {
     }
 
     public void changLanguage() {
-        final Locale locale = new Locale( ConfigurationBundle.getLanguage() );
-        resources = ResourceBundle.getBundle("internationalization/messages", locale );
+        final Locale locale = new Locale(ConfigurationBundle.getLanguage());
         commander.getChildren().clear();
-        loadView( locale );
+        loadView(locale);
     }
 
     public void loadView(Locale locale) {
         try {
-            Parent fileCommander = FXMLLoader.load( getClass().getClassLoader().getResource( "main.fxml" ),
-                                                    ResourceBundle.getBundle( "internationalization/messages", locale) );
-            commander.getChildren().add( fileCommander );
+            AnchorPane fileCommander = FXMLLoader.load(getClass().getClassLoader().getResource("main.fxml"), ResourceBundle.getBundle("internationalization/messages", locale));
+            commander.getChildren().add(fileCommander);
+            setTopAnchor(fileCommander, 0d);
+            setBottomAnchor(fileCommander, 0d);
+            setRightAnchor(fileCommander, 0d);
+            setLeftAnchor(fileCommander, 0d);
         } catch (IOException ex) {
             ex.printStackTrace();
         }

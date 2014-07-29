@@ -10,12 +10,10 @@
 <fx:root alignment="TOP_RIGHT" prefHeight="20.0" prefWidth="400.0" type="javafx.scene.layout.VBox" HBox.hgrow="ALWAYS" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <ToolBar prefHeight="30.0" prefWidth="400.0" VBox.vgrow="NEVER">
-            <items>
-                <Label text="%storage.locals" />
-                <SegmentedButton fx:id="localDrives" onMouseClicked="#onLocalDriveMouseClicked" />
-                <Label text="%storage.remotes" />
-                <SegmentedButton fx:id="remoteDrives" />
-            </items>
+            <Label text="%storage.locals"/>
+            <SegmentedButton fx:id="localDrives" onMouseClicked="#onLocalDriveMouseClicked"/>
+            <Label text="%storage.remotes"/>
+            <SegmentedButton fx:id="remoteDrives"/>
         </ToolBar>
         <BreadCrumbBar fx:id="breadcrumb" onCrumbAction="#onCrumbAction" focusTraversable="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="20.0" VBox.vgrow="NEVER" />
         <FileTableView fx:id="table" onMouseClicked="#onMouseClicked" onKeyPressed="#onKeyPressed" prefHeight="450.0" prefWidth="400.0" />

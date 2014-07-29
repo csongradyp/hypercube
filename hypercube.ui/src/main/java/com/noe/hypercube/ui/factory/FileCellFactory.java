@@ -44,6 +44,8 @@ public class FileCellFactory implements Callback<TableColumn<IFile, IFile>, Tabl
                     }
                     if ( file.isMarked() ) {
                         getStyleClass().add( "table-row-marked" );
+                    } else if ( file.isShared() ) {
+                        getStyleClass().add( "table-row-special" );
                     } else {
                         getStyleClass().remove( "table-row-marked" );
                     }

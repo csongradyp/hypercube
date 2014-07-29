@@ -4,13 +4,13 @@ public class LocalFile extends File {
 
     private final java.io.File file;
 
-    public LocalFile( java.io.File file ) {
+    public LocalFile(java.io.File file) {
         super(file.toPath());
-        this.file  = file;
+        this.file = file;
     }
 
-    public LocalFile( String path ) {
-        this(new java.io.File( path ));
+    public LocalFile(String path) {
+        this(new java.io.File(path));
     }
 
     public LocalFile(final String path, final boolean stepBack) {
@@ -18,9 +18,9 @@ public class LocalFile extends File {
         setStepBack(stepBack);
     }
 
-    public LocalFile( java.io.File parentFile, boolean stepBack ) {
-        this( parentFile);
-        setStepBack( stepBack );
+    public LocalFile(java.io.File parentFile, boolean stepBack) {
+        this(parentFile);
+        setStepBack(stepBack);
     }
 
     @Override
@@ -43,8 +43,10 @@ public class LocalFile extends File {
         return file.lastModified();
     }
 
-    @Override public boolean isRoot() {
+    @Override
+    public boolean isRoot() {
         return file.getParentFile().getParentFile() == null;
     }
+
 
 }

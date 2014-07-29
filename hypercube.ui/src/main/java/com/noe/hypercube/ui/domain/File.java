@@ -4,18 +4,20 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public abstract class File implements IFile {
-
-    private static final String PARENT_DIR_PLACEHOLDER = "[ . . ]";
 
     protected Path path;
     private boolean stepBack;
     private final SimpleBooleanProperty marked;
+    private Collection<String> shared;
 
     protected File(Path path) {
         this.path = path;
         marked = new SimpleBooleanProperty(false);
+        shared = new ArrayList<>();
     }
 
     @Override
@@ -41,23 +43,23 @@ public abstract class File implements IFile {
     @Override
     public Path getParentDirectory() {
         Path currentDir = path.getParent();
-        if ( !stepBack && currentDir != null) {
-            if( isRootDirectory( currentDir ) ) {
-                 return currentDir;
-             }
-             return currentDir.getParent();
-         }
+        if (!stepBack && currentDir != null) {
+            if (isRootDirectory(currentDir)) {
+                return currentDir;
+            }
+            return currentDir.getParent();
+        }
         return path;
     }
 
-    private boolean isRootDirectory( Path parentDir ) {
+    private boolean isRootDirectory(Path parentDir) {
         return parentDir.getParent() == null;
     }
 
     @Override
     public String getName() {
         if (stepBack) {
-            return PARENT_DIR_PLACEHOLDER;
+            return "";
         }
         return path.getFileName().toString();
     }
@@ -68,8 +70,8 @@ public abstract class File implements IFile {
     }
 
     @Override
-    public void setMarked( boolean marked ) {
-        this.marked.set( marked );
+    public void setMarked(boolean marked) {
+        this.marked.set(marked);
     }
 
     @Override
@@ -79,11 +81,30 @@ public abstract class File implements IFile {
 
     @Override
     public void mark() {
-        marked.set( !marked.get() );
+        marked.set(!marked.get());
     }
 
     @Override
     public String toString() {
         return path.toString();
+    }
+
+    @Override
+    public boolean isShared() {
+        return !shared.isEmpty();
+    }
+
+    @Override
+    public Collection<String> sharedWith() {
+        return shared;
+    }
+
+    public void setShared(Collection<String> accounts) {
+        this.shared = accounts;
+    }
+
+    @Override
+    public void share(String account) {
+        shared.add(account);
     }
 }

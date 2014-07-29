@@ -13,6 +13,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>de.jensd</groupId>
+            <artifactId>fontawesomefx</artifactId>
+            <version>8.0.8</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.noe.hypercube</groupId>
             <artifactId>hypercube.event</artifactId>
             <version>1.0-SNAPSHOT</version>

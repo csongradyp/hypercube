@@ -78,10 +78,10 @@ public class FileView extends VBox implements Initializable {
         });
         table.getActiveProperty().addListener((observable, oldValue, newValue) -> table.getSelectionModel().selectFirst());
         //        MasterDetailPane pane = new MasterDetailPane();
-//        pane.setMasterNode(table);
-//        pane.setDetailNode(breadcrumb);
-//        pane.setDetailSide( Side.TOP);
-//        pane.setShowDetailNode(true);
+        //        pane.setMasterNode(table);
+        //        pane.setDetailNode(breadcrumb);
+        //        pane.setDetailSide( Side.TOP);
+        //        pane.setShowDetailNode(true);
     }
 
     public void initStartLocation() {
@@ -137,6 +137,23 @@ public class FileView extends VBox implements Initializable {
     }
 
     private void initRemoteDrives() {
+        for (int i = 0; i < 3; i++) {
+            final ToggleButton test = new ToggleButton(String.valueOf(i));
+            remoteDrives.getButtons().add(test);
+            test.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                table.getStylesheets().removeAll("style/darkTheme.css", "style/caspian_mod.css", "style/fileTableView.css");
+                if (test.getText().equals("0")) {
+                    table.getStylesheets().add("style/darkTheme.css");
+                    table.getStylesheets().add("style/fileTableView.css");
+                } else if (test.getText().equals("1")) {
+                    table.getStylesheets().add("style/caspian_mod.css");
+                    table.getStylesheets().add("style/fileTableView.css");
+                } else if (test.getText().equals("2")) {
+                    table.getStylesheets().add("style/win7.css");
+                    table.getStylesheets().add("style/fileTableView.css");
+                }
+            });
+        }
         ToggleButton remoteDriveButton = new ToggleButton("+");
         remoteDriveButton.setFocusTraversable(false);
         remoteDriveButton.setTooltip(new Tooltip("Add new remote drive"));
