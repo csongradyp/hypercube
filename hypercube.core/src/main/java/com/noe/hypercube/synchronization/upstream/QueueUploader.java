@@ -35,20 +35,20 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
 
     @Override
     public void run() {
-        while(!stop) {
+        while (!stop) {
             UploadEntity uploadEntity = uploadQ.poll();
-            Path remotePath = uploadEntity.getRemotePath();
+            Path remotePath = uploadEntity.getRemoteFolder();
             File file = uploadEntity.getFile();
             try {
                 final Action action = uploadEntity.getAction();
                 if (ADDED == action) {
-                    uploadNew(file, remotePath);
+                    super.uploadNew(uploadEntity);
                 } else if (CHANGED == action) {
-                    uploadUpdated(file, remotePath);
+                    super.uploadUpdated(uploadEntity);
                 } else if (REMOVED == action) {
-                    delete(file, remotePath);
+                    super.delete(uploadEntity);
                 }
-            }catch (SynchronizationException e) {
+            } catch (SynchronizationException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -64,21 +64,16 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     }
 
     @Override
-    public void uploadNew(final File file, final Path remotePath) throws SynchronizationException {
-        submit(file, remotePath, ADDED);
+    public void uploadUpdated(final UploadEntity uploadEntity) throws SynchronizationException {
+        uploadQ.add(uploadEntity);
     }
 
     @Override
-    public void uploadUpdated(final File file, final Path remotePath) throws SynchronizationException {
-        submit(file, remotePath, CHANGED);
+    public void uploadNew(final UploadEntity uploadEntity) throws SynchronizationException {
+        uploadQ.add(uploadEntity);
     }
 
-    @Override
-    public void delete(final File file, final Path remotePath) throws SynchronizationException {
-        submit(file, remotePath, REMOVED);
-    }
-
-    public void submit(final File file, final Path remotePath, final Action action) throws SynchronizationException {
-        uploadQ.add(new UploadEntity(file, remotePath, action));
+    public void submit(final File file, final Path remotePath, final String origin) throws SynchronizationException {
+        uploadQ.add(new UploadEntity(file, remotePath, origin));
     }
 }

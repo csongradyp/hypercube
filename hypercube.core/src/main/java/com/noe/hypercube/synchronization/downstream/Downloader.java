@@ -41,7 +41,7 @@ public class Downloader implements IDownloader {
 
     private AtomicBoolean stop = new AtomicBoolean(false);
 
-    public Downloader(IClient client, IMapper directoryMapper, FileEntityFactory entityFactory, IPersistenceController persistenceController) {
+    public Downloader(final IClient client, final IMapper directoryMapper, final FileEntityFactory entityFactory, final IPersistenceController persistenceController) {
         this.client = client;
         this.persistenceController = persistenceController;
         this.directoryMapper = directoryMapper;
@@ -57,24 +57,37 @@ public class Downloader implements IDownloader {
     @Override
     public void run() {
         while (!stop.get()) {
-            ServerEntry entry = null;
+            ServerEntry entry;
             try {
                 entry = downloadQ.take();
+                process(entry);
             } catch (InterruptedException e) {
-                LOG.error(client.getAccountName() + " download queue operation has been interrupted");
+                LOG.error("{} download queue operation has been interrupted", client.getAccountName());
             }
-            if (client.exist(entry)) {
-                downloadFromServer(entry);
-            } else {
-                deleteLocalFile(entry);
-            }
-            logQueueEmpty();
         }
+    }
+
+    private void process(ServerEntry entry) {
+        if (exist(entry)) {
+            downloadFromServer(entry);
+        } else {
+            deleteLocalFile(entry);
+        }
+        logQueueEmpty();
+    }
+
+    private boolean exist(ServerEntry entry) {
+        try {
+            return client.exist(entry);
+        } catch (SynchronizationException e) {
+            LOG.error("{} - Error Occurred while getting information of file: {}", client.getAccountName(), entry.getPath());
+        }
+        return false;
     }
 
     private void logQueueEmpty() {
         if (downloadQ.isEmpty()) {
-            LOG.info(client.getAccountName() + " download queue is empty. Waiting for changes from server");
+            LOG.info("{} download queue is empty. Waiting for changes from server", client.getAccountName());
         }
     }
 
@@ -102,24 +115,47 @@ public class Downloader implements IDownloader {
         return !dbEntry.getRevision().equals(entry.getRevision());
     }
 
-    private void downloadFromServer(ServerEntry entry) {
+    private void downloadFromServer(final ServerEntry entry) {
         if (entry.isFile()) {
             final List<Path> localPaths = directoryMapper.getLocals(entry.getPath());
             for (Path localPath : localPaths) {
-                File newLocalFile = new File(localPath.toString(), entry.getPath().getFileName().toString());
+                final File newLocalFile = createNewLocalFileReference(entry, localPath);
                 final Action action = getDeltaAction(entry, newLocalFile);
                 if (ADDED == action) {
-                    EventBus.publish(new FileEvent(entry.getPath(), newLocalFile.toPath(), FileEventType.NEW));
+                    publishEvent(entry, newLocalFile, FileEventType.NEW);
                     createDirsFor(newLocalFile);
                     download(entry, newLocalFile);
                 } else if (CHANGED == action) {
-                    EventBus.publish(new FileEvent(entry.getPath(), newLocalFile.toPath(), FileEventType.UPDATED));
+                    publishEvent(entry, newLocalFile, FileEventType.UPDATED);
                     download(entry, newLocalFile);
                 } else {
                     LOG.debug("{} is up to date", localPath);
                 }
             }
         }
+    }
+
+    private File createNewLocalFileReference(final ServerEntry entry, final Path localPath) {
+        File newLocalFile = new File(localPath.toString(), entry.getPath().getFileName().toString());
+        if (isConflicted(newLocalFile)) {
+            LOG.warn("{} Conflict {}", client.getAccountName(), newLocalFile);
+            final String conflictedFileName = String.format("%s (%s)", entry.getPath().getFileName().toString(), client.getAccountName());
+            LOG.info("{} already exists! File name updated to: {}", newLocalFile.toPath(), conflictedFileName);
+            newLocalFile = new File(localPath.toString(), conflictedFileName);
+        }
+        return newLocalFile;
+    }
+
+    private boolean isConflicted(File newLocalFile) {
+        return newLocalFile.exists() && isNotMapped(newLocalFile);
+    }
+
+    private boolean isNotMapped(File newLocalFile) {
+        return persistenceController.get(newLocalFile.toPath().toString(), client.getEntityType()) == null;
+    }
+
+    private void publishEvent(ServerEntry entry, File newLocalFile, FileEventType eventType) {
+        EventBus.publish(new FileEvent(entry.getPath(), newLocalFile.toPath(), eventType));
     }
 
 

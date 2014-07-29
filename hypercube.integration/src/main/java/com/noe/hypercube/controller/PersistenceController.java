@@ -4,14 +4,12 @@ import com.noe.hypercube.dao.Dao;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.IEntity;
 import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.service.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 @Named
 public class PersistenceController implements IPersistenceController {
@@ -51,6 +49,18 @@ public class PersistenceController implements IPersistenceController {
     }
 
     @Override
+    public Set<Class<IEntity>> getEntitiesMapping(String folder) {
+        Set<Class<IEntity>> results = new HashSet<>();
+        for (Dao<String, IEntity> dao : daos) {
+            final IEntity entity = dao.findById(folder);
+            if(entity != null) {
+                results.add(dao.getEntityClass());
+            }
+        }
+        return results;
+    }
+
+    @Override
     public void save(FileEntity entity) {
         Class<? extends FileEntity> entityClass = entity.getClass();
         Dao dao = daoMap.get(entityClass);
@@ -82,7 +92,7 @@ public class PersistenceController implements IPersistenceController {
 
     @Override
     public Collection<MappingEntity> getAllMappings() {
-        Collection<MappingEntity> allMappings = new LinkedList<>();
+        Collection<MappingEntity> allMappings = new ArrayList<>();
         Collection<Dao> daos = daoMap.values();
         for (Dao dao : daos) {
             if(MappingEntity.class.isAssignableFrom(dao.getEntityClass())) {
@@ -90,6 +100,38 @@ public class PersistenceController implements IPersistenceController {
             }
         }
         return allMappings;
+    }
+
+    @Override
+    public Collection<String> getLocalMappings() {
+        Set<String> mappedLocalFolders = new HashSet<>();
+        Collection<Dao> daos = daoMap.values();
+        for (Dao dao : daos) {
+            if(MappingEntity.class.isAssignableFrom(dao.getEntityClass())) {
+                final Collection<MappingEntity> daoMappings = dao.getAll();
+                for (MappingEntity mapping : daoMappings) {
+                    mappedLocalFolders.add(mapping.getLocalDir());
+                }
+            }
+        }
+        return mappedLocalFolders;
+    }
+
+    @Override
+    public List<FileEntity> getMappingUnder(String folder){
+        final List<FileEntity> fileEntities = new ArrayList<>();
+        Collection<Dao> daos = daoMap.values();
+        for (Dao dao : daos) {
+            if(FileEntity.class.isAssignableFrom(dao.getEntityClass())) {
+                final Collection<? extends FileEntity> mappings = dao.getAll();
+                for (FileEntity fileEntity : mappings) {
+                    if(folder.contains(fileEntity.getLocalPath())) {
+                        fileEntities.add(fileEntity);
+                    }
+                }
+            }
+        }
+        return fileEntities;
     }
 
     @Override

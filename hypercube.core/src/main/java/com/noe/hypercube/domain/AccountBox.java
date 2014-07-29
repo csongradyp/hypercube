@@ -55,4 +55,12 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     public IUploader<ACCOUNT_TYPE, ENTITY_TYPE> getUploader() {
         return uploader;
     }
+
+    public void stopUploader() {
+        uploader.stop();
+    }
+
+    public Class<ENTITY_TYPE> getEntityType() {
+        return client.getEntityType();
+    }
 }

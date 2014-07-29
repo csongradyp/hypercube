@@ -21,7 +21,7 @@ public class DriveDirectoryUtil {
     }
 
     private void getPath(com.google.api.services.drive.model.File file, ArrayList<String> path) throws IOException {
-        System.out.println(path + " - " + file.getTitle() + " is current file with id=" + file.getId());
+        LOG.debug(path + " - " + file.getTitle() + " is current file with id=" + file.getId());
         List<ParentReference> parents = file.getParents();
 //        for(int i=0;i<parents.size();i++){
             for (ParentReference parent : parents) {

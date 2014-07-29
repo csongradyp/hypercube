@@ -8,7 +8,9 @@ import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.ChangeList;
 import com.google.api.services.drive.model.ParentReference;
 import com.noe.hypercube.controller.IPersistenceController;
+import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
+import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.googledrive.domain.DriveFileEntity;
 import com.noe.hypercube.googledrive.domain.DriveServerEntry;
 import com.noe.hypercube.service.IClient;
@@ -63,26 +65,36 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
     }
 
     @Override
-    public boolean exist(final File fileToUpload, final Path remotePath) {
-        DriveFileEntity fileEntity = (DriveFileEntity) persistenceController.get(fileToUpload.getPath(), DriveFileEntity.class);
-        return isExisting(fileEntity.getFileId());
+    public boolean exist(final UploadEntity uploadEntity) throws SynchronizationException {
+        FileEntity fileEntity = persistenceController.get(uploadEntity.getFile().getPath(), DriveFileEntity.class);
+        if (fileEntity == null) {
+            final Path remoteFilePath = uploadEntity.getRemoteFilePath();
+            try {
+                final com.google.api.services.drive.model.File foundFile = client.files().get(remoteFilePath.toString()).execute();
+                return foundFile != null && foundFile.getId() != null && !foundFile.getId().isEmpty();
+            } catch (IOException e) {
+                LOG.error("Cannot get information of {}", remoteFilePath);
+                throw new SynchronizationException(String.format("Cannot get information of file: %s", remoteFilePath));
+            }
+        }
+        return isExisting(fileEntity.getId());
     }
 
     @Override
-    public boolean exist(final ServerEntry serverEntry) {
+    public boolean exist(final ServerEntry serverEntry) throws SynchronizationException {
         DriveServerEntry driveServerEntry = (DriveServerEntry) serverEntry;
         com.google.api.services.drive.model.File remoteFile = driveServerEntry.getRemoteFile();
-        return isExisting(remoteFile.getId());
+        return remoteFile != null;
     }
 
-    private boolean isExisting(String fileId) {
-        com.google.api.services.drive.model.File file = null;
+    private boolean isExisting(final String fileId) throws SynchronizationException {
+        com.google.api.services.drive.model.File file;
         try {
             file = client.files().get(fileId).execute();
         } catch (IOException e) {
-
+            throw new SynchronizationException(String.format("Could not get information of file via file ID: %s", fileId));
         }
-        return file != null;
+        return file != null && !file.isEmpty();
     }
 
     @Override
@@ -103,15 +115,22 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
             remotes.addAll(files.getItems());
             for (Change change : remotes) {
                 com.google.api.services.drive.model.File remoteFile = change.getFile();
-                if(!remoteFile.getTitle().equals(EXCLUDE_FILE)){
-                    DriveServerEntry serverEntry = new DriveServerEntry(remoteFile, dirUtil.getPath(remoteFile),remoteFile.getHeadRevisionId(), new Date(remoteFile.getModifiedDate().getValue()));
-                    result.add(serverEntry);
+                if (!remoteFile.getTitle().equals(EXCLUDE_FILE)) {
+                    if(isFile(remoteFile)) {
+                        DriveServerEntry serverEntry = new DriveServerEntry(dirUtil.getPath(remoteFile), remoteFile.getId(), remoteFile.getHeadRevisionId(), new Date(remoteFile.getModifiedDate().getValue()), false);
+                        result.add(serverEntry);
+                    }
                 }
             }
-             request.setPageToken(files.getNextPageToken());
+            request.setPageToken(files.getNextPageToken());
         } while (request.getPageToken() != null && !request.getPageToken().isEmpty());
 
         return result;
+    }
+
+    private boolean isFile(com.google.api.services.drive.model.File remoteFile) {
+        // TODO return if drive content is a folder or not!!!!!
+        return true;
     }
 
     @Override
@@ -156,21 +175,23 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
     }
 
     @Override
-    public void delete(final File localFile, final Path remotePath) throws SynchronizationException {
+    public void delete(final File localFile, final Path remoteFolder) throws SynchronizationException {
         String fileId = getFileId(localFile);
         try {
             client.files().delete(fileId);
         } catch (IOException e) {
-            LOG.error("Google Drive file deletion failed from server: {}", remotePath);
-            throw new SynchronizationException("Google Drive file deletion failed from server: " + remotePath);
+            LOG.error("Google Drive file deletion failed from server: {}", remoteFolder);
+            throw new SynchronizationException("Google Drive file deletion failed from server: " + remoteFolder);
         }
     }
 
     @Override
-    public ServerEntry uploadAsNew(final Path remotePath, final File fileToUpload, final InputStream inputStream) throws SynchronizationException {
-        List<ParentReference> parentReferences = getParentDirectories(remotePath);
-        com.google.api.services.drive.model.File content = getContent(fileToUpload, parentReferences);
-        FileContent mediaContent = new FileContent("text/plain", fileToUpload);
+    public ServerEntry uploadAsNew(final UploadEntity uploadEntity) throws SynchronizationException {
+        final Path remoteFilePath = uploadEntity.getRemoteFilePath();
+        final File toUpload = uploadEntity.getFile();
+        List<ParentReference> parentReferences = getParentDirectories(remoteFilePath);
+        com.google.api.services.drive.model.File content = getContent(toUpload, parentReferences);
+        FileContent mediaContent = new FileContent("text/plain", toUpload);
         com.google.api.services.drive.model.File driveFile;
         try {
             driveFile = client.files().insert(content, mediaContent).execute();
@@ -179,7 +200,7 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
         }
 
         Date lastModified = new Date(driveFile.getModifiedDate().getValue());
-        return new DriveServerEntry(remotePath.toString(), driveFile.getHeadRevisionId(), lastModified, false);
+        return new DriveServerEntry(remoteFilePath.toString(), driveFile.getId(), driveFile.getHeadRevisionId(), lastModified, false);
     }
 
     private List<ParentReference> getParentDirectories(final Path remotePath) throws SynchronizationException {
@@ -193,7 +214,10 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
     }
 
     @Override
-    public ServerEntry uploadAsUpdated(Path remotePath, File fileToUpload, InputStream inputStream) throws SynchronizationException {
+    public ServerEntry uploadAsUpdated(final UploadEntity uploadEntity) throws SynchronizationException {
+        final File fileToUpload = uploadEntity.getFile();
+        final Path remoteFilePath = uploadEntity.getRemoteFilePath();
+
         String driveFileId = getFileId(fileToUpload);
         com.google.api.services.drive.model.File driveFile = getDriveFile(driveFileId);
         FileContent mediaContent = new FileContent(driveFile.getMimeType(), fileToUpload);
@@ -206,7 +230,7 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
         }
 
         Date lastModified = new Date(updatedFile.getModifiedDate().getValue());
-        return new DriveServerEntry(remotePath.toString(), updatedFile.getHeadRevisionId(), lastModified, false);
+        return new DriveServerEntry(uploadEntity.getRemoteFilePath().toString(), updatedFile.getId(), updatedFile.getHeadRevisionId(), lastModified, false);
     }
 
     private com.google.api.services.drive.model.File getDriveFile(String driveFileId) throws SynchronizationException {

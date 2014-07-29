@@ -1,5 +1,7 @@
 package com.noe.hypercube.observer.remote;
 
+import com.noe.hypercube.domain.FileEntity;
+import com.noe.hypercube.service.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,7 @@ public class CloudMonitor {
         this.cloudObservers = cloudObservers;
     }
 
-    public CloudMonitor(Long pollInterval) {
+    public CloudMonitor(final Long pollInterval) {
         this.pollInterval = pollInterval;
         cloudObservers = new ArrayList<>();
     }
@@ -41,7 +43,7 @@ public class CloudMonitor {
         }
     }
 
-    public void submit(ICloudObserver observer) {
+    public void submit(final ICloudObserver observer) {
         executorService.schedule(observer, pollInterval, TimeUnit.MILLISECONDS);
     }
 
@@ -53,13 +55,13 @@ public class CloudMonitor {
         LOG.info("Cloud monitoring has been stopped");
     }
 
-    public void addObservers(Collection<CloudObserver> observers) {
+    public void addObservers(final Collection<CloudObserver<? extends Account, ? extends FileEntity>> observers) {
         for (CloudObserver observer : observers) {
             addObserver(observer);
         }
     }
 
-    public void addObserver(CloudObserver observer) {
+    public void addObserver(final CloudObserver observer) {
         cloudObservers.add(observer);
         LOG.debug("Cloud observer added for account: {}", observer.getAccountType().getName());
     }

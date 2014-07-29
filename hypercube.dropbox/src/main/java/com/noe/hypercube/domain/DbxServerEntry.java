@@ -20,6 +20,11 @@ public class DbxServerEntry implements ServerEntry {
     }
 
     @Override
+    public String getId() {
+        return revision;
+    }
+
+    @Override
     public String getRevision() {
         return revision;
     }

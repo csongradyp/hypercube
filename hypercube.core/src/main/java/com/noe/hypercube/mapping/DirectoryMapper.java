@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,7 +54,7 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
     @Override
     public List<Path> getRemotes(final Path localPath) {
         List<MappingEntity> mappedDirectories = getMappedDirectories(localPath, remoteDirectoryCollector);
-        List<Path> remoteDirs = new LinkedList<>();
+        List<Path> remoteDirs = new ArrayList<>();
         for (MappingEntity mapping : mappedDirectories) {
             Path remoteDir = convertToRemotePath(localPath.getParent(), mapping);
             remoteDirs.add(remoteDir);
@@ -63,7 +64,7 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
 
     private List<MappingEntity> getMappedDirectories(final Path filePath, final Collector directoryCollector) {
         final Collection<MappingEntity> mappings = persistenceController.getMappings(getMappingClass());
-        final List<MappingEntity> matchedMappings = new LinkedList<>();
+        final List<MappingEntity> matchedMappings = new ArrayList<>();
         final String fileName = filePath.getFileName().toString();
         Path directory = filePath.normalize().getParent();
         while (directory != null) {

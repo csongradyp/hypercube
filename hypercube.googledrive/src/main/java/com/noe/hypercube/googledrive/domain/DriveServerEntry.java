@@ -2,6 +2,7 @@ package com.noe.hypercube.googledrive.domain;
 
 import com.google.api.services.drive.model.File;
 import com.noe.hypercube.domain.ServerEntry;
+import com.noe.hypercube.googledrive.service.DriveDirectoryUtil;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,27 +10,23 @@ import java.util.Date;
 
 public class DriveServerEntry implements ServerEntry {
 
-    private File remoteFile;
+    private final String id;
     private Path path;
-    private String revision;
-    private Date lastModified;
-    private boolean isFolder;
+    private final String revision;
+    private final Date lastModified;
+    private final boolean isFolder;
 
-    public DriveServerEntry(final String path, final String revision, final Date lastModified, final boolean isFolder) {
+    public DriveServerEntry(final String path, String id, final String revision, final Date lastModified, final boolean isFolder) {
         this.path = Paths.get(path);
+        this.id = id;
         this.revision = revision;
         this.lastModified = lastModified;
         this.isFolder = isFolder;
     }
 
-    public DriveServerEntry(final File remoteFile, final String path, final String revision, final Date lastModified) {
-        this.remoteFile = remoteFile;
-        this.revision = revision;
-        this.lastModified = lastModified;
-    }
-
-    public File getRemoteFile() {
-        return remoteFile;
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override

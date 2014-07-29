@@ -2,6 +2,7 @@ package com.noe.hypercube.service;
 
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
+import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.synchronization.SynchronizationException;
 
 import java.io.File;
@@ -26,23 +27,25 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
     Class<ACCOUNT_TYPE> getAccountType();
 
     /**
-     * Checks if the file exists on the server for the given server specific path.
-     * @return {@code true} if the file exists on the server in the given path.
+     * Checks whether the file exists on the server or not.
+     * @return {@code true} if the file exists on the server in the given path in the {@link com.noe.hypercube.domain.ServerEntry} instance.
      */
-    boolean exist(final File fileToUpload, final Path remotePath);
-
-    boolean exist(final ServerEntry serverEntry);
+    boolean exist(final ServerEntry serverEntry) throws SynchronizationException;
+    /**
+     * Checks whether the file exists on the server or not.
+     * @return {@code true} if the file exists on the server in the given path in the {@link com.noe.hypercube.domain.UploadEntity} instance.
+     */
+    boolean exist(final UploadEntity uploadEntity) throws SynchronizationException;
 
     Collection<ServerEntry> getChanges() throws SynchronizationException;
 
     void download(final ServerEntry serverPath, final FileOutputStream outputStream) throws SynchronizationException;
 
-    void download(String serverPath, FileOutputStream outputStream, Object... extraArgs) throws SynchronizationException;
+    void download(final String serverPath, final FileOutputStream outputStream, final Object... extraArgs) throws SynchronizationException;
 
-    void delete(final File fileToUpload, final Path remotePath) throws SynchronizationException;
+    void delete(final File fileToUpload, final Path remoteFolder) throws SynchronizationException;
 
-    ServerEntry uploadAsNew(final Path remotePath, final File fileToUpload, final InputStream inputStream) throws SynchronizationException;
+    ServerEntry uploadAsNew(final UploadEntity uploadEntity) throws SynchronizationException;
 
-    ServerEntry uploadAsUpdated(final Path remotePath, final File fileToUpload, final InputStream inputStream) throws SynchronizationException;
-
+    ServerEntry uploadAsUpdated(final UploadEntity uploadEntity) throws SynchronizationException;
 }
