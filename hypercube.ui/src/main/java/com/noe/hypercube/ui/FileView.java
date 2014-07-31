@@ -6,6 +6,7 @@ import com.noe.hypercube.ui.factory.IconFactory;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -74,12 +75,19 @@ public class FileView extends VBox implements Initializable {
         initLocalDrives();
         initRemoteDrives();
         table.getLocationProperty().addListener((observable, oldValue, newValue) -> {
-            multiBreadCrumbBar.setBreadCrumbs( newValue );
+            multiBreadCrumbBar.setBreadCrumbs(newValue);
             table.updateLocation(newValue);
         });
         table.getActiveProperty().addListener((observable, oldValue, newValue) -> table.getSelectionModel().selectFirst());
-        multiBreadCrumbBar.setOnLocalCrumbAction( this::onCrumbAction );
-        multiBreadCrumbBar.setOnRemoteCrumbAction( event -> System.out.println(event.getSelectedCrumb()) );
+        multiBreadCrumbBar.setOnLocalCrumbAction(this::onCrumbAction);
+        multiBreadCrumbBar.setOnRemoteCrumbAction(new EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>>() {
+            @Override
+            public void handle(BreadCrumbBar.BreadCrumbActionEvent<String> event) {
+                final FileBreadCrumbBar triggered = (FileBreadCrumbBar) event.getSource();
+                System.out.println(triggered);
+                System.out.println(event.getSelectedCrumb());
+            }
+        });
     }
 
     public void initStartLocation() {

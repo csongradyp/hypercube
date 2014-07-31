@@ -10,7 +10,6 @@ public class PathBundle {
 
     public PathBundle() {
         mappings = new HashMap<>();
-        mappings.put( "test", new HashMap<>() );
     }
 
     public PathBundle(Map<String, Map<String, String>> mappings) {

@@ -26,8 +26,10 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     private static final Pattern COMPILE = Pattern.compile("/");
 
     private PathBundle pathBundle;
-    private BreadCrumbBar<String> localBreadcrumb;
-    private Map<String, BreadCrumbBar<String>> breadCrumbBars;
+    private FileBreadCrumbBar localBreadcrumb;
+    private Map<String, FileBreadCrumbBar> breadCrumbBars;
+    private EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> remoteEventHandler;
+    private EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> localEventHandler;
 
     public MultiBreadCrumbBar() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("multiBreadCrumbBar.fxml"));
@@ -44,15 +46,44 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         pathBundle = new PathBundle();
         breadCrumbBars = new HashMap<>();
-        localBreadcrumb = new BreadCrumbBar<>();
+        localBreadcrumb = new FileBreadCrumbBar(true);
+        setLocalCrumbActionHandler();
         final Collection<String> accounts = pathBundle.getAccounts();
         for (String account : accounts) {
-            breadCrumbBars.put(account, new BreadCrumbBar<>());
+            final FileBreadCrumbBar remote = new FileBreadCrumbBar();
+            setRemoteCrumbEventHandler(remote);
+            breadCrumbBars.put(account, remote);
         }
         disableBreadcrumbFocusTraversal(localBreadcrumb);
         breadCrumbBars.values().forEach(this::disableBreadcrumbFocusTraversal);
         getChildren().add(localBreadcrumb);
+    }
 
+    private void setRemoteCrumbEventHandler(FileBreadCrumbBar remote) {
+        remote.setOnCrumbAction(event -> {
+            setAllCrumbsInactive();
+            ((FileBreadCrumbBar) event.getSource()).setActive(true);
+            remoteEventHandler.handle(event);
+        });
+    }
+
+    private void setLocalCrumbActionHandler() {
+        localBreadcrumb.setOnCrumbAction(event -> {
+            setAllRemoteCrumbsInactive();
+            localBreadcrumb.setActive(true);
+            localEventHandler.handle(event);
+        });
+    }
+
+    private void setAllCrumbsInactive() {
+        setAllRemoteCrumbsInactive();
+        localBreadcrumb.setActive(false);
+    }
+
+    private void setAllRemoteCrumbsInactive() {
+        for (FileBreadCrumbBar fileBreadCrumbBar : breadCrumbBars.values()) {
+            fileBreadCrumbBar.setActive(false);
+        }
     }
 
     public void setBreadCrumbs(Path path) {
@@ -94,13 +125,11 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     }
 
     public void setOnLocalCrumbAction(EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> eventHandler) {
-        localBreadcrumb.setOnCrumbAction(eventHandler);
+        localEventHandler = eventHandler;
     }
 
-    public void setOnRemoteCrumbAction(EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> eventHandler) {
-        for (Map.Entry<String, BreadCrumbBar<String>> entry : breadCrumbBars.entrySet()) {
-            entry.getValue().setOnCrumbAction(eventHandler);
-        }
+    public void setOnRemoteCrumbAction(EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> remoteEventHandler) {
+        this.remoteEventHandler = remoteEventHandler;
     }
 
 }
