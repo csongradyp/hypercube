@@ -9,11 +9,13 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 import org.controlsfx.control.BreadCrumbBar;
 import org.controlsfx.control.SegmentedButton;
 
@@ -44,7 +46,7 @@ public class FileView extends VBox implements Initializable {
     private FileTableView table;
 
     @FXML
-    private BreadCrumbBar<String> breadcrumb;
+    private MultiBreadCrumbBar multiBreadCrumbBar;
     @FXML
     private SegmentedButton localDrives;
     @FXML
@@ -71,17 +73,13 @@ public class FileView extends VBox implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         initLocalDrives();
         initRemoteDrives();
-        disableBreadcrumbFocusTraversal();
         table.getLocationProperty().addListener((observable, oldValue, newValue) -> {
-            setBreadCrumb(newValue);
+            multiBreadCrumbBar.setBreadCrumbs( newValue );
             table.updateLocation(newValue);
         });
         table.getActiveProperty().addListener((observable, oldValue, newValue) -> table.getSelectionModel().selectFirst());
-        //        MasterDetailPane pane = new MasterDetailPane();
-        //        pane.setMasterNode(table);
-        //        pane.setDetailNode(breadcrumb);
-        //        pane.setDetailSide( Side.TOP);
-        //        pane.setShowDetailNode(true);
+        multiBreadCrumbBar.setOnLocalCrumbAction( this::onCrumbAction );
+        multiBreadCrumbBar.setOnRemoteCrumbAction( event -> System.out.println(event.getSelectedCrumb()) );
     }
 
     public void initStartLocation() {
@@ -94,21 +92,6 @@ public class FileView extends VBox implements Initializable {
                 button.setSelected(true);
             }
         }
-    }
-
-    private void setBreadCrumb(Path path) {
-        TreeItem<String> model = BreadCrumbBar.buildTreeModel(path.toString().split(SEPARATOR_PATTERN));
-        breadcrumb.setSelectedCrumb(model);
-    }
-
-    private void disableBreadcrumbFocusTraversal() {
-        breadcrumb.setFocusTraversable(false);
-        Callback<TreeItem<String>, Button> crumbFactory = breadcrumb.getCrumbFactory();
-        breadcrumb.setCrumbFactory((param) -> {
-            Button crumbButton = crumbFactory.call(param);
-            crumbButton.setFocusTraversable(false);
-            return crumbButton;
-        });
     }
 
     private void initLocalDrives() {
