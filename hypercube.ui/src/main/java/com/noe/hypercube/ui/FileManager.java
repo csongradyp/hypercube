@@ -53,7 +53,8 @@ public class FileManager extends VBox implements Initializable {
 
     public FileManager() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fileManager.fxml"));
-        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage())));
+        ResourceBundle bundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
+        fxmlLoader.setResources(bundle);
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         try {
@@ -61,6 +62,7 @@ public class FileManager extends VBox implements Initializable {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+        resources = bundle;
     }
 
     @Override
@@ -75,9 +77,9 @@ public class FileManager extends VBox implements Initializable {
         FileView inactiveFileView = getInactiveFileView();
 
         Collection<IFile> markedFiles = activeFileView.getMarkedFiles();
-        final String title = resources.getString("title.copy");
+        final String title = resources.getString("dialog.copy.title");
         Action action = Dialogs.create().title(title).message(markedFiles.toString()).showConfirm();
-        if ("Yes".equals(action.textProperty().getValue())) {
+        if ("YES".equals(action.toString())) {
             FileProgressDialog test = new FileProgressDialog(this, resources, activeFileView.getLocation(), inactiveFileView.getLocation());
             test.show();
             System.out.println(markedFiles);

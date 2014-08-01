@@ -22,6 +22,7 @@ public class ConfigurationBundle {
     private static final BidiMap languages = new DualHashBidiMap();
     private static final ConfigurationBundle instance = new ConfigurationBundle();
     private static final String LOCATION_SECTION = "location";
+    public static final String LANGUAGE = "language";
     private final Ini ini;
 
     private ConfigurationBundle() {
@@ -41,27 +42,27 @@ public class ConfigurationBundle {
         });
     }
 
-    public Ini getIni() {
-        return ini;
-    }
-
     public static Path getStartLocation(String side) {
         String location = instance.ini.get(LOCATION_SECTION).get(side);
         return Paths.get(location);
     }
 
     public static String getLanguage() {
-        return instance.ini.get("language").get("language");
+        return instance.ini.get(LANGUAGE).get(LANGUAGE);
+    }
+
+    public static Locale getLocale() {
+        return new Locale(instance.ini.get(LANGUAGE).get(LANGUAGE));
     }
 
     public static String setLanguage(Locale locale) {
         final String country = locale.getLanguage();
-        return instance.ini.get("language").replace( "language", country );
+        return instance.ini.get(LANGUAGE).replace(LANGUAGE, country );
     }
 
     public static String setLanguage(String locale) {
         final String country = (String)languages.get( locale );
-        return instance.ini.get("language").replace( "language", country );
+        return instance.ini.get(LANGUAGE).replace(LANGUAGE, country );
     }
 
     public static void setStartLocation(String side, Path newLocation) {

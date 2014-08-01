@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
 
 public class FileProgressDialog extends Dialog {
 
-    private final static String title = "title.copy";
+    private final static String title = "dialog.copy.title";
     private final ProgressBar progressBar = new ProgressBar( 0 );
     private final ProgressIndicator indicator = new ProgressIndicator( 0 );
     private OnProgressListener onProgressListener;
@@ -29,8 +29,8 @@ public class FileProgressDialog extends Dialog {
     private void init(ResourceBundle bundle, Path from, Path to) {
         progressBar.setPrefWidth( 300 );
         indicator.autosize();
-        final Label fromLabel = new Label( bundle.getString( "copy.from" ) + from + "*" );
-        final Label toLabel = new Label( bundle.getString( "copy.to" ) + to + "*");
+        final Label fromLabel = new Label(String.format("%s%s*", bundle.getString("dialog.copy.from"), from));
+        final Label toLabel = new Label(String.format("%s%s*", bundle.getString("dialog.copy.to"), to));
         final Label currentFile = new Label();
         final HBox progressBox = new HBox( 5, progressBar, indicator );
         progressBox.setAlignment( Pos.CENTER );
