@@ -1,32 +1,38 @@
 package com.noe.hypercube.ui.tray;
 
-import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.util.Locale;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ResourceBundle;
 
+import static com.noe.hypercube.ui.tray.menu.TrayMenuFactory.showPopupMenuDialog;
+
 public class HypercubeTrayIcon {
+    private static final String TOOLTIP_TEXT = "HyperCube - Cloud Connected (v1.0)";
     private static final String TRAY_DEFAULT_IMAGE_KEY = "tray.default";
     private static final String ERROR_TITLE = "ERROR";
-    private HTrayIcon trayIcon;
+    private TrayIcon trayIcon;
     private boolean firstTime = true;
 
-    public HypercubeTrayIcon(Stage stage) {
+    public HypercubeTrayIcon(final Stage primaryStage) {
         if (SystemTray.isSupported()) {
-            final ActionListener closeListener = event -> System.exit(0);
-            final ActionListener showListener = event -> Platform.runLater(stage::show);
-            stage.toFront();
-            stage.requestFocus();
-            final PopupMenu popup = createPopupMenu(closeListener, showListener);
             final Image trayIconImage = ImageBundle.getRawImage(TRAY_DEFAULT_IMAGE_KEY);
-            trayIcon = new HTrayIcon(trayIconImage, popup);
-            trayIcon.addActionListener(showListener);
+            trayIcon = new TrayIcon(trayIconImage, TOOLTIP_TEXT);
+            trayIcon.setImageAutoSize(true);
+            trayIcon.addActionListener(event -> Platform.runLater(primaryStage::show));
+            trayIcon.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent event) {
+                    if (MouseEvent.BUTTON3 == event.getButton()) {
+                        Platform.runLater(() -> showPopupMenuDialog(event.getX(), event.getY(), primaryStage));
+                    }
+                }
+            });
             show();
         } else {
             JOptionPane.showMessageDialog(new Frame(), "Tray icon is not supported in your system!", ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
@@ -42,19 +48,7 @@ public class HypercubeTrayIcon {
         }
     }
 
-    private PopupMenu createPopupMenu(final ActionListener closeListener, final ActionListener showListener) {
-        PopupMenu popup = new PopupMenu();
-        MenuItem showItem = new MenuItem("Show");
-        showItem.addActionListener(showListener);
-        popup.add(showItem);
-
-        MenuItem closeItem = new MenuItem("Close");
-        closeItem.addActionListener(closeListener);
-        popup.add(closeItem);
-        return popup;
-    }
-
-    public void hide(ResourceBundle messageBundle) {
+    public void hide(final ResourceBundle messageBundle) {
         if (firstTime) {
             trayIcon.displayMessage(messageBundle.getString("prompt.minimized.title"), messageBundle.getString("prompt.minimized"), TrayIcon.MessageType.INFO);
             firstTime = false;
