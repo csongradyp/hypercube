@@ -1,28 +1,12 @@
 package com.noe.hypercube.ui.tray.menu;
 
-import com.noe.hypercube.ui.TrayMenu;
-import com.noe.hypercube.ui.bundle.ConfigurationBundle;
-import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import org.controlsfx.dialog.Dialog;
-import org.controlsfx.dialog.DialogStyle;
-import sun.tools.jar.resources.jar_de;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
-import java.io.IOException;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 public class TrayMenuFactory {
 

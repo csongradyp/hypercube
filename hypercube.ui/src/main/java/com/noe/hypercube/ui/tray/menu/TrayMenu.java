@@ -1,16 +1,12 @@
-package com.noe.hypercube.ui;
+package com.noe.hypercube.ui.tray.menu;
 
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -24,20 +20,22 @@ import java.util.ResourceBundle;
 public class TrayMenu extends AnchorPane implements Initializable {
 
     @FXML
+    private Button exit;
+    @FXML
+    private StateInfoLabel info;
+    @FXML
     private Button show;
     @FXML
     private Button settings;
-    @FXML
-    private Button exit;
-    @FXML
-    private Label info;
     @FXML
     private ListView<String> lastSynchList;
     @FXML
     private SegmentedButton accounts;
 
+    private ResourceBundle messageBundle;
+
     public TrayMenu(Stage stage) {
-        ResourceBundle messageBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
+        messageBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("trayMenu.fxml"));
         fxmlLoader.setResources(messageBundle);
         fxmlLoader.setRoot(this);
@@ -50,25 +48,15 @@ public class TrayMenu extends AnchorPane implements Initializable {
         show.setOnAction(actionEvent -> stage.show());
     }
 
-    public static Parent createMenu() {
-        try {
-            ResourceBundle messageBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
-
-            return FXMLLoader.load(TrayMenu.class.getClassLoader().getResource("trayMenu.fxml"), messageBundle);
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
-    }
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        AwesomeDude.setIcon(show, AwesomeIcon.NAVICON);
+        show.setFocusTraversable(false);
+        settings.setFocusTraversable(false);
+        exit.setFocusTraversable(false);
+        AwesomeDude.setIcon(show, AwesomeIcon.TABLE);
         AwesomeDude.setIcon(settings, AwesomeIcon.GEAR);
         AwesomeDude.setIcon(exit, AwesomeIcon.SIGN_OUT);
         exit.setOnAction(actionEvent -> System.exit(0));
     }
 
-    public void setOnShowPrimaryView(EventHandler<ActionEvent> eventHandler) {
-        show.setOnAction(eventHandler);
-    }
 }
