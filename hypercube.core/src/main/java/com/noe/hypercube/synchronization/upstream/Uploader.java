@@ -73,17 +73,18 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
         final Path localPath = fileToUpload.toPath();
         ServerEntry uploadedFile = null;
         try(FileInputStream inputStream = FileUtils.openInputStream(fileToUpload)) {
+            final String accountName = client.getAccountName();
             if (REMOVED != action) {
                 if (CHANGED == action) {
-                    EventBus.publish(new FileEvent(localPath, remotePath, FileEventType.UPDATED));
+                    EventBus.publish(new FileEvent(accountName, localPath, remotePath, FileEventType.UPDATED));
                     uploadedFile = client.uploadAsUpdated(remotePath, fileToUpload, inputStream);
                 } else if (ADDED == action) {
-                    EventBus.publish(new FileEvent(localPath, remotePath, FileEventType.NEW));
+                    EventBus.publish(new FileEvent(accountName, localPath, remotePath, FileEventType.NEW));
                     uploadedFile = client.uploadAsNew(remotePath, fileToUpload, inputStream);
                 }
             }
             if(uploadedFile == null) {
-                throw new SynchronizationException(format("Upload failed - Cannot upload file: '%s' to %s", localPath.toString(), client.getAccountName()));
+                throw new SynchronizationException(format("Upload failed - Cannot upload file: '%s' to %s", localPath.toString(), accountName));
             }
             persist(localPath, uploadedFile);
             LOG.debug("successfully uploaded file: '{}' with new revision: {}", uploadedFile.getPath(), uploadedFile.getRevision());

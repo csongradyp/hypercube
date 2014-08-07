@@ -1,5 +1,7 @@
 package com.noe.hypercube.ui.tray;
 
+import com.noe.hypercube.ui.bundle.AccountBundle;
+import com.noe.hypercube.ui.bundle.HistoryBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -21,6 +23,8 @@ public class HypercubeTrayIcon {
 
     public HypercubeTrayIcon(final Stage primaryStage) {
         if (SystemTray.isSupported()) {
+            AccountBundle.getAccounts();
+            HistoryBundle.getLastSyncedFiles();
             final Image trayIconImage = ImageBundle.getRawImage(TRAY_DEFAULT_IMAGE_KEY);
             trayIcon = new TrayIcon(trayIconImage, TOOLTIP_TEXT);
             trayIcon.setImageAutoSize(true);

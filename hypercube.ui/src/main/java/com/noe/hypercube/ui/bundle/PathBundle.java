@@ -10,6 +10,10 @@ public class PathBundle {
 
     public PathBundle() {
         mappings = new HashMap<>();
+        mappings.put( "test", new HashMap<>() );
+        mappings.put( "other", new HashMap<>() );
+        add( "test", "C:\\Users", "A/B/C" );
+        add( "other", "C:\\Users", "x/y" );
     }
 
     public PathBundle(Map<String, Map<String, String>> mappings) {

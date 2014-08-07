@@ -9,7 +9,7 @@ public class RemoteFile extends File {
     private final long size;
     private final Date lastModified;
 
-    protected RemoteFile(final Path path, final long size, final boolean directory, final Date lastModified) {
+    public RemoteFile(final Path path, final long size, final boolean directory, final Date lastModified) {
         super(path);
         this.directory = directory;
         this.size = size;

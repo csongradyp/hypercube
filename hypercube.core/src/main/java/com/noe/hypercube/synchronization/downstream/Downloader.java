@@ -108,12 +108,13 @@ public class Downloader implements IDownloader {
             for (Path localPath : localPaths) {
                 File newLocalFile = new File(localPath.toString(), entry.getPath().getFileName().toString());
                 final Action action = getDeltaAction(entry, newLocalFile);
+                final String accountName = client.getAccountName();
                 if (ADDED == action) {
-                    EventBus.publish(new FileEvent(entry.getPath(), newLocalFile.toPath(), FileEventType.NEW));
+                    EventBus.publish(new FileEvent(accountName, entry.getPath(), newLocalFile.toPath(), FileEventType.NEW));
                     createDirsFor(newLocalFile);
                     download(entry, newLocalFile);
                 } else if (CHANGED == action) {
-                    EventBus.publish(new FileEvent(entry.getPath(), newLocalFile.toPath(), FileEventType.UPDATED));
+                    EventBus.publish(new FileEvent(accountName, entry.getPath(), newLocalFile.toPath(), FileEventType.UPDATED));
                     download(entry, newLocalFile);
                 } else {
                     LOG.debug("{} is up to date", localPath);

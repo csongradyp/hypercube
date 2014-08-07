@@ -1,0 +1,9 @@
+.up-to-date {
+    -fx-effect: innershadow( gaussian , green , 7 , 1 , 1 , 1 );
+}
+.synchronizing {
+
+}
+.offline {
+    -fx-effect: innershadow( gaussian , red , 7 , 1 , 1 , 1 );
+}

@@ -64,5 +64,6 @@
     <bean id="cloudObserverFactory" class="com.noe.hypercube.observer.remote.CloudObserverFactory" />
     <bean id="localDirectoryCollector" class="com.noe.hypercube.mapping.collector.LocalDirectoryCollector" />
     <bean id="remoteDirectoryCollector" class="com.noe.hypercube.mapping.collector.RemoteDirectoryCollector" />
+    <bean class="com.noe.hypercube.bridge.AccountDataBridge" />
 
 </beans>
