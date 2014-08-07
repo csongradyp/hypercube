@@ -1,5 +1,8 @@
 package com.noe.hypercube.ui;
 
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.FileListResponse;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.dialog.FileProgressDialog;
 import com.noe.hypercube.ui.domain.IFile;
@@ -11,6 +14,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import net.engio.mbassy.listener.Handler;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialogs;
 
@@ -22,7 +26,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class FileManager extends VBox implements Initializable {
+public class FileManager extends VBox implements Initializable, EventHandler<FileListResponse> {
 
     @FXML
     private HBox doubleView;
@@ -63,6 +67,7 @@ public class FileManager extends VBox implements Initializable {
             throw new RuntimeException(exception);
         }
         resources = bundle;
+        EventBus.subscribeToFileListResponse( this );
     }
 
     @Override
@@ -158,5 +163,11 @@ public class FileManager extends VBox implements Initializable {
             return leftFileView;
         }
         return rightFileView;
+    }
+
+    @Override
+    @Handler( rejectSubtypes = true )
+    public void onEvent( FileListResponse event ) {
+        Platform.runLater( () -> getActiveFileView().setRemoteFileList( event ) );
     }
 }

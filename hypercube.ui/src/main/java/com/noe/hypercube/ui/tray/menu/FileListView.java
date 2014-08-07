@@ -1,7 +1,6 @@
 package com.noe.hypercube.ui.tray.menu;
 
 import com.noe.hypercube.event.domain.FileEvent;
-import com.noe.hypercube.ui.bundle.HistoryBundle;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -29,7 +28,7 @@ public class FileListView extends ListView<FileListItem> {
     public synchronized void add(FileEvent file) {
         Platform.runLater(() -> {
             final ObservableList<FileListItem> items = getItems();
-            if (items.size() == HistoryBundle.getHistorySize()) {
+            if (items.size() == 6) {
                 items.remove(items.size() - 1);
             }
             items.add(0, new FileListItem(file, messageBundle));
@@ -37,6 +36,8 @@ public class FileListView extends ListView<FileListItem> {
                 item.refresh();
             }
         });
+        setVisible(false);
+        setVisible(true);
     }
 
     public void setMessageBundle(ResourceBundle messageBundle) {

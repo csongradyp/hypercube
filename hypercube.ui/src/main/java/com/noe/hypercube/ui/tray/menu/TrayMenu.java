@@ -50,8 +50,8 @@ public class TrayMenu extends AnchorPane implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        show.setOnAction(actionEvent -> stage.show());
         createAccountButtons();
+        show.setOnAction(actionEvent -> stage.show());
         final Map<String, ObservableList<FileEvent>> lastSyncedFiles = HistoryBundle.getLastSyncedFiles();
         fileListView.clearAndSet(lastSyncedFiles.get(accounts.getButtons().get(0).getText()));
     }
@@ -59,13 +59,25 @@ public class TrayMenu extends AnchorPane implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         fileListView.setMessageBundle(resourceBundle);
-        show.setFocusTraversable(false);
-        settings.setFocusTraversable(false);
+        initShowButton();
+        initSettingsButton();
+        initExitButton();
+    }
+
+    private void initExitButton() {
         exit.setFocusTraversable(false);
-        AwesomeDude.setIcon(show, AwesomeIcon.TABLE);
-        AwesomeDude.setIcon(settings, AwesomeIcon.GEAR);
         AwesomeDude.setIcon(exit, AwesomeIcon.SIGN_OUT);
         exit.setOnAction(actionEvent -> System.exit(0));
+    }
+
+    private void initSettingsButton() {
+        settings.setFocusTraversable(false);
+        AwesomeDude.setIcon(settings, AwesomeIcon.GEAR);
+    }
+
+    private void initShowButton() {
+        show.setFocusTraversable(false);
+        AwesomeDude.setIcon(show, AwesomeIcon.TABLE);
     }
 
     private void createAccountButtons() {
@@ -106,6 +118,6 @@ public class TrayMenu extends AnchorPane implements Initializable {
                 return button;
             }
         }
-        return null;
+        return buttons.get(0);
     }
 }

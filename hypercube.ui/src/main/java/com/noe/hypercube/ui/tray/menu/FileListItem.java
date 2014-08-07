@@ -1,7 +1,6 @@
 package com.noe.hypercube.ui.tray.menu;
 
 import com.noe.hypercube.event.domain.FileEvent;
-import com.noe.hypercube.event.domain.FileEventType;
 import com.noe.hypercube.ui.util.FileManagerUtil;
 import com.noe.hypercube.ui.util.LastSyncDisplayUtil;
 import de.jensd.fx.fontawesome.AwesomeDude;
@@ -16,27 +15,26 @@ import javafx.scene.text.TextAlignment;
 
 import java.util.ResourceBundle;
 
-import static com.noe.hypercube.event.domain.FileEventType.*;
-
 public class FileListItem extends HBox {
 
-    private final ResourceBundle messageBundle;
     private final FileEvent fileEvent;
+    private final ResourceBundle messageBundle;
+
     private Label syncTime;
 
-    public FileListItem(final FileEvent file, final ResourceBundle messageBundle) {
+    public FileListItem(final FileEvent fileEvent, final ResourceBundle messageBundle) {
         super();
         this.messageBundle = messageBundle;
-        this.fileEvent = file;
-        syncTime = createTimeLabel(file);
-        final Label filePath = createFileLabel(file);
-        final Button viewButton = createShareButton(file);
+        this.fileEvent = fileEvent;
+        syncTime = createTimeLabel(fileEvent);
+        final Label filePath = createFileLabel(fileEvent);
+        final Button viewButton = createShareButton(fileEvent);
         setAlignment(Pos.CENTER_LEFT);
         setOnMouseEntered(event -> viewButton.setVisible(true));
         setOnMouseExited(event -> viewButton.setVisible(false));
         setOnMouseClicked(event -> {
             if (isDoubleClick(event)) {
-                FileManagerUtil.openFileManager(file.getLocalPath().toString());
+                FileManagerUtil.openFileManager(fileEvent.getLocalPath().toString());
             }
         });
         getChildren().addAll(filePath, viewButton, syncTime);
@@ -48,21 +46,10 @@ public class FileListItem extends HBox {
 
     private Label createFileLabel(final FileEvent file) {
         final Label fileName = new Label(file.getLocalPath().getFileName().toString());
+        IconInjector.setFileStatusIcon(file, fileName);
         fileName.setPrefSize(170, 40);
         fileName.setAlignment(Pos.CENTER_LEFT);
-        setStatusIcon(file, fileName);
         return fileName;
-    }
-
-    private void setStatusIcon(final FileEvent file, final Label fileName) {
-        final FileEventType eventType = file.getEventType();
-        if (NEW == eventType) {
-            AwesomeDude.setIcon(fileName, AwesomeIcon.PLUS_CIRCLE);
-        } else if (DELETED == eventType) {
-            AwesomeDude.setIcon(fileName, AwesomeIcon.MINUS_CIRCLE);
-        } else if (UPDATED == eventType) {
-            AwesomeDude.setIcon(fileName, AwesomeIcon.CHECK_CIRCLE);
-        }
     }
 
     private Label createTimeLabel(final FileEvent file) {
@@ -75,12 +62,12 @@ public class FileListItem extends HBox {
 
     private Button createShareButton(final FileEvent file) {
         final Button viewButton = new Button();
-        viewButton.setFocusTraversable(false);
         viewButton.setPrefSize(15, 15);
+        viewButton.setFocusTraversable(false);
         AwesomeDude.setIcon(viewButton, AwesomeIcon.SHARE_ALT);
         viewButton.setVisible(false);
         viewButton.setOnAction(event -> {
-            System.out.println(file.getLocalPath().getParent());
+            System.out.println(file.getLocalPath());
         });
         return viewButton;
     }

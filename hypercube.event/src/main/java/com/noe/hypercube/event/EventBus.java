@@ -1,9 +1,6 @@
 package com.noe.hypercube.event;
 
-import com.noe.hypercube.event.domain.AccountEvent;
-import com.noe.hypercube.event.domain.FileEvent;
-import com.noe.hypercube.event.domain.StateChangeEvent;
-import com.noe.hypercube.event.domain.StorageEvent;
+import com.noe.hypercube.event.domain.*;
 import net.engio.mbassy.bus.MBassador;
 import net.engio.mbassy.bus.config.BusConfiguration;
 
@@ -15,13 +12,17 @@ public final class EventBus {
     private final MBassador<StorageEvent> storageEventBus;
     private final MBassador<FileEvent> fileEventBus;
     private final MBassador<StateChangeEvent> stateEventBus;
+    private final MBassador<FileListRequest> fileListRequestBus;
+    private final MBassador<FileListResponse> fileListResponseBus;
 
     private EventBus() {
         accountEventBus = new MBassador<>(BusConfiguration.Default());
         storageEventBus = new MBassador<>(BusConfiguration.Default());
         fileEventBus = new MBassador<>(BusConfiguration.Default());
         stateEventBus = new MBassador<>(BusConfiguration.Default());
-        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, accountEventBus);
+        fileListRequestBus = new MBassador<>(BusConfiguration.Default());
+        fileListResponseBus = new MBassador<>(BusConfiguration.Default());
+        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, accountEventBus, fileListRequestBus, fileListResponseBus);
     }
 
     private void registerShutdownHook(MBassador<?>... mBassadors) {
@@ -50,6 +51,22 @@ public final class EventBus {
 
     public static void subscribeToAccountEvent(EventHandler<AccountEvent> handler) {
         instance.accountEventBus.subscribe(handler);
+    }
+
+    public static void publish(FileListRequest fileListRequest) {
+        instance.fileListRequestBus.publish(fileListRequest);
+    }
+
+    public static void publish(FileListResponse fileListResponse) {
+        instance.fileListResponseBus.publish(fileListResponse);
+    }
+
+    public static void subscribeToFileListRequest(EventHandler<FileListRequest> handler) {
+        instance.fileListRequestBus.subscribe(handler);
+    }
+
+    public static void subscribeToFileListResponse(EventHandler<FileListResponse> handler) {
+        instance.fileListResponseBus.subscribe(handler);
     }
 
     public static void subscribeToStateEvent(EventHandler<StateChangeEvent> handler) {

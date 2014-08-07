@@ -13,8 +13,6 @@ import net.engio.mbassy.listener.Handler;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import static com.noe.hypercube.event.domain.StateChangeEvent.State.*;
-
 public class StateInfoLabel extends Label implements EventHandler<StateChangeEvent> {
 
     private ResourceBundle messageBundle;
@@ -36,16 +34,6 @@ public class StateInfoLabel extends Label implements EventHandler<StateChangeEve
     private void changeState(StateChangeEvent event) {
         final StateChangeEvent.State state = event.getState();
         setText(messageBundle.getString(state.getState()));
-        getStyleClass().clear();
-        if (SYNCHRONIZING == state) {
-            AwesomeDude.setIcon(this, AwesomeIcon.REFRESH);
-            getStyleClass().add("synchronizing");
-        } else if (UP_TO_DATE == state) {
-            AwesomeDude.setIcon(this, AwesomeIcon.CHECK_CIRCLE);
-            getStyleClass().add("up-to-date");
-        } else if (OFFLINE == state) {
-            AwesomeDude.setIcon(this, AwesomeIcon.WARNING);
-            getStyleClass().add("offline");
-        }
+        IconInjector.setSyncStatusIcon(state, this);
     }
 }

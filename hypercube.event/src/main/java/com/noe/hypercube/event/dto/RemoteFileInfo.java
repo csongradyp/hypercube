@@ -1,26 +1,24 @@
-package com.noe.hypercube.event.domain;
+package com.noe.hypercube.event.dto;
 
 import java.nio.file.Path;
 import java.util.Date;
 
-public class FileEvent implements IEvent {
+public class RemoteFileInfo {
 
-    private final FileEventType eventType;
     private final Path localPath;
     private final Path remotePath;
+    private final Long size;
     private final Date timeStamp;
     private final String accountName;
+    private final Boolean directory;
 
-    public FileEvent(final String accountName, final Path localPath, final Path remotePath, final FileEventType eventType) {
+    public RemoteFileInfo(final String accountName, final Path remotePath, final Path localPath, final Long size, final Date timeStamp, final Boolean directory) {
         this.accountName = accountName;
-        this.localPath = localPath;
         this.remotePath = remotePath;
-        this.eventType = eventType;
-        timeStamp = new Date();
-    }
-
-    public FileEventType getEventType() {
-        return eventType;
+        this.size = size;
+        this.localPath = localPath;
+        this.timeStamp = timeStamp;
+        this.directory = directory;
     }
 
     public Path getLocalPath() {
@@ -39,7 +37,11 @@ public class FileEvent implements IEvent {
         return accountName;
     }
 
-    @Override public String toString() {
-        return localPath.getFileName().toString();
+    public Boolean isDirectory() {
+        return directory;
+    }
+
+    public Long getSize() {
+        return size;
     }
 }

@@ -1,8 +1,10 @@
 package com.noe.hypercube.ui;
 
+import com.noe.hypercube.event.dto.RemoteFileInfo;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.domain.IFile;
 import com.noe.hypercube.ui.domain.LocalFile;
+import com.noe.hypercube.ui.domain.RemoteFile;
 import com.noe.hypercube.ui.factory.FileCellFactory;
 import com.noe.hypercube.ui.factory.IconFactory;
 import com.noe.hypercube.ui.util.DateUtil;
@@ -30,10 +32,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class FileTableView extends TableView<IFile> implements Initializable {
 
@@ -53,7 +52,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
 
     public FileTableView() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fileTableView.fxml"));
-        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale( ConfigurationBundle.getLanguage() )));
+        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage())));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         try {
@@ -65,15 +64,14 @@ public class FileTableView extends TableView<IFile> implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setEmptyTablePlaceholder( resources );
+        setEmptyTablePlaceholder(resources);
         requestFocusIfActive();
 
-//        sharedColumn.setGraphic( AwesomeDude.createIconLabel( AwesomeIcon.SHARE_ALT, "15" ));
-        sharedColumn.setGraphic( AwesomeDude.createIconLabel( AwesomeIcon.CODE_FORK, "15" ));
+        sharedColumn.setGraphic(AwesomeDude.createIconLabel(AwesomeIcon.CODE_FORK, "15"));
 
         fileNameColumn.setCellValueFactory(file -> new ReadOnlyObjectWrapper<>(file.getValue()));
         fileNameColumn.setCellFactory(new FileCellFactory(file -> {
-            Label label = IconFactory.getFileIcon( file );
+            Label label = IconFactory.getFileIcon(file);
             if (file.isMarked()) {
                 label.getStyleClass().add("table-row-marked");
                 getStyleClass().add("table-row-marked");
@@ -81,8 +79,8 @@ public class FileTableView extends TableView<IFile> implements Initializable {
                 getStyleClass().add("table-row-special");
                 label.getStyleClass().add("table-row-special");
             } else {
-                label.getStyleClass().removeAll( "table-row-marked", "table-row-special" );
-                getStyleClass().removeAll( "table-row-marked", "table-row-special" );
+                label.getStyleClass().removeAll("table-row-marked", "table-row-special");
+                getStyleClass().removeAll("table-row-marked", "table-row-special");
             }
             return label;
         }));
@@ -91,24 +89,24 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         fileSizeColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 
         extColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-        extColumn.setCellFactory(new FileCellFactory(TextAlignment.CENTER, file -> !file.isDirectory() ? FilenameUtils.getExtension( file.getName() ) : ""));
+        extColumn.setCellFactory(new FileCellFactory(TextAlignment.CENTER, file -> !file.isDirectory() ? FilenameUtils.getExtension(file.getName()) : ""));
 
         dateColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
         dateColumn.setCellFactory(new FileCellFactory(TextAlignment.RIGHT, file -> DateUtil.format(file.lastModified())));
     }
 
-    private void setEmptyTablePlaceholder( ResourceBundle resources ) {
-        final Label iconLabel = AwesomeDude.createIconLabel( AwesomeIcon.PUZZLE_PIECE, resources.getString( "table.empty" ), "100px", "12", ContentDisplay.TOP );
-        iconLabel.getGraphic().setOpacity( 0.3d );
-        setPlaceholder( iconLabel );
+    private void setEmptyTablePlaceholder(ResourceBundle resources) {
+        final Label iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.PUZZLE_PIECE, resources.getString("table.empty"), "100px", "12", ContentDisplay.TOP);
+        iconLabel.getGraphic().setOpacity(0.3d);
+        setPlaceholder(iconLabel);
     }
 
     private void requestFocusIfActive() {
-        Platform.runLater( () -> {
-            if ( isActive() ) {
+        Platform.runLater(() -> {
+            if (isActive()) {
                 requestFocus();
             }
-        } );
+        });
     }
 
     public void updateLocation(Path dir) {
@@ -119,7 +117,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         if (stepBack != null) {
             dirs.add(stepBack);
         }
-        if ( list != null ) {
+        if (list != null) {
             for (java.io.File file : list) {
                 if (!file.isHidden() && Files.isReadable(file.toPath())) {
                     if (file.isDirectory()) {
@@ -128,6 +126,27 @@ public class FileTableView extends TableView<IFile> implements Initializable {
                         files.add(new LocalFile(file));
                     }
                 }
+            }
+        }
+        dirs.addAll(files);
+        ObservableList<IFile> data = FXCollections.observableArrayList(dirs);
+        setItems(data);
+        getSelectionModel().selectFirst();
+    }
+
+    public void setFileList(List<RemoteFileInfo> list) {
+        Collection<IFile> files = new ArrayList<>(100);
+        Collection<IFile> dirs = new ArrayList<>(100);
+        IFile stepBack = createStepBackFile(list.get(0).getRemotePath().getParent());
+        if (stepBack != null) {
+            dirs.add(stepBack);
+        }
+        for (RemoteFileInfo file : list) {
+            final RemoteFile remoteFile = new RemoteFile(file.getRemotePath(), file.getSize(), file.isDirectory(), file.getTimeStamp());
+            if (file.isDirectory()) {
+                dirs.add(remoteFile);
+            } else {
+                files.add(remoteFile);
             }
         }
         dirs.addAll(files);
