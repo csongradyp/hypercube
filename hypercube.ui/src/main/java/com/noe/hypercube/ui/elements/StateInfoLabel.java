@@ -1,9 +1,10 @@
-package com.noe.hypercube.ui.tray.menu;
+package com.noe.hypercube.ui.elements;
 
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
 import com.noe.hypercube.event.domain.StateChangeEvent;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
+import com.noe.hypercube.ui.util.IconInjector;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.application.Platform;

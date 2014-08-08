@@ -5,7 +5,6 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.AnchorPane;
 
@@ -18,10 +17,6 @@ import static javafx.scene.layout.AnchorPane.*;
 
 public class Controller implements Initializable {
 
-    @FXML
-    private Button button1;
-    @FXML
-    private Button button2;
     @FXML
     private ChoiceBox<String> languages;
     @FXML

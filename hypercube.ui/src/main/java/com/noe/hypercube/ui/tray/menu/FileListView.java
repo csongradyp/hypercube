@@ -25,7 +25,7 @@ public class FileListView extends ListView<FileListItem> {
         }
     }
 
-    public synchronized void add(FileEvent file) {
+    public synchronized void add(final FileEvent file) {
         Platform.runLater(() -> {
             final ObservableList<FileListItem> items = getItems();
             if (items.size() == 6) {
@@ -36,8 +36,6 @@ public class FileListView extends ListView<FileListItem> {
                 item.refresh();
             }
         });
-        setVisible(false);
-        setVisible(true);
     }
 
     public void setMessageBundle(ResourceBundle messageBundle) {

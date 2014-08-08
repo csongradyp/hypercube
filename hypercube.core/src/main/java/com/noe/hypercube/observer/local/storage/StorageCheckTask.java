@@ -2,6 +2,7 @@ package com.noe.hypercube.observer.local.storage;
 
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.StorageEvent;
+import com.noe.hypercube.event.domain.type.StorageEventType;
 import org.apache.commons.collections.IteratorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +12,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.noe.hypercube.event.domain.StorageEventType.ATTACHED;
-import static com.noe.hypercube.event.domain.StorageEventType.DETACHED;
+
 
 public class StorageCheckTask implements Runnable {
 
@@ -37,7 +37,7 @@ public class StorageCheckTask implements Runnable {
                 roots.remove(newRoot);
             } else {
                 LOG.info("Drive has been detected : {}", newRoot);
-                final StorageEvent storageEvent = new StorageEvent(newRoot, ATTACHED);
+                final StorageEvent storageEvent = new StorageEvent(newRoot, StorageEventType.ATTACHED);
                 EventBus.publish(storageEvent);
                 newRoots.add(newRoot);
             }
@@ -45,7 +45,7 @@ public class StorageCheckTask implements Runnable {
         if (!roots.isEmpty()) {
             for (Path root : roots) {
                 LOG.info("Drive has been removed : {}", root);
-                final StorageEvent storageEvent = new StorageEvent(root, DETACHED);
+                final StorageEvent storageEvent = new StorageEvent(root, StorageEventType.DETACHED);
                 EventBus.publish(storageEvent);
             }
         }

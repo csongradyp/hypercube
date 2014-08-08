@@ -37,14 +37,14 @@ import static javafx.scene.input.KeyCombination.ModifierValue.UP;
 
 public class FileView extends VBox implements Initializable {
 
-    private static final String SEPARATOR = System.getProperty( "file.separator" );
-    private static final String SEPARATOR_PATTERN = Pattern.quote( SEPARATOR );
+    private static final String SEPARATOR = System.getProperty("file.separator");
+    private static final String SEPARATOR_PATTERN = Pattern.quote(SEPARATOR);
 
-    private final KeyCombination enter = new KeyCodeCombination( KeyCode.ENTER );
-    private final KeyCombination backSpace = new KeyCodeCombination( KeyCode.BACK_SPACE );
-    private final KeyCombination space = new KeyCodeCombination( KeyCode.SPACE );
-    private final KeyCombination shiftDown = new KeyCodeCombination( KeyCode.DOWN, DOWN, UP, UP, UP, UP );
-    private final KeyCombination shiftUp = new KeyCodeCombination( KeyCode.UP, DOWN, UP, UP, UP, UP );
+    private final KeyCombination enter = new KeyCodeCombination(KeyCode.ENTER);
+    private final KeyCombination backSpace = new KeyCodeCombination(KeyCode.BACK_SPACE);
+    private final KeyCombination space = new KeyCodeCombination(KeyCode.SPACE);
+    private final KeyCombination shiftDown = new KeyCodeCombination(KeyCode.DOWN, DOWN, UP, UP, UP, UP);
+    private final KeyCombination shiftUp = new KeyCodeCombination(KeyCode.UP, DOWN, UP, UP, UP, UP);
 
     @FXML
     private FileTableView table;
@@ -62,70 +62,69 @@ public class FileView extends VBox implements Initializable {
     private SimpleStringProperty side = new SimpleStringProperty();
 
     public FileView() {
-        FXMLLoader fxmlLoader = new FXMLLoader( getClass().getClassLoader().getResource( "fileView.fxml" ) );
-        fxmlLoader.setResources( ResourceBundle.getBundle( "internationalization/messages", new Locale( ConfigurationBundle.getLanguage() ) ) );
-        fxmlLoader.setRoot( this );
-        fxmlLoader.setController( this );
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fileView.fxml"));
+        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage())));
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
         try {
             fxmlLoader.load();
-        } catch ( IOException exception ) {
-            throw new RuntimeException( exception );
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
         }
-
     }
 
     @Override
-    public void initialize( URL location, ResourceBundle resources ) {
+    public void initialize(URL location, ResourceBundle resources) {
         initLocalDrives();
         initRemoteDrives();
-        table.getLocationProperty().addListener( ( observable, oldValue, newValue ) -> {
-            multiBreadCrumbBar.setBreadCrumbs( newValue );
-            table.updateLocation( newValue );
-        } );
-        table.getActiveProperty().addListener( ( observable, oldValue, newValue ) -> table.getSelectionModel().selectFirst() );
-        multiBreadCrumbBar.setOnLocalCrumbAction( this::onCrumbAction );
-        multiBreadCrumbBar.setOnRemoteCrumbAction( event -> {
-            final FileBreadCrumbBar triggered = (FileBreadCrumbBar)event.getSource();
-            System.out.println( triggered );
-            System.out.println( event.getSelectedCrumb() );
-            EventBus.publish( new FileListRequest( Paths.get( "X/Y" ) ) );
-        } );
+        table.getLocationProperty().addListener((observable, oldValue, newValue) -> {
+            multiBreadCrumbBar.setBreadCrumbs(newValue);
+            table.updateLocation(newValue);
+        });
+        table.getActiveProperty().addListener((observable, oldValue, newValue) -> table.getSelectionModel().selectFirst());
+        multiBreadCrumbBar.setOnLocalCrumbAction(this::onCrumbAction);
+        multiBreadCrumbBar.setOnRemoteCrumbAction(event -> {
+            final FileBreadCrumbBar triggered = (FileBreadCrumbBar) event.getSource();
+            System.out.println(triggered);
+            System.out.println(event.getSelectedCrumb());
+            EventBus.publish(new FileListRequest(Paths.get("X/Y")));
+        });
     }
 
     public void initStartLocation() {
-        Path startLocation = ConfigurationBundle.getStartLocation( side.get() );
-        setLocation( startLocation );
-        getLocationProperty().addListener( ( observableValue, path, newLocation ) -> ConfigurationBundle.setStartLocation( side.get(), newLocation ) );
+        Path startLocation = ConfigurationBundle.getStartLocation(side.get());
+        setLocation(startLocation);
+        getLocationProperty().addListener((observableValue, path, newLocation) -> ConfigurationBundle.setStartLocation(side.get(), newLocation));
         ObservableList<ToggleButton> buttons = localDrives.getButtons();
-        for ( ToggleButton button : buttons ) {
-            if ( startLocation.startsWith( button.getText() ) ) {
-                button.setSelected( true );
+        for (ToggleButton button : buttons) {
+            if (startLocation.startsWith(button.getText())) {
+                button.setSelected(true);
             }
         }
     }
 
     private void initLocalDrives() {
         List<ToggleButton> drives = collectLocalDrives();
-        localDrives.getButtons().addAll( drives );
-        localDrives.getButtons().get( 0 ).setSelected( true );
+        localDrives.getButtons().addAll(drives);
+        localDrives.getButtons().get(0).setSelected(true);
     }
 
     private List<ToggleButton> collectLocalDrives() {
-        List<ToggleButton> drives = new ArrayList<>( 5 );
+        List<ToggleButton> drives = new ArrayList<>(5);
         Iterable<Path> rootDirectories = FileSystems.getDefault().getRootDirectories();
-        for ( Path root : rootDirectories ) {
-            drives.add( createLocalStorageButton( root ) );
+        for (Path root : rootDirectories) {
+            drives.add(createLocalStorageButton(root));
         }
         return drives;
     }
 
-    private ToggleButton createLocalStorageButton( Path root ) {
-        ToggleButton button = new ToggleButton( root.toString(), new ImageView( IconFactory.getStorageIcon( root ) ) );
-        button.setFocusTraversable( false );
-        button.setOnMouseClicked( event -> {
-            table.setLocation( Paths.get( button.getText() ) );
-            button.setSelected( true );
-        } );
+    private ToggleButton createLocalStorageButton(Path root) {
+        ToggleButton button = new ToggleButton(root.toString(), new ImageView(IconFactory.getStorageIcon(root)));
+        button.setFocusTraversable(false);
+        button.setOnMouseClicked(event -> {
+            table.setLocation(Paths.get(button.getText()));
+            button.setSelected(true);
+        });
         return button;
     }
 
@@ -148,94 +147,94 @@ public class FileView extends VBox implements Initializable {
         //            });
         //        }
         final List<String> accounts = AccountBundle.getAccounts();
-        for ( String account : accounts ) {
-            final ToggleButton accountStorageButton = new ToggleButton( account );
-            accountStorageButton.setFocusTraversable( false );
-            accountStorageButton.setOnAction( event -> EventBus.publish( new FileListRequest( getLocation() ) ) );
-            remoteDrives.getButtons().add( accountStorageButton );
+        for (String account : accounts) {
+            final ToggleButton accountStorageButton = new ToggleButton(account);
+            accountStorageButton.setFocusTraversable(false);
+            accountStorageButton.setOnAction(event -> EventBus.publish(new FileListRequest(getLocation())));
+            remoteDrives.getButtons().add(accountStorageButton);
         }
-        ToggleButton remoteDriveButton = new ToggleButton( "+" );
-        remoteDriveButton.setFocusTraversable( false );
-        remoteDriveButton.setTooltip( new Tooltip( "Add new remote drive" ) );
-        remoteDrives.getButtons().add( remoteDriveButton );
-        remoteDriveButton.setOnMouseClicked( event -> {
-            ToggleButton newRemoteDrive = new ToggleButton( "New" );
-            newRemoteDrive.setFocusTraversable( false );
-            remoteDrives.getButtons().add( 0, newRemoteDrive );
-            remoteDriveButton.setSelected( false );
-        } );
+        ToggleButton remoteDriveButton = new ToggleButton("+");
+        remoteDriveButton.setFocusTraversable(false);
+        remoteDriveButton.setTooltip(new Tooltip("Add new remote drive"));
+        remoteDrives.getButtons().add(remoteDriveButton);
+        remoteDriveButton.setOnMouseClicked(event -> {
+            ToggleButton newRemoteDrive = new ToggleButton("New");
+            newRemoteDrive.setFocusTraversable(false);
+            remoteDrives.getButtons().add(0, newRemoteDrive);
+            remoteDriveButton.setSelected(false);
+        });
     }
 
     @FXML
-    public void onCrumbAction( BreadCrumbBar.BreadCrumbActionEvent<String> event ) {
+    public void onCrumbAction(BreadCrumbBar.BreadCrumbActionEvent<String> event) {
         TreeItem<String> selectedCrumb = event.getSelectedCrumb();
         List<String> folders = new ArrayList<>();
-        while ( selectedCrumb != null ) {
-            folders.add( 0, selectedCrumb.getValue() );
+        while (selectedCrumb != null) {
+            folders.add(0, selectedCrumb.getValue());
             selectedCrumb = selectedCrumb.getParent();
         }
         String path = "";
-        for ( String folder : folders ) {
+        for (String folder : folders) {
             path += folder + SEPARATOR;
         }
 //        table.setLocation( Paths.get( path ) );
         //
         // TODO investigate locationchangeproperty trigger problem
-        final Path newPath = Paths.get( path );
-        multiBreadCrumbBar.setBreadCrumbs( newPath );
-        table.updateLocation( Paths.get( path ) );
+        final Path newPath = Paths.get(path);
+        multiBreadCrumbBar.setBreadCrumbs(newPath);
+        table.updateLocation(Paths.get(path));
         table.requestFocus();
-        deselectButtons( remoteDrives );
+        deselectButtons(remoteDrives);
     }
 
     @FXML
-    public void onMouseClicked( MouseEvent event ) {
-        if ( isDoubleClick( event ) ) {
+    public void onMouseClicked(MouseEvent event) {
+        if (isDoubleClick(event)) {
             IFile selectedItem = table.getSelectionModel().getSelectedItem();
-            stepInto( selectedItem );
-        } else if ( MouseButton.SECONDARY.equals( event.getButton() ) ) {
+            stepInto(selectedItem);
+        } else if (MouseButton.SECONDARY.equals(event.getButton())) {
             IFile selectedItem = table.getSelectionModel().getSelectedItem();
             selectedItem.mark();
         }
     }
 
-    private boolean isDoubleClick( MouseEvent event ) {
-        return event.getClickCount() == 2 && event.getButton().compareTo( MouseButton.PRIMARY ) == 0;
+    private boolean isDoubleClick(MouseEvent event) {
+        return event.getClickCount() == 2 && event.getButton().compareTo(MouseButton.PRIMARY) == 0;
     }
 
     @FXML
-    public void onKeyPressed( KeyEvent event ) {
+    public void onKeyPressed(KeyEvent event) {
         IFile selectedFile = table.getSelectionModel().getSelectedItem();
 
-        if ( backSpace.match( event ) ) {
-            table.setLocation( selectedFile.getParentDirectory() );
-        } else if ( enter.match( event ) ) {
-            stepInto( selectedFile );
-        } else if ( space.match( event ) ) {
+        if (backSpace.match(event)) {
+            table.setLocation(selectedFile.getParentDirectory());
+        } else if (enter.match(event)) {
+            stepInto(selectedFile);
+        } else if (space.match(event)) {
             selectedFile.mark();
-        } else if ( shiftUp.match( event ) ) {
+        } else if (shiftUp.match(event)) {
             selectedFile.mark();
             table.getSelectionModel().selectAboveCell();
-        } else if ( shiftDown.match( event ) ) {
+        } else if (shiftDown.match(event)) {
             selectedFile.mark();
             table.getSelectionModel().selectBelowCell();
         }
     }
 
     @FXML
-    public void onLocalDriveMouseClicked( MouseEvent event ) {
-        ToggleButton source = (ToggleButton)event.getSource();
-        table.updateLocation( Paths.get( source.getText() ) );
-        if ( !source.isSelected() ) {
-            source.setSelected( true );
+    public void onLocalDriveMouseClicked(MouseEvent event) {
+        ToggleButton source = (ToggleButton) event.getSource();
+        table.updateLocation(Paths.get(source.getText()));
+        if (!source.isSelected()) {
+            source.setSelected(true);
         }
     }
 
-    private void stepInto( IFile selectedFile ) {
-        if ( selectedFile.isDirectory() ) {
-            table.setLocation( selectedFile.getPath() );
+    private void stepInto(IFile selectedFile) {
+        if (selectedFile.isDirectory()) {
+            table.setLocation(selectedFile.getPath());
         } else {
-            System.out.println( selectedFile );
+            System.out.println(selectedFile);
         }
     }
 
@@ -244,26 +243,26 @@ public class FileView extends VBox implements Initializable {
     }
 
     public Collection<IFile> getMarkedFiles() {
-        ArrayList<IFile> marked = new ArrayList<>( 50 );
+        ArrayList<IFile> marked = new ArrayList<>(50);
         ObservableList<IFile> files = table.getItems();
-        marked.addAll( files.stream().filter( IFile::isMarked ).collect( Collectors.toList() ) );
-        if ( marked.isEmpty() ) {
-            marked.add( getSelectedFile() );
+        marked.addAll(files.stream().filter(IFile::isMarked).collect(Collectors.toList()));
+        if (marked.isEmpty()) {
+            marked.add(getSelectedFile());
         }
         return marked;
     }
 
     @FXML
-    public void setActive( boolean active ) {
-        table.setActive( active );
+    public void setActive(boolean active) {
+        table.setActive(active);
     }
 
     public boolean isActive() {
         return table.isActive();
     }
 
-    public void setLocation( Path location ) {
-        table.setLocation( location );
+    public void setLocation(Path location) {
+        table.setLocation(location);
     }
 
     public Path getLocation() {
@@ -279,30 +278,30 @@ public class FileView extends VBox implements Initializable {
     }
 
     @FXML
-    public void setSide( String side ) {
-        this.side.set( side );
+    public void setSide(final String side) {
+        this.side.set(side);
     }
 
-    public void setRemoteFileList( FileListResponse event ) {
-        table.setFileList( event.getFileList() );
-        activateRemoteStorageButton( event );
-        deselectButtons( localDrives );
+    public void setRemoteFileList(final FileListResponse event) {
+        table.setFileList(event.getFileList());
+        activateRemoteStorageButton(event);
+        deselectButtons(localDrives);
     }
 
-    private void activateRemoteStorageButton( FileListResponse event ) {
+    private void activateRemoteStorageButton(final FileListResponse event) {
         final ObservableList<ToggleButton> buttons = remoteDrives.getButtons();
-        for ( ToggleButton button : buttons ) {
-            if ( button.getText().equals( event.getAccount() ) ) {
-                button.setSelected( true );
+        for (ToggleButton button : buttons) {
+            if (button.getText().equals(event.getAccount())) {
+                button.setSelected(true);
             }
         }
     }
 
-    public ToggleButton deselectButtons( SegmentedButton segmentedButton ) {
+    public ToggleButton deselectButtons(final SegmentedButton segmentedButton) {
         final ObservableList<ToggleButton> buttons = segmentedButton.getButtons();
-        for ( ToggleButton button : buttons ) {
-            if ( button.isSelected() ) {
-                button.setSelected( false );
+        for (ToggleButton button : buttons) {
+            if (button.isSelected()) {
+                button.setSelected(false);
             }
         }
         return null;

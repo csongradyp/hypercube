@@ -1,6 +1,7 @@
 package com.noe.hypercube.event;
 
 import com.noe.hypercube.event.domain.*;
+import com.noe.hypercube.event.domain.type.StreamDirection;
 import net.engio.mbassy.bus.MBassador;
 import net.engio.mbassy.bus.config.BusConfiguration;
 
@@ -8,7 +9,6 @@ public final class EventBus {
 
     private static final EventBus instance = new EventBus();
 
-    private final MBassador<AccountEvent> accountEventBus;
     private final MBassador<StorageEvent> storageEventBus;
     private final MBassador<FileEvent> fileEventBus;
     private final MBassador<StateChangeEvent> stateEventBus;
@@ -16,13 +16,12 @@ public final class EventBus {
     private final MBassador<FileListResponse> fileListResponseBus;
 
     private EventBus() {
-        accountEventBus = new MBassador<>(BusConfiguration.Default());
         storageEventBus = new MBassador<>(BusConfiguration.Default());
         fileEventBus = new MBassador<>(BusConfiguration.Default());
         stateEventBus = new MBassador<>(BusConfiguration.Default());
         fileListRequestBus = new MBassador<>(BusConfiguration.Default());
         fileListResponseBus = new MBassador<>(BusConfiguration.Default());
-        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, accountEventBus, fileListRequestBus, fileListResponseBus);
+        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, fileListRequestBus, fileListResponseBus);
     }
 
     private void registerShutdownHook(MBassador<?>... mBassadors) {
@@ -33,7 +32,37 @@ public final class EventBus {
         }));
     }
 
-    public static void publish(FileEvent fileEvent) {
+    public static void publishDownloadSubmit(final FileEvent fileEvent) {
+        fileEvent.setDirection(StreamDirection.DOWN);
+        instance.fileEventBus.publishAsync(fileEvent);
+    }
+
+    public static void publishDownloadStart(FileEvent fileEvent) {
+        fileEvent.setDirection(StreamDirection.DOWN);
+        fileEvent.setStarted();
+        instance.fileEventBus.publishAsync(fileEvent);
+    }
+
+    public static void publishDownloadFinished(FileEvent fileEvent) {
+        fileEvent.setDirection(StreamDirection.DOWN);
+        fileEvent.setFinished();
+        instance.fileEventBus.publishAsync(fileEvent);
+    }
+
+    public static void publishUploadSubmit(final FileEvent fileEvent) {
+        fileEvent.setDirection(StreamDirection.UP);
+        instance.fileEventBus.publishAsync(fileEvent);
+    }
+
+    public static void publishUploadStart(FileEvent fileEvent) {
+        fileEvent.setDirection(StreamDirection.UP);
+        fileEvent.setStarted();
+        instance.fileEventBus.publishAsync(fileEvent);
+    }
+
+    public static void publishUploadFinished(FileEvent fileEvent) {
+        fileEvent.setDirection(StreamDirection.UP);
+        fileEvent.setFinished();
         instance.fileEventBus.publishAsync(fileEvent);
     }
 
@@ -43,14 +72,6 @@ public final class EventBus {
 
     public static void publish(StateChangeEvent stateChangeEvent) {
         instance.stateEventBus.publishAsync(stateChangeEvent);
-    }
-
-    public static void publish(AccountEvent accountEvent) {
-        instance.accountEventBus.publish(accountEvent);
-    }
-
-    public static void subscribeToAccountEvent(EventHandler<AccountEvent> handler) {
-        instance.accountEventBus.subscribe(handler);
     }
 
     public static void publish(FileListRequest fileListRequest) {

@@ -2,6 +2,7 @@ package com.noe.hypercube.ui.tray.menu;
 
 import com.noe.hypercube.event.domain.FileEvent;
 import com.noe.hypercube.ui.util.FileManagerUtil;
+import com.noe.hypercube.ui.util.IconInjector;
 import com.noe.hypercube.ui.util.LastSyncDisplayUtil;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
@@ -17,6 +18,8 @@ import java.util.ResourceBundle;
 
 public class FileListItem extends HBox {
 
+    private static final double HEIGHT = 40.0d;
+
     private final FileEvent fileEvent;
     private final ResourceBundle messageBundle;
 
@@ -27,6 +30,7 @@ public class FileListItem extends HBox {
         this.messageBundle = messageBundle;
         this.fileEvent = fileEvent;
         syncTime = createTimeLabel(fileEvent);
+        final Label streamDirection = IconInjector.getStreamDirectionIcon(fileEvent);
         final Label filePath = createFileLabel(fileEvent);
         final Button viewButton = createShareButton(fileEvent);
         setAlignment(Pos.CENTER_LEFT);
@@ -37,7 +41,7 @@ public class FileListItem extends HBox {
                 FileManagerUtil.openFileManager(fileEvent.getLocalPath().toString());
             }
         });
-        getChildren().addAll(filePath, viewButton, syncTime);
+        getChildren().addAll(streamDirection, filePath, viewButton, syncTime);
     }
 
     private boolean isDoubleClick(final MouseEvent event) {
@@ -47,7 +51,7 @@ public class FileListItem extends HBox {
     private Label createFileLabel(final FileEvent file) {
         final Label fileName = new Label(file.getLocalPath().getFileName().toString());
         IconInjector.setFileStatusIcon(file, fileName);
-        fileName.setPrefSize(170, 40);
+        fileName.setPrefSize(150, HEIGHT);
         fileName.setAlignment(Pos.CENTER_LEFT);
         return fileName;
     }
@@ -56,7 +60,7 @@ public class FileListItem extends HBox {
         final Label syncTime = new Label(LastSyncDisplayUtil.convertToString(file.getTimeStamp(), messageBundle));
         syncTime.setTextAlignment(TextAlignment.RIGHT);
         syncTime.setAlignment(Pos.CENTER_RIGHT);
-        syncTime.setPrefSize(85, 40);
+        syncTime.setPrefSize(85, HEIGHT);
         return syncTime;
     }
 

@@ -5,6 +5,9 @@ import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.FileEntityFactory;
 import com.noe.hypercube.domain.UploadEntity;
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.domain.FileEvent;
+import com.noe.hypercube.event.domain.type.FileActionType;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.Action;
@@ -17,9 +20,7 @@ import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import static com.noe.hypercube.synchronization.Action.ADDED;
-import static com.noe.hypercube.synchronization.Action.CHANGED;
-import static com.noe.hypercube.synchronization.Action.REMOVED;
+import static com.noe.hypercube.synchronization.Action.*;
 
 public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> extends Uploader<ACCOUNT_TYPE, ENTITY_TYPE> {
 
@@ -36,9 +37,9 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     @Override
     public void run() {
         while(!stop) {
-            UploadEntity uploadEntity = uploadQ.poll();
-            Path remotePath = uploadEntity.getRemotePath();
-            File file = uploadEntity.getFile();
+            final UploadEntity uploadEntity = uploadQ.poll();
+            final Path remotePath = uploadEntity.getRemotePath();
+            final File file = uploadEntity.getFile();
             try {
                 final Action action = uploadEntity.getAction();
                 if (ADDED == action) {
@@ -49,6 +50,7 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
                     delete(file, remotePath);
                 }
             }catch (SynchronizationException e) {
+                EventBus.publishUploadFinished(new FileEvent(client.getAccountName(), file.toPath(), remotePath, FileActionType.FAIL));
                 LOG.error(e.getMessage(), e);
             }
         }

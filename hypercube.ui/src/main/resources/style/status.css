@@ -9,7 +9,7 @@
 }
 
 .added {
-    -fx-effect: innershadow( gaussian , darkolivegreen , 7 , 1 , 1 , 1 );
+    -fx-effect: innershadow( gaussian , green , 7 , 1 , 1 , 1 );
 }
 
 .deleted {
@@ -18,4 +18,11 @@
 
 .updated {
     -fx-effect: innershadow( gaussian , royalblue , 7 , 1 , 1 , 1 );
+}
+
+.inactive {
+    -fx-effect: innershadow( gaussian , lightgray , 7 , 1 , 1 , 1 );
+}
+
+.active {
 }

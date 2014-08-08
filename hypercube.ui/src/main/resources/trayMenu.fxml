@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.noe.hypercube.ui.tray.menu.FileListView?>
-<?import com.noe.hypercube.ui.tray.menu.StateInfoLabel?>
+<?import com.noe.hypercube.ui.elements.StateInfoLabel?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.*?>

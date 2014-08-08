@@ -77,7 +77,7 @@ public class FileManager extends VBox implements Initializable, EventHandler<Fil
     }
 
     @FXML
-    public void onCopy(ActionEvent e) {
+    public void onCopy(final ActionEvent e) {
         FileView activeFileView = getActiveFileView();
         FileView inactiveFileView = getInactiveFileView();
 

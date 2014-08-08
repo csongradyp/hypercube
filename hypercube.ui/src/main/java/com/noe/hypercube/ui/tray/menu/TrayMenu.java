@@ -4,6 +4,7 @@ import com.noe.hypercube.event.domain.FileEvent;
 import com.noe.hypercube.ui.bundle.AccountBundle;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.HistoryBundle;
+import com.noe.hypercube.ui.elements.StateInfoLabel;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.collections.ListChangeListener;

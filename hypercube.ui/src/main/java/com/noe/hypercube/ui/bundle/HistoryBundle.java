@@ -15,29 +15,31 @@ public final class HistoryBundle implements EventHandler<FileEvent> {
 
     private final Map<String, ObservableList<FileEvent>> lastSyncedFiles;
     private static final HistoryBundle instance = new HistoryBundle();
-    private static final Integer historySize = 6;
+    private static final Integer historySize = 100;
 
     private HistoryBundle() {
         lastSyncedFiles = new HashMap<>();
-        EventBus.subscribeToFileEvent( this );
+        EventBus.subscribeToFileEvent(this);
     }
 
     public static Map<String, ObservableList<FileEvent>> getLastSyncedFiles() {
         return instance.lastSyncedFiles;
     }
 
-    public static void createSpaceFor( String account ) {
-        instance.lastSyncedFiles.put( account, new ObservableListWrapper<>( new ArrayList<>(6) )  );
+    public static void createSpaceFor(String account) {
+        instance.lastSyncedFiles.put(account, new ObservableListWrapper<>(new ArrayList<>(6)));
     }
 
     @Override
     @Handler(rejectSubtypes = true)
-    public void onEvent( FileEvent event ) {
-        final ObservableList<FileEvent> fileEvents = lastSyncedFiles.get( event.getAccountName() );
-        if(fileEvents.size() == historySize) {
-            fileEvents.remove( fileEvents.size()-1 );
+    public void onEvent(final FileEvent event) {
+        if (event.isFinished()) {
+            final ObservableList<FileEvent> fileEvents = lastSyncedFiles.get(event.getAccountName());
+            if (fileEvents.size() == historySize) {
+                fileEvents.remove(fileEvents.size() - 1);
+            }
+            fileEvents.add(event);
         }
-        fileEvents.add( event );
     }
 
     public static Integer getHistorySize() {

@@ -6,7 +6,7 @@ import com.noe.hypercube.domain.FileEntityFactory;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.FileEvent;
-import com.noe.hypercube.event.domain.FileEventType;
+import com.noe.hypercube.event.domain.type.FileActionType;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.Action;
@@ -21,17 +21,15 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
 
-import static com.noe.hypercube.synchronization.Action.ADDED;
-import static com.noe.hypercube.synchronization.Action.CHANGED;
-import static com.noe.hypercube.synchronization.Action.REMOVED;
+import static com.noe.hypercube.synchronization.Action.*;
 import static java.lang.String.format;
 
 public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> implements IUploader<ACCOUNT_TYPE, ENTITY_TYPE> {
 
     private static final Logger LOG = LoggerFactory.getLogger(Uploader.class);
 
+    protected final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
     private final IPersistenceController persistenceController;
-    private final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
     private final FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory;
 
     protected Uploader(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, IPersistenceController persistenceController, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory) {
@@ -76,11 +74,15 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
             final String accountName = client.getAccountName();
             if (REMOVED != action) {
                 if (CHANGED == action) {
-                    EventBus.publish(new FileEvent(accountName, localPath, remotePath, FileEventType.UPDATED));
+                    final FileEvent event = new FileEvent(accountName, localPath, remotePath, FileActionType.UPDATED);
+                    EventBus.publishUploadStart(event);
                     uploadedFile = client.uploadAsUpdated(remotePath, fileToUpload, inputStream);
+                    EventBus.publishUploadFinished(event);
                 } else if (ADDED == action) {
-                    EventBus.publish(new FileEvent(accountName, localPath, remotePath, FileEventType.NEW));
+                    final FileEvent event = new FileEvent(accountName, localPath, remotePath, FileActionType.ADDED);
+                    EventBus.publishUploadStart(event);
                     uploadedFile = client.uploadAsNew(remotePath, fileToUpload, inputStream);
+                    EventBus.publishUploadFinished(event);
                 }
             }
             if(uploadedFile == null) {

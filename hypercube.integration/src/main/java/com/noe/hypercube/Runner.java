@@ -27,8 +27,6 @@ public class Runner {
     private static ConfigurableApplicationContext APPLICATION_CONTEXT;
     private static InstanceMonitor INSTANCE_MONITOR = new SingleInstanceMonitor();
     private static HyperCubeApp app;
-//    private static Gui gui;
-
 
     public static void main(String[] args) throws IOException {
 //        updateAuthProperty();
