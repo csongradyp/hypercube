@@ -1,11 +1,9 @@
 package com.noe.hypercube.ui;
 
-import com.noe.hypercube.event.EventBus;
-import com.noe.hypercube.event.EventHandler;
-import com.noe.hypercube.event.domain.FileListResponse;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.dialog.FileProgressDialog;
 import com.noe.hypercube.ui.domain.IFile;
+import com.noe.hypercube.ui.util.ProgressAwareInputStream;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -14,19 +12,22 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import net.engio.mbassy.listener.Handler;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialogs;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class FileManager extends VBox implements Initializable, EventHandler<FileListResponse> {
+public class FileManager extends VBox implements Initializable {
 
     @FXML
     private HBox doubleView;
@@ -67,7 +68,6 @@ public class FileManager extends VBox implements Initializable, EventHandler<Fil
             throw new RuntimeException(exception);
         }
         resources = bundle;
-        EventBus.subscribeToFileListResponse( this );
     }
 
     @Override
@@ -86,34 +86,31 @@ public class FileManager extends VBox implements Initializable, EventHandler<Fil
         Action action = Dialogs.create().title(title).message(markedFiles.toString()).showConfirm();
         if ("YES".equals(action.toString())) {
             FileProgressDialog test = new FileProgressDialog(this, resources, activeFileView.getLocation(), inactiveFileView.getLocation());
-            test.show();
             System.out.println(markedFiles);
-            for (IFile markedFile : markedFiles) {
-                Path destination = Paths.get(inactiveFileView.getLocation().toString(), markedFile.getName());
-                System.out.println(markedFile + " to " + destination);
-            }
+//            Platform.runLater(() -> {
+            new Thread(() -> {
+                for (IFile markedFile : markedFiles) {
+                    try {
+                        Path destination = Paths.get(inactiveFileView.getLocation().toString(), markedFile.getName());
+                        System.out.println(markedFile + " to " + destination);
+                        final File file = markedFile.getPath().toFile();
+                        ProgressAwareInputStream progressAwareInputStream = new ProgressAwareInputStream(new FileInputStream(file), file.length(), null);
+                        test.setCurrentProgress(progressAwareInputStream);
+                        Files.copy(progressAwareInputStream, destination, StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                    Platform.runLater(() -> {
+                        markedFile.setMarked(false);
+                        test.resetProgressBar();
+                        inactiveFileView.refresh();
+                    });
+
+                }
+                Platform.runLater(test::hide);
+            }).start();
+            test.show();
         }
-        for (IFile markedFile : markedFiles) {
-            markedFile.setMarked(false);
-        }
-
-
-//        try {
-//            ProgressAwareInputStream progressAwareInputStream = new ProgressAwareInputStream( new FileInputStream( source ), source.length(), null );
-//            new Thread( () -> { try {
-//                Files.copy( progressAwareInputStream, destination, StandardCopyOption.REPLACE_EXISTING );
-//            }
-//            catch ( IOException e1 ) {
-//                e1.printStackTrace();
-//            }
-//            } ).start();
-//            DialogFactory.createProgressDialog( "Copy file(s)", progressAwareInputStream ).show();
-//
-//        } catch ( IOException e2 ) {
-//            e2.printStackTrace();
-//        }
-
-
     }
 
     @FXML
@@ -165,9 +162,4 @@ public class FileManager extends VBox implements Initializable, EventHandler<Fil
         return rightFileView;
     }
 
-    @Override
-    @Handler( rejectSubtypes = true )
-    public void onEvent( FileListResponse event ) {
-        Platform.runLater( () -> getActiveFileView().setRemoteFileList( event ) );
-    }
 }

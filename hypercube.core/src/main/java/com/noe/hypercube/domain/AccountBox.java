@@ -1,15 +1,24 @@
 package com.noe.hypercube.domain;
 
 import com.noe.hypercube.controller.IPersistenceController;
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.FileListRequest;
+import com.noe.hypercube.event.domain.FileListResponse;
 import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
+import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.downstream.Downloader;
 import com.noe.hypercube.synchronization.downstream.IDownloader;
 import com.noe.hypercube.synchronization.upstream.IUploader;
 import com.noe.hypercube.synchronization.upstream.QueueUploader;
+import net.engio.mbassy.listener.Handler;
+import net.engio.mbassy.listener.Invoke;
 
-public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_TYPE extends MappingEntity> {
+import java.util.List;
+
+public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_TYPE extends MappingEntity> implements EventHandler<FileListRequest> {
 
     private final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
     private final IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper;
@@ -26,6 +35,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
 
         downloader = new Downloader(client, mapper, entityFactory, persistenceController);
         uploader = new QueueUploader<>(client,entityFactory, persistenceController);
+        EventBus.subscribeToFileListRequest(this);
     }
 
     private void validate(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory) {
@@ -54,5 +64,21 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
 
     public IUploader<ACCOUNT_TYPE, ENTITY_TYPE> getUploader() {
         return uploader;
+    }
+
+    @Override
+    @Handler(rejectSubtypes = true, delivery = Invoke.Synchronously)
+    public void onEvent(final FileListRequest event) {
+        try {
+            final List<ServerEntry> fileList;
+            if (event.getRemoteFolder() == null) {
+                fileList = client.getRootFileList();
+            } else {
+                fileList = client.getFileList(event.getRemoteFolder());
+            }
+            EventBus.publish(new FileListResponse(client.getAccountName(), event.getRemoteFolder(), fileList));
+        } catch (SynchronizationException e) {
+            e.printStackTrace();
+        }
     }
 }

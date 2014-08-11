@@ -17,6 +17,7 @@
         <module>hypercube.ui</module>
         <module>hypercube.integration</module>
         <module>hypercube.event</module>
+        <module>hypercube.api</module>
     </modules>
 
     <properties>

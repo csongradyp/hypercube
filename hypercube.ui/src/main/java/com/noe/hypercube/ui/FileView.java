@@ -1,12 +1,14 @@
 package com.noe.hypercube.ui;
 
 import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.EventHandler;
 import com.noe.hypercube.event.domain.FileListRequest;
 import com.noe.hypercube.event.domain.FileListResponse;
-import com.noe.hypercube.ui.bundle.AccountBundle;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.domain.IFile;
+import com.noe.hypercube.ui.elements.AccountSegmentedButton;
 import com.noe.hypercube.ui.factory.IconFactory;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
@@ -15,11 +17,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.VBox;
+import net.engio.mbassy.listener.Handler;
 import org.controlsfx.control.BreadCrumbBar;
 import org.controlsfx.control.SegmentedButton;
 
@@ -29,22 +31,21 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static javafx.scene.input.KeyCombination.ModifierValue.DOWN;
 import static javafx.scene.input.KeyCombination.ModifierValue.UP;
 
-public class FileView extends VBox implements Initializable {
+public class FileView extends VBox implements Initializable, EventHandler<FileListResponse> {
 
     private static final String SEPARATOR = System.getProperty("file.separator");
-    private static final String SEPARATOR_PATTERN = Pattern.quote(SEPARATOR);
 
     private final KeyCombination enter = new KeyCodeCombination(KeyCode.ENTER);
     private final KeyCombination backSpace = new KeyCodeCombination(KeyCode.BACK_SPACE);
     private final KeyCombination space = new KeyCodeCombination(KeyCode.SPACE);
     private final KeyCombination shiftDown = new KeyCodeCombination(KeyCode.DOWN, DOWN, UP, UP, UP, UP);
     private final KeyCombination shiftUp = new KeyCodeCombination(KeyCode.UP, DOWN, UP, UP, UP, UP);
+//    private final KeyCombination refresh = new KeyCodeCombination(KeyCode.F5, UP, UP, UP, UP, UP);
 
     @FXML
     private FileTableView table;
@@ -54,12 +55,14 @@ public class FileView extends VBox implements Initializable {
     @FXML
     private SegmentedButton localDrives;
     @FXML
-    private SegmentedButton remoteDrives;
+    private AccountSegmentedButton remoteDrives;
 
     @FXML
     private Label metaDataInfo;
     @FXML
     private SimpleStringProperty side = new SimpleStringProperty();
+
+    private Boolean remote;
 
     public FileView() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fileView.fxml"));
@@ -71,15 +74,22 @@ public class FileView extends VBox implements Initializable {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+        EventBus.subscribeToFileListResponse(this);
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        remote = false;
         initLocalDrives();
         initRemoteDrives();
         table.getLocationProperty().addListener((observable, oldValue, newValue) -> {
-            multiBreadCrumbBar.setBreadCrumbs(newValue);
-            table.updateLocation(newValue);
+            // tODO change location based on remoteViewActive - triggereded by location change HERE
+            if (remote) {
+                EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), newValue));
+            } else {
+                multiBreadCrumbBar.setBreadCrumbs(newValue);
+                table.setLocalFileList(newValue);
+            }
         });
         table.getActiveProperty().addListener((observable, oldValue, newValue) -> table.getSelectionModel().selectFirst());
         multiBreadCrumbBar.setOnLocalCrumbAction(this::onCrumbAction);
@@ -87,7 +97,8 @@ public class FileView extends VBox implements Initializable {
             final FileBreadCrumbBar triggered = (FileBreadCrumbBar) event.getSource();
             System.out.println(triggered);
             System.out.println(event.getSelectedCrumb());
-            EventBus.publish(new FileListRequest(Paths.get("X/Y")));
+//            EventBus.publish(new FileListRequest(account, Paths.get("X/Y")));
+            remote = true;
         });
     }
 
@@ -124,6 +135,7 @@ public class FileView extends VBox implements Initializable {
         button.setOnMouseClicked(event -> {
             table.setLocation(Paths.get(button.getText()));
             button.setSelected(true);
+            remoteDrives.deselectButtons();
         });
         return button;
     }
@@ -146,27 +158,23 @@ public class FileView extends VBox implements Initializable {
         //                }
         //            });
         //        }
-        final List<String> accounts = AccountBundle.getAccounts();
-        for (String account : accounts) {
-            final ToggleButton accountStorageButton = new ToggleButton(account);
-            accountStorageButton.setFocusTraversable(false);
-            accountStorageButton.setOnAction(event -> EventBus.publish(new FileListRequest(getLocation())));
-            remoteDrives.getButtons().add(accountStorageButton);
-        }
-        ToggleButton remoteDriveButton = new ToggleButton("+");
-        remoteDriveButton.setFocusTraversable(false);
-        remoteDriveButton.setTooltip(new Tooltip("Add new remote drive"));
-        remoteDrives.getButtons().add(remoteDriveButton);
-        remoteDriveButton.setOnMouseClicked(event -> {
-            ToggleButton newRemoteDrive = new ToggleButton("New");
-            newRemoteDrive.setFocusTraversable(false);
-            remoteDrives.getButtons().add(0, newRemoteDrive);
-            remoteDriveButton.setSelected(false);
+        remoteDrives.activeProperty().addListener((observableValue, oldValue, newValue) -> {
+            remote = newValue;
         });
+    }
+
+    public void refresh() {
+        table.getItems().clear();
+        if(remote) {
+            EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getLocation()));
+        } else {
+            table.setLocalFileList(getLocation());
+        }
     }
 
     @FXML
     public void onCrumbAction(BreadCrumbBar.BreadCrumbActionEvent<String> event) {
+        remote = false;
         TreeItem<String> selectedCrumb = event.getSelectedCrumb();
         List<String> folders = new ArrayList<>();
         while (selectedCrumb != null) {
@@ -182,18 +190,17 @@ public class FileView extends VBox implements Initializable {
         // TODO investigate locationchangeproperty trigger problem
         final Path newPath = Paths.get(path);
         multiBreadCrumbBar.setBreadCrumbs(newPath);
-        table.updateLocation(Paths.get(path));
+        table.setLocalFileList(Paths.get(path));
         table.requestFocus();
         deselectButtons(remoteDrives);
     }
 
     @FXML
     public void onMouseClicked(MouseEvent event) {
+        final IFile selectedItem = table.getSelectionModel().getSelectedItem();
         if (isDoubleClick(event)) {
-            IFile selectedItem = table.getSelectionModel().getSelectedItem();
             stepInto(selectedItem);
         } else if (MouseButton.SECONDARY.equals(event.getButton())) {
-            IFile selectedItem = table.getSelectionModel().getSelectedItem();
             selectedItem.mark();
         }
     }
@@ -203,9 +210,8 @@ public class FileView extends VBox implements Initializable {
     }
 
     @FXML
-    public void onKeyPressed(KeyEvent event) {
-        IFile selectedFile = table.getSelectionModel().getSelectedItem();
-
+    public void onKeyPressed(final KeyEvent event) {
+        final IFile selectedFile = table.getSelectionModel().getSelectedItem();
         if (backSpace.match(event)) {
             table.setLocation(selectedFile.getParentDirectory());
         } else if (enter.match(event)) {
@@ -219,20 +225,24 @@ public class FileView extends VBox implements Initializable {
             selectedFile.mark();
             table.getSelectionModel().selectBelowCell();
         }
+//        else if (refresh.match(event)) {
+//            refresh();
+//        }
     }
 
     @FXML
     public void onLocalDriveMouseClicked(MouseEvent event) {
         ToggleButton source = (ToggleButton) event.getSource();
-        table.updateLocation(Paths.get(source.getText()));
+        table.setLocalFileList(Paths.get(source.getText()));
         if (!source.isSelected()) {
             source.setSelected(true);
         }
     }
 
     private void stepInto(IFile selectedFile) {
-        if (selectedFile.isDirectory()) {
-            table.setLocation(selectedFile.getPath());
+        if (selectedFile.isDirectory() || selectedFile.isStepBack()) {
+            final Path folder = selectedFile.getPath();
+            table.setLocation(folder);
         } else {
             System.out.println(selectedFile);
         }
@@ -283,7 +293,7 @@ public class FileView extends VBox implements Initializable {
     }
 
     public void setRemoteFileList(final FileListResponse event) {
-        table.setFileList(event.getFileList());
+        table.setRemoteFileList(event.getFileList());
         activateRemoteStorageButton(event);
         deselectButtons(localDrives);
     }
@@ -297,13 +307,23 @@ public class FileView extends VBox implements Initializable {
         }
     }
 
-    public ToggleButton deselectButtons(final SegmentedButton segmentedButton) {
+    public void deselectButtons(final SegmentedButton segmentedButton) {
         final ObservableList<ToggleButton> buttons = segmentedButton.getButtons();
         for (ToggleButton button : buttons) {
             if (button.isSelected()) {
                 button.setSelected(false);
             }
         }
-        return null;
+    }
+
+    @Override
+    @Handler(rejectSubtypes = true)
+    public void onEvent(FileListResponse event) {
+        if (remote) {
+            Platform.runLater(() -> {
+                multiBreadCrumbBar.setRemoteBreadCrumbs(event.getAccount(), event.getParentFolder());
+                setRemoteFileList(event);
+            });
+        }
     }
 }

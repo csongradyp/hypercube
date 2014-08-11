@@ -1,13 +1,7 @@
 package com.noe.hypercube.observer.remote;
 
 import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.domain.AccountBox;
-import com.noe.hypercube.domain.FileEntityFactory;
-import com.noe.hypercube.domain.MappingEntity;
-import com.noe.hypercube.domain.ServerEntry;
-import com.noe.hypercube.domain.TestEntity;
-import com.noe.hypercube.domain.TestMapping;
-import com.noe.hypercube.domain.TestServerEntry;
+import com.noe.hypercube.domain.*;
 import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.service.TestAccount;
@@ -23,10 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CloudObserverTest {

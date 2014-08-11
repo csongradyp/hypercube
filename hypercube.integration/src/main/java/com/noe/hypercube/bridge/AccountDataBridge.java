@@ -6,8 +6,10 @@ import com.noe.hypercube.ui.bundle.AccountBundle;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Collection;
 
+@Named
 public class AccountDataBridge {
 
     @Inject

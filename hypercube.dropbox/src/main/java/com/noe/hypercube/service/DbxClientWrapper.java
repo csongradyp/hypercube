@@ -1,14 +1,11 @@
 package com.noe.hypercube.service;
 
 
-import com.dropbox.core.DbxClient;
-import com.dropbox.core.DbxDelta;
-import com.dropbox.core.DbxEntry;
-import com.dropbox.core.DbxException;
-import com.dropbox.core.DbxWriteMode;
+import com.dropbox.core.*;
 import com.noe.hypercube.domain.DbxFileEntity;
 import com.noe.hypercube.domain.DbxServerEntry;
 import com.noe.hypercube.domain.ServerEntry;
+import com.noe.hypercube.event.domain.ServerEntryEvent;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.*;
 
 public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
 
@@ -50,7 +46,7 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
 
     @Override
     public boolean exist(File fileToUpload, Path remotePath) {
-        return exist(getDropboxPath(remotePath) + "/" +fileToUpload.getName());
+        return exist(getDropboxPath(remotePath) + "/" + fileToUpload.getName());
     }
 
     @Override
@@ -75,7 +71,7 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
         try {
             DbxDelta<DbxEntry> delta = client.getDelta(cursor);
             for (DbxDelta.Entry<DbxEntry> entry : delta.entries) {
-                if(entry.metadata.isFile()) {
+                if (entry.metadata.isFile()) {
                     DbxServerEntry dbxServerEntry = new DbxServerEntry(entry.lcPath, entry.metadata.asFile().rev, entry.metadata.asFile().lastModified, entry.metadata.isFolder());
                     serverEntries.add(dbxServerEntry);
                 }
@@ -126,11 +122,54 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
         return upload(remotePath, DbxWriteMode.force(), fileToUpload, inputStream);
     }
 
+    @Override
+    public List<ServerEntry> getFileList(final Path remoteFolder) throws SynchronizationException {
+        final String dropboxPath = remoteFolder.toString().replace("\\", "/");
+        final List<ServerEntry> fileList = new ArrayList<>();
+        try {
+            final DbxEntry.WithChildren metadataWithChildren = client.getMetadataWithChildren(dropboxPath);
+            final List<DbxEntry> folderContent = metadataWithChildren.children;
+            for (DbxEntry file : folderContent) {
+                String rev = "";
+                Date lastModified = new Date();
+                if (file.isFile()) {
+                    lastModified = file.asFile().lastModified;
+                    rev = file.asFile().rev;
+                }
+                fileList.add(new ServerEntryEvent(file.path, rev, lastModified, file.isFolder()));
+            }
+        } catch (DbxException e) {
+            throw new SynchronizationException(e.getMessage());
+        }
+        return fileList;
+    }
+
+    @Override
+    public List<ServerEntry> getRootFileList() throws SynchronizationException {
+        final List<ServerEntry> fileList = new ArrayList<>();
+        try {
+            final DbxEntry.WithChildren metadataWithChildren = client.getMetadataWithChildren("/");
+            final List<DbxEntry> folderContent = metadataWithChildren.children;
+            for (DbxEntry file : folderContent) {
+                String rev = "";
+                Date lastModified = new Date();
+                if (file.isFile()) {
+                    lastModified = file.asFile().lastModified;
+                    rev = file.asFile().rev;
+                }
+                fileList.add(new ServerEntryEvent(file.path, rev, lastModified, file.isFolder()));
+            }
+        } catch (DbxException e) {
+            throw new SynchronizationException(e.getMessage());
+        }
+        return fileList;
+    }
+
     private ServerEntry upload(Path remotePath, DbxWriteMode writeMode, File fileToUpload, InputStream inputStream) {
         DbxServerEntry serverEntry = null;
         final String dropboxFilePath = getDropboxPath(remotePath) + "/" + fileToUpload.getName();
         try {
-            DbxEntry.File uploadedFile = client.uploadFile(dropboxFilePath,writeMode, fileToUpload.length(), inputStream);
+            DbxEntry.File uploadedFile = client.uploadFile(dropboxFilePath, writeMode, fileToUpload.length(), inputStream);
             serverEntry = new DbxServerEntry(uploadedFile.path, uploadedFile.rev, uploadedFile.lastModified, uploadedFile.isFolder());
         } catch (DbxException e) {
             LOG.error("File upload failed to Dropbox: {}", remotePath);

@@ -27,7 +27,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
 
     private PathBundle pathBundle;
     private FileBreadCrumbBar localBreadcrumb;
-    private Map<String, FileBreadCrumbBar> breadCrumbBars;
+    private Map<String, FileBreadCrumbBar> remotebreadcrumbs;
     private EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> remoteEventHandler;
     private EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> localEventHandler;
 
@@ -45,17 +45,17 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         pathBundle = new PathBundle();
-        breadCrumbBars = new HashMap<>();
+        remotebreadcrumbs = new HashMap<>();
         localBreadcrumb = new FileBreadCrumbBar(true);
         setLocalCrumbActionHandler();
         final Collection<String> accounts = pathBundle.getAccounts();
         for (String account : accounts) {
             final FileBreadCrumbBar remote = new FileBreadCrumbBar();
             setRemoteCrumbEventHandler(remote);
-            breadCrumbBars.put(account, remote);
+            remotebreadcrumbs.put(account, remote);
         }
         disableBreadcrumbFocusTraversal(localBreadcrumb);
-        breadCrumbBars.values().forEach(this::disableBreadcrumbFocusTraversal);
+        remotebreadcrumbs.values().forEach(this::disableBreadcrumbFocusTraversal);
         getChildren().add(localBreadcrumb);
     }
 
@@ -81,30 +81,38 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     }
 
     private void setAllRemoteCrumbsInactive() {
-        for (FileBreadCrumbBar fileBreadCrumbBar : breadCrumbBars.values()) {
+        for (FileBreadCrumbBar fileBreadCrumbBar : remotebreadcrumbs.values()) {
             fileBreadCrumbBar.setActive(false);
         }
     }
 
     public void setBreadCrumbs(Path path) {
-        TreeItem<String> model = BreadCrumbBar.buildTreeModel(path.toString().split(SEPARATOR_PATTERN));
-        localBreadcrumb.setSelectedCrumb(model);
         setBreadCrumb(path, localBreadcrumb);
-        final Map<String, String> remoteFolders = pathBundle.getAllRemoteFolders(path.toString());
+        final Map<String, String> remoteFolders = pathBundle.getAllFolders(path.toString());
         getChildren().clear();
         if (path.toFile().exists()) {
             getChildren().add(localBreadcrumb);
         }
         for (Map.Entry<String, String> entry : remoteFolders.entrySet()) {
-            final BreadCrumbBar<String> remoteBreadcrumb = breadCrumbBars.get(entry.getKey());
+            final BreadCrumbBar<String> remoteBreadcrumb = remotebreadcrumbs.get(entry.getKey());
             setRemoteBreadCrumb(entry.getValue(), entry.getKey(), remoteBreadcrumb);
             getChildren().add(remoteBreadcrumb);
         }
     }
 
+    public void setRemoteBreadCrumbs(String account, Path path) {
+        getChildren().clear();
+        final FileBreadCrumbBar activeAccountCrumb = remotebreadcrumbs.get(account);
+        final String crumbPath = path == null ? "" : path.toString();
+        setRemoteBreadCrumb(crumbPath, account, activeAccountCrumb);
+        getChildren().add(activeAccountCrumb);
+    }
+
     private void setBreadCrumb(Path path, BreadCrumbBar<String> breadcrumb) {
         TreeItem<String> model = BreadCrumbBar.buildTreeModel(path.toString().split(SEPARATOR_PATTERN));
-        breadcrumb.setSelectedCrumb(model);
+        if (model != null) {
+            breadcrumb.setSelectedCrumb(model);
+        }
     }
 
     private void setRemoteBreadCrumb(final String path, final String account, final BreadCrumbBar<String> breadcrumb) {

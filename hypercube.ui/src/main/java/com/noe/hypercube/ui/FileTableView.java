@@ -1,6 +1,6 @@
 package com.noe.hypercube.ui;
 
-import com.noe.hypercube.event.dto.RemoteFileInfo;
+import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.domain.IFile;
 import com.noe.hypercube.ui.domain.LocalFile;
@@ -109,7 +109,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         });
     }
 
-    public void updateLocation(Path dir) {
+    public void setLocalFileList(Path dir) {
         java.io.File[] list = dir.toFile().listFiles();
         Collection<IFile> files = new ArrayList<>(100);
         Collection<IFile> dirs = new ArrayList<>(100);
@@ -134,22 +134,29 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         getSelectionModel().selectFirst();
     }
 
-    public void setFileList(List<RemoteFileInfo> list) {
-        Collection<IFile> files = new ArrayList<>(100);
-        Collection<IFile> dirs = new ArrayList<>(100);
-        IFile stepBack = createStepBackFile(list.get(0).getRemotePath().getParent());
-        if (stepBack != null) {
+    public void setRemoteFileList(final List<ServerEntry> list) {
+        final Collection<IFile> files = new ArrayList<>(100);
+        final Collection<IFile> dirs = new ArrayList<>(100);
+        if (!list.isEmpty()) {
+            final IFile stepBack = createStepBackFile(list.get(0).getPath().getParent());
+            if (stepBack != null) {
+                dirs.add(stepBack);
+            }
+            for (ServerEntry file : list) {
+                final RemoteFile remoteFile = new RemoteFile(file.getPath(), 0, file.isFolder(), file.lastModified());
+                if (file.isFolder()) {
+                    dirs.add(remoteFile);
+                } else {
+                    files.add(remoteFile);
+                }
+            }
+            getItems().clear();
+            dirs.addAll(files);
+        } else {
+            final Path location1 = getLocation();
+            final IFile stepBack = createStepBackFile(location1);
             dirs.add(stepBack);
         }
-        for (RemoteFileInfo file : list) {
-            final RemoteFile remoteFile = new RemoteFile(file.getRemotePath(), file.getSize(), file.isDirectory(), file.getTimeStamp());
-            if (file.isDirectory()) {
-                dirs.add(remoteFile);
-            } else {
-                files.add(remoteFile);
-            }
-        }
-        dirs.addAll(files);
         ObservableList<IFile> data = FXCollections.observableArrayList(dirs);
         setItems(data);
         getSelectionModel().selectFirst();

@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 
 public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity>{
 
@@ -45,4 +46,7 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
 
     ServerEntry uploadAsUpdated(final Path remotePath, final File fileToUpload, final InputStream inputStream) throws SynchronizationException;
 
+    List<ServerEntry> getFileList(final Path remoteFolder) throws SynchronizationException;
+
+    List<ServerEntry> getRootFileList() throws SynchronizationException;
 }

@@ -209,6 +209,17 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
         return new DriveServerEntry(remotePath.toString(), updatedFile.getHeadRevisionId(), lastModified, false);
     }
 
+    @Override
+    public List<ServerEntry> getFileList(Path remoteFolder) throws SynchronizationException {
+        // TODO implement
+        return null;
+    }
+
+    @Override
+    public List<ServerEntry> getRootFileList() throws SynchronizationException {
+        return null;
+    }
+
     private com.google.api.services.drive.model.File getDriveFile(String driveFileId) throws SynchronizationException {
         com.google.api.services.drive.model.File driveFile;
         try {

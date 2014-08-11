@@ -38,7 +38,6 @@ public class Runner {
             APPLICATION_CONTEXT = new ClassPathXmlApplicationContext(CONTEXT_XML_PATH);
             APPLICATION_CONTEXT.registerShutdownHook();
             app = APPLICATION_CONTEXT.getBean(HyperCubeApp.class);
-//            app.addTestDirectoryMapping(new DbxMapping("d:\\hyper\\", "/newtest"));
             app.start();
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
