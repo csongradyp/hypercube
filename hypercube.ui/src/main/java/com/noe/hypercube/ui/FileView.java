@@ -45,7 +45,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     private final KeyCombination space = new KeyCodeCombination(KeyCode.SPACE);
     private final KeyCombination shiftDown = new KeyCodeCombination(KeyCode.DOWN, DOWN, UP, UP, UP, UP);
     private final KeyCombination shiftUp = new KeyCodeCombination(KeyCode.UP, DOWN, UP, UP, UP, UP);
-//    private final KeyCombination refresh = new KeyCodeCombination(KeyCode.F5, UP, UP, UP, UP, UP);
+    private final KeyCombination refresh = new KeyCodeCombination(KeyCode.F5, UP, UP, UP, UP, UP);
 
     @FXML
     private FileTableView table;
@@ -132,11 +132,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     private ToggleButton createLocalStorageButton(Path root) {
         ToggleButton button = new ToggleButton(root.toString(), new ImageView(IconFactory.getStorageIcon(root)));
         button.setFocusTraversable(false);
-        button.setOnMouseClicked(event -> {
-            table.setLocation(Paths.get(button.getText()));
-            button.setSelected(true);
-            remoteDrives.deselectButtons();
-        });
+        button.setOnMouseClicked(this::onLocalDriveMouseClicked);
         return button;
     }
 
@@ -165,7 +161,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     public void refresh() {
         table.getItems().clear();
-        if(remote) {
+        if (remote) {
             EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getLocation()));
         } else {
             table.setLocalFileList(getLocation());
@@ -224,19 +220,20 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         } else if (shiftDown.match(event)) {
             selectedFile.mark();
             table.getSelectionModel().selectBelowCell();
+        } else if (refresh.match(event)) {
+            refresh();
         }
-//        else if (refresh.match(event)) {
-//            refresh();
-//        }
     }
 
     @FXML
     public void onLocalDriveMouseClicked(MouseEvent event) {
-        ToggleButton source = (ToggleButton) event.getSource();
-        table.setLocalFileList(Paths.get(source.getText()));
-        if (!source.isSelected()) {
-            source.setSelected(true);
-        }
+        remote = false;
+        ToggleButton localDriveButton = (ToggleButton) event.getSource();
+//        table.setLocalFileList(Paths.get(localDriveButton.getText()));
+        final Path location = Paths.get(localDriveButton.getText());
+        localDriveButton.setSelected(true);
+        table.setLocation(location);
+        remoteDrives.deselectButtons();
     }
 
     private void stepInto(IFile selectedFile) {
