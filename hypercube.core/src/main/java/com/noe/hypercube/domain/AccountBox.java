@@ -16,6 +16,7 @@ import com.noe.hypercube.synchronization.upstream.QueueUploader;
 import net.engio.mbassy.listener.Handler;
 import net.engio.mbassy.listener.Invoke;
 
+import java.nio.file.Path;
 import java.util.List;
 
 public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_TYPE extends MappingEntity> implements EventHandler<FileListRequest> {
@@ -71,12 +72,13 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     public void onEvent(final FileListRequest event) {
         try {
             final List<ServerEntry> fileList;
-            if (event.getRemoteFolder() == null) {
+            final Path remoteFolder = event.getRemoteFolder();
+            if (remoteFolder == null || remoteFolder.toString().isEmpty()) {
                 fileList = client.getRootFileList();
             } else {
-                fileList = client.getFileList(event.getRemoteFolder());
+                fileList = client.getFileList(remoteFolder);
             }
-            EventBus.publish(new FileListResponse(client.getAccountName(), event.getRemoteFolder(), fileList));
+            EventBus.publish(new FileListResponse(client.getAccountName(), remoteFolder, fileList));
         } catch (SynchronizationException e) {
             e.printStackTrace();
         }

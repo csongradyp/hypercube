@@ -17,7 +17,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.VBox;
@@ -45,7 +44,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     private final KeyCombination space = new KeyCodeCombination(KeyCode.SPACE);
     private final KeyCombination shiftDown = new KeyCodeCombination(KeyCode.DOWN, DOWN, UP, UP, UP, UP);
     private final KeyCombination shiftUp = new KeyCodeCombination(KeyCode.UP, DOWN, UP, UP, UP, UP);
-    private final KeyCombination refresh = new KeyCodeCombination(KeyCode.F5, UP, UP, UP, UP, UP);
+    private final KeyCombination ctrlF5 = new KeyCodeCombination(KeyCode.F5, UP, DOWN, UP, UP, UP);
 
     @FXML
     private FileTableView table;
@@ -83,7 +82,6 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         initLocalDrives();
         initRemoteDrives();
         table.getLocationProperty().addListener((observable, oldValue, newValue) -> {
-            // tODO change location based on remoteViewActive - triggereded by location change HERE
             if (remote) {
                 EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), newValue));
             } else {
@@ -92,14 +90,8 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
             }
         });
         table.getActiveProperty().addListener((observable, oldValue, newValue) -> table.getSelectionModel().selectFirst());
-        multiBreadCrumbBar.setOnLocalCrumbAction(this::onCrumbAction);
-        multiBreadCrumbBar.setOnRemoteCrumbAction(event -> {
-            final FileBreadCrumbBar triggered = (FileBreadCrumbBar) event.getSource();
-            System.out.println(triggered);
-            System.out.println(event.getSelectedCrumb());
-//            EventBus.publish(new FileListRequest(account, Paths.get("X/Y")));
-            remote = true;
-        });
+        multiBreadCrumbBar.setOnLocalCrumbAction(this::onLocalCrumbAction);
+        multiBreadCrumbBar.setOnRemoteCrumbAction(event -> remote = true);
     }
 
     public void initStartLocation() {
@@ -168,26 +160,10 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         }
     }
 
-    @FXML
-    public void onCrumbAction(BreadCrumbBar.BreadCrumbActionEvent<String> event) {
+    public void onLocalCrumbAction(BreadCrumbBar.BreadCrumbActionEvent<String> event) {
         remote = false;
-        TreeItem<String> selectedCrumb = event.getSelectedCrumb();
-        List<String> folders = new ArrayList<>();
-        while (selectedCrumb != null) {
-            folders.add(0, selectedCrumb.getValue());
-            selectedCrumb = selectedCrumb.getParent();
-        }
-        String path = "";
-        for (String folder : folders) {
-            path += folder + SEPARATOR;
-        }
-//        table.setLocation( Paths.get( path ) );
-        //
-        // TODO investigate locationchangeproperty trigger problem
-        final Path newPath = Paths.get(path);
-        multiBreadCrumbBar.setBreadCrumbs(newPath);
-        table.setLocalFileList(Paths.get(path));
-        table.requestFocus();
+        final Path newPath = multiBreadCrumbBar.getNewLocalPath(event);
+        table.setLocation( newPath );
         deselectButtons(remoteDrives);
     }
 
@@ -220,7 +196,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         } else if (shiftDown.match(event)) {
             selectedFile.mark();
             table.getSelectionModel().selectBelowCell();
-        } else if (refresh.match(event)) {
+        } else if (ctrlF5.match(event)) {
             refresh();
         }
     }
