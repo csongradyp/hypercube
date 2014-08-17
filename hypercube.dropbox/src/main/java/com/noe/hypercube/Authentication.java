@@ -18,7 +18,7 @@ public class Authentication {
         LOG.debug("Authentication started");
         String authorizeUrl = dbxWebAut.start();
         LOG.info("Authorization URL: " + authorizeUrl);
-        JTextArea textarea= new JTextArea("Go to: " + authorizeUrl);
+        JTextArea textarea = new JTextArea("Go to: " + authorizeUrl);
         textarea.setEditable(true);
         JOptionPane.showMessageDialog(null, textarea, "Confirm Dropbox using", JOptionPane.ERROR_MESSAGE);
 

@@ -22,27 +22,27 @@ public final class IconFactory {
     private IconFactory() {
     }
 
-    public static Image getStorageIcon( Path rootPath ) {
-        Image hardDriveIcon = ImageBundle.getImage( HARD_DRIVE_ICON );
+    public static Image getStorageIcon(Path rootPath) {
+        Image hardDriveIcon = ImageBundle.getImage(HARD_DRIVE_ICON);
         Image icon = hardDriveIcon;
-        String driveType = FileSystemView.getFileSystemView().getSystemTypeDescription( rootPath.toFile() );
-        if ( driveType.toLowerCase().contains( "local" ) ) {
+        String driveType = FileSystemView.getFileSystemView().getSystemTypeDescription(rootPath.toFile());
+        if (driveType.toLowerCase().contains("local")) {
             icon = hardDriveIcon;
-        } else if ( driveType.toLowerCase().contains( "cd" ) ) {
-            icon = ImageBundle.getImage( OPTICAL_DRIVE_ICON );
-        } else if ( driveType.toLowerCase().contains( "removable" ) ) {
-            icon = ImageBundle.getImage( USB_DRIVE_ICON );
+        } else if (driveType.toLowerCase().contains("cd")) {
+            icon = ImageBundle.getImage(OPTICAL_DRIVE_ICON);
+        } else if (driveType.toLowerCase().contains("removable")) {
+            icon = ImageBundle.getImage(USB_DRIVE_ICON);
         }
         return icon;
     }
 
-    public static Label getFileIcon( IFile file ) {
-        if ( file.isStepBack() ) {
-            return AwesomeDude.createIconLabel( AwesomeIcon.REPLY, "[ . . ]", ICON_SIZE, FONT_SIZE, ContentDisplay.LEFT );
+    public static Label getFileIcon(IFile file) {
+        if (file.isStepBack()) {
+            return AwesomeDude.createIconLabel(AwesomeIcon.REPLY, "[ . . ]", ICON_SIZE, FONT_SIZE, ContentDisplay.LEFT);
         }
-        if ( file.isDirectory() ) {
-            return AwesomeDude.createIconLabel( AwesomeIcon.FOLDER, file.getName(), "16", FONT_SIZE, ContentDisplay.LEFT );
+        if (file.isDirectory()) {
+            return AwesomeDude.createIconLabel(AwesomeIcon.FOLDER, file.getName(), "16", FONT_SIZE, ContentDisplay.LEFT);
         }
-        return AwesomeDude.createIconLabel( AwesomeIcon.FILE_ALT, file.getName(), ICON_SIZE, FONT_SIZE, ContentDisplay.LEFT  );
+        return AwesomeDude.createIconLabel(AwesomeIcon.FILE_ALT, file.getName(), ICON_SIZE, FONT_SIZE, ContentDisplay.LEFT);
     }
 }

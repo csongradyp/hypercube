@@ -5,21 +5,27 @@ import java.io.InputStream;
 
 public class ProgressAwareInputStream extends InputStream {
     private InputStream wrappedInputStream;
-    private long size;
+    private Long size;
     private Object tag;
-    private long counter;
-    private long lastPercent;
+    private Long counter;
+    private Double lastPercent;
     private OnProgressListener listener;
 
     public ProgressAwareInputStream(InputStream in, long size, Object tag) {
         wrappedInputStream = in;
         this.size = size;
         this.tag = tag;
+        counter = 0L;
+        lastPercent = (double) 0;
     }
 
-    public void setOnProgressListener(OnProgressListener listener) { this.listener = listener; }
+    public void setOnProgressListener(OnProgressListener listener) {
+        this.listener = listener;
+    }
 
-    public Object getTag() { return tag; }
+    public Object getTag() {
+        return tag;
+    }
 
     @Override
     public int read() throws IOException {
@@ -45,8 +51,8 @@ public class ProgressAwareInputStream extends InputStream {
     }
 
     private void check() {
-        int percent = (int) ( counter * 100 / size );
-        if (percent - lastPercent >= 10) {
+        Double percent = counter / size.doubleValue();
+        if (percent - lastPercent >= 0.001d) {
             lastPercent = percent;
             if (listener != null)
                 listener.onProgress(percent, tag);
@@ -54,23 +60,40 @@ public class ProgressAwareInputStream extends InputStream {
     }
 
     @Override
-    public void close() throws IOException { wrappedInputStream.close(); }
+    public void close() throws IOException {
+        wrappedInputStream.close();
+    }
+
     @Override
-    public int available() throws IOException { return wrappedInputStream.available(); }
+    public int available() throws IOException {
+        return wrappedInputStream.available();
+    }
+
     @Override
-    public void mark(int readlimit) { wrappedInputStream.mark(readlimit); }
+    public void mark(int readlimit) {
+        wrappedInputStream.mark(readlimit);
+    }
+
     @Override
-    public synchronized void reset() throws IOException { wrappedInputStream.reset(); }
+    public synchronized void reset() throws IOException {
+        wrappedInputStream.reset();
+    }
+
     @Override
-    public boolean markSupported() { return wrappedInputStream.markSupported(); }
+    public boolean markSupported() {
+        return wrappedInputStream.markSupported();
+    }
+
     @Override
-    public long skip(long n) throws IOException { return wrappedInputStream.skip(n); }
+    public long skip(long n) throws IOException {
+        return wrappedInputStream.skip(n);
+    }
 
     /**
      * Interface for classes that want to monitor this input stream
      */
     public interface OnProgressListener {
-        void onProgress(int percentage, Object tag);
+        void onProgress(Double percentage, Object tag);
     }
 }
 

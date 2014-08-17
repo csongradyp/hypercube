@@ -26,7 +26,7 @@ public class Authentication {
     private static String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
     private static String APPLICATION_NAME = "HyperCube";
 
-    public static String getUrl(){
+    public static String getUrl() {
         HttpTransport httpTransport = new NetHttpTransport();
         JsonFactory jsonFactory = new JacksonFactory();
         GoogleAuthorizationCodeFlow flow = getGoogleAuthorizationCodeFlow(httpTransport, jsonFactory);

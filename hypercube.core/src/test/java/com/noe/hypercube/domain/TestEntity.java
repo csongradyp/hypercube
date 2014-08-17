@@ -2,7 +2,7 @@ package com.noe.hypercube.domain;
 
 import java.util.Date;
 
-public class TestEntity implements  FileEntity {
+public class TestEntity implements FileEntity {
     @Override
     public String getLocalPath() {
         return "A/B";

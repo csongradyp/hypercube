@@ -16,8 +16,8 @@
     <bean parent="daos" class="com.noe.hypercube.collector.DaoCollector">
         <constructor-arg>
             <list merge="true">
-                <bean class="com.noe.hypercube.dao.DbxEntityDao" />
-                <bean class="com.noe.hypercube.dao.DbxMappingDao" />
+                <bean class="com.noe.hypercube.dao.DbxEntityDao"/>
+                <bean class="com.noe.hypercube.dao.DbxMappingDao"/>
             </list>
         </constructor-arg>
     </bean>
@@ -25,7 +25,7 @@
     <bean id="dropbox.clients" parent="clients" class="com.noe.hypercube.collector.ClientCollector">
         <constructor-arg>
             <list merge="true">
-                <ref bean="dbxClient" />
+                <ref bean="dbxClient"/>
             </list>
         </constructor-arg>
     </bean>
@@ -33,7 +33,7 @@
     <bean id="dropbox.mappers" parent="mappers" class="com.noe.hypercube.collector.MapperCollector">
         <constructor-arg>
             <list>
-                <ref bean="dbxDirectoryMapper" />
+                <ref bean="dbxDirectoryMapper"/>
             </list>
         </constructor-arg>
     </bean>
@@ -41,18 +41,18 @@
     <bean id="dropbox.entityFactories" parent="entityFactories" class="com.noe.hypercube.collector.EntityFactoryCollector">
         <constructor-arg>
             <list>
-                <ref bean="dbxFileEntityFactory" />
+                <ref bean="dbxFileEntityFactory"/>
             </list>
         </constructor-arg>
     </bean>
 
-    <bean id="authentication" class="com.noe.hypercube.Authentication" />
+    <bean id="authentication" class="com.noe.hypercube.Authentication"/>
 
     <bean id="dbxClient" class="com.noe.hypercube.service.DbxClientWrapper">
         <constructor-arg>
             <bean class="com.dropbox.core.DbxClient">
-                <constructor-arg index="0" ref="config" />
-                <constructor-arg index="1" value="${accessToken}" />
+                <constructor-arg index="0" ref="config"/>
+                <constructor-arg index="1" value="${accessToken}"/>
             </bean>
         </constructor-arg>
     </bean>
@@ -60,20 +60,20 @@
     <bean id="dbxDirectoryMapper" class="com.noe.hypercube.mapping.DbxDirectoryMapper"/>
 
     <bean id="config" class="com.dropbox.core.DbxRequestConfig">
-        <constructor-arg value="HyperCube/0.0.1" />
-        <constructor-arg value="en" />
+        <constructor-arg value="HyperCube/0.0.1"/>
+        <constructor-arg value="en"/>
     </bean>
 
     <bean id="dbxWebAuth" class="com.dropbox.core.DbxWebAuthNoRedirect">
-        <constructor-arg ref="config" />
-        <constructor-arg ref="appInfo" />
+        <constructor-arg ref="config"/>
+        <constructor-arg ref="appInfo"/>
     </bean>
 
     <bean id="appInfo" class="com.dropbox.core.DbxAppInfo">
-        <constructor-arg value="${app.key}" />
-        <constructor-arg value="${app.secret}" />
+        <constructor-arg value="${app.key}"/>
+        <constructor-arg value="${app.secret}"/>
     </bean>
 
-    <bean id="dbxFileEntityFactory" class="com.noe.hypercube.domain.DbxFileEntityFactory" />
+    <bean id="dbxFileEntityFactory" class="com.noe.hypercube.domain.DbxFileEntityFactory"/>
 
 </beans>

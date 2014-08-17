@@ -5,44 +5,44 @@
        http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
     <!--<bean id="drive.daos" parent="daos" class="com.noe.hypercube.collector.DaoCollector">-->
-        <!--<constructor-arg>-->
-            <!--<list>-->
-                <!--<bean class="com.noe.hypercube.googledrive.dao.DriveFileEntryDao" />-->
-                <!--<bean class="com.noe.hypercube.googledrive.dao.DriveMappingDao" />-->
-            <!--</list>-->
-        <!--</constructor-arg>-->
+    <!--<constructor-arg>-->
+    <!--<list>-->
+    <!--<bean class="com.noe.hypercube.googledrive.dao.DriveFileEntryDao" />-->
+    <!--<bean class="com.noe.hypercube.googledrive.dao.DriveMappingDao" />-->
+    <!--</list>-->
+    <!--</constructor-arg>-->
     <!--</bean>-->
 
     <!--<bean id="drive.clients" parent="clients" class="com.noe.hypercube.collector.ClientCollector">-->
-        <!--<constructor-arg>-->
-            <!--<list>-->
-                <!--<ref bean="driveClient" />-->
-            <!--</list>-->
-        <!--</constructor-arg>-->
+    <!--<constructor-arg>-->
+    <!--<list>-->
+    <!--<ref bean="driveClient" />-->
+    <!--</list>-->
+    <!--</constructor-arg>-->
     <!--</bean>-->
 
     <!--<bean id="drive.mappers" parent="mappers" class="com.noe.hypercube.collector.MapperCollector">-->
-        <!--<constructor-arg>-->
-            <!--<list>-->
-            <!--</list>-->
-        <!--</constructor-arg>-->
+    <!--<constructor-arg>-->
+    <!--<list>-->
+    <!--</list>-->
+    <!--</constructor-arg>-->
     <!--</bean>-->
 
     <!--<bean id="drive.entityFactories" parent="entityFactories" class="com.noe.hypercube.collector.EntityFactoryCollector">-->
-        <!--<constructor-arg>-->
-            <!--<list>-->
-            <!--</list>-->
-        <!--</constructor-arg>-->
+    <!--<constructor-arg>-->
+    <!--<list>-->
+    <!--</list>-->
+    <!--</constructor-arg>-->
     <!--</bean>-->
 
 
     <!--<bean id="driveClient" class="com.noe.hypercube.googledrive.service.DriveClient">-->
-        <!--<constructor-arg ref="drive" />-->
+    <!--<constructor-arg ref="drive" />-->
     <!--</bean>-->
 
 
     <!--<bean id="directoryUtil" class="com.noe.hypercube.googledrive.service.DriveDirectoryUtil" >-->
-        <!--<constructor-arg ref="drive" />-->
+    <!--<constructor-arg ref="drive" />-->
     <!--</bean>-->
 
 </beans>

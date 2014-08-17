@@ -26,8 +26,8 @@ public class ConfigurationBundle {
     private final Ini ini;
 
     private ConfigurationBundle() {
-        languages.put( "Magyar", "hu" );
-        languages.put( "English", "en" );
+        languages.put("Magyar", "hu");
+        languages.put("English", "en");
         try {
             URL resource = getClass().getClassLoader().getResource("settings/settings.ini");
             ini = new Ini(new File(resource.toURI()));
@@ -57,12 +57,12 @@ public class ConfigurationBundle {
 
     public static String setLanguage(Locale locale) {
         final String country = locale.getLanguage();
-        return instance.ini.get(LANGUAGE).replace(LANGUAGE, country );
+        return instance.ini.get(LANGUAGE).replace(LANGUAGE, country);
     }
 
     public static String setLanguage(String locale) {
-        final String country = (String)languages.get( locale );
-        return instance.ini.get(LANGUAGE).replace(LANGUAGE, country );
+        final String country = (String) languages.get(locale);
+        return instance.ini.get(LANGUAGE).replace(LANGUAGE, country);
     }
 
     public static void setStartLocation(String side, Path newLocation) {

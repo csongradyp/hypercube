@@ -14,6 +14,9 @@ public final class EventBus {
     private final MBassador<StateChangeEvent> stateEventBus;
     private final MBassador<FileListRequest> fileListRequestBus;
     private final MBassador<FileListResponse> fileListResponseBus;
+    private final MBassador<UploadRequest> uploadRequestBus;
+    private final MBassador<DownloadRequest> downloadRequestBus;
+    private final MBassador<CreateFolderRequest> createFolderRequestBus;
 
     private EventBus() {
         storageEventBus = new MBassador<>(BusConfiguration.Default());
@@ -21,7 +24,10 @@ public final class EventBus {
         stateEventBus = new MBassador<>(BusConfiguration.Default());
         fileListRequestBus = new MBassador<>(BusConfiguration.Default());
         fileListResponseBus = new MBassador<>(BusConfiguration.Default());
-        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, fileListRequestBus, fileListResponseBus);
+        uploadRequestBus = new MBassador<>(BusConfiguration.Default());
+        downloadRequestBus = new MBassador<>(BusConfiguration.Default());
+        createFolderRequestBus = new MBassador<>(BusConfiguration.Default());
+        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, fileListRequestBus, fileListResponseBus, uploadRequestBus, downloadRequestBus, createFolderRequestBus);
     }
 
     private void registerShutdownHook(MBassador<?>... mBassadors) {
@@ -82,7 +88,31 @@ public final class EventBus {
         instance.fileListResponseBus.publish(fileListResponse);
     }
 
-    public static void subscribeToFileListRequest(EventHandler<FileListRequest> handler) {
+    public static void publish(UploadRequest uploadRequest) {
+        instance.uploadRequestBus.publish(uploadRequest);
+    }
+
+    public static void publish(DownloadRequest downloadRequest) {
+        instance.downloadRequestBus.publish(downloadRequest);
+    }
+
+    public static void publish(CreateFolderRequest createFolderRequest) {
+        instance.createFolderRequestBus.publish(createFolderRequest);
+    }
+
+    public static void subscribeToUploadRequest(FileEventHandler handler) {
+        instance.uploadRequestBus.subscribe(handler);
+    }
+
+    public static void subscribeToDownloadRequest(FileEventHandler handler) {
+        instance.downloadRequestBus.subscribe(handler);
+    }
+
+    public static void subscribeToCreateFolderRequest(FileEventHandler handler) {
+        instance.createFolderRequestBus.subscribe(handler);
+    }
+
+    public static void subscribeToFileListRequest(FileEventHandler handler) {
         instance.fileListRequestBus.subscribe(handler);
     }
 
@@ -98,12 +128,12 @@ public final class EventBus {
         instance.fileEventBus.subscribe(handler);
     }
 
-    public static void unsubscribeToFileEvent(EventHandler<FileEvent> handler) {
-        instance.fileEventBus.unsubscribe(handler);
-    }
-
     public static void subscribeToStorageEvent(EventHandler<StorageEvent> handler) {
         instance.storageEventBus.subscribe(handler);
+    }
+
+    public static void unsubscribeToFileEvent(EventHandler<FileEvent> handler) {
+        instance.fileEventBus.unsubscribe(handler);
     }
 
     public static void unsubscribeToStorageEvent(EventHandler<StorageEvent> handler) {

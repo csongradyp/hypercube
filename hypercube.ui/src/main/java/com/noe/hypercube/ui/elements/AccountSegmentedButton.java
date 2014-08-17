@@ -17,26 +17,46 @@ public class AccountSegmentedButton extends SegmentedButton {
 
     public AccountSegmentedButton() {
         super();
+        final ObservableList<String> accounts = AccountBundle.getAccounts();
+        if(!accounts.isEmpty()) {
+            for (String account : accounts) {
+                final ToggleButton accountStorageButton = createAccountButton(account);
+                getButtons().add(accountStorageButton);
+            }
+        }
+        addListenerForAccountChanges();
+    }
+
+    private void addListenerForAccountChanges() {
         AccountBundle.getAccounts().addListener((ListChangeListener<String>) change -> {
             while (change.next()) {
                 final List<? extends String> addedAccount = change.getAddedSubList();
                 for (String account : addedAccount) {
-                    final ToggleButton accountStorageButton = new ToggleButton(account);
-                    accountStorageButton.setFocusTraversable(false);
-                    accountStorageButton.setOnAction(event -> {
-                        active.set(true);
-                        EventBus.publish(new FileListRequest(account));
-                    });
+                    final ToggleButton accountStorageButton = createAccountButton(account);
                     getButtons().add(accountStorageButton);
+                }
+                final List<? extends String> removedAccount = change.getRemoved();
+                for (String account : removedAccount) {
+                    getButtons().removeIf(toggleButton -> toggleButton.getText().equals(account));
                 }
             }
         });
     }
 
+    private ToggleButton createAccountButton(String account) {
+        final ToggleButton accountStorageButton = new ToggleButton(account);
+        accountStorageButton.setFocusTraversable(false);
+        accountStorageButton.setOnAction(event -> {
+            active.set(true);
+            EventBus.publish(new FileListRequest(account));
+        });
+        return accountStorageButton;
+    }
+
     public String getActiveAccount() {
         final ObservableList<ToggleButton> buttons = getButtons();
         for (ToggleButton button : buttons) {
-            if(button.isSelected()) {
+            if (button.isSelected()) {
                 return button.getText();
             }
         }

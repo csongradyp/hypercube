@@ -32,7 +32,7 @@ public class LocalObserverFactory {
     public List<LocalFileObserver> create() {
         final List<LocalFileObserver> observers = new LinkedList<>();
         final Collection<MappingEntity> mappings = persistenceController.getAllMappings();
-        if(mappings != null) {
+        if (mappings != null) {
             for (MappingEntity entity : mappings) {
                 final LocalFileObserver observer = createObserver(entity);
                 LOG.info("File observer created for {} to watch '{}' directory ", entity.getAccountType(), entity.getLocalDir());
@@ -57,7 +57,7 @@ public class LocalObserverFactory {
     }
 
     private void validate(Class<? extends Account> accountType, IUploader uploader, IMapper mapper) {
-        if(uploader == null || mapper == null) {
+        if (uploader == null || mapper == null) {
             throw new IllegalStateException("Observer creation failed for " + accountType.getSimpleName());
         }
     }

@@ -19,7 +19,7 @@ public class FileFilter implements Filter, IEntity<Long> {
     private Collection<String> filters;
 
     public FileFilter() {
-       this(false);
+        this(false);
     }
 
     public FileFilter(final boolean blackList) {

@@ -59,10 +59,9 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
 
     @Override
     public void uploadUpdated(File fileToUpload, Path remotePath) throws SynchronizationException {
-        if(client.exist(fileToUpload, remotePath) && isNewer(fileToUpload)) {
+        if (client.exist(fileToUpload, remotePath) && isNewer(fileToUpload)) {
             upload(fileToUpload, remotePath, CHANGED);
-        }
-        else {
+        } else {
             LOG.debug("{} inconsistency - Remote file '{}' is fresher than the local one: {}", client.getAccountName(), remotePath.toString(), fileToUpload.toPath());
         }
     }
@@ -70,7 +69,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
     private synchronized void upload(File fileToUpload, Path remotePath, Action action) throws SynchronizationException {
         final Path localPath = fileToUpload.toPath();
         ServerEntry uploadedFile = null;
-        try(FileInputStream inputStream = FileUtils.openInputStream(fileToUpload)) {
+        try (FileInputStream inputStream = FileUtils.openInputStream(fileToUpload)) {
             final String accountName = client.getAccountName();
             if (REMOVED != action) {
                 if (CHANGED == action) {
@@ -85,7 +84,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
                     EventBus.publishUploadFinished(event);
                 }
             }
-            if(uploadedFile == null) {
+            if (uploadedFile == null) {
                 throw new SynchronizationException(format("Upload failed - Cannot upload file: '%s' to %s", localPath.toString(), accountName));
             }
             persist(localPath, uploadedFile);
@@ -102,13 +101,12 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
 
     @Override
     public synchronized void delete(File localFile, Path remotePath) throws SynchronizationException {
-        if(client.exist(localFile, remotePath)) {
+        if (client.exist(localFile, remotePath)) {
             client.delete(localFile, remotePath);
             Path localPath = localFile.toPath();
             persistenceController.delete(localPath.toString(), client.getEntityType());
             LOG.debug("Successfully deleted file '{}' from {}", remotePath, client.getAccountName());
-        }
-        else {
+        } else {
             LOG.debug("{} already deleted from {}", remotePath, client.getAccountName());
         }
     }
@@ -116,7 +114,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
     private boolean isNewer(File fileToUpload) {
         Path localPath = fileToUpload.toPath();
         FileEntity dbEntry = persistenceController.get(localPath.toString(), client.getEntityType());
-        if(dbEntry == null) {
+        if (dbEntry == null) {
             return true;
         }
         Date dbLastModifiedDate = dbEntry.lastModified();

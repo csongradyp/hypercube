@@ -17,8 +17,8 @@ public class IconInjector {
 
     public static final String ICON_SIZE = "20";
 
-    public static void setFileStatusIcon( final FileEvent file, final Label label ) {
-        label.getStylesheets().add( "style/status.css" );
+    public static void setFileStatusIcon(final FileEvent file, final Label label) {
+        label.getStylesheets().add("style/status.css");
         if (ADDED == file.getActionType()) {
             AwesomeDude.setIcon(label, AwesomeIcon.INBOX, ICON_SIZE);
 //            AwesomeDude.setIcon(label, AwesomeIcon.PLUS_SQUARE, ICON_SIZE);
@@ -35,14 +35,14 @@ public class IconInjector {
         }
     }
 
-    public static void setSyncStatusIcon( final StateChangeEvent.State state, Label label ) {
+    public static void setSyncStatusIcon(final StateChangeEvent.State state, Label label) {
         label.getGraphic().getStyleClass().clear();
         if (SYNCHRONIZING == state) {
-            AwesomeDude.setIcon( label, AwesomeIcon.REFRESH );
-            label.getGraphic().getStyleClass().add( "synchronizing" );
+            AwesomeDude.setIcon(label, AwesomeIcon.REFRESH);
+            label.getGraphic().getStyleClass().add("synchronizing");
         } else if (UP_TO_DATE == state) {
             AwesomeDude.setIcon(label, AwesomeIcon.CHECK_CIRCLE);
-            label.getGraphic().getStyleClass().add( "up-to-date" );
+            label.getGraphic().getStyleClass().add("up-to-date");
         } else if (OFFLINE == state) {
             AwesomeDude.setIcon(label, AwesomeIcon.WARNING);
             label.getGraphic().getStyleClass().add("offline");
@@ -51,12 +51,12 @@ public class IconInjector {
 
     public static Label getStreamDirectionIcon(final FileEvent fileEvent) {
         final Label icon;
-        if(fileEvent.getDirection() == DOWN) {
+        if (fileEvent.getDirection() == DOWN) {
             icon = AwesomeDude.createIconLabel(AwesomeIcon.ARROW_CIRCLE_DOWN, ICON_SIZE);
         } else {
             icon = AwesomeDude.createIconLabel(AwesomeIcon.ARROW_CIRCLE_UP, ICON_SIZE);
         }
-        icon.setEffect(new InnerShadow(BlurType.GAUSSIAN, Color.GREY, 7 , 1 , 1 , 1));
+        icon.setEffect(new InnerShadow(BlurType.GAUSSIAN, Color.GREY, 7, 1, 1, 1));
         return icon;
     }
 }

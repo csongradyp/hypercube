@@ -29,7 +29,7 @@ public class LocalFilePreSynchronizer implements FilePreSynchronizer {
     }
 
     @Override
-    public void run(final Collection<File> currentLocalFiles)  {
+    public void run(final Collection<File> currentLocalFiles) {
         final Map<Path, FileEntity> deletedLocalFiles = uploadChanged(currentLocalFiles, toMap(mappedFiles));
         deleteFromServer(deletedLocalFiles);
     }
@@ -51,20 +51,18 @@ public class LocalFilePreSynchronizer implements FilePreSynchronizer {
     private Map<Path, FileEntity> uploadChanged(final Collection<File> currentLocalFiles, final Map<Path, FileEntity> mappedLocalFiles) {
         for (File localFile : currentLocalFiles) {
 
-            if(!localFile.isDirectory()) {
+            if (!localFile.isDirectory()) {
                 final Path localFilePath = localFile.toPath();
 
-                if(isMapped(localFilePath, mappedLocalFiles)) {
+                if (isMapped(localFilePath, mappedLocalFiles)) {
                     final FileEntity dbEntry = mappedLocalFiles.get(localFilePath);
                     uploadChanged(localFile, dbEntry);
                     mappedLocalFiles.remove(localFilePath);
-                }
-                else {
+                } else {
                     LOG.debug("New local file found: {}", localFilePath);
                     fileListener.onFileCreate(localFile);
                 }
-            }
-            else {
+            } else {
                 uploadChanged(FileUtils.listFiles(localFile, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE), mappedLocalFiles);
             }
         }
@@ -77,11 +75,10 @@ public class LocalFilePreSynchronizer implements FilePreSynchronizer {
 
     private void uploadChanged(final File localFile, final FileEntity dbEntry) {
         final Path localFilePath = localFile.toPath();
-        if(isFileNewer(localFile, dbEntry.lastModified())) {
+        if (isFileNewer(localFile, dbEntry.lastModified())) {
             LOG.debug("New local file has been updated before start: " + localFilePath);
             fileListener.onFileChange(localFile);
-        }
-        else{
+        } else {
             LOG.debug("Untouched local file: " + localFilePath);
         }
     }

@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
-public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity>{
+public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> {
 
     /**
      * Returns the official name of the file hosting service.
@@ -38,7 +38,7 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
 
     void download(final ServerEntry serverPath, final FileOutputStream outputStream) throws SynchronizationException;
 
-    void download(String serverPath, FileOutputStream outputStream, Object... extraArgs) throws SynchronizationException;
+    ServerEntry download(String serverPath, FileOutputStream outputStream, Object... extraArgs) throws SynchronizationException;
 
     void delete(final File fileToUpload, final Path remotePath) throws SynchronizationException;
 
@@ -49,4 +49,6 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
     List<ServerEntry> getFileList(final Path remoteFolder) throws SynchronizationException;
 
     List<ServerEntry> getRootFileList() throws SynchronizationException;
+
+    void createFolder(final Path folder) throws SynchronizationException;
 }

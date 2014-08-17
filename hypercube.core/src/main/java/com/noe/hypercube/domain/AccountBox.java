@@ -2,9 +2,8 @@ package com.noe.hypercube.domain;
 
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.event.EventBus;
-import com.noe.hypercube.event.EventHandler;
-import com.noe.hypercube.event.domain.FileListRequest;
-import com.noe.hypercube.event.domain.FileListResponse;
+import com.noe.hypercube.event.FileEventHandler;
+import com.noe.hypercube.event.domain.*;
 import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
@@ -14,12 +13,12 @@ import com.noe.hypercube.synchronization.downstream.IDownloader;
 import com.noe.hypercube.synchronization.upstream.IUploader;
 import com.noe.hypercube.synchronization.upstream.QueueUploader;
 import net.engio.mbassy.listener.Handler;
-import net.engio.mbassy.listener.Invoke;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
-public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_TYPE extends MappingEntity> implements EventHandler<FileListRequest> {
+public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_TYPE extends MappingEntity> implements FileEventHandler {
 
     private final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
     private final IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper;
@@ -35,8 +34,11 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
         this.mapper = mapper;
 
         downloader = new Downloader(client, mapper, entityFactory, persistenceController);
-        uploader = new QueueUploader<>(client,entityFactory, persistenceController);
+        uploader = new QueueUploader<>(client, entityFactory, persistenceController);
         EventBus.subscribeToFileListRequest(this);
+        EventBus.subscribeToUploadRequest(this);
+        EventBus.subscribeToDownloadRequest(this);
+        EventBus.subscribeToCreateFolderRequest(this);
     }
 
     private void validate(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory) {
@@ -68,8 +70,8 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     }
 
     @Override
-    @Handler(rejectSubtypes = true, delivery = Invoke.Synchronously)
-    public void onEvent(final FileListRequest event) {
+    @Handler(rejectSubtypes = true)
+    public void onFileListRequest(final FileListRequest event) {
         try {
             final List<ServerEntry> fileList;
             final Path remoteFolder = event.getRemoteFolder();
@@ -81,6 +83,39 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
             EventBus.publish(new FileListResponse(client.getAccountName(), remoteFolder, fileList));
         } catch (SynchronizationException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    @Handler(rejectSubtypes = true)
+    public void onUploadRequest(final UploadRequest event) {
+        try {
+            uploader.uploadNew(event.getLocalFile().toFile(), event.getRemoteFolder());
+        } catch (SynchronizationException e) {
+            // send fail message
+        }
+    }
+
+    @Override
+    @Handler(rejectSubtypes = true)
+    public void onDownloadRequest(final DownloadRequest event) {
+        try {
+            downloader.download(event.getRemoteFile(), event.getLocalFolder());
+        } catch (SynchronizationException e) {
+            // send fail message
+        }
+    }
+
+    @Override
+    @Handler
+    public void onCreateFolderRequest(final CreateFolderRequest event) {
+        try {
+            final Path remoteFolder = event.getBaseFolder();
+            final Path folder = Paths.get(remoteFolder.toString(), event.getFolderName());
+            client.createFolder(folder);
+            EventBus.publish(new FileListResponse(client.getAccountName(), remoteFolder, client.getFileList(remoteFolder)) );
+        } catch (SynchronizationException e) {
+            // send fail message
         }
     }
 }

@@ -16,7 +16,7 @@ public class TrayMenuFactory {
         final TrayMenu trayMenu = new TrayMenu(primaryView);
         final JFXPanel fxPanel = new JFXPanel();
         final JDialog trayPopupMenu = new JDialog();
-        fxPanel.setScene(new Scene(trayMenu, WINDOW_SIZE, WINDOW_SIZE ));
+        fxPanel.setScene(new Scene(trayMenu, WINDOW_SIZE, WINDOW_SIZE));
         trayPopupMenu.add(fxPanel);
         trayPopupMenu.setAlwaysOnTop(true);
         trayPopupMenu.setUndecorated(true);

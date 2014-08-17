@@ -98,7 +98,17 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
     }
 
     @Override
-    public void download(String serverEntry, FileOutputStream outputStream, Object... extraArgs) {
+    public ServerEntry download(String serverPath, FileOutputStream outputStream, Object... extraArgs) throws SynchronizationException {
+        try {
+            final DbxEntry.File file = client.getFile(serverPath, null, outputStream);
+            return new DbxServerEntry(file.path, file.rev, file.lastModified, file.isFolder());
+        } catch (DbxException e) {
+            LOG.error("Dropbox file download failed: {}", serverPath);
+            throw new SynchronizationException("Dropbox file download failed: " + serverPath);
+        } catch (IOException e) {
+            LOG.error("Failed to write downloaded file to disc: {}", serverPath);
+            throw new SynchronizationException("Failed to write to disc: " + serverPath);
+        }
     }
 
     @Override
@@ -165,7 +175,16 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
         return fileList;
     }
 
-    private ServerEntry upload(Path remotePath, DbxWriteMode writeMode, File fileToUpload, InputStream inputStream) {
+    @Override
+    public void createFolder(final Path folder) throws SynchronizationException {
+        try {
+            final DbxEntry.Folder createdFolder = client.createFolder(getDropboxPath(folder));
+        } catch (DbxException e) {
+            throw new SynchronizationException("Unable to create folder: " + folder);
+        }
+    }
+
+    private ServerEntry upload(final Path remotePath, final DbxWriteMode writeMode, final File fileToUpload, final InputStream inputStream) {
         DbxServerEntry serverEntry = null;
         final String dropboxFilePath = getDropboxPath(remotePath) + "/" + fileToUpload.getName();
         try {
@@ -179,7 +198,11 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
         return serverEntry;
     }
 
-    private String getDropboxPath(Path remotePath) {
-        return remotePath.toString().replace("\\", "/");
+    private String getDropboxPath(final Path remotePath) {
+        String dropboxPath = remotePath.toString();
+        if(!dropboxPath.startsWith("/")) {
+            dropboxPath = "/" + dropboxPath;
+        }
+        return dropboxPath.replace("\\", "/");
     }
 }

@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 
 /**
  * Monitor class for allocate running program instance.
+ *
  * @author Peter_Csongrady
  */
 public class SingleInstanceMonitor implements InstanceMonitor {

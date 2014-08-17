@@ -44,7 +44,7 @@ public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
             if (deltas != null && !deltas.isEmpty()) {
                 LOG.debug("Detected {} changes to process on {}", deltas.size(), client.getAccountName());
                 for (ServerEntry deltaEntry : deltas) {
-                    if(isRelevant(deltaEntry)) {
+                    if (isRelevant(deltaEntry)) {
                         LOG.debug("Relevant content found: {}", deltaEntry);
                         downloader.download(deltaEntry);
                     }
@@ -58,7 +58,7 @@ public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     private boolean isRelevant(ServerEntry entry) {
         Collection<MappingEntity> mappings = persistenceController.getMappings(directoryMapper.getMappingClass());
         for (MappingEntity mapping : mappings) {
-            if(overlaps(entry, Paths.get(mapping.getRemoteDir()))) {
+            if (overlaps(entry, Paths.get(mapping.getRemoteDir()))) {
                 return true;
             }
         }

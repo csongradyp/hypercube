@@ -1,53 +1,106 @@
 package com.noe.hypercube.ui.dialog;
 
-import com.noe.hypercube.ui.OnProgressListener;
-import com.noe.hypercube.ui.util.ProgressAwareInputStream;
+import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import javafx.application.Platform;
-import javafx.geometry.Pos;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import org.controlsfx.dialog.Dialog;
 
+import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class FileProgressDialog extends Dialog {
+public class FileProgressDialog extends Dialog implements Initializable {
 
-    private final static String title = "dialog.copy.title";
-    private final ProgressBar progressBar = new ProgressBar( 0 );
-    private final ProgressIndicator indicator = new ProgressIndicator( 0 );
-    private OnProgressListener onProgressListener;
+    @FXML
+    private Label source;
+    @FXML
+    private Label destination;
+    @FXML
+    private Label processedFile;
+    @FXML
+    private Label counterLabel;
+    @FXML
+    private Label destinationLabel;
 
-    public FileProgressDialog( Object owner, ResourceBundle bundle, Path from, Path to ) {
-        super( owner, bundle.getString( title ) );
-        init(bundle, from, to);
+    @FXML
+    private Button pauseButton;
+    @FXML
+    private Button interruptButton;
+    @FXML
+    private ProgressBar progressBar;
+    @FXML
+    private ProgressIndicator indicator;
+
+    private final Path sourceFolder;
+    private final Path destinationFolder;
+    private final Integer fileListSize;
+
+    private AtomicInteger currentIndex;
+
+
+    public FileProgressDialog(final Object owner, final String title, final Integer fileListSize, final Path sourceFolder, final Path destinationFolder) {
+        super(owner, title);
+        currentIndex = new AtomicInteger(0);
+        this.sourceFolder = sourceFolder;
+        this.destinationFolder = destinationFolder;
+        ResourceBundle bundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("FileProgressDialog.fxml"), bundle);
+        fxmlLoader.setResources(bundle);
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
+        try {
+            fxmlLoader.load();
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+        this.fileListSize = fileListSize;
     }
 
-    private void init(ResourceBundle bundle, Path from, Path to) {
-        progressBar.setPrefWidth( 300 );
-        indicator.autosize();
-        final Label fromLabel = new Label(String.format("%s%s*", bundle.getString("dialog.copy.from"), from));
-        final Label toLabel = new Label(String.format("%s%s*", bundle.getString("dialog.copy.to"), to));
-        final Label currentFile = new Label();
-        final HBox progressBox = new HBox( 5, progressBar, indicator );
-        progressBox.setAlignment( Pos.CENTER );
-        final VBox content = new VBox( 5, fromLabel, toLabel, currentFile, progressBox );
-        setContent( content );
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        source.setText(sourceFolder.toString());
+        destination.setText(destinationFolder.toString());
+        counterLabel.setText(getCurrentIndex());
+    }
+
+    private String getCurrentIndex() {
+        return String.format("%d/%d", currentIndex.get(), fileListSize);
+    }
+
+    public void hideDestinationFolder() {
+        destination.setText("");
+        destinationLabel.setText("");
     }
 
     public void resetProgressBar() {
-        progressBar.setProgress( 0 );
+        final int index = currentIndex.incrementAndGet();
+        progressBar.setProgress(0);
+        counterLabel.setText(getCurrentIndex());
+        indicator.setProgress(index / fileListSize.doubleValue());
     }
 
-    public void setCurrentProgress( ProgressAwareInputStream stream ) {
-        stream.setOnProgressListener( ( percentage, tag ) -> Platform.runLater( () -> {
-            progressBar.setProgress( percentage );
-            if ( percentage == 1 ) {
+    public void setProcessedFile(final String fileName) {
+        processedFile.setText(fileName);
+        resetProgressBar();
+    }
+
+    public void setProgress(Double percentage) {
+        Platform.runLater(() -> {
+            progressBar.setProgress(percentage);
+            indicator.setProgress(fileListSize / currentIndex.doubleValue());
+            if (percentage == 1) {
                 hide();
             }
-        } ) );
+        });
     }
+
 }

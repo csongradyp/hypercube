@@ -27,7 +27,7 @@ public final class FileManagerUtil {
             executeFileManager(WINDOWS_COMMAND + path);
         } else if (os.contains(LINUX)) {
             executeFileManager(LINUX_COMMAND + path);
-        } else if ( os.contains(MAC)){
+        } else if (os.contains(MAC)) {
             executeFileManager(MAC_COMMAND + path);
         }
     }
@@ -35,8 +35,7 @@ public final class FileManagerUtil {
     private static void executeFileManager(String command) {
         try {
             Runtime.getRuntime().exec(command);
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             JOptionPane.showMessageDialog(null, CANNOT_OPEN_ERROR_MESSAGE, ERROR_TITLE, ERROR_MESSAGE);
         }
     }

@@ -68,7 +68,7 @@ public class PersistenceController implements IPersistenceController {
     public boolean delete(String id, Class<? extends FileEntity> entityClass) {
         Dao dao = daoMap.get(entityClass);
         boolean deleted = dao.remove(id);
-        if(deleted) {
+        if (deleted) {
             LOG.debug("Successfully deleted {} from database", id);
         }
         return deleted;
@@ -85,7 +85,7 @@ public class PersistenceController implements IPersistenceController {
         Collection<MappingEntity> allMappings = new LinkedList<>();
         Collection<Dao> daos = daoMap.values();
         for (Dao dao : daos) {
-            if(MappingEntity.class.isAssignableFrom(dao.getEntityClass())) {
+            if (MappingEntity.class.isAssignableFrom(dao.getEntityClass())) {
                 allMappings.addAll(dao.getAll());
             }
         }

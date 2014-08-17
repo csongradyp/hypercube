@@ -36,7 +36,7 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
 
     @Override
     public void run() {
-        while(!stop) {
+        while (!stop) {
             final UploadEntity uploadEntity = uploadQ.poll();
             final Path remotePath = uploadEntity.getRemotePath();
             final File file = uploadEntity.getFile();
@@ -49,7 +49,7 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
                 } else if (REMOVED == action) {
                     delete(file, remotePath);
                 }
-            }catch (SynchronizationException e) {
+            } catch (SynchronizationException e) {
                 EventBus.publishUploadFinished(new FileEvent(client.getAccountName(), file.toPath(), remotePath, FileActionType.FAIL));
                 LOG.error(e.getMessage(), e);
             }

@@ -36,7 +36,7 @@ public class DirectoryBindCache {
 
     private void bindDir(DirectoryBind bind) {
         String remoteDir = bind.getRemoteDir();
-        if(notNullOrEmpty(remoteDir)) {
+        if (notNullOrEmpty(remoteDir)) {
             remoteDirs.put(bind.getLocalDir(), remoteDir);
             localDirs.put(remoteDir, bind.getLocalDir());
         }

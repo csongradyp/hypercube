@@ -22,10 +22,10 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class DirectoryMapperTest {
 
-    private static final Path[] LOCAL_DIRS = new Path[]{ Paths.get("X:\\A\\B"), Paths.get("X:\\A"), Paths.get("Z:\\Y") };
-    private static final Path[] EXPECTED_LOCAL_DIRS = new Path[]{ Paths.get("X:\\A\\B\\z")};
-    private static final Path[] REMOTE_DIRS = new Path[]{ Paths.get("/x/y"), Paths.get("/g/h/i"), Paths.get("/a/b/c") };
-    private static final Path[] EXPECTED_REMOTE_DIRS = new Path[]{ Paths.get("/x/y/C"), Paths.get("/g/h/i/B/C") };
+    private static final Path[] LOCAL_DIRS = new Path[]{Paths.get("X:\\A\\B"), Paths.get("X:\\A"), Paths.get("Z:\\Y")};
+    private static final Path[] EXPECTED_LOCAL_DIRS = new Path[]{Paths.get("X:\\A\\B\\z")};
+    private static final Path[] REMOTE_DIRS = new Path[]{Paths.get("/x/y"), Paths.get("/g/h/i"), Paths.get("/a/b/c")};
+    private static final Path[] EXPECTED_REMOTE_DIRS = new Path[]{Paths.get("/x/y/C"), Paths.get("/g/h/i/B/C")};
     @Mock
     private IPersistenceController mockMappingController;
 
@@ -64,7 +64,7 @@ public class DirectoryMapperTest {
 
     private List<MappingEntity> createMappingEntity() {
         ArrayList<MappingEntity> mappingEntities = new ArrayList<>();
-        for(int i = 0; i < LOCAL_DIRS.length; i++) {
+        for (int i = 0; i < LOCAL_DIRS.length; i++) {
             mappingEntities.add(new TestMapping(LOCAL_DIRS[i].toString(), REMOTE_DIRS[i].toString()));
         }
         return mappingEntities;

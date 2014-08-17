@@ -15,7 +15,8 @@ public abstract class AbstractFileEntity implements FileEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModifiedDate;
 
-    public AbstractFileEntity() {}
+    public AbstractFileEntity() {
+    }
 
     public AbstractFileEntity(String localPath, String revision) {
         this(localPath, revision, new Date());
@@ -64,7 +65,7 @@ public abstract class AbstractFileEntity implements FileEntity {
 
     @Override
     public int compareTo(FileEntity entry) {
-        if(localPath.equals(entry.getLocalPath())) {
+        if (localPath.equals(entry.getLocalPath())) {
             return 0;
         }
         return -1;

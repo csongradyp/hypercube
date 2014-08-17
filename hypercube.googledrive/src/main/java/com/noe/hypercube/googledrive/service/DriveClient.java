@@ -103,12 +103,12 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
             remotes.addAll(files.getItems());
             for (Change change : remotes) {
                 com.google.api.services.drive.model.File remoteFile = change.getFile();
-                if(!remoteFile.getTitle().equals(EXCLUDE_FILE)){
-                    DriveServerEntry serverEntry = new DriveServerEntry(remoteFile, dirUtil.getPath(remoteFile),remoteFile.getHeadRevisionId(), new Date(remoteFile.getModifiedDate().getValue()));
+                if (!remoteFile.getTitle().equals(EXCLUDE_FILE)) {
+                    DriveServerEntry serverEntry = new DriveServerEntry(remoteFile, dirUtil.getPath(remoteFile), remoteFile.getHeadRevisionId(), new Date(remoteFile.getModifiedDate().getValue()));
                     result.add(serverEntry);
                 }
             }
-             request.setPageToken(files.getNextPageToken());
+            request.setPageToken(files.getNextPageToken());
         } while (request.getPageToken() != null && !request.getPageToken().isEmpty());
 
         return result;
@@ -151,7 +151,7 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
     }
 
     @Override
-    public void download(String serverPath, FileOutputStream outputStream, Object... extraArgs) throws SynchronizationException {
+    public DriveServerEntry download(String serverPath, FileOutputStream outputStream, Object... extraArgs) throws SynchronizationException {
         throw new UnsupportedOperationException("Use the public void download(ServerEntry serverEntry, FileOutputStream outputStream) method.");
     }
 
@@ -218,6 +218,11 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
     @Override
     public List<ServerEntry> getRootFileList() throws SynchronizationException {
         return null;
+    }
+
+    @Override
+    public void createFolder(Path folder) throws SynchronizationException {
+
     }
 
     private com.google.api.services.drive.model.File getDriveFile(String driveFileId) throws SynchronizationException {

@@ -46,7 +46,7 @@ public class Synchronizer {
 
     private void createExecutor() {
 //        if(!(localObservers.isEmpty() && cloudObservers.isEmpty())) {
-            executorService = Executors.newFixedThreadPool(localObservers.size() + cloudObservers.size());
+        executorService = Executors.newFixedThreadPool(localObservers.size() + cloudObservers.size());
 //        }
     }
 

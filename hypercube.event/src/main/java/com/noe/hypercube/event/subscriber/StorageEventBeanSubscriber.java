@@ -17,7 +17,7 @@ public class StorageEventBeanSubscriber {
 
     @PostConstruct
     public void subscribeAll() {
-        for(EventHandler<StorageEvent> listener : listeners) {
+        for (EventHandler<StorageEvent> listener : listeners) {
             EventBus.subscribeToStorageEvent(listener);
         }
     }

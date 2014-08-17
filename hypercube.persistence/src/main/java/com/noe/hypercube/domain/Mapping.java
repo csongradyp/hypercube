@@ -6,7 +6,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @MappedSuperclass
-@Table(uniqueConstraints= @UniqueConstraint(columnNames = {"localDir", "remoteDir"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"localDir", "remoteDir"}))
 public abstract class Mapping implements MappingEntity {
 
     @Id

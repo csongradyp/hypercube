@@ -40,9 +40,9 @@ public class CloudActivityIcon extends Label implements EventHandler<FileEvent> 
         if (event.getDirection() == direction) {
             Platform.runLater(() -> {
                 getGraphic().getStyleClass().clear();
-                if(event.isStarted()) {
+                if (event.isStarted()) {
                     getGraphic().getStyleClass().add("active");
-                } else if(event.isFinished()){
+                } else if (event.isFinished()) {
                     getGraphic().getStyleClass().add("inactive");
                 }
             });

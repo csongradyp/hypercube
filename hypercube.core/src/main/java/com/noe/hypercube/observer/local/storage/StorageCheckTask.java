@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
 public class StorageCheckTask implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(StorageCheckTask.class);

@@ -37,14 +37,14 @@ public class SynchronizationView extends AnchorPane implements EventHandler<File
     private ListView<Label> uploadList;
 
     public SynchronizationView() {
-        FXMLLoader fxmlLoader = new FXMLLoader( getClass().getClassLoader().getResource( "syncView.fxml" ) );
-        fxmlLoader.setResources( ResourceBundle.getBundle( "internationalization/messages", new Locale( ConfigurationBundle.getLanguage() ) ) );
-        fxmlLoader.setRoot( this );
-        fxmlLoader.setController( this );
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("syncView.fxml"));
+        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage())));
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
         try {
             fxmlLoader.load();
-        } catch ( IOException exception ) {
-            throw new RuntimeException( exception );
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
         }
         EventBus.subscribeToFileEvent(this);
         setUploadListPlaceholder();
@@ -53,17 +53,17 @@ public class SynchronizationView extends AnchorPane implements EventHandler<File
 
     private void createAccountButtons() {
         final List<String> accountNames = AccountBundle.getAccounts();
-        for ( String account : accountNames ) {
-            final ToggleButton accountButton = new ToggleButton( account );
-            accountButton.setFocusTraversable( false );
-            accountButton.setPrefHeight( accounts.getPrefHeight() );
-            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get( account );
-            accountButton.setOnAction( e -> {
-                accountButton.setSelected( true );
-            } );
-            accounts.getButtons().add( accountButton );
+        for (String account : accountNames) {
+            final ToggleButton accountButton = new ToggleButton(account);
+            accountButton.setFocusTraversable(false);
+            accountButton.setPrefHeight(accounts.getPrefHeight());
+            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(account);
+            accountButton.setOnAction(e -> {
+                accountButton.setSelected(true);
+            });
+            accounts.getButtons().add(accountButton);
         }
-        accounts.getButtons().get( 0 ).setSelected( true );
+        accounts.getButtons().get(0).setSelected(true);
     }
 
     private void setDownloadListPlaceholder() {
@@ -82,7 +82,7 @@ public class SynchronizationView extends AnchorPane implements EventHandler<File
     @Handler(rejectSubtypes = true)
     public void onEvent(FileEvent event) {
         Label item = createListItem(event);
-        if(event.getDirection() == StreamDirection.DOWN) {
+        if (event.getDirection() == StreamDirection.DOWN) {
             downloadList.getItems().add(item);
         } else {
             uploadList.getItems().add(item);

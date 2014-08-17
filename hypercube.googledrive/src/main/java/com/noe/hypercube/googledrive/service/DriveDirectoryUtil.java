@@ -24,23 +24,23 @@ public class DriveDirectoryUtil {
         System.out.println(path + " - " + file.getTitle() + " is current file with id=" + file.getId());
         List<ParentReference> parents = file.getParents();
 //        for(int i=0;i<parents.size();i++){
-            for (ParentReference parent : parents) {
+        for (ParentReference parent : parents) {
 //            File parent = Download.printFile(client, parents.get(i).getId());
             File parentFolder = client.files().get(parent.getId()).execute();
-            if(!parentFolder.getTitle().equals("root")){
+            if (!parentFolder.getTitle().equals("root")) {
                 path.add(parentFolder.getTitle());
-                getPath(parentFolder,path);
+                getPath(parentFolder, path);
             }
         }
     }
 
-    public String getPathString(File file){
+    public String getPathString(File file) {
         String pathString = "";
         ArrayList<String> path = new ArrayList<>();
         try {
-            getPath(file,path);
-            for(int i=path.size()-1;i>=0;i--){
-                pathString += path.get(i)+"/";
+            getPath(file, path);
+            for (int i = path.size() - 1; i >= 0; i--) {
+                pathString += path.get(i) + "/";
 
             }
             return pathString;
@@ -51,47 +51,43 @@ public class DriveDirectoryUtil {
     }
 
 
-
     public String getPath(File file) throws IOException {
         return getPathString(file);
     }
 
     private String getPath(File file, String path) throws IOException {
         // TODO get path for file
-        LOG.debug(path + " - " +file.getTitle() + " is current file with id=" + file.getId());
+        LOG.debug(path + " - " + file.getTitle() + " is current file with id=" + file.getId());
         List<ParentReference> parents = file.getParents();
 
         ParentReference parent = parents.get(0);
         String mimeType = file.getMimeType();
         LOG.debug("parentId=" + parent.getId() + " mimeType=" + mimeType);
         String ID = parent.getId();
-        if(mimeType.equals("application/vnd.google-apps.folder")) {
+        if (mimeType.equals("application/vnd.google-apps.folder")) {
             ID = file.getId();
         }
 
-        if(parent.getIsRoot()){
-            return "/"+ file.getTitle();
-        }
-        else {
+        if (parent.getIsRoot()) {
+            return "/" + file.getTitle();
+        } else {
             Drive.Files.List request = client.files().list();
             String query = "mimeType='application/vnd.google-apps.folder' AND trashed=false AND '" + ID + "' in parents";
             LOG.debug("isFolderExists(): Query= " + query);
             request = request.setQ(query);
             FileList folderList = request.execute();
             File folder;
-            if(folderList.getItems() == null || folderList.getItems().isEmpty()) {
-                return "/"+ file.getTitle();
-            }
-            else {
+            if (folderList.getItems() == null || folderList.getItems().isEmpty()) {
+                return "/" + file.getTitle();
+            } else {
                 folder = folderList.getItems().get(0);
             }
-            return getPath(folder,  "/" + folder.getTitle() + path);
+            return getPath(folder, "/" + folder.getTitle() + path);
         }
     }
 
     /**
-     *
-     * @param title the title (name) of the folder (the one you search for)
+     * @param title    the title (name) of the folder (the one you search for)
      * @param parentId the parent Id of this folder (use root) if the folder is in the main directory of google drive
      * @return google drive file object
      * @throws java.io.IOException
@@ -114,10 +110,9 @@ public class DriveDirectoryUtil {
     }
 
     /**
-     *
-     * @param title the folder's title
+     * @param title               the folder's title
      * @param listParentReference the list of parents references where you want the folder to be created,
-     * if you have more than one parent references, then a folder will be created in each one of them
+     *                            if you have more than one parent references, then a folder will be created in each one of them
      * @return google drive file object
      * @throws java.io.IOException
      */
@@ -132,7 +127,7 @@ public class DriveDirectoryUtil {
 
     /**
      * @param directories list of folders directories
-     * i.e. if your path like this folder1/folder2/folder3 then pass them in this order createFoldersPath(service, folder1, folder2, folder3)
+     *                    i.e. if your path like this folder1/folder2/folder3 then pass them in this order createFoldersPath(service, folder1, folder2, folder3)
      * @return parent reference of the last added folder in case you want to use it to create a file inside this folder.
      * @throws java.io.IOException
      */
@@ -157,7 +152,7 @@ public class DriveDirectoryUtil {
 
     private String getParentId(File file) {
         String parentId = ROOT_DIRECTORY;
-        if(file != null) {
+        if (file != null) {
             parentId = file.getId();
         }
         return parentId;

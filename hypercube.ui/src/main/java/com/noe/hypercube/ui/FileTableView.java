@@ -65,6 +65,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setEmptyTablePlaceholder(resources);
+        focusedProperty().addListener((observable, oldValue, newValue) -> setActive(newValue));
         requestFocusIfActive();
 
         sharedColumn.setGraphic(AwesomeDude.createIconLabel(AwesomeIcon.CODE_FORK, "15"));
@@ -134,11 +135,11 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         getSelectionModel().selectFirst();
     }
 
-    public void setRemoteFileList(final List<ServerEntry> list) {
+    public void setRemoteFileList(final Path parentFolder, final List<ServerEntry> list) {
         final Collection<IFile> files = new ArrayList<>(100);
         final Collection<IFile> dirs = new ArrayList<>(100);
         if (!list.isEmpty()) {
-            final IFile stepBack = createStepBackFile(list.get(0).getPath().getParent());
+            final IFile stepBack = createStepBackFile(parentFolder);
             if (stepBack != null) {
                 dirs.add(stepBack);
             }
@@ -163,7 +164,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
     }
 
     private IFile createStepBackFile(Path dir) {
-        if (dir.toFile().getParentFile() != null) {
+        if (dir != null && dir.toFile().getParentFile() != null) {
             java.io.File parentFile = dir.toFile().getParentFile();
             return new LocalFile(parentFile, true);
         }

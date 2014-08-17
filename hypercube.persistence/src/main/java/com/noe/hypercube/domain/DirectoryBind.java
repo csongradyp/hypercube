@@ -31,7 +31,7 @@ public abstract class DirectoryBind implements IEntity {
     }
 
     @Override
-    public String getId(){
+    public String getId() {
         return localDir;
     }
 

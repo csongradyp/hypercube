@@ -15,9 +15,9 @@ public abstract class DirectoryCollector implements Collector<MappingEntity> {
     @Override
     public Collection<MappingEntity> collect(final Path filePath, final String fileName, final Collection<MappingEntity> mappings) {
         List<MappingEntity> matchedDirs = new ArrayList<>(5);
-        for(MappingEntity mapping : mappings) {
+        for (MappingEntity mapping : mappings) {
             Path directoryToMatch = getDirectoryToMatch(mapping);
-            if(directoryToMatch.equals(filePath) && isMatchingFilter(fileName, mapping)) {
+            if (directoryToMatch.equals(filePath) && isMatchingFilter(fileName, mapping)) {
                 matchedDirs.add(mapping);
             }
         }
@@ -26,10 +26,10 @@ public abstract class DirectoryCollector implements Collector<MappingEntity> {
 
     private boolean isMatchingFilter(final String fileName, MappingEntity mapping) {
         Filter fileFilter = mapping.getFilter();
-        if(fileFilter != null) {
+        if (fileFilter != null) {
             Collection<String> filters = fileFilter.getFilters();
             for (String filter : filters) {
-                if(fileName.matches(filter) && fileFilter.isBlackList()) {
+                if (fileName.matches(filter) && fileFilter.isBlackList()) {
                     return false;
                 }
             }

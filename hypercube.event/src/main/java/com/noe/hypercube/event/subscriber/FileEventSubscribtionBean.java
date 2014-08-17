@@ -16,7 +16,7 @@ public class FileEventSubscribtionBean {
 
     @PostConstruct
     public void subscribeAll() {
-        for(EventHandler<FileEvent> listener : listeners) {
+        for (EventHandler<FileEvent> listener : listeners) {
 //            EventBus.subscribeToFileEvent(listener);
         }
     }

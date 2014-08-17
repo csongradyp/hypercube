@@ -8,12 +8,12 @@ import java.util.List;
 public class FileListResponse {
 
     private final List<ServerEntry> fileList;
-    private final Path parentFolder;
+    private final Path folder;
     private final String account;
 
-    public FileListResponse(String account, Path parentFolder, List<ServerEntry> fileList) {
+    public FileListResponse(String account, Path folder, List<ServerEntry> fileList) {
         this.account = account;
-        this.parentFolder = parentFolder;
+        this.folder = folder;
         this.fileList = fileList;
     }
 
@@ -21,8 +21,8 @@ public class FileListResponse {
         return fileList;
     }
 
-    public Path getParentFolder() {
-        return parentFolder;
+    public Path getFolder() {
+        return folder;
     }
 
     public String getAccount() {

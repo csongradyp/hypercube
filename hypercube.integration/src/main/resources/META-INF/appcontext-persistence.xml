@@ -4,12 +4,12 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd ">
 
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-        <property name="entityManagerFactory" ref="entityManagerFactory" />
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
     </bean>
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="persistenceUnitName" value="myPersistenceUnit" />
-        <property name="persistenceUnitManager" ref="persistenceUnitManager" />
+        <property name="persistenceUnitName" value="myPersistenceUnit"/>
+        <property name="persistenceUnitManager" ref="persistenceUnitManager"/>
         <property name="jpaPropertyMap">
             <map>
                 <entry key="javax.persistence.jdbc.url" value="objectdb:test.odb"/>
@@ -25,7 +25,7 @@
         </property>
 
         <property name="persistenceUnitPostProcessors">
-            <bean class="com.noe.hypercube.MergingPersistenceUnitPostProcessor" />
+            <bean class="com.noe.hypercube.MergingPersistenceUnitPostProcessor"/>
         </property>
     </bean>
 

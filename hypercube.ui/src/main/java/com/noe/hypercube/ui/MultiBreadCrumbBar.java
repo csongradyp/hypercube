@@ -147,7 +147,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
 
     private void setRemoteBreadCrumb(final String path, final String account, final BreadCrumbBar<String> breadcrumb) {
         String breadcrumbPath = account + path;
-        breadcrumbPath = SLASH_SEPARATOR.matcher(breadcrumbPath).replaceAll(SEPARATOR);
+        breadcrumbPath = SLASH_SEPARATOR.matcher(breadcrumbPath).replaceAll("\\\\");
         final TreeItem<String> model = BreadCrumbBar.buildTreeModel(breadcrumbPath.split(SEPARATOR_PATTERN));
         breadcrumb.setSelectedCrumb(model);
     }

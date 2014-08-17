@@ -24,10 +24,9 @@ public abstract class EntityDao<ENTITY_TYPE extends IEntity> implements Dao<Stri
     @Override
     @Transactional
     public void persist(ENTITY_TYPE entity) {
-        if(entityManager.contains(entity)) {
+        if (entityManager.contains(entity)) {
             entityManager.merge(entity);
-        }
-        else {
+        } else {
             entityManager.persist(entity);
         }
     }

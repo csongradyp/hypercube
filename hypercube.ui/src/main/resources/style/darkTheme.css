@@ -39,11 +39,7 @@
 .table-view .column-header, .table-view .filler {
     -fx-size: 35;
     -fx-border-width: 0 0 1 0;
-    -fx-border-color:
-        transparent
-        transparent
-        derive(-fx-base, 80%)
-        transparent;
+    -fx-border-color: transparent transparent derive(-fx-base, 80%) transparent;
     -fx-border-insets: 0 10 1 0;
 }
 
@@ -61,7 +57,7 @@
 
 .split-pane:horizontal > * > .split-pane-divider {
     -fx-border-color: transparent #1d1d1d transparent #1d1d1d;
-    -fx-background-color: transparent, derive(#1d1d1d,20%);
+    -fx-background-color: transparent, derive(#1d1d1d, 20%);
 }
 
 .split-pane {
@@ -69,8 +65,8 @@
 }
 
 .menu-bar {
-    -fx-background-color: derive(#1d1d1d,20%);
-    -fx-selection-bar: derive(-fx-background,-7%);
+    -fx-background-color: derive(#1d1d1d, 20%);
+    -fx-selection-bar: derive(-fx-background, -7%);
 }
 
 .menu-bar .label {
@@ -84,8 +80,6 @@
     -fx-font-size: 12pt;
     -fx-font-family: "Segoe UI Semibold";
 }
-
-
 
 /*
  * Metro style Push Button
@@ -109,8 +103,8 @@
 }
 
 .button:pressed, .button:default:hover:pressed {
-  -fx-background-color: white;
-  -fx-text-fill: #1d1d1d;
+    -fx-background-color: white;
+    -fx-text-fill: #1d1d1d;
 }
 
 .button:focused {
@@ -133,5 +127,5 @@
 }
 
 .button:default:hover {
-    -fx-background-color: derive(-fx-focus-color,30%);
+    -fx-background-color: derive(-fx-focus-color, 30%);
 }

@@ -27,6 +27,7 @@ public class StateChangeEvent implements IEvent {
     public State getState() {
         return state;
     }
+
     public String getStateString() {
         return state.getState();
     }

@@ -32,38 +32,38 @@ public class FileCellFactory implements Callback<TableColumn<IFile, IFile>, Tabl
     public TableCell<IFile, IFile> call(TableColumn<IFile, IFile> tableColumn) {
         TableCell<IFile, IFile> tableCell = new TableCell<IFile, IFile>() {
             @Override
-            public void updateItem( IFile file, boolean empty ) {
-                super.updateItem( file, empty );
-                if ( file != null && !empty ) {
-                    file.getMarkedProperty().addListener( ( observable, oldValue, newValue ) -> updateItem( file, false ) );
-                    if ( cellText != null ) {
-                        setText( cellText.getCellText( file ) );
+            public void updateItem(IFile file, boolean empty) {
+                super.updateItem(file, empty);
+                if (file != null && !empty) {
+                    file.getMarkedProperty().addListener((observable, oldValue, newValue) -> updateItem(file, false));
+                    if (cellText != null) {
+                        setText(cellText.getCellText(file));
                     }
-                    if ( cellGraphic != null ) {
-                        setGraphic( cellGraphic.getCellGraphic( file ) );
+                    if (cellGraphic != null) {
+                        setGraphic(cellGraphic.getCellGraphic(file));
                     }
-                    if ( file.isMarked() ) {
-                        getStyleClass().add( "table-row-marked" );
-                    } else if ( file.isShared() ) {
-                        getStyleClass().add( "table-row-special" );
+                    if (file.isMarked()) {
+                        getStyleClass().add("table-row-marked");
+                    } else if (file.isShared()) {
+                        getStyleClass().add("table-row-special");
                     } else {
-                        getStyleClass().remove( "table-row-marked" );
+                        getStyleClass().remove("table-row-marked");
                     }
-                    setTextAlignment( alignment );
-                    switch ( alignment ) {
-                    case CENTER:
-                        setAlignment( Pos.CENTER );
-                        break;
-                    case RIGHT:
-                        setAlignment( Pos.CENTER_RIGHT );
-                        break;
-                    default:
-                        setAlignment( Pos.CENTER_LEFT );
-                        break;
+                    setTextAlignment(alignment);
+                    switch (alignment) {
+                        case CENTER:
+                            setAlignment(Pos.CENTER);
+                            break;
+                        case RIGHT:
+                            setAlignment(Pos.CENTER_RIGHT);
+                            break;
+                        default:
+                            setAlignment(Pos.CENTER_LEFT);
+                            break;
                     }
                 } else {
-                    setText( null );
-                    setGraphic( null );
+                    setText(null);
+                    setGraphic(null);
                 }
             }
         };

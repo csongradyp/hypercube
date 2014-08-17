@@ -11,24 +11,24 @@
 
     <context:annotation-config/>
     <context:component-scan base-package="com.noe.hypercube.domain"/>
-    <tx:annotation-driven />
+    <tx:annotation-driven/>
 
-    <import resource="appcontext-persistence.xml" />
-    <import resource="appontext-observation.xml" />
-    <import resource="classpath*:**/*-account-context.xml" />
+    <import resource="appcontext-persistence.xml"/>
+    <import resource="appontext-observation.xml"/>
+    <import resource="classpath*:**/*-account-context.xml"/>
 
     <bean id="app" class="com.noe.hypercube.HyperCubeApp" destroy-method="stop"/>
 
     <!--<bean id="accountController" class="com.noe.hypercube.controller.AccountController" >-->
-        <!--<property name="clients" ref="clients" />-->
-        <!--<property name="mappers" ref="mappers" />-->
-        <!--<property name="entityFactories" ref="entityFactories" />-->
+    <!--<property name="clients" ref="clients" />-->
+    <!--<property name="mappers" ref="mappers" />-->
+    <!--<property name="entityFactories" ref="entityFactories" />-->
     <!--</bean>-->
 
     <bean id="accountController" class="com.noe.hypercube.controller.AccountController">
-        <constructor-arg index="0" ref="clients" />
-        <constructor-arg index="1" ref="mappers" />
-        <constructor-arg index="2" ref="entityFactories" />
+        <constructor-arg index="0" ref="clients"/>
+        <constructor-arg index="1" ref="mappers"/>
+        <constructor-arg index="2" ref="entityFactories"/>
     </bean>
 
     <bean id="propertyPlaceholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -41,29 +41,29 @@
         </property>
     </bean>
 
-    <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer" destroy-method="shutdown" />
+    <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer" destroy-method="shutdown"/>
 
-    <bean id="daos" class="com.noe.hypercube.collector.DaoCollector" />
-    <bean id="entityFactories" class="com.noe.hypercube.collector.EntityFactoryCollector" />
-    <bean id="clients" class="com.noe.hypercube.collector.ClientCollector" />
-    <bean id="mappers" class="com.noe.hypercube.collector.MapperCollector" />
+    <bean id="daos" class="com.noe.hypercube.collector.DaoCollector"/>
+    <bean id="entityFactories" class="com.noe.hypercube.collector.EntityFactoryCollector"/>
+    <bean id="clients" class="com.noe.hypercube.collector.ClientCollector"/>
+    <bean id="mappers" class="com.noe.hypercube.collector.MapperCollector"/>
 
     <bean id="persistenceController" class="com.noe.hypercube.controller.PersistenceController">
-        <constructor-arg ref="daos" />
+        <constructor-arg ref="daos"/>
     </bean>
 
     <bean id="fileMonitor" class="com.noe.hypercube.observer.local.LocalFileMonitor" destroy-method="stop">
-        <constructor-arg value="${poll.delay.in.milisec}" />
+        <constructor-arg value="${poll.delay.in.milisec}"/>
     </bean>
 
     <bean id="cloudMonitor" class="com.noe.hypercube.observer.remote.CloudMonitor" destroy-method="stop">
-        <constructor-arg value="${poll.delay.in.milisec}" />
+        <constructor-arg value="${poll.delay.in.milisec}"/>
     </bean>
 
-    <bean id="localObserverFactory" class="com.noe.hypercube.observer.local.LocalObserverFactory" />
-    <bean id="cloudObserverFactory" class="com.noe.hypercube.observer.remote.CloudObserverFactory" />
-    <bean id="localDirectoryCollector" class="com.noe.hypercube.mapping.collector.LocalDirectoryCollector" />
-    <bean id="remoteDirectoryCollector" class="com.noe.hypercube.mapping.collector.RemoteDirectoryCollector" />
-    <bean class="com.noe.hypercube.bridge.AccountDataBridge" />
+    <bean id="localObserverFactory" class="com.noe.hypercube.observer.local.LocalObserverFactory"/>
+    <bean id="cloudObserverFactory" class="com.noe.hypercube.observer.remote.CloudObserverFactory"/>
+    <bean id="localDirectoryCollector" class="com.noe.hypercube.mapping.collector.LocalDirectoryCollector"/>
+    <bean id="remoteDirectoryCollector" class="com.noe.hypercube.mapping.collector.RemoteDirectoryCollector"/>
+    <bean class="com.noe.hypercube.bridge.AccountDataBridge"/>
 
 </beans>

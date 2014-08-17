@@ -42,12 +42,12 @@ public class ProgressInputStream extends FilterInputStream {
 
     @Override
     public int read(byte[] b) throws IOException {
-        return (int)updateProgress(super.read(b));
+        return (int) updateProgress(super.read(b));
     }
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        return (int)updateProgress(super.read(b, off, len));
+        return (int) updateProgress(super.read(b, off, len));
     }
 
     @Override

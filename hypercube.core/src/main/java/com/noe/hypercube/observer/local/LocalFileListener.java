@@ -25,7 +25,8 @@ public class LocalFileListener implements FileAlterationListener {
     }
 
     @Override
-    public void onStart(FileAlterationObserver observer) {}
+    public void onStart(FileAlterationObserver observer) {
+    }
 
     @Override
     public void onDirectoryCreate(File directory) {

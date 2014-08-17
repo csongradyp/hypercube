@@ -12,12 +12,12 @@
     <children>
         <ToolBar prefHeight="30.0" prefWidth="400.0" VBox.vgrow="NEVER">
             <Label text="%storage.locals"/>
-            <SegmentedButton fx:id="localDrives" onMouseClicked="#onLocalDriveMouseClicked"/>
+            <SegmentedButton fx:id="localDrives" onMouseClicked="#onLocalDriveAction"/>
             <Label text="%storage.remotes"/>
             <AccountSegmentedButton fx:id="remoteDrives"/>
         </ToolBar>
-        <MultiBreadCrumbBar fx:id="multiBreadCrumbBar" focusTraversable="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="20.0" VBox.vgrow="NEVER" />
-        <FileTableView fx:id="table" onMouseClicked="#onMouseClicked" onKeyPressed="#onKeyPressed" prefHeight="450.0" prefWidth="400.0" />
-        <Label fx:id="metaDataInfo" prefWidth="400.0" VBox.vgrow="NEVER" />
+        <MultiBreadCrumbBar fx:id="multiBreadCrumbBar" focusTraversable="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="20.0" VBox.vgrow="NEVER"/>
+        <FileTableView fx:id="table" onMouseClicked="#onMouseClicked" onKeyPressed="#onKeyPressed" prefHeight="450.0" prefWidth="400.0"/>
+        <Label fx:id="metaDataInfo" prefWidth="400.0" VBox.vgrow="NEVER"/>
     </children>
 </fx:root>

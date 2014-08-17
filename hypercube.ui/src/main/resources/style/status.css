@@ -1,27 +1,28 @@
 .up-to-date {
-    -fx-effect: innershadow( gaussian , green , 7 , 1 , 1 , 1 );
+    -fx-effect: innershadow(gaussian, green, 7, 1, 1, 1);
 }
+
 .synchronizing {
 }
 
 .offline {
-    -fx-effect: innershadow( gaussian , red , 7 , 1 , 1 , 1 );
+    -fx-effect: innershadow(gaussian, red, 7, 1, 1, 1);
 }
 
 .added {
-    -fx-effect: innershadow( gaussian , green , 7 , 1 , 1 , 1 );
+    -fx-effect: innershadow(gaussian, green, 7, 1, 1, 1);
 }
 
 .deleted {
-    -fx-effect: innershadow( gaussian, #c62b00, 7 , 1 , 1 , 1 );
+    -fx-effect: innershadow(gaussian, #c62b00, 7, 1, 1, 1);
 }
 
 .updated {
-    -fx-effect: innershadow( gaussian , royalblue , 7 , 1 , 1 , 1 );
+    -fx-effect: innershadow(gaussian, royalblue, 7, 1, 1, 1);
 }
 
 .inactive {
-    -fx-effect: innershadow( gaussian , lightgray , 7 , 1 , 1 , 1 );
+    -fx-effect: innershadow(gaussian, lightgray, 7, 1, 1, 1);
 }
 
 .active {

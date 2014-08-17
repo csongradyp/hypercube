@@ -26,7 +26,7 @@ public class ImageBundle {
     }
 
     public static Image getImage(String imageId) {
-        if(INSTANCE.imageCache.containsKey(imageId)) {
+        if (INSTANCE.imageCache.containsKey(imageId)) {
             return INSTANCE.imageCache.get(imageId);
         }
         Image image = loadImage(imageId);

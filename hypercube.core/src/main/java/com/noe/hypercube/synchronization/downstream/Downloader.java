@@ -54,6 +54,24 @@ public class Downloader implements IDownloader {
     }
 
     @Override
+    public void download(final Path serverPath, final Path localFolder) throws SynchronizationException {
+        File newLocalFile = Paths.get(localFolder.toString(), serverPath.getFileName().toString()).toFile();
+        try (FileOutputStream outputStream = FileUtils.openOutputStream(newLocalFile)) {
+            final ServerEntry serverEntry = client.download(serverPath.toString(), outputStream);
+            persist(serverEntry, newLocalFile.toPath());
+            LOG.info("{} Successfully downloaded {}", client.getAccountName(), newLocalFile.toPath());
+        } catch (FileNotFoundException e) {
+            LOG.error("Couldn't write file {}", newLocalFile.toPath(), e);
+        } catch (IOException e) {
+            LOG.error("Error occurred while downloading file from {}", client.getAccountName(), e);
+        } catch (SynchronizationException e) {
+            e.setRelatedFile(newLocalFile.toPath());
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
     public void run() {
         while (!stop.get()) {
             ServerEntry entry = getNext();
@@ -63,8 +81,8 @@ public class Downloader implements IDownloader {
                 } else {
                     deleteLocalFile(entry);
                 }
-            }catch(SynchronizationException e) {
-                EventBus.publishDownloadFinished(new FileEvent(client.getAccountName(),e.getRelatedFile(), entry.getPath(), FileActionType.FAIL));
+            } catch (SynchronizationException e) {
+                EventBus.publishDownloadFinished(new FileEvent(client.getAccountName(), e.getRelatedFile(), entry.getPath(), FileActionType.FAIL));
             }
             logQueueEmpty();
         }

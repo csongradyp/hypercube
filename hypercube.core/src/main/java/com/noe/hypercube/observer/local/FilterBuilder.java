@@ -58,17 +58,16 @@ public final class FilterBuilder {
     public IOFileFilter build() {
         IOFileFilter orMergedFilter = trueFileFilter();
         IOFileFilter andMergedFilter = trueFileFilter();
-        if(!andFilters.isEmpty()) {
+        if (!andFilters.isEmpty()) {
             andMergedFilter = and((IOFileFilter[]) andFilters.toArray());
         }
-        if(!orFilters.isEmpty()) {
+        if (!orFilters.isEmpty()) {
             orMergedFilter = or((IOFileFilter[]) orFilters.toArray());
         }
         IOFileFilter mergedFilter = and(andMergedFilter, orMergedFilter);
-        if(isWhiteList) {
+        if (isWhiteList) {
             return mergedFilter;
-        }
-        else {
+        } else {
             return notFileFilter(mergedFilter);
         }
     }

@@ -9,7 +9,8 @@ import java.nio.file.Path;
 
 public final class StorageButtonFactory {
 
-    private StorageButtonFactory() { }
+    private StorageButtonFactory() {
+    }
 
     public static ToggleButton create(final Path rootPath, EventHandler<MouseEvent> mouseEventEventHandler) {
         ToggleButton button = new ToggleButton(rootPath.toString(), new ImageView(IconFactory.getStorageIcon(rootPath)));

@@ -12,7 +12,7 @@ public class RemoteFileInfo {
     private final String accountName;
     private final Boolean directory;
 
-    public RemoteFileInfo(final String accountName, final Path remotePath,final Long size, final Path localPath,  final Date timeStamp, final Boolean directory) {
+    public RemoteFileInfo(final String accountName, final Path remotePath, final Long size, final Path localPath, final Date timeStamp, final Boolean directory) {
         this.accountName = accountName;
         this.remotePath = remotePath;
         this.size = size;
