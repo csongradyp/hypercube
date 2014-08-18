@@ -17,7 +17,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.action.Action;
@@ -60,7 +59,7 @@ public class FileManager extends VBox implements Initializable {
     @FXML
     private FileActionButton newFolder;
     @FXML
-    private Button exit;
+    private FileActionButton close;
 
     @FXML
     private ResourceBundle resources;
@@ -97,7 +96,7 @@ public class FileManager extends VBox implements Initializable {
         move.prefWidthProperty().bind(widthProperty().subtract(40).divide(6));
         edit.prefWidthProperty().bind(widthProperty().subtract(40).divide(6));
         newFolder.prefWidthProperty().bind(widthProperty().subtract(40).divide(6));
-        exit.prefWidthProperty().bind(widthProperty().subtract(40).divide(6));
+        close.prefWidthProperty().bind(widthProperty().subtract(40).divide(6));
     }
 
     private void setupLocalCondition() {
@@ -207,7 +206,7 @@ public class FileManager extends VBox implements Initializable {
                             progressDialog.setProcessedFile(markedFile.getName());
                         });
                         Files.copy(progressAwareInputStream, destination, StandardCopyOption.REPLACE_EXISTING);
-
+                        refreshViews(inactiveFileView, markedFile);
                     }
                     if (DELETE == action) {
                         Platform.runLater(() -> {
@@ -217,20 +216,35 @@ public class FileManager extends VBox implements Initializable {
                         });
                     }
                     if (DELETE == action || MOVE == action) {
-                        Files.deleteIfExists(markedFile.getPath());
+                        if(markedFile.isDirectory()) {
+                            Files.list(markedFile.getPath()).forEach(path -> {
+                                try {
+                                    Files.deleteIfExists(path);
+                                } catch (IOException e) {
+                                    Dialogs.create().message(resources.getString("dialog.delete.fail")).showError();
+                                }
+                            });
+                            Files.deleteIfExists(markedFile.getPath());
+                        } else {
+                            Files.deleteIfExists(markedFile.getPath());
+                        }
                     }
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
-                Platform.runLater(() -> {
-                    markedFile.setMarked(false);
-                    inactiveFileView.refresh();
-                    getActiveFileView().refresh();
-                });
             }
             Platform.runLater(progressDialog::hide);
+            getActiveFileView().refresh();
         }).start();
         Platform.runLater(progressDialog::show);
+    }
+
+    private void refreshViews(FileView inactiveFileView, IFile markedFile) {
+        Platform.runLater(() -> {
+            markedFile.setMarked(false);
+            inactiveFileView.refresh();
+            getActiveFileView().refresh();
+        });
     }
 
     private void processRemoteFiles(final Collection<IFile> markedFiles, final FileAction action) {

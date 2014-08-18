@@ -1,6 +1,7 @@
 package com.noe.hypercube.ui.bundle;
 
-import org.apache.commons.collections.DualHashBidiMap;
+
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,7 +9,7 @@ import java.util.Map;
 
 public class PathBundle {
 
-    private Map<String, Map<String, String>> mappings;
+    private Map<String, DualHashBidiMap<String, String>> mappings;
 
     public PathBundle() {
         mappings = new HashMap<>();
@@ -20,12 +21,17 @@ public class PathBundle {
         add("Dropbox", "D:\\test", "/newtest");
     }
 
-    public PathBundle(Map<String, Map<String, String>> mappings) {
+    public PathBundle(final Map<String, DualHashBidiMap<String, String>> mappings) {
         this.mappings = mappings;
     }
 
     public String getFolder(final String account, final String localFolder) {
         return mappings.get(account).get(localFolder);
+    }
+
+    public String getLocalFolder(String account, String folder) {
+        final DualHashBidiMap<String, String> accountMapping = mappings.get(account);
+        return accountMapping.getKey(folder.replaceAll("\\\\", "/"));
     }
 
     public Map<String, String> getAllFolders(final String folder) {

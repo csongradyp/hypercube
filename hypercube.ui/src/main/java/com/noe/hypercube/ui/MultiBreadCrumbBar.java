@@ -3,6 +3,7 @@ package com.noe.hypercube.ui;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.FileListRequest;
 import com.noe.hypercube.ui.bundle.PathBundle;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -31,6 +32,8 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     private EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> remoteEventHandler;
     private EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> localEventHandler;
 
+    private SimpleBooleanProperty remote = new SimpleBooleanProperty(false);
+
     public MultiBreadCrumbBar() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("multiBreadCrumbBar.fxml"));
         fxmlLoader.setRoot(this);
@@ -57,17 +60,19 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         disableBreadcrumbFocusTraversal(localBreadcrumb);
         remotebreadcrumbs.values().forEach(this::disableBreadcrumbFocusTraversal);
         getChildren().add(localBreadcrumb);
+        localBreadcrumb.activeProperty().bind(remote.not());
     }
 
     private void setRemoteCrumbEventHandler(FileBreadCrumbBar remote) {
         remote.setOnCrumbAction(event -> {
+            remoteEventHandler.handle(event);
+            remoteProperty().set(true);
             final RemoteFileBreadCrumbBar triggeredCrumbBar = (RemoteFileBreadCrumbBar) event.getSource();
             final String account = triggeredCrumbBar.getAccount();
             final Path newPath = getNewRemotePath(event, account);
-            EventBus.publish(new FileListRequest(account, newPath));
-            setAllCrumbsInactive();
+            setAllRemoteCrumbsInactive();
             triggeredCrumbBar.setActive(true);
-            remoteEventHandler.handle(event);
+            EventBus.publish(new FileListRequest(account, newPath));
         });
     }
 
@@ -77,9 +82,9 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         while (selectedCrumb != null) {
             final String folder = selectedCrumb.getValue();
             if (folder.equals(account)) {
-                path = "";
+                path = "/" + path;
             } else {
-                path = folder + SEPARATOR + path;
+                path = folder + "/" + path;
             }
             selectedCrumb = selectedCrumb.getParent();
         }
@@ -99,47 +104,52 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     private void setLocalCrumbActionHandler() {
         localBreadcrumb.setOnCrumbAction(event -> {
             setAllRemoteCrumbsInactive();
-            localBreadcrumb.setActive(true);
             localEventHandler.handle(event);
         });
     }
 
-    private void setAllCrumbsInactive() {
-        setAllRemoteCrumbsInactive();
-        localBreadcrumb.setActive(false);
-    }
-
-    private void setAllRemoteCrumbsInactive() {
+    public void setAllRemoteCrumbsInactive() {
         for (FileBreadCrumbBar fileBreadCrumbBar : remotebreadcrumbs.values()) {
             fileBreadCrumbBar.setActive(false);
         }
     }
 
     public void setBreadCrumbs(Path path) {
-        setBreadCrumb(path, localBreadcrumb);
+        setBreadCrumb(path.toString(), localBreadcrumb);
         final Map<String, String> remoteFolders = pathBundle.getAllFolders(path.toString());
         getChildren().clear();
         if (path.toFile().exists()) {
             getChildren().add(localBreadcrumb);
         }
         for (Map.Entry<String, String> entry : remoteFolders.entrySet()) {
-            final BreadCrumbBar<String> remoteBreadcrumb = remotebreadcrumbs.get(entry.getKey());
-            setRemoteBreadCrumb(entry.getValue(), entry.getKey(), remoteBreadcrumb);
-            getChildren().add(remoteBreadcrumb);
+            final String account = entry.getKey();
+            final FileBreadCrumbBar remoteBreadcrumb = remotebreadcrumbs.get(account);
+            final String folderPath = entry.getValue();
+            setRemoteBreadCrumb(folderPath, account, remoteBreadcrumb);
+            if(remoteBreadcrumb.isActive()) {
+                getChildren().add(0,remoteBreadcrumb);
+            } else {
+                getChildren().add(remoteBreadcrumb);
+            }
         }
     }
 
     public void setRemoteBreadCrumbs(String account, Path path) {
-        getChildren().clear();
         final FileBreadCrumbBar activeAccountCrumb = remotebreadcrumbs.get(account);
         activeAccountCrumb.setActive(true);
         final String crumbPath = path == null ? "" : path.toString();
-        setRemoteBreadCrumb(crumbPath, account, activeAccountCrumb);
-        getChildren().add(activeAccountCrumb);
+        final String localFolder = pathBundle.getLocalFolder(account, crumbPath);
+        if(localFolder != null && !localFolder.isEmpty()) {
+            setBreadCrumbs(Paths.get(localFolder));
+        } else {
+            getChildren().clear();
+            setRemoteBreadCrumb(crumbPath, account, activeAccountCrumb);
+            getChildren().add(activeAccountCrumb);
+        }
     }
 
-    private void setBreadCrumb(Path path, BreadCrumbBar<String> breadcrumb) {
-        TreeItem<String> model = BreadCrumbBar.buildTreeModel(path.toString().split(SEPARATOR_PATTERN));
+    private void setBreadCrumb(String path, BreadCrumbBar<String> breadcrumb) {
+        TreeItem<String> model = BreadCrumbBar.buildTreeModel(path.split(SEPARATOR_PATTERN));
         if (model != null) {
             breadcrumb.setSelectedCrumb(model);
         }
@@ -168,6 +178,10 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
 
     public void setOnRemoteCrumbAction(EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> remoteEventHandler) {
         this.remoteEventHandler = remoteEventHandler;
+    }
+
+    public SimpleBooleanProperty remoteProperty() {
+        return remote;
     }
 
 }

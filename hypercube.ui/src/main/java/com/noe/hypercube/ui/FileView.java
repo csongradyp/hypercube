@@ -85,12 +85,14 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
             if (isRemote()) {
                 EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), newValue));
             } else {
+                multiBreadCrumbBar.setAllRemoteCrumbsInactive();
                 multiBreadCrumbBar.setBreadCrumbs(newValue);
                 table.setLocalFileList(newValue);
             }
         });
+        multiBreadCrumbBar.remoteProperty().bindBidirectional(remote);
         multiBreadCrumbBar.setOnLocalCrumbAction(this::onLocalCrumbAction);
-        multiBreadCrumbBar.setOnRemoteCrumbAction(event -> remote.set(true));
+//        multiBreadCrumbBar.setOnRemoteCrumbAction(event -> table.setEffect(new GaussianBlur()));
     }
 
     public void initStartLocation() {
@@ -178,9 +180,6 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         } else if (MouseButton.SECONDARY.equals(event.getButton())) {
             selectedItem.mark();
         }
-//        else {
-//            table.getSelectionModel().select(event.);
-//        }
     }
 
     private boolean isDoubleClick(MouseEvent event) {
@@ -231,7 +230,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     }
 
     public Collection<IFile> getMarkedFiles() {
-        ArrayList<IFile> marked = new ArrayList<>(50);
+        Collection<IFile> marked = new ArrayList<>(50);
         ObservableList<IFile> files = table.getItems();
         marked.addAll(files.stream().filter(IFile::isMarked).collect(Collectors.toList()));
         if (marked.isEmpty()) {

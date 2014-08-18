@@ -32,6 +32,7 @@ public class FileActionButton extends Button implements Initializable {
     private static final String edit = "button.edit";
     private static final String upload = "button.upload";
     private static final String download = "button.download";
+    private static final String exit = "button.exit";
     private static final String ICON_SIZE = "15";
     private static final String FONT_SIZE = "12";
 
@@ -102,6 +103,14 @@ public class FileActionButton extends Button implements Initializable {
                 case CLOUD_DELETE:
                     setText(resources.getString(deleteCloud));
                     iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.TRASH_ALT, "F8", ICON_SIZE, FONT_SIZE, ContentDisplay.LEFT);
+                    break;
+                case CLOSE:
+                    setText(resources.getString(exit));
+                    iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.SIGN_OUT, "ALT + F4", ICON_SIZE, FONT_SIZE, ContentDisplay.LEFT);
+                    break;
+                case EDIT:
+                    setText(resources.getString(edit));
+                    iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.PENCIL, "F4", ICON_SIZE, FONT_SIZE, ContentDisplay.LEFT);
                     break;
             }
             iconLabel.setStyle("-fx-font-weight: bold");

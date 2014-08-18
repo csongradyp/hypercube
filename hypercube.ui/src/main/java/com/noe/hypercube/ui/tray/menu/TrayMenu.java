@@ -67,7 +67,7 @@ public class TrayMenu extends AnchorPane implements Initializable {
 
     private void initExitButton() {
         exit.setFocusTraversable(false);
-        AwesomeDude.setIcon(exit, AwesomeIcon.SIGN_OUT);
+        AwesomeDude.setIcon(exit, AwesomeIcon.POWER_OFF);
         exit.setOnAction(actionEvent -> System.exit(0));
     }
 
@@ -78,7 +78,7 @@ public class TrayMenu extends AnchorPane implements Initializable {
 
     private void initShowButton() {
         show.setFocusTraversable(false);
-        AwesomeDude.setIcon(show, AwesomeIcon.TABLE);
+        AwesomeDude.setIcon(show, AwesomeIcon.COLUMNS);
     }
 
     private void createAccountButtons() {

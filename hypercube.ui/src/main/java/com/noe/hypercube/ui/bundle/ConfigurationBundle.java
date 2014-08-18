@@ -2,7 +2,7 @@ package com.noe.hypercube.ui.bundle;
 
 
 import org.apache.commons.collections.BidiMap;
-import org.apache.commons.collections.DualHashBidiMap;
+import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.ini4j.Ini;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -30,8 +30,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.*;
 
 public class FileTableView extends TableView<IFile> implements Initializable {
@@ -110,24 +109,27 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         });
     }
 
-    public void setLocalFileList(Path dir) {
-        java.io.File[] list = dir.toFile().listFiles();
-        Collection<IFile> files = new ArrayList<>(100);
+    public void setLocalFileList(Path directory) {
+        Collection <IFile> files = new ArrayList<>(100);
         Collection<IFile> dirs = new ArrayList<>(100);
-        IFile stepBack = createStepBackFile(dir);
+        IFile stepBack = createStepBackFile(directory);
         if (stepBack != null) {
             dirs.add(stepBack);
         }
-        if (list != null) {
-            for (java.io.File file : list) {
-                if (!file.isHidden() && Files.isReadable(file.toPath())) {
-                    if (file.isDirectory()) {
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directory)) {
+            for (Path file : directoryStream) {
+                final boolean hidden = file.toFile().isHidden();
+                final boolean readable = Files.isReadable(file);
+                if (readable && !hidden) {
+                    if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) {
                         dirs.add(new LocalFile(file));
-                    } else {
+                    } else if(Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)){
                         files.add(new LocalFile(file));
                     }
                 }
             }
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
         dirs.addAll(files);
         ObservableList<IFile> data = FXCollections.observableArrayList(dirs);

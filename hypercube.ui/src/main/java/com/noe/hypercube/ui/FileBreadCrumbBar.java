@@ -3,6 +3,7 @@ package com.noe.hypercube.ui;
 import impl.org.controlsfx.skin.BreadCrumbBarSkin;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import org.controlsfx.control.BreadCrumbBar;
 
@@ -17,7 +18,8 @@ public class FileBreadCrumbBar extends BreadCrumbBar<String> {
 
     public FileBreadCrumbBar() {
         setCrumbFactory(crumb -> {
-            final BreadCrumbBarSkin.BreadCrumbButton breadCrumbButton = new BreadCrumbBarSkin.BreadCrumbButton(crumb.getValue() != null ? crumb.getValue().toString() : "");
+            final BreadCrumbBarSkin.BreadCrumbButton breadCrumbButton = new BreadCrumbBarSkin.BreadCrumbButton(crumb.getValue() != null ? crumb.getValue() : "");
+            breadCrumbButton.setPadding(new Insets(1,8,1,8));
             changeStyle(breadCrumbButton, isActive());
             return breadCrumbButton;
         });
@@ -44,7 +46,7 @@ public class FileBreadCrumbBar extends BreadCrumbBar<String> {
     }
 
     private void setActiveStyle(BreadCrumbBarSkin.BreadCrumbButton breadCrumbButton) {
-        breadCrumbButton.setStyle("-fx-font: 12 System; -fx-font-weight: bold; -fx-text-fill: white; -fx-base: steelblue;");
+        breadCrumbButton.setStyle("-fx-font: 12 System; -fx-font-weight: bold; -fx-text-fill: white; -fx-base: steelblue; -fx-border-color: white;");
     }
 
     public boolean isActive() {

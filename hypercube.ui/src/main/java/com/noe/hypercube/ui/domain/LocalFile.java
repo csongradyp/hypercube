@@ -1,5 +1,7 @@
 package com.noe.hypercube.ui.domain;
 
+import java.nio.file.Path;
+
 public class LocalFile extends File {
 
     private final java.io.File file;
@@ -7,6 +9,11 @@ public class LocalFile extends File {
     public LocalFile(java.io.File file) {
         super(file.toPath());
         this.file = file;
+    }
+
+    public LocalFile(Path path) {
+        super(path);
+        this.file = path.toFile();
     }
 
     public LocalFile(String path) {
