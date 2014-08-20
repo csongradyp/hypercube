@@ -1,10 +1,13 @@
 package com.noe.hypercube.ui;
 
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
+import de.jensd.fx.fontawesome.AwesomeDude;
+import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.AnchorPane;
 
@@ -21,6 +24,8 @@ public class Controller implements Initializable {
     private ChoiceBox<String> languages;
     @FXML
     private AnchorPane commander;
+    @FXML
+    private Button queue;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -28,6 +33,7 @@ public class Controller implements Initializable {
             ConfigurationBundle.setLanguage(newValue);
             changLanguage();
         });
+        AwesomeDude.setIcon(queue, AwesomeIcon.LIST_UL, "12");
     }
 
     @FXML
@@ -52,5 +58,9 @@ public class Controller implements Initializable {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    @FXML
+    public void onShowSyncView() {
     }
 }

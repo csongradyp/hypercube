@@ -1,8 +1,8 @@
 package com.noe.hypercube.ui.bundle;
 
 
-import org.apache.commons.collections.BidiMap;
-import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.ini4j.Ini;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ public class ConfigurationBundle {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigurationBundle.class);
 
-    private static final BidiMap languages = new DualHashBidiMap();
+    private static final BidiMap<String, String> languages = new DualHashBidiMap<>();
     private static final ConfigurationBundle instance = new ConfigurationBundle();
     private static final String LOCATION_SECTION = "location";
     public static final String LANGUAGE = "language";

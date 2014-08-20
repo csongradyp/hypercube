@@ -17,8 +17,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.layout.HBox;
+import javafx.geometry.Side;
+import javafx.scene.control.Label;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import org.controlsfx.control.HiddenSidesPane;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialogs;
 
@@ -42,8 +45,6 @@ import static org.controlsfx.dialog.Dialog.Actions.YES;
 public class FileManager extends VBox implements Initializable {
 
     @FXML
-    private HBox doubleView;
-    @FXML
     private FileView leftFileView;
     @FXML
     private FileView rightFileView;
@@ -60,6 +61,14 @@ public class FileManager extends VBox implements Initializable {
     private FileActionButton newFolder;
     @FXML
     private FileActionButton close;
+    @FXML
+    private HiddenSidesPane doubleView;
+    @FXML
+    private AnchorPane syncView;
+    @FXML
+    private Label showSyncView;
+    @FXML
+    private Label hideSyncView;
 
     @FXML
     private ResourceBundle resources;
@@ -97,6 +106,9 @@ public class FileManager extends VBox implements Initializable {
         edit.prefWidthProperty().bind(widthProperty().subtract(40).divide(6));
         newFolder.prefWidthProperty().bind(widthProperty().subtract(40).divide(6));
         close.prefWidthProperty().bind(widthProperty().subtract(40).divide(6));
+        showSyncView.setOnMouseEntered(mouseEvent -> doubleView.setPinnedSide(Side.RIGHT));
+        hideSyncView.setOnMouseClicked(mouseEvent -> doubleView.setPinnedSide(null));
+        syncView.prefWidthProperty().bind(rightFileView.widthProperty().add(20));
     }
 
     private void setupLocalCondition() {
@@ -216,7 +228,7 @@ public class FileManager extends VBox implements Initializable {
                         });
                     }
                     if (DELETE == action || MOVE == action) {
-                        if(markedFile.isDirectory()) {
+                        if (markedFile.isDirectory()) {
                             Files.list(markedFile.getPath()).forEach(path -> {
                                 try {
                                     Files.deleteIfExists(path);

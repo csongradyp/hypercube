@@ -17,13 +17,17 @@ public class FileBreadCrumbBar extends BreadCrumbBar<String> {
     }
 
     public FileBreadCrumbBar() {
+        setCrumbFactory();
+        active.addListener((observableValue, oldValue, newValue) -> changeStyle(newValue));
+    }
+
+    protected void setCrumbFactory() {
         setCrumbFactory(crumb -> {
             final BreadCrumbBarSkin.BreadCrumbButton breadCrumbButton = new BreadCrumbBarSkin.BreadCrumbButton(crumb.getValue() != null ? crumb.getValue() : "");
             breadCrumbButton.setPadding(new Insets(1,8,1,8));
             changeStyle(breadCrumbButton, isActive());
             return breadCrumbButton;
         });
-        active.addListener((observableValue, oldValue, newValue) -> changeStyle(newValue));
     }
 
     private void changeStyle(Boolean isActive) {
@@ -33,7 +37,7 @@ public class FileBreadCrumbBar extends BreadCrumbBar<String> {
         }
     }
 
-    private void changeStyle(BreadCrumbBarSkin.BreadCrumbButton breadCrumbButton, final Boolean isActive) {
+    protected void changeStyle(BreadCrumbBarSkin.BreadCrumbButton breadCrumbButton, final Boolean isActive) {
         if (isActive) {
             setActiveStyle(breadCrumbButton);
         } else {

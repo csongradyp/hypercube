@@ -178,7 +178,8 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
     @Override
     public void createFolder(final Path folder) throws SynchronizationException {
         try {
-            final DbxEntry.Folder createdFolder = client.createFolder(getDropboxPath(folder));
+            final String folderPath = getDropboxPath(folder);
+            final DbxEntry.Folder createdFolder = client.createFolder(folderPath);
         } catch (DbxException e) {
             throw new SynchronizationException("Unable to create folder: " + folder);
         }

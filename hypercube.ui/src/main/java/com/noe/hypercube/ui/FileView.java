@@ -151,9 +151,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         //                }
         //            });
         //        }
-        remoteDrives.activeProperty().addListener((observableValue, oldValue, newValue) -> {
-            remote.set(newValue);
-        });
+        remoteDrives.activeProperty().addListener((observableValue, oldValue, newValue) -> remote.set(newValue));
     }
 
     public void refresh() {

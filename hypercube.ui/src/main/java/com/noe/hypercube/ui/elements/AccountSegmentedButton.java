@@ -3,10 +3,13 @@ package com.noe.hypercube.ui.elements;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.FileListRequest;
 import com.noe.hypercube.ui.bundle.AccountBundle;
+import de.jensd.fx.fontawesome.AwesomeDude;
+import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import org.controlsfx.control.SegmentedButton;
 
 import java.util.List;
@@ -45,6 +48,8 @@ public class AccountSegmentedButton extends SegmentedButton {
 
     private ToggleButton createAccountButton(String account) {
         final ToggleButton accountStorageButton = new ToggleButton(account);
+        AwesomeDude.setIcon(accountStorageButton, AwesomeIcon.DROPBOX);
+        accountStorageButton.setTooltip(new Tooltip(account));
         accountStorageButton.setFocusTraversable(false);
         accountStorageButton.setOnAction(event -> {
             active.set(true);

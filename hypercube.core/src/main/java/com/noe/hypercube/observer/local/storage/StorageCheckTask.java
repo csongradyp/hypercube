@@ -3,7 +3,7 @@ package com.noe.hypercube.observer.local.storage;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.StorageEvent;
 import com.noe.hypercube.event.domain.type.StorageEventType;
-import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.collections4.IteratorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -21,7 +21,7 @@
                     <String fx:value="English"/>
                 </ChoiceBox>
                 <Separator orientation="VERTICAL" prefHeight="20.0"/>
-                <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
+                <Button fx:id="queue" onAction="#onShowSyncView" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
                 <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
                 <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
             </items>

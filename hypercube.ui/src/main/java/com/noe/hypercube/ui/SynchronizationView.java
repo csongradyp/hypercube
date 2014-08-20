@@ -16,7 +16,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import net.engio.mbassy.listener.Handler;
 import org.controlsfx.control.SegmentedButton;
 
@@ -27,7 +27,7 @@ import java.util.ResourceBundle;
 
 import static com.noe.hypercube.event.domain.type.FileEventType.*;
 
-public class SynchronizationView extends AnchorPane implements EventHandler<FileEvent> {
+public class SynchronizationView extends VBox implements EventHandler<FileEvent> {
 
     @FXML
     private SegmentedButton accounts;
@@ -67,14 +67,14 @@ public class SynchronizationView extends AnchorPane implements EventHandler<File
     }
 
     private void setDownloadListPlaceholder() {
-        final Label iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.CLOUD_DOWNLOAD);
-        iconLabel.getGraphic().setOpacity(0.3d);
+        final Label iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.CLOUD_DOWNLOAD, "", "150px", "12", ContentDisplay.TOP);
+        iconLabel.getGraphic().setOpacity(0.1d);
         downloadList.setPlaceholder(iconLabel);
     }
 
     private void setUploadListPlaceholder() {
-        final Label iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.CLOUD_UPLOAD);
-        iconLabel.getGraphic().setOpacity(0.3d);
+        final Label iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.CLOUD_UPLOAD, "", "150px", "12", ContentDisplay.TOP);
+        iconLabel.getGraphic().setOpacity(0.1d);
         uploadList.setPlaceholder(iconLabel);
     }
 

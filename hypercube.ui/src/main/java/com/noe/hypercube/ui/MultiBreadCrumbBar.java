@@ -65,7 +65,9 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
 
     private void setRemoteCrumbEventHandler(FileBreadCrumbBar remote) {
         remote.setOnCrumbAction(event -> {
-            remoteEventHandler.handle(event);
+            if(remoteEventHandler != null) {
+                remoteEventHandler.handle(event);
+            }
             remoteProperty().set(true);
             final RemoteFileBreadCrumbBar triggeredCrumbBar = (RemoteFileBreadCrumbBar) event.getSource();
             final String account = triggeredCrumbBar.getAccount();
