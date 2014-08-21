@@ -27,3 +27,11 @@
 
 .active {
 }
+
+.mouseover {
+    -fx-effect: innershadow(gaussian, lightsteelblue, 7, 1, 1, 1);
+}
+
+.default{
+    -fx-effect: innershadow(gaussian, steelblue, 7, 1, 1, 1);
+}

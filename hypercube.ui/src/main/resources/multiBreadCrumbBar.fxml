@@ -3,6 +3,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import org.controlsfx.control.BreadCrumbBar?>
-<fx:root alignment="TOP_RIGHT" prefHeight="20.0" prefWidth="400.0" type="javafx.scene.layout.VBox" HBox.hgrow="ALWAYS" xmlns="http://javafx.com/javafx/8"
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<fx:root prefHeight="20.0" prefWidth="400.0" type="javafx.scene.layout.VBox" HBox.hgrow="ALWAYS" xmlns="http://javafx.com/javafx/8"
          xmlns:fx="http://javafx.com/fxml/1">
 </fx:root>

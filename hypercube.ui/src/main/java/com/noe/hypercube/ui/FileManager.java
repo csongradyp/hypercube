@@ -10,6 +10,8 @@ import com.noe.hypercube.ui.dialog.FileProgressDialog;
 import com.noe.hypercube.ui.domain.IFile;
 import com.noe.hypercube.ui.elements.FileActionButton;
 import com.noe.hypercube.ui.util.ProgressAwareInputStream;
+import de.jensd.fx.fontawesome.AwesomeDude;
+import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -18,7 +20,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Side;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.HiddenSidesPane;
@@ -107,8 +111,16 @@ public class FileManager extends VBox implements Initializable {
         newFolder.prefWidthProperty().bind(widthProperty().subtract(40).divide(6));
         close.prefWidthProperty().bind(widthProperty().subtract(40).divide(6));
         showSyncView.setOnMouseEntered(mouseEvent -> doubleView.setPinnedSide(Side.RIGHT));
-        hideSyncView.setOnMouseClicked(mouseEvent -> doubleView.setPinnedSide(null));
+        setupHideSyncViewLabel();
         syncView.prefWidthProperty().bind(rightFileView.widthProperty().add(20));
+    }
+
+    private void setupHideSyncViewLabel() {
+        hideSyncView.setGraphic(AwesomeDude.createIconLabel(AwesomeIcon.PLAY, "", "10", "0", ContentDisplay.GRAPHIC_ONLY));
+        hideSyncView.getGraphic().setStyle("-fx-effect: innershadow(gaussian, white, 7, 1, 1, 1);");
+        hideSyncView.addEventHandler(MouseEvent.MOUSE_EXITED, event -> hideSyncView.setStyle("-fx-background-color: linear-gradient(to right, lightsteelblue 0%, #7A9ECC 50%, #5C92BF 51%, steelblue 100%);"));
+        hideSyncView.addEventHandler(MouseEvent.MOUSE_ENTERED, event -> hideSyncView.setStyle("-fx-background-color: linear-gradient(to right, lightsteelblue 0%, steelblue 40%, steelblue 80%, #3C76A6 100%);"));
+        hideSyncView.setOnMouseClicked(mouseEvent -> doubleView.setPinnedSide(null));
     }
 
     private void setupLocalCondition() {

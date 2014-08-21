@@ -4,24 +4,19 @@ import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
 import com.noe.hypercube.event.domain.FileEvent;
 import com.noe.hypercube.event.domain.type.StreamDirection;
-import com.noe.hypercube.ui.bundle.AccountBundle;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
-import com.noe.hypercube.ui.bundle.HistoryBundle;
+import com.noe.hypercube.ui.elements.AccountSegmentedButton;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import net.engio.mbassy.listener.Handler;
-import org.controlsfx.control.SegmentedButton;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -30,7 +25,7 @@ import static com.noe.hypercube.event.domain.type.FileEventType.*;
 public class SynchronizationView extends VBox implements EventHandler<FileEvent> {
 
     @FXML
-    private SegmentedButton accounts;
+    private AccountSegmentedButton accounts;
     @FXML
     private ListView<Label> downloadList;
     @FXML
@@ -50,21 +45,21 @@ public class SynchronizationView extends VBox implements EventHandler<FileEvent>
         setUploadListPlaceholder();
         setDownloadListPlaceholder();
     }
-
-    private void createAccountButtons() {
-        final List<String> accountNames = AccountBundle.getAccounts();
-        for (String account : accountNames) {
-            final ToggleButton accountButton = new ToggleButton(account);
-            accountButton.setFocusTraversable(false);
-            accountButton.setPrefHeight(accounts.getPrefHeight());
-            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(account);
-            accountButton.setOnAction(e -> {
-                accountButton.setSelected(true);
-            });
-            accounts.getButtons().add(accountButton);
-        }
-        accounts.getButtons().get(0).setSelected(true);
-    }
+//
+//    private void createAccountButtons() {
+//        final List<String> accountNames = AccountBundle.getAccounts();
+//        for (String account : accountNames) {
+//            final ToggleButton accountButton = new ToggleButton(account);
+//            accountButton.setFocusTraversable(false);
+//            accountButton.setPrefHeight(accounts.getPrefHeight());
+//            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(account);
+//            accountButton.setOnAction(e -> {
+//                accountButton.setSelected(true);
+//            });
+//            accounts.getButtons().add(accountButton);
+//        }
+//        accounts.getButtons().get(0).setSelected(true);
+//    }
 
     private void setDownloadListPlaceholder() {
         final Label iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.CLOUD_DOWNLOAD, "", "150px", "12", ContentDisplay.TOP);

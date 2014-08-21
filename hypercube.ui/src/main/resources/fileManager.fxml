@@ -6,6 +6,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.*?>
 <?import org.controlsfx.control.HiddenSidesPane?>
 <fx:root type="javafx.scene.layout.VBox" VBox.vgrow="ALWAYS" prefHeight="400.0" prefWidth="800.0" stylesheets="style/status.css" xmlns="http://javafx.com/javafx/8"
@@ -24,7 +25,11 @@
             </content>
             <right>
                 <AnchorPane fx:id="syncView">
-                    <Label fx:id="hideSyncView" text=">" alignment="CENTER" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" focusTraversable="false" prefWidth="15" style="-fx-background-color: steelblue; -fx-text-fill: white; -fx-font-weight: bold" />
+                    <Label fx:id="hideSyncView" alignment="CENTER" graphicTextGap="0.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" focusTraversable="false" prefWidth="15" style="-fx-background-color:  linear-gradient(to right, lightsteelblue 0%, #7A9ECC 50%, #5C92BF 51%, steelblue 100%);">
+                        <tooltip>
+                            <Tooltip text="%tooltip.syncView.hide"/>
+                        </tooltip>
+                    </Label>
                     <SynchronizationView focusTraversable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.leftAnchor="15.0"/>
                 </AnchorPane>
             </right>

@@ -13,6 +13,7 @@ public class RemoteFileBreadCrumbBar extends FileBreadCrumbBar {
 
     public RemoteFileBreadCrumbBar(String account) {
         super();
+        setCanAddMapping(false);
         this.account = account;
     }
 
@@ -24,7 +25,9 @@ public class RemoteFileBreadCrumbBar extends FileBreadCrumbBar {
             if(crumb.getValue().equals(account)) {
                 final Label iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.DROPBOX, "", "14", "0", ContentDisplay.GRAPHIC_ONLY);
                 breadCrumbButton.setGraphic(iconLabel);
-                breadCrumbButton.getGraphic().setStyle("-fx-effect: innershadow(gaussian, white, 7, 1, 1, 1);");
+                if(isActive()) {
+                    breadCrumbButton.getGraphic().setStyle("-fx-effect: innershadow(gaussian, white, 7, 1, 1, 1);");
+                }
 //                AwesomeDude.setIcon(breadCrumbButton, AwesomeIcon.DROPBOX, "14");
 //                  breadCrumbButton.setGraphic(new ImageView(account + ".png"));
                 breadCrumbButton.setText("");
@@ -37,4 +40,9 @@ public class RemoteFileBreadCrumbBar extends FileBreadCrumbBar {
     public String getAccount() {
         return account;
     }
+
+    public void setCanAddMapping(Boolean canAddMapping) {
+        mappingButton.setAdder(canAddMapping);
+    }
+
 }
