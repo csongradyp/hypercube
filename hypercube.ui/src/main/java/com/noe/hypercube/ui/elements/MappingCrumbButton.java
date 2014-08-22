@@ -19,8 +19,6 @@ import java.util.ResourceBundle;
 
 public class MappingCrumbButton extends Label implements Initializable {
 
-    private static final String DEFAULT_STYLE = "default";
-
     private final SimpleBooleanProperty adder = new SimpleBooleanProperty(true);
     private EventHandler<MouseEvent> mouseEnteredEventHandler;
     private EventHandler<MouseEvent> mouseExitedEventHandler;
@@ -41,6 +39,7 @@ public class MappingCrumbButton extends Label implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         messageBundle = resourceBundle;
+        getStylesheets().add("style/labelbutton.css");
         setAddMappingStyle();
         setStyle();
         adderProperty().addListener((observable, oldValue, newValue) -> setStyle());
@@ -61,8 +60,6 @@ public class MappingCrumbButton extends Label implements Initializable {
 
     private void setRemoveMappingStyle() {
         AwesomeDude.setIcon(this, AwesomeIcon.CHAIN, ContentDisplay.GRAPHIC_ONLY);
-        getStyleClass().clear();
-        getStyleClass().add(DEFAULT_STYLE);
         mouseEnteredEventHandler = event -> AwesomeDude.setIcon(this, AwesomeIcon.CHAIN_BROKEN, ContentDisplay.GRAPHIC_ONLY);
         mouseExitedEventHandler = event -> AwesomeDude.setIcon(this, AwesomeIcon.CHAIN, ContentDisplay.GRAPHIC_ONLY);
         setTooltip(new Tooltip(messageBundle.getString("tooltip.mapping.remove")));
@@ -70,16 +67,8 @@ public class MappingCrumbButton extends Label implements Initializable {
 
     protected void setAddMappingStyle() {
         AwesomeDude.setIcon(this, AwesomeIcon.PLUS_SQUARE, ContentDisplay.GRAPHIC_ONLY);
-        getStyleClass().clear();
-        getStyleClass().add(DEFAULT_STYLE);
-        mouseEnteredEventHandler =  event -> {
-            getStyleClass().clear();
-            getStyleClass().add("mouseover");
-        };
-        mouseExitedEventHandler = event -> {
-            getStyleClass().clear();
-            getStyleClass().add(DEFAULT_STYLE);
-        };
+        mouseEnteredEventHandler =  event -> {};
+        mouseExitedEventHandler = event -> {};
         setTooltip(new Tooltip(messageBundle.getString("tooltip.mapping.add")));
     }
 

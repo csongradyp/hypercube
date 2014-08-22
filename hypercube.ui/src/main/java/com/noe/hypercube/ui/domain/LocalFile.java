@@ -30,6 +30,10 @@ public class LocalFile extends File {
         setStepBack(stepBack);
     }
 
+    public java.io.File getFile() {
+        return file;
+    }
+
     @Override
     public boolean isLocal() {
         return true;

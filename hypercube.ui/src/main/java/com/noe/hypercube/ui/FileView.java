@@ -6,6 +6,7 @@ import com.noe.hypercube.event.domain.FileListRequest;
 import com.noe.hypercube.event.domain.FileListResponse;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.domain.IFile;
+import com.noe.hypercube.ui.domain.LocalFile;
 import com.noe.hypercube.ui.elements.AccountSegmentedButton;
 import com.noe.hypercube.ui.factory.IconFactory;
 import javafx.application.Platform;
@@ -27,12 +28,14 @@ import net.engio.mbassy.listener.Handler;
 import org.controlsfx.control.BreadCrumbBar;
 import org.controlsfx.control.SegmentedButton;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static javafx.scene.input.KeyCombination.ModifierValue.DOWN;
@@ -174,7 +177,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     public void onMouseClicked(MouseEvent event) {
         final IFile selectedItem = table.getSelectionModel().getSelectedItem();
         if (isDoubleClick(event)) {
-            stepInto(selectedItem);
+            open(selectedItem);
         } else if (MouseButton.SECONDARY.equals(event.getButton())) {
             selectedItem.mark();
         }
@@ -190,7 +193,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         if (backSpace.match(event)) {
             table.setLocation(selectedFile.getParentDirectory());
         } else if (enter.match(event)) {
-            stepInto(selectedFile);
+            open(selectedFile);
         } else if (space.match(event)) {
             selectedFile.mark();
         } else if (shiftUp.match(event)) {
@@ -204,6 +207,27 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         }
     }
 
+    private void open(IFile selectedFile) {
+        if (selectedFile.isDirectory() || selectedFile.isStepBack()) {
+            final Path folder = selectedFile.getPath();
+            table.setLocation(folder);
+        } else if (isLocalFile(selectedFile)){
+            openWithDefaultProgram((LocalFile) selectedFile);
+        }
+    }
+
+    private boolean isLocalFile(IFile selectedFile) {
+        return LocalFile.class.isAssignableFrom(selectedFile.getClass());
+    }
+
+    private void openWithDefaultProgram(LocalFile selectedFile) {
+        try {
+            Desktop.getDesktop().open(selectedFile.getFile());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     public void onLocalDriveAction(ActionEvent event) {
         remote.set(false);
@@ -212,15 +236,6 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         localDriveButton.setSelected(true);
         setLocation(location);
         remoteDrives.deselectButtons();
-    }
-
-    private void stepInto(IFile selectedFile) {
-        if (selectedFile.isDirectory() || selectedFile.isStepBack()) {
-            final Path folder = selectedFile.getPath();
-            table.setLocation(folder);
-        } else {
-            System.out.println(selectedFile);
-        }
     }
 
     public IFile getSelectedFile() {

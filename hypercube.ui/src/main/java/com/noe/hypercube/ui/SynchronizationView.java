@@ -45,21 +45,6 @@ public class SynchronizationView extends VBox implements EventHandler<FileEvent>
         setUploadListPlaceholder();
         setDownloadListPlaceholder();
     }
-//
-//    private void createAccountButtons() {
-//        final List<String> accountNames = AccountBundle.getAccounts();
-//        for (String account : accountNames) {
-//            final ToggleButton accountButton = new ToggleButton(account);
-//            accountButton.setFocusTraversable(false);
-//            accountButton.setPrefHeight(accounts.getPrefHeight());
-//            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(account);
-//            accountButton.setOnAction(e -> {
-//                accountButton.setSelected(true);
-//            });
-//            accounts.getButtons().add(accountButton);
-//        }
-//        accounts.getButtons().get(0).setSelected(true);
-//    }
 
     private void setDownloadListPlaceholder() {
         final Label iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.CLOUD_DOWNLOAD, "", "150px", "12", ContentDisplay.TOP);

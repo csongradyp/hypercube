@@ -3,6 +3,7 @@ package com.noe.hypercube.ui;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.tray.HypercubeTrayIcon;
+import impl.org.controlsfx.i18n.Localization;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -21,9 +22,11 @@ public class FileCommander extends Application {
     @Override
     public void start(final Stage stage) throws Exception {
         trayIcon = new HypercubeTrayIcon(stage);
-        messageBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
+        final Locale defaultLocale = new Locale(ConfigurationBundle.getLanguage());
+        Localization.setLocale(defaultLocale);
+        messageBundle = ResourceBundle.getBundle("internationalization/messages", defaultLocale);
         Parent fileCommander = FXMLLoader.load(getClass().getClassLoader().getResource("main.fxml"), messageBundle);
-        Scene scene = new Scene(fileCommander, 800, 600);
+        Scene scene = new Scene(fileCommander, 1024, 768);
         stage.setScene(scene);
         stage.setTitle("HyperCube - Cloud connected");
         stage.getIcons().add(ImageBundle.getImage("tray.default"));

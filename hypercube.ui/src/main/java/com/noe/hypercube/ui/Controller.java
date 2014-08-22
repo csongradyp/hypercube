@@ -3,6 +3,7 @@ package com.noe.hypercube.ui;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+import impl.org.controlsfx.i18n.Localization;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -43,6 +44,8 @@ public class Controller implements Initializable {
 
     public void changLanguage() {
         final Locale locale = new Locale(ConfigurationBundle.getLanguage());
+        Locale.setDefault(Locale.Category.DISPLAY, locale);
+        Localization.setLocale(locale);
         commander.getChildren().clear();
         loadView(locale);
     }

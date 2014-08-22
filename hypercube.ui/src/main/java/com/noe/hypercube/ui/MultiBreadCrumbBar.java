@@ -3,6 +3,7 @@ package com.noe.hypercube.ui;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.FileListRequest;
 import com.noe.hypercube.ui.bundle.PathBundle;
+import com.noe.hypercube.ui.dialog.AddMappingDialog;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -55,20 +56,15 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         remotebreadcrumbs = new HashMap<>();
         localBreadcrumb = new FileBreadCrumbBar();
         localBreadcrumb.setActive(true);
-        localBreadcrumb.setOnAddMapping(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                System.out.println("Add mapping dialog here to : " + localBreadcrumb.getLocation());
-            }
-        });
+        localBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapLocalDialog(localBreadcrumb.getLocation()));
         getChildren().add(localBreadcrumb);
         setLocalCrumbActionHandler();
         final Collection<String> accounts = pathBundle.getAccounts();
         for (String account : accounts) {
             final RemoteFileBreadCrumbBar remoteBreadcrumb = new RemoteFileBreadCrumbBar(account);
             setRemoteCrumbEventHandler(remoteBreadcrumb);
-            setOnAddMapping(remoteBreadcrumb);
-            setOnRemoveMapping(remoteBreadcrumb);
+            remoteBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapRemoteDialog( remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation()));
+            setOnRemoveRemoteMapping(remoteBreadcrumb);
             remotebreadcrumbs.put(account, remoteBreadcrumb);
         }
         disableBreadcrumbFocusTraversal(localBreadcrumb);
@@ -76,20 +72,11 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         localBreadcrumb.activeProperty().bind(remote.not());
     }
 
-    private void setOnAddMapping(final RemoteFileBreadCrumbBar remoteBreadcrumb) {
-        remoteBreadcrumb.setOnAddMapping(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                System.out.println(remoteBreadcrumb.getLocation());
-            }
-        });
-    }
-
-    private void setOnRemoveMapping(RemoteFileBreadCrumbBar remoteBreadcrumb) {
+    private void setOnRemoveRemoteMapping(RemoteFileBreadCrumbBar remoteBreadcrumb) {
         remoteBreadcrumb.setOnRemoveMapping(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                System.out.println(remoteBreadcrumb.getLocation());
+                // TODO send remove mapping event
             }
         });
     }

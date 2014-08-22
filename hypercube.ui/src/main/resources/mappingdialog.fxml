@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root type="org.controlsfx.dialog.Dialog" resizable="true" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <content>
+        <VBox alignment="TOP_CENTER" minHeight="150.0" minWidth="350.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+            <Label text="%dialog.mapping.folder.local"/>
+            <HBox>
+                <TextField fx:id="localFolder" prefHeight="25.0" HBox.hgrow="ALWAYS"/>
+                <Button fx:id="localFolderChooser"/>
+            </HBox>
+            <Separator prefWidth="200.0">
+                <padding>
+                  <Insets bottom="5.0" top="10.0"/>
+                </padding>
+            </Separator>
+            <Label text="%dialog.mapping.folder.remotes"/>
+            <VBox fx:id="remoteMappings" spacing="5.0">
+                <HBox>
+                    <Label fx:id="addMappingChooser" prefWidth="15.0" prefHeight="15.0"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </content>
+</fx:root>
