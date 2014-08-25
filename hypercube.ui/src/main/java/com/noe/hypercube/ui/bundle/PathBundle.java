@@ -1,42 +1,43 @@
 package com.noe.hypercube.ui.bundle;
 
 
+import com.noe.hypercube.ui.domain.LocalFile;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class PathBundle {
 
+    private static final PathBundle instance = new PathBundle();
     private Map<String, DualHashBidiMap<String, String>> mappings;
 
-    public PathBundle() {
+    private PathBundle() {
         mappings = new HashMap<>();
         mappings.put("test", new DualHashBidiMap(new HashMap<>()));
         mappings.put("other", new DualHashBidiMap(new HashMap<>()));
         mappings.put("Dropbox", new DualHashBidiMap(new HashMap<>()));
-        add("test", "C:\\Users", "/A/B/C");
-        add("other", "C:\\Users", "/x/y");
-        add("Dropbox", "D:\\test", "/newtest");
+        mappings.get("test").put("C:\\Users", "/A/B/C");
+        mappings.get("test").put("C:\\Users", "/x");
+        mappings.get("Dropbox").put("D:\\test", "/newtest");
     }
 
     public PathBundle(final Map<String, DualHashBidiMap<String, String>> mappings) {
         this.mappings = mappings;
     }
 
-    public String getFolder(final String account, final String localFolder) {
-        return mappings.get(account).get(localFolder);
+    public static String getFolder(final String account, final String localFolder) {
+        return instance.mappings.get(account).get(localFolder);
     }
 
-    public String getLocalFolder(String account, String folder) {
-        final DualHashBidiMap<String, String> accountMapping = mappings.get(account);
+    public static String getLocalFolder(String account, String folder) {
+        final DualHashBidiMap<String, String> accountMapping = instance.mappings.get(account);
         return accountMapping.getKey(folder.replaceAll("\\\\", "/"));
     }
 
-    public Map<String, String> getAllFolders(final String folder) {
+    public static Map<String, String> getAllFolders(final String folder) {
         final Map<String, String> folders = new HashMap<>();
-        for (String account : mappings.keySet()) {
+        final Set<String> accounts = instance.mappings.keySet();
+        for (String account : accounts) {
             final String remoteFolderPath = getFolder(account, folder);
             if (remoteFolderPath != null) {
                 folders.put(account, remoteFolderPath);
@@ -45,12 +46,23 @@ public class PathBundle {
         return folders;
     }
 
-    public void add(final String account, final String localFolder, final String remoteFolder) {
-        mappings.get(account).put(localFolder, remoteFolder);
+    public static Set<String> getAccounts(LocalFile folder) {
+        final Set<String> sharedAccounts = new HashSet<>();
+        final Set<String> accounts = instance.mappings.keySet();
+        for (String account : accounts) {
+            final String remoteFolderPath = getFolder(account, folder.getFile().getPath());
+            if (remoteFolderPath != null) {
+                sharedAccounts.add(account);
+            }
+        }
+        return sharedAccounts;
     }
 
-    public Collection<String> getAccounts() {
-        return mappings.keySet();
+    public static void add(final String account, final String localFolder, final String remoteFolder) {
+        instance.mappings.get(account).put(localFolder, remoteFolder);
     }
 
+    public static Collection<String> getAccounts() {
+        return instance.mappings.keySet();
+    }
 }

@@ -31,7 +31,6 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     private static final String SEPARATOR_PATTERN = Pattern.quote(SEPARATOR);
     private static final Pattern SLASH_SEPARATOR = Pattern.compile("/");
 
-    private PathBundle pathBundle;
     private FileBreadCrumbBar localBreadcrumb;
     private Map<String, RemoteFileBreadCrumbBar> remotebreadcrumbs;
     private EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> remoteEventHandler;
@@ -52,14 +51,13 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        pathBundle = new PathBundle();
         remotebreadcrumbs = new HashMap<>();
         localBreadcrumb = new FileBreadCrumbBar();
         localBreadcrumb.setActive(true);
         localBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapLocalDialog(localBreadcrumb.getLocation()));
         getChildren().add(localBreadcrumb);
         setLocalCrumbActionHandler();
-        final Collection<String> accounts = pathBundle.getAccounts();
+        final Collection<String> accounts = PathBundle.getAccounts();
         for (String account : accounts) {
             final RemoteFileBreadCrumbBar remoteBreadcrumb = new RemoteFileBreadCrumbBar(account);
             setRemoteCrumbEventHandler(remoteBreadcrumb);
@@ -135,7 +133,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
 
     public void setBreadCrumbs(Path path) {
         setBreadCrumb(path.toString(), localBreadcrumb);
-        final Map<String, String> remoteFolders = pathBundle.getAllFolders(path.toString());
+        final Map<String, String> remoteFolders = PathBundle.getAllFolders(path.toString());
         getChildren().clear();
         if (path.toFile().exists()) {
             getChildren().add(localBreadcrumb);
@@ -158,7 +156,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         final RemoteFileBreadCrumbBar activeAccountCrumb = remotebreadcrumbs.get(account);
         activeAccountCrumb.setActive(true);
         final String crumbPath = path == null ? "" : path.toString();
-        final String localFolder = pathBundle.getLocalFolder(account, crumbPath);
+        final String localFolder = PathBundle.getLocalFolder(account, crumbPath);
         if(isMapped(localFolder)) {
             setBreadCrumbs(Paths.get(localFolder));
         } else {

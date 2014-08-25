@@ -25,6 +25,7 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.controlsfx.control.HiddenSidesPane;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialogs;
@@ -366,7 +367,7 @@ public class FileManager extends VBox implements Initializable {
 
     @FXML
     public void onExit() {
-        Platform.exit();
+        ((Stage) getScene().getWindow()).close();
     }
 
     private FileView getActiveFileView() {

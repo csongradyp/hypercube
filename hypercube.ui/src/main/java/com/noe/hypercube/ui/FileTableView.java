@@ -2,6 +2,7 @@ package com.noe.hypercube.ui;
 
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
+import com.noe.hypercube.ui.bundle.PathBundle;
 import com.noe.hypercube.ui.domain.IFile;
 import com.noe.hypercube.ui.domain.LocalFile;
 import com.noe.hypercube.ui.domain.RemoteFile;
@@ -21,16 +22,17 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.TextAlignment;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.util.*;
 
 public class FileTableView extends TableView<IFile> implements Initializable {
@@ -68,6 +70,19 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         requestFocusIfActive();
 
         sharedColumn.setGraphic(AwesomeDude.createIconLabel(AwesomeIcon.CODE_FORK, "15"));
+        sharedColumn.setCellValueFactory(file -> new ReadOnlyObjectWrapper<>(file.getValue()));
+        sharedColumn.setCellFactory(new FileCellFactory(file -> {
+            HBox content = new HBox(2.0d);
+            final Collection<String> sharedWith = file.sharedWith();
+            for (final String account : sharedWith) {
+                final Label accountMark = new Label();
+                // TODO add icon
+                AwesomeDude.setIcon(accountMark, AwesomeIcon.DROPBOX);
+                accountMark.setTooltip(new Tooltip(account));
+                content.getChildren().add(accountMark);
+            }
+            return content;
+        }));
 
         fileNameColumn.setCellValueFactory(file -> new ReadOnlyObjectWrapper<>(file.getValue()));
         fileNameColumn.setCellFactory(new FileCellFactory(file -> {
@@ -76,7 +91,6 @@ public class FileTableView extends TableView<IFile> implements Initializable {
                 label.getStyleClass().add("table-row-marked");
                 getStyleClass().add("table-row-marked");
             } else if (file.isShared()) {
-                getStyleClass().add("table-row-special");
                 label.getStyleClass().add("table-row-special");
             } else {
                 label.getStyleClass().removeAll("table-row-marked", "table-row-special");
@@ -122,7 +136,12 @@ public class FileTableView extends TableView<IFile> implements Initializable {
                 final boolean readable = Files.isReadable(file);
                 if (readable && !hidden) {
                     if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) {
-                        dirs.add(new LocalFile(file));
+                        final LocalFile localFolder = new LocalFile(file);
+                        final Set<String> accounts = PathBundle.getAccounts(localFolder);
+                        if(!accounts.isEmpty()) {
+                            localFolder.sharedWith(accounts);
+                        }
+                        dirs.add(localFolder);
                     } else if(Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)){
                         files.add(new LocalFile(file));
                     }

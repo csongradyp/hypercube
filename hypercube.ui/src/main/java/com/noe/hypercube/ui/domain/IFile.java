@@ -4,6 +4,7 @@ import javafx.beans.property.BooleanProperty;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Set;
 
 public interface IFile {
 
@@ -41,5 +42,7 @@ public interface IFile {
 
     Collection<String> sharedWith();
 
-    void share(String account);
+    void sharedWith(String account);
+
+    void sharedWith(Set<String> accounts);
 }

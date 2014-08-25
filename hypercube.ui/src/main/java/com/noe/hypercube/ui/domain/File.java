@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 
 public abstract class File implements IFile {
 
@@ -104,7 +105,12 @@ public abstract class File implements IFile {
     }
 
     @Override
-    public void share(String account) {
+    public void sharedWith(String account) {
         shared.add(account);
+    }
+
+    @Override
+    public void sharedWith(Set<String> accounts) {
+        shared = accounts;
     }
 }
