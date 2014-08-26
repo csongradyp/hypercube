@@ -50,12 +50,21 @@ public class PathBundle {
         final Set<String> sharedAccounts = new HashSet<>();
         final Set<String> accounts = instance.mappings.keySet();
         for (String account : accounts) {
-            final String remoteFolderPath = getFolder(account, folder.getFile().getPath());
-            if (remoteFolderPath != null) {
+            if(isMapped(account, folder)) {
                 sharedAccounts.add(account);
             }
         }
         return sharedAccounts;
+    }
+
+    private static boolean isMapped(final String account, final LocalFile folder) {
+        final DualHashBidiMap<String, String> folderMap = instance.mappings.get(account);
+        for (String mappedLocalFolder : folderMap.keySet()) {
+            if(folder.getPath().toString().contains(mappedLocalFolder)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void add(final String account, final String localFolder, final String remoteFolder) {
