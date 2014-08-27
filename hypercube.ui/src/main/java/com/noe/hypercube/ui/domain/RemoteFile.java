@@ -5,9 +5,9 @@ import java.util.Date;
 
 public class RemoteFile extends File {
 
-    private final boolean directory;
-    private final long size;
-    private final Date lastModified;
+    private boolean directory;
+    private long size;
+    private Date lastModified;
 
     public RemoteFile(final Path path, final long size, final boolean directory, final Date lastModified) {
         super(path);

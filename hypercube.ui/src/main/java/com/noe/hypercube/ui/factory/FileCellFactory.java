@@ -45,9 +45,9 @@ public class FileCellFactory implements Callback<TableColumn<IFile, IFile>, Tabl
                     if (file.isMarked()) {
                         getStyleClass().add("table-row-marked");
                     } else if (file.isShared()) {
-                        getStyleClass().add("table-row-special");
+                        getStyleClass().add("table-row-shared");
                     } else {
-                        getStyleClass().remove("table-row-marked");
+                        getStyleClass().removeAll("table-row-marked", "table-row-shared");
                     }
                     setTextAlignment(alignment);
                     switch (alignment) {

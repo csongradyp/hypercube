@@ -15,7 +15,7 @@ public abstract class File implements IFile {
     private final SimpleBooleanProperty marked;
     private Collection<String> shared;
 
-    protected File(Path path) {
+    protected File(final Path path) {
         this.path = path;
         marked = new SimpleBooleanProperty(false);
         shared = new ArrayList<>();
@@ -109,8 +109,21 @@ public abstract class File implements IFile {
         shared.add(account);
     }
 
-    @Override
     public void sharedWith(Set<String> accounts) {
         shared = accounts;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        File file = (File) o;
+        return path.equals(file.path);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return path.hashCode();
     }
 }

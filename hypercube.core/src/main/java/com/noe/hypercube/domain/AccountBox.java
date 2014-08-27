@@ -80,7 +80,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
             } else {
                 fileList = client.getFileList(remoteFolder);
             }
-            EventBus.publish(new FileListResponse(client.getAccountName(), remoteFolder, fileList));
+            EventBus.publish(new FileListResponse(client.getAccountName(), event.getParentRemoteFolder(), remoteFolder, fileList));
         } catch (SynchronizationException e) {
             e.printStackTrace();
         }

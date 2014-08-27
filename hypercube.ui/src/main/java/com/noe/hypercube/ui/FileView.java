@@ -84,13 +84,13 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     public void initialize(URL location, ResourceBundle resources) {
         initLocalDrives();
         initRemoteDrives();
-        table.getLocationProperty().addListener((observable, oldValue, newValue) -> {
+        table.getLocationProperty().addListener((observable, oldLocation, newLocation) -> {
             if (isRemote()) {
-                EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), newValue));
+                EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), oldLocation, newLocation));
             } else {
                 multiBreadCrumbBar.setAllRemoteCrumbsInactive();
-                multiBreadCrumbBar.setBreadCrumbs(newValue);
-                table.setLocalFileList(newValue);
+                multiBreadCrumbBar.setBreadCrumbs(newLocation);
+                table.setLocalFileList(newLocation, oldLocation);
             }
         });
         multiBreadCrumbBar.remoteProperty().bindBidirectional(remote);
@@ -140,7 +140,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         //        for (int i = 0; i < 3; i++) {
         //            final ToggleButton test = new ToggleButton(String.valueOf(i));
         //            remoteDrives.getButtons().add(test);
-        //            test.selectedProperty().addListener((observable, oldValue, newValue) -> {
+        //            test.selectedProperty().addListener((observable, oldLocation, newLocation) -> {
         //                table.getStylesheets().removeAll("style/darkTheme.css", "style/caspian_mod.css", "style/fileTableView.css");
         //                if (test.getText().equals("0")) {
         //                    table.getStylesheets().add("style/darkTheme.css");
@@ -158,12 +158,12 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     }
 
     public void refresh() {
-        table.getItems().clear();
-        if (isRemote()) {
-            EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getLocation()));
-        } else {
-            table.setLocalFileList(getLocation());
-        }
+//        table.getItems().clear();
+//        if (isRemote()) {
+//            EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getLocation()));
+//        } else {
+//            table.setLocalFileList(getLocation());
+//        }
     }
 
     public void onLocalCrumbAction(BreadCrumbBar.BreadCrumbActionEvent<String> event) {
@@ -287,7 +287,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     public void setRemoteFileList(final FileListResponse event) {
         final Path folder = event.getFolder();
-        table.setRemoteFileList(folder, event.getFileList());
+        table.setRemoteFileList(event.getParentFolder(), folder, event.getFileList());
         setLocation(folder);
         activateRemoteStorageButton(event);
         deselectButtons(localDrives);
