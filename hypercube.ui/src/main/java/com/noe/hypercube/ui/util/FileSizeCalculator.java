@@ -5,6 +5,8 @@ import com.noe.hypercube.ui.domain.IFile;
 
 public final class FileSizeCalculator {
 
+    private static final Long UNIT = 1024L;
+    private static final String SIZE_SYMBOLS = "kMGTPEZY";
     private static final String DIR_PLACEHOLDER = "<DIR>  ";
 
     private FileSizeCalculator() {
@@ -12,35 +14,17 @@ public final class FileSizeCalculator {
 
     public static String calculate(final IFile file) {
         if (!file.isDirectory()) {
-            long length = file.size();
-            return humanReadableByteCount(length, false);
+            return humanReadableByteCount(file.size());
         }
         return DIR_PLACEHOLDER;
     }
 
-    public static String calculateSelected(final java.io.File file) {
-        return humanReadableByteCount(cal(file), false);
-    }
-
-    private static long cal(java.io.File file) {
-        long size = 0l;
-        if (!file.isDirectory()) {
-            return file.length();
+    private static String humanReadableByteCount(final Long bytes) {
+        if (bytes < UNIT) {
+            return bytes + " b";
         }
-        java.io.File[] files = file.listFiles();
-        if (files != null) {
-            for (java.io.File fileContent : files) {
-                size += cal(fileContent);
-            }
-        }
-        return size;
-    }
-
-    public static String humanReadableByteCount(long bytes, boolean si) {
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit) return bytes + " B";
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPEZY" : "KMGTPEZY").charAt(exp - 1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+        final Double exp = StrictMath.log(bytes) / StrictMath.log(UNIT);
+        final String pre = SIZE_SYMBOLS.charAt(exp.intValue() - 1) + "i";
+        return String.format("%.1f %sB", bytes / StrictMath.pow( UNIT, exp), pre);
     }
 }

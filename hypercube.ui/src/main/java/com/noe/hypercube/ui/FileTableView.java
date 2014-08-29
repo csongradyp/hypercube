@@ -51,6 +51,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
 
     private final SimpleObjectProperty<Path> location = new SimpleObjectProperty<>();
     private final SimpleBooleanProperty active = new SimpleBooleanProperty(false);
+    private final DirectoryStream.Filter<Path> localFileFilter = path -> Files.isReadable(path) && !path.toFile().isHidden();
 
     public FileTableView() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fileTableView.fxml"));
@@ -98,8 +99,8 @@ public class FileTableView extends TableView<IFile> implements Initializable {
             return label;
         }));
 
-        fileSizeColumn.setCellFactory(new FileCellFactory(TextAlignment.RIGHT, file -> file.isStepBack() ? "" : FileSizeCalculator.calculate(file)));
         fileSizeColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+        fileSizeColumn.setCellFactory(new FileCellFactory(TextAlignment.RIGHT, file -> file.isStepBack() ? "" : FileSizeCalculator.calculate(file)));
 
         extColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
         extColumn.setCellFactory(new FileCellFactory(TextAlignment.CENTER, file -> file.isDirectory() ? "" : FilenameUtils.getExtension(file.getName())));
@@ -123,36 +124,31 @@ public class FileTableView extends TableView<IFile> implements Initializable {
     }
 
     public void setLocalFileList(final Path directory, final Path previousDirectory) {
-        Collection <IFile> files = new ArrayList<>(100);
-        Collection<IFile> dirs = new ArrayList<>(100);
-        IFile stepBack = createStepBackFile(directory);
-        IFile previousFolder = getPreviousFolder(previousDirectory);
+        final Collection <IFile> files = new ArrayList<>(100);
+        final Collection<IFile> dirs = new ArrayList<>(100);
+        final IFile stepBack = createStepBackFile(directory);
+        final IFile previousFolder = getPreviousFolder(previousDirectory);
         if (stepBack != null) {
             dirs.add(stepBack);
         }
-        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directory)) {
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directory, localFileFilter)) {
             for (Path file : directoryStream) {
-                final boolean hidden = file.toFile().isHidden();
-                final boolean readable = Files.isReadable(file);
-                if (readable && !hidden) {
-                    if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) {
-                        final LocalFile localFolder = new LocalFile(file);
-                        final Set<String> accounts = PathBundle.getAccounts(localFolder);
-                        if(!accounts.isEmpty()) {
-                            localFolder.sharedWith(accounts);
-                        }
-                        dirs.add(localFolder);
-                    } else if(Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)){
-                        files.add(new LocalFile(file));
+                if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) {
+                    final LocalFile localFolder = new LocalFile(file);
+                    final Set<String> accounts = PathBundle.getAccounts(localFolder);
+                    if(!accounts.isEmpty()) {
+                        localFolder.sharedWith(accounts);
                     }
+                    dirs.add(localFolder);
+                } else if(Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)){
+                    files.add(new LocalFile(file));
                 }
             }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
         dirs.addAll(files);
-        ObservableList<IFile> data = FXCollections.observableArrayList(dirs);
-        setItems(data);
+        setItems(FXCollections.observableArrayList(dirs));
         selectIfSteppedBack(previousFolder);
     }
 
@@ -173,10 +169,10 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         }
     }
 
-    public void setRemoteFileList(final Path previousDirectory, final Path parentFolder, final List<ServerEntry> list) {
+    public void setRemoteFileList(final Path parentFolder, final List<ServerEntry> list) {
         final Collection<IFile> files = new ArrayList<>(100);
         final Collection<IFile> dirs = new ArrayList<>(100);
-        IFile previousFolder = getPreviousFolder(previousDirectory);
+        final IFile previousFolder = new LocalFile(getLocation());
         if (list.isEmpty()) {
             final Path location1 = getLocation();
             final IFile stepBack = createStepBackFile(location1);
@@ -210,7 +206,6 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         return null;
     }
 
-    @FXML
     public void setActive(boolean active) {
         this.active.set(active);
     }

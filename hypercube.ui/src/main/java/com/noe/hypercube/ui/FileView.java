@@ -19,6 +19,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
@@ -49,6 +50,8 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     private final KeyCombination shiftDown = new KeyCodeCombination(KeyCode.DOWN, DOWN, UP, UP, UP, UP);
     private final KeyCombination shiftUp = new KeyCodeCombination(KeyCode.UP, DOWN, UP, UP, UP, UP);
     private final KeyCombination ctrlF5 = new KeyCodeCombination(KeyCode.F5, UP, DOWN, UP, UP, UP);
+
+    private Node focusTransferTarget;
 
     @FXML
     private FileTableView table;
@@ -84,13 +87,13 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     public void initialize(URL location, ResourceBundle resources) {
         initLocalDrives();
         initRemoteDrives();
-        table.getLocationProperty().addListener((observable, oldLocation, newLocation) -> {
+        table.getLocationProperty().addListener((observable, oldValue, newValue) -> {
             if (isRemote()) {
-                EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), oldLocation, newLocation));
+                EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), newValue));
             } else {
                 multiBreadCrumbBar.setAllRemoteCrumbsInactive();
-                multiBreadCrumbBar.setBreadCrumbs(newLocation);
-                table.setLocalFileList(newLocation, oldLocation);
+                multiBreadCrumbBar.setBreadCrumbs(newValue);
+                table.setLocalFileList(newValue, oldValue);
             }
         });
         multiBreadCrumbBar.remoteProperty().bindBidirectional(remote);
@@ -100,6 +103,12 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     public void initStartLocation() {
         Path startLocation = ConfigurationBundle.getStartLocation(side.get());
+        if(side.get().equals("left")) {
+//            setActive(true);
+            requestFocus();
+            table.requestFocus();
+            setFocused(true);
+        }
         setLocation(startLocation);
         getLocationProperty().addListener((observableValue, path, newLocation) -> {
             if (!isRemote()) {
@@ -140,7 +149,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         //        for (int i = 0; i < 3; i++) {
         //            final ToggleButton test = new ToggleButton(String.valueOf(i));
         //            remoteDrives.getButtons().add(test);
-        //            test.selectedProperty().addListener((observable, oldLocation, newLocation) -> {
+        //            test.selectedProperty().addListener((observable, oldValue, newValue) -> {
         //                table.getStylesheets().removeAll("style/darkTheme.css", "style/caspian_mod.css", "style/fileTableView.css");
         //                if (test.getText().equals("0")) {
         //                    table.getStylesheets().add("style/darkTheme.css");
@@ -164,6 +173,11 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 //        } else {
 //            table.setLocalFileList(getLocation());
 //        }
+    }
+
+    @Override
+    public void requestFocus() {
+        table.requestFocus();
     }
 
     public void onLocalCrumbAction(BreadCrumbBar.BreadCrumbActionEvent<String> event) {
@@ -207,6 +221,10 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         }
     }
 
+    public javafx.beans.property.ReadOnlyBooleanProperty getFocusedProperty() {
+        return table.focusedProperty();
+    }
+
     private void open(IFile selectedFile) {
         if (selectedFile.isDirectory() || selectedFile.isStepBack()) {
             final Path folder = selectedFile.getPath();
@@ -243,8 +261,8 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     }
 
     public Collection<IFile> getMarkedFiles() {
-        Collection<IFile> marked = new ArrayList<>(50);
-        ObservableList<IFile> files = table.getItems();
+        final Collection<IFile> marked = new ArrayList<>(50);
+        final ObservableList<IFile> files = table.getItems();
         marked.addAll(files.stream().filter(IFile::isMarked).collect(Collectors.toList()));
         if (marked.isEmpty()) {
             marked.add(getSelectedFile());
@@ -287,7 +305,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     public void setRemoteFileList(final FileListResponse event) {
         final Path folder = event.getFolder();
-        table.setRemoteFileList(event.getParentFolder(), folder, event.getFileList());
+        table.setRemoteFileList(folder, event.getFileList());
         setLocation(folder);
         activateRemoteStorageButton(event);
         deselectButtons(localDrives);

@@ -81,6 +81,7 @@ public class FileManager extends VBox implements Initializable {
     private SimpleBooleanProperty cloud = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty localToCloud = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty cloudToLocal = new SimpleBooleanProperty(false);
+
     private SimpleBooleanProperty local = new SimpleBooleanProperty(false);
 
     public FileManager() {
@@ -101,6 +102,8 @@ public class FileManager extends VBox implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         leftFileView.initStartLocation();
         rightFileView.initStartLocation();
+        transferFocus(leftFileView, rightFileView);
+        transferFocus(rightFileView, leftFileView);
         setupCloudCondition();
         setupLocalToCloudCondition();
         setupCloudToLocalCondition();
@@ -114,6 +117,14 @@ public class FileManager extends VBox implements Initializable {
         showSyncView.setOnMouseEntered(mouseEvent -> doubleView.setPinnedSide(Side.RIGHT));
         setupHideSyncViewLabel();
         syncView.prefWidthProperty().bind(rightFileView.widthProperty().add(20));
+    }
+
+    private void transferFocus(final FileView from, final FileView to) {
+        from.getFocusedProperty().addListener((observable, oldValue, newValue) -> {
+            if(!newValue) {
+                to.requestFocus();
+            }
+        });
     }
 
     private void setupHideSyncViewLabel() {
