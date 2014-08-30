@@ -4,6 +4,7 @@ import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.FileEventHandler;
 import com.noe.hypercube.event.domain.*;
+import com.noe.hypercube.event.dto.RemoteQuotaInfo;
 import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
@@ -80,7 +81,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
             } else {
                 fileList = client.getFileList(remoteFolder);
             }
-            EventBus.publish(new FileListResponse(client.getAccountName(), event.getParentRemoteFolder(), remoteFolder, fileList));
+            EventBus.publish(new FileListResponse(client.getAccountName(), event.getParentRemoteFolder(), remoteFolder, fileList, getRemoteQuotaInfo()));
         } catch (SynchronizationException e) {
             e.printStackTrace();
         }
@@ -92,7 +93,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
         try {
             uploader.uploadNew(event.getLocalFile().toFile(), event.getRemoteFolder());
         } catch (SynchronizationException e) {
-            // send fail message
+            //TODO send fail message
         }
     }
 
@@ -113,9 +114,14 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
             final Path remoteFolder = event.getBaseFolder();
             final Path folder = Paths.get(remoteFolder.toString(), event.getFolderName());
             client.createFolder(folder);
-            EventBus.publish(new FileListResponse(client.getAccountName(), remoteFolder, client.getFileList(remoteFolder)) );
+            EventBus.publish(new FileListResponse(client.getAccountName(), remoteFolder, client.getFileList(remoteFolder), getRemoteQuotaInfo()) );
         } catch (SynchronizationException e) {
-            // send fail message
+            //TODO send fail message
         }
+    }
+
+    private RemoteQuotaInfo getRemoteQuotaInfo() throws SynchronizationException {
+        final AccountQuota quota = client.getQuota();
+        return new RemoteQuotaInfo(quota.getTotalSpace(), quota.getUsedSpace());
     }
 }

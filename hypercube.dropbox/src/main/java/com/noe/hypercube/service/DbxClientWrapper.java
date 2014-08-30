@@ -2,6 +2,7 @@ package com.noe.hypercube.service;
 
 
 import com.dropbox.core.*;
+import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.DbxFileEntity;
 import com.noe.hypercube.domain.DbxServerEntry;
 import com.noe.hypercube.domain.ServerEntry;
@@ -205,5 +206,15 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
             dropboxPath = "/" + dropboxPath;
         }
         return dropboxPath.replace("\\", "/");
+    }
+
+    @Override
+    public AccountQuota getQuota() throws SynchronizationException {
+        try {
+            final DbxAccountInfo.Quota quota = client.getAccountInfo().quota;
+            return new AccountQuota(quota.total, quota.normal + quota.shared);
+        } catch (DbxException e) {
+            throw new SynchronizationException("Could not get Dropbox qouta info", e);
+        }
     }
 }

@@ -30,6 +30,7 @@ public class FileBreadCrumbBar extends HBox {
     public FileBreadCrumbBar() {
         mappingButton = new MappingCrumbButton();
         breadCrumbBar = new BreadCrumbBar<>();
+        breadCrumbBar.setFocusTraversable(false);
         setCrumbFactory();
         active.addListener((observableValue, oldValue, newValue) -> changeStyle(newValue));
         getChildren().addAll(mappingButton, breadCrumbBar);
@@ -39,6 +40,7 @@ public class FileBreadCrumbBar extends HBox {
     protected void setCrumbFactory() {
         breadCrumbBar.setCrumbFactory(crumb -> {
             final BreadCrumbBarSkin.BreadCrumbButton breadCrumbButton = new BreadCrumbBarSkin.BreadCrumbButton(crumb.getValue() != null ? crumb.getValue() : "");
+            breadCrumbButton.setFocusTraversable(false);
             breadCrumbButton.setPadding(new Insets(1, 8, 1, 8));
             changeStyle(breadCrumbButton, isActive());
             return breadCrumbButton;

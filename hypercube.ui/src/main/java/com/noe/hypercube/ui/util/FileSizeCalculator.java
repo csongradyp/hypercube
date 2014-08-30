@@ -19,12 +19,10 @@ public final class FileSizeCalculator {
         return DIR_PLACEHOLDER;
     }
 
-    private static String humanReadableByteCount(final Long bytes) {
-        if (bytes < UNIT) {
-            return bytes + " b";
-        }
-        final Double exp = StrictMath.log(bytes) / StrictMath.log(UNIT);
-        final String pre = SIZE_SYMBOLS.charAt(exp.intValue() - 1) + "i";
-        return String.format("%.1f %sB", bytes / StrictMath.pow( UNIT, exp), pre);
+    public static String humanReadableByteCount(Long bytes) {
+        if (bytes < UNIT) return bytes + " B";
+        final Integer exp = new Double(StrictMath.log(bytes) / StrictMath.log(UNIT)).intValue();
+        String pre = SIZE_SYMBOLS.charAt(exp - 1) + "i";
+        return String.format("%.1f %sB", bytes / StrictMath.pow(UNIT, exp), pre);
     }
 }

@@ -172,10 +172,13 @@ public class FileTableView extends TableView<IFile> implements Initializable {
     public void setRemoteFileList(final Path parentFolder, final List<ServerEntry> list) {
         final Collection<IFile> files = new ArrayList<>(100);
         final Collection<IFile> dirs = new ArrayList<>(100);
-        final IFile previousFolder = new LocalFile(getLocation());
+        final Path currentLocation = getLocation();
+        IFile previousFolder = null;
+        if(currentLocation.startsWith("/")) {
+            previousFolder = new StepBackFile(currentLocation);
+        }
         if (list.isEmpty()) {
-            final Path location1 = getLocation();
-            final IFile stepBack = createStepBackFile(location1);
+            final IFile stepBack = createStepBackFile(currentLocation);
             dirs.add(stepBack);
         } else {
             final IFile stepBack = createStepBackFile(parentFolder);

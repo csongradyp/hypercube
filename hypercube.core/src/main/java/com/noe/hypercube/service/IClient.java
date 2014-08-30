@@ -1,5 +1,6 @@
 package com.noe.hypercube.service;
 
+import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.synchronization.SynchronizationException;
@@ -51,4 +52,6 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
     List<ServerEntry> getRootFileList() throws SynchronizationException;
 
     void createFolder(final Path folder) throws SynchronizationException;
+
+    AccountQuota getQuota() throws SynchronizationException;
 }

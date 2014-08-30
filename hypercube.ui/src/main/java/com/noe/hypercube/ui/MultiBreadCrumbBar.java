@@ -8,11 +8,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 import org.controlsfx.control.BreadCrumbBar;
 
 import java.io.IOException;
@@ -65,8 +63,6 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
             setOnRemoveRemoteMapping(remoteBreadcrumb);
             remotebreadcrumbs.put(account, remoteBreadcrumb);
         }
-        disableBreadcrumbFocusTraversal(localBreadcrumb);
-        remotebreadcrumbs.values().forEach(this::disableBreadcrumbFocusTraversal);
         localBreadcrumb.activeProperty().bind(remote.not());
     }
 
@@ -74,7 +70,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         remoteBreadcrumb.setOnRemoveMapping(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                // TODO send remove mapping event
+                System.out.println(remoteBreadcrumb.getLocation());
             }
         });
     }
@@ -183,16 +179,6 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         breadcrumbPath = SLASH_SEPARATOR.matcher(breadcrumbPath).replaceAll("\\\\");
         final TreeItem<String> model = BreadCrumbBar.buildTreeModel(breadcrumbPath.split(SEPARATOR_PATTERN));
         breadcrumb.setSelectedCrumb(model);
-    }
-
-    private void disableBreadcrumbFocusTraversal(FileBreadCrumbBar breadcrumb) {
-        breadcrumb.setFocusTraversable(false);
-        Callback<TreeItem<String>, Button> crumbFactory = breadcrumb.getCrumbFactory();
-        breadcrumb.setCrumbFactory((param) -> {
-            Button crumbButton = crumbFactory.call(param);
-            crumbButton.setFocusTraversable(false);
-            return crumbButton;
-        });
     }
 
     public void setOnLocalCrumbAction(EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> eventHandler) {

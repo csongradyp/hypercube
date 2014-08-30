@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Text?>
+<fx:root alignment="CENTER" type="javafx.scene.layout.HBox" HBox.hgrow="ALWAYS" focusTraversable="false" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <StackPane HBox.hgrow="ALWAYS" alignment="CENTER" focusTraversable="false">
+            <ProgressBar fx:id="spaceBar" maxWidth="Infinity" focusTraversable="false"/>
+            <HBox fx:id="labels" spacing="5.0" alignment="CENTER" focusTraversable="false">
+                <Text fx:id="used" focusTraversable="false" style="-fx-font-weight: bold;" />
+                <Text text="%space.used" focusTraversable="false"/>
+                <Text text="%space.available"  style="-fx-font-weight: bold;" focusTraversable="false"/>
+                <Text fx:id="available" focusTraversable="false"/>
+                <Text text="%space.total"  style="-fx-font-weight: bold;" focusTraversable="false"/>
+                <Text fx:id="total" focusTraversable="false"/>
+            </HBox>
+        </StackPane>
+    </children>
+</fx:root>

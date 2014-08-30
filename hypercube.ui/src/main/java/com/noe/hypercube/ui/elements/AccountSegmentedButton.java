@@ -8,6 +8,8 @@ import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import org.controlsfx.control.SegmentedButton;
@@ -17,6 +19,7 @@ import java.util.List;
 public class AccountSegmentedButton extends SegmentedButton {
 
     private SimpleBooleanProperty active = new SimpleBooleanProperty(false);
+    private EventHandler<ActionEvent> eventHandler;
 
     public AccountSegmentedButton() {
         super();
@@ -52,10 +55,17 @@ public class AccountSegmentedButton extends SegmentedButton {
         accountStorageButton.setTooltip(new Tooltip(account));
         accountStorageButton.setFocusTraversable(false);
         accountStorageButton.setOnAction(event -> {
+            if(eventHandler != null) {
+                eventHandler.handle(event);
+            }
             active.set(true);
             EventBus.publish(new FileListRequest(account));
         });
         return accountStorageButton;
+    }
+
+    public void setOnAction(EventHandler<ActionEvent> eventHandler) {
+        this.eventHandler = eventHandler;
     }
 
     public String getActiveAccount() {

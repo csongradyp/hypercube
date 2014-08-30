@@ -8,6 +8,7 @@ import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.ChangeList;
 import com.google.api.services.drive.model.ParentReference;
 import com.noe.hypercube.controller.IPersistenceController;
+import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.googledrive.domain.DriveFileEntity;
 import com.noe.hypercube.googledrive.domain.DriveServerEntry;
@@ -217,12 +218,19 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
 
     @Override
     public List<ServerEntry> getRootFileList() throws SynchronizationException {
+        // TODO implement
         return null;
     }
 
     @Override
     public void createFolder(Path folder) throws SynchronizationException {
+        // TODO implement
+    }
 
+    @Override
+    public AccountQuota getQuota() throws SynchronizationException {
+        // TODO implement
+        return null;
     }
 
     private com.google.api.services.drive.model.File getDriveFile(String driveFileId) throws SynchronizationException {

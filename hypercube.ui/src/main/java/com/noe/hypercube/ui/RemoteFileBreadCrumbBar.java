@@ -21,6 +21,7 @@ public class RemoteFileBreadCrumbBar extends FileBreadCrumbBar {
     protected void setCrumbFactory() {
         setCrumbFactory(crumb -> {
             final BreadCrumbBarSkin.BreadCrumbButton breadCrumbButton = new BreadCrumbBarSkin.BreadCrumbButton(crumb.getValue() != null ? crumb.getValue() : "");
+            breadCrumbButton.setFocusTraversable(false);
             breadCrumbButton.setPadding(new Insets(1, 8, 1, 8));
             if(crumb.getValue().equals(account)) {
                 final Label iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.DROPBOX, "", "14", "0", ContentDisplay.GRAPHIC_ONLY);
