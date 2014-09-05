@@ -1,44 +1,60 @@
 package com.noe.hypercube.event.dto;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 
 public class RemoteFileInfo {
 
-    private final Path localPath;
-    private final Path remotePath;
-    private final Long size;
-    private final Date timeStamp;
+    private final Path path;
     private final String accountName;
-    private final Boolean directory;
+    private final Boolean folder;
+    private String id;
+    private Long size;
+    private Date lastModified;
 
-    public RemoteFileInfo(final String accountName, final Path remotePath, final Long size, final Path localPath, final Date timeStamp, final Boolean directory) {
+    public RemoteFileInfo(final String accountName, final Path path, final Boolean folder) {
         this.accountName = accountName;
-        this.remotePath = remotePath;
-        this.size = size;
-        this.localPath = localPath;
-        this.timeStamp = timeStamp;
-        this.directory = directory;
+        this.path = path;
+        this.folder = folder;
     }
 
-    public Path getLocalPath() {
-        return localPath;
+    public RemoteFileInfo(final String accountName, String path, final Boolean folder) {
+        this.accountName = accountName;
+        this.path = Paths.get(path);
+        this.folder = folder;
     }
 
-    public Path getRemotePath() {
-        return remotePath;
+    public String getId() {
+        return id;
     }
 
-    public Date getTimeStamp() {
-        return timeStamp;
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    public Date lastModified() {
+        return lastModified;
+    }
+
+    public Path getPath() {
+        return path;
     }
 
     public String getAccountName() {
         return accountName;
     }
 
-    public Boolean isDirectory() {
-        return directory;
+    public Boolean isFolder() {
+        return folder;
+    }
+
+    public void setSize(Long size) {
+        this.size = size;
     }
 
     public Long getSize() {

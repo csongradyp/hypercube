@@ -16,6 +16,7 @@ public class FileListView extends ListView<FileListItem> {
     public FileListView() {
         setPadding(Insets.EMPTY);
         setPrefSize(280, getFixedCellSize());
+        setCellFactory(param -> new AnimatedListCell<>(AbstractAnimatedListCell.AnimationType.FADE_OUT));
     }
 
     public synchronized void clearAndSet(final List<FileEvent> files) {

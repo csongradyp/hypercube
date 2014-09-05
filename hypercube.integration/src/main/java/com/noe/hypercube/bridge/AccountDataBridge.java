@@ -8,12 +8,15 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Collection;
+import java.util.Properties;
 
 @Named
 public class AccountDataBridge {
 
     @Inject
     private IAccountController accountController;
+    @Inject
+    private Properties accountProperties;
 
     @PostConstruct
     public void transferData() {

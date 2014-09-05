@@ -1,9 +1,6 @@
 package com.noe.hypercube.event;
 
-import com.noe.hypercube.event.domain.CreateFolderRequest;
-import com.noe.hypercube.event.domain.DownloadRequest;
-import com.noe.hypercube.event.domain.FileListRequest;
-import com.noe.hypercube.event.domain.UploadRequest;
+import com.noe.hypercube.event.domain.*;
 
 public interface FileEventHandler {
 
@@ -14,4 +11,6 @@ public interface FileEventHandler {
     void onDownloadRequest(final DownloadRequest event);
 
     void onCreateFolderRequest(final CreateFolderRequest event);
+
+    void onDeleteRequest(final DeleteRequest event);
 }

@@ -40,6 +40,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
         EventBus.subscribeToUploadRequest(this);
         EventBus.subscribeToDownloadRequest(this);
         EventBus.subscribeToCreateFolderRequest(this);
+        EventBus.subscribeToDeleteRequest(this);
     }
 
     private void validate(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory) {
@@ -73,17 +74,19 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     @Override
     @Handler(rejectSubtypes = true)
     public void onFileListRequest(final FileListRequest event) {
-        try {
-            final List<ServerEntry> fileList;
-            final Path remoteFolder = event.getRemoteFolder();
-            if (remoteFolder == null || remoteFolder.toString().isEmpty()) {
-                fileList = client.getRootFileList();
-            } else {
-                fileList = client.getFileList(remoteFolder);
+        if(event.getAccount().equals(client.getAccountName()) || event.isCloud()) {
+            try {
+                final List<ServerEntry> fileList;
+                final Path remoteFolder = event.getFolder();
+                if (remoteFolder == null || remoteFolder.toString().isEmpty() || remoteFolder.equals(Paths.get(event.getAccount()))) {
+                    fileList = client.getRootFileList();
+                } else {
+                    fileList = client.getFileList(remoteFolder);
+                }
+                EventBus.publish(new FileListResponse(client.getAccountName(), event.getPreviousFolder(), remoteFolder, fileList, getRemoteQuotaInfo()));
+            } catch (SynchronizationException e) {
+                e.printStackTrace();
             }
-            EventBus.publish(new FileListResponse(client.getAccountName(), event.getParentRemoteFolder(), remoteFolder, fileList, getRemoteQuotaInfo()));
-        } catch (SynchronizationException e) {
-            e.printStackTrace();
         }
     }
 
@@ -108,15 +111,29 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     }
 
     @Override
-    @Handler
+    @Handler(rejectSubtypes = true)
     public void onCreateFolderRequest(final CreateFolderRequest event) {
         try {
             final Path remoteFolder = event.getBaseFolder();
             final Path folder = Paths.get(remoteFolder.toString(), event.getFolderName());
             client.createFolder(folder);
-            EventBus.publish(new FileListResponse(client.getAccountName(), remoteFolder, client.getFileList(remoteFolder), getRemoteQuotaInfo()) );
+            EventBus.publish(new FileListResponse(client.getAccountName(), event.getBaseFolder(), remoteFolder, client.getFileList(remoteFolder), getRemoteQuotaInfo()));
         } catch (SynchronizationException e) {
             //TODO send fail message
+        }
+    }
+
+    @Override
+    @Handler(rejectSubtypes = true)
+    public void onDeleteRequest(final DeleteRequest event) {
+        try {
+            if(event.getId() != null) {
+                client.delete(event.getId());
+            } else {
+                client.delete(event.getPath());
+            }
+        } catch (SynchronizationException e) {
+//            throw new SynchronizationException();
         }
     }
 

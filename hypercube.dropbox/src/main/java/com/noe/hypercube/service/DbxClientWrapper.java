@@ -6,7 +6,6 @@ import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.DbxFileEntity;
 import com.noe.hypercube.domain.DbxServerEntry;
 import com.noe.hypercube.domain.ServerEntry;
-import com.noe.hypercube.event.domain.ServerEntryEvent;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,14 +112,19 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
     }
 
     @Override
-    public void delete(File fileToUpload, Path remotePath) throws SynchronizationException {
-        final String dropboxFilePath = getDropboxPath(remotePath) + "/" + fileToUpload.getName();
+    public void delete(final Path remoteFilePath) throws SynchronizationException {
+        final String dropboxFilePath = getDropboxPath(remoteFilePath);
         try {
             client.delete(dropboxFilePath);
         } catch (DbxException e) {
-            LOG.error("Dropbox file deletion failed from server: {}", remotePath);
-            throw new SynchronizationException("Dropbox file deletion failed from server: " + remotePath);
+            LOG.error("Dropbox file deletion failed from server: {}", dropboxFilePath);
+            throw new SynchronizationException("Dropbox file deletion failed from server: " + dropboxFilePath);
         }
+    }
+
+    @Override
+    public void delete(String remoteFileId) throws SynchronizationException {
+        throw new UnsupportedOperationException("Dropbox does not populate file id");
     }
 
     @Override
@@ -141,13 +145,7 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
             final DbxEntry.WithChildren metadataWithChildren = client.getMetadataWithChildren(dropboxPath);
             final List<DbxEntry> folderContent = metadataWithChildren.children;
             for (DbxEntry file : folderContent) {
-                String rev = "";
-                Date lastModified = new Date();
-                if (file.isFile()) {
-                    lastModified = file.asFile().lastModified;
-                    rev = file.asFile().rev;
-                }
-                fileList.add(new ServerEntryEvent(file.path, rev, lastModified, file.isFolder()));
+                fileList.add(getDbxFileInfo(file));
             }
         } catch (DbxException e) {
             throw new SynchronizationException(e.getMessage());
@@ -162,18 +160,22 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
             final DbxEntry.WithChildren metadataWithChildren = client.getMetadataWithChildren("/");
             final List<DbxEntry> folderContent = metadataWithChildren.children;
             for (DbxEntry file : folderContent) {
-                String rev = "";
-                Date lastModified = new Date();
-                if (file.isFile()) {
-                    lastModified = file.asFile().lastModified;
-                    rev = file.asFile().rev;
-                }
-                fileList.add(new ServerEntryEvent(file.path, rev, lastModified, file.isFolder()));
+                fileList.add(getDbxFileInfo(file));
             }
         } catch (DbxException e) {
             throw new SynchronizationException(e.getMessage());
         }
         return fileList;
+    }
+
+    private DbxServerEntry getDbxFileInfo(DbxEntry file) {
+        final DbxServerEntry dbxServerEntry = new DbxServerEntry(file.path, file.isFolder());
+        if (file.isFile()) {
+            dbxServerEntry.setSize(file.asFile().numBytes);
+            dbxServerEntry.setLastModified(file.asFile().lastModified);
+            dbxServerEntry.setRevision(file.asFile().rev);
+        }
+        return dbxServerEntry;
     }
 
     @Override

@@ -33,6 +33,11 @@ public class TestServerEntry implements ServerEntry {
     }
 
     @Override
+    public Long getSize() {
+        return 1L;
+    }
+
+    @Override
     public boolean isFolder() {
         return isFolder;
     }
@@ -45,5 +50,15 @@ public class TestServerEntry implements ServerEntry {
     @Override
     public Date lastModified() {
         return lastModified;
+    }
+
+    @Override
+    public String getId() {
+        return null;
+    }
+
+    @Override
+    public String getAccount() {
+        return "test";
     }
 }

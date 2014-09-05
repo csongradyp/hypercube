@@ -17,6 +17,7 @@ public final class EventBus {
     private final MBassador<UploadRequest> uploadRequestBus;
     private final MBassador<DownloadRequest> downloadRequestBus;
     private final MBassador<CreateFolderRequest> createFolderRequestBus;
+    private final MBassador<DeleteRequest> deleteRequestBus;
 
     private EventBus() {
         storageEventBus = new MBassador<>(BusConfiguration.Default());
@@ -27,7 +28,8 @@ public final class EventBus {
         uploadRequestBus = new MBassador<>(BusConfiguration.Default());
         downloadRequestBus = new MBassador<>(BusConfiguration.Default());
         createFolderRequestBus = new MBassador<>(BusConfiguration.Default());
-        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, fileListRequestBus, fileListResponseBus, uploadRequestBus, downloadRequestBus, createFolderRequestBus);
+        deleteRequestBus = new MBassador<>(BusConfiguration.Default());
+        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, fileListRequestBus, fileListResponseBus, uploadRequestBus, downloadRequestBus, createFolderRequestBus, deleteRequestBus);
     }
 
     private void registerShutdownHook(MBassador<?>... mBassadors) {
@@ -81,11 +83,11 @@ public final class EventBus {
     }
 
     public static void publish(FileListRequest fileListRequest) {
-        instance.fileListRequestBus.publish(fileListRequest);
+        instance.fileListRequestBus.publishAsync(fileListRequest);
     }
 
     public static void publish(FileListResponse fileListResponse) {
-        instance.fileListResponseBus.publish(fileListResponse);
+        instance.fileListResponseBus.publishAsync(fileListResponse);
     }
 
     public static void publish(UploadRequest uploadRequest) {
@@ -98,6 +100,14 @@ public final class EventBus {
 
     public static void publish(CreateFolderRequest createFolderRequest) {
         instance.createFolderRequestBus.publish(createFolderRequest);
+    }
+
+    public static void publish(DeleteRequest deleteRequest) {
+        instance.deleteRequestBus.publish(deleteRequest);
+    }
+
+    public static void subscribeToDeleteRequest(FileEventHandler handler) {
+        instance.deleteRequestBus.subscribe(handler);
     }
 
     public static void subscribeToUploadRequest(FileEventHandler handler) {

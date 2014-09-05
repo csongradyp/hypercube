@@ -9,9 +9,15 @@ public interface ServerEntry {
 
     Path getPath();
 
+    Long getSize();
+
     boolean isFolder();
 
     boolean isFile();
 
     Date lastModified();
+
+    String getId();
+
+    String getAccount();
 }

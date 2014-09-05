@@ -6,7 +6,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 
 public abstract class File implements IFile {
 
@@ -96,6 +95,11 @@ public abstract class File implements IFile {
     }
 
     @Override
+    public boolean isSharedWith(String account) {
+        return shared.contains(account);
+    }
+
+    @Override
     public Collection<String> sharedWith() {
         return shared;
     }
@@ -105,18 +109,27 @@ public abstract class File implements IFile {
     }
 
     @Override
-    public void sharedWith(String account) {
+    public void share(String account) {
         shared.add(account);
     }
 
-    public void sharedWith(Set<String> accounts) {
-        shared = accounts;
+    @Override
+    public void share(Collection<String> accounts) {
+        if(shared.isEmpty()) {
+            shared = accounts;
+        } else {
+            for (String account : accounts) {
+                if(!isSharedWith(account)) {
+                    share(account);
+                }
+            }
+        }
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null) return false;
+        if (o == null || !File.class.isAssignableFrom(o.getClass())) return false;
         File file = (File) o;
         return path.equals(file.path);
 

@@ -1,8 +1,7 @@
 package com.noe.hypercube.ui.elements;
 
-import com.noe.hypercube.event.EventBus;
-import com.noe.hypercube.event.domain.FileListRequest;
 import com.noe.hypercube.ui.bundle.AccountBundle;
+import com.noe.hypercube.ui.bundle.ImageBundle;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -10,6 +9,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import org.controlsfx.control.SegmentedButton;
@@ -27,9 +27,12 @@ public class AccountSegmentedButton extends SegmentedButton {
         if(!accounts.isEmpty()) {
             for (String account : accounts) {
                 final ToggleButton accountStorageButton = createAccountButton(account);
+                accountStorageButton.setMaxHeight(getHeight());
                 getButtons().add(accountStorageButton);
             }
         }
+        final ToggleButton cloudButton = createCloudButton();
+        getButtons().add(0, cloudButton);
         addListenerForAccountChanges();
     }
 
@@ -50,16 +53,30 @@ public class AccountSegmentedButton extends SegmentedButton {
     }
 
     private ToggleButton createAccountButton(String account) {
-        final ToggleButton accountStorageButton = new ToggleButton(account);
-        AwesomeDude.setIcon(accountStorageButton, AwesomeIcon.DROPBOX);
+        final ToggleButton accountStorageButton = createButton(account);
+        accountStorageButton.setGraphic(ImageBundle.getAccountImageView(account));
+        return accountStorageButton;
+    }
+
+    private ToggleButton createCloudButton() {
+        final ToggleButton accountStorageButton = createButton("Cloud");
+        AwesomeDude.setIcon(accountStorageButton, AwesomeIcon.CLOUD, ContentDisplay.GRAPHIC_ONLY);
+        return accountStorageButton;
+    }
+
+    private ToggleButton createButton(String account) {
+        final ToggleButton accountStorageButton = new ToggleButton();
+        accountStorageButton.setMinHeight(25.0);
+        accountStorageButton.setMaxHeight(25.0);
+        accountStorageButton.setId(account);
         accountStorageButton.setTooltip(new Tooltip(account));
         accountStorageButton.setFocusTraversable(false);
         accountStorageButton.setOnAction(event -> {
+            active.set(true);
+            accountStorageButton.setSelected(true);
             if(eventHandler != null) {
                 eventHandler.handle(event);
             }
-            active.set(true);
-            EventBus.publish(new FileListRequest(account));
         });
         return accountStorageButton;
     }
@@ -72,10 +89,10 @@ public class AccountSegmentedButton extends SegmentedButton {
         final ObservableList<ToggleButton> buttons = getButtons();
         for (ToggleButton button : buttons) {
             if (button.isSelected()) {
-                return button.getText();
+                return button.getId();
             }
         }
-        return "";
+        throw new RuntimeException("no accounts active");
     }
 
     public void deselectButtons() {

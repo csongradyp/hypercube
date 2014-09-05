@@ -14,13 +14,6 @@ public class HyperCubeApp {
     @Inject
     private PersistenceController persistenceController;
 
-    public HyperCubeApp() {
-    }
-
-    public HyperCubeApp(Synchronizer synchronizer) {
-        this.synchronizer = synchronizer;
-    }
-
     public void start() {
         synchronizer.start();
     }

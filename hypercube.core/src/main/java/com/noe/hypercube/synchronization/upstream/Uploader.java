@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 
 import static com.noe.hypercube.synchronization.Action.*;
@@ -49,7 +50,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
     }
 
     @Override
-    public void uploadNew(File fileToUpload, Path remotePath) throws SynchronizationException {
+    public void uploadNew(final File fileToUpload, final Path remotePath) throws SynchronizationException {
         if (client.exist(fileToUpload, remotePath)) {
             LOG.debug("{} conflict - File already exists on server: {}", client.getAccountName(), remotePath.toString());
         } else {
@@ -58,7 +59,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
     }
 
     @Override
-    public void uploadUpdated(File fileToUpload, Path remotePath) throws SynchronizationException {
+    public void uploadUpdated(final File fileToUpload, final Path remotePath) throws SynchronizationException {
         if (client.exist(fileToUpload, remotePath) && isNewer(fileToUpload)) {
             upload(fileToUpload, remotePath, CHANGED);
         } else {
@@ -66,7 +67,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
         }
     }
 
-    private synchronized void upload(File fileToUpload, Path remotePath, Action action) throws SynchronizationException {
+    private synchronized void upload(final File fileToUpload, final Path remotePath, final Action action) throws SynchronizationException {
         final Path localPath = fileToUpload.toPath();
         ServerEntry uploadedFile = null;
         try (FileInputStream inputStream = FileUtils.openInputStream(fileToUpload)) {
@@ -94,16 +95,16 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
         }
     }
 
-    private void persist(Path localPath, ServerEntry uploadedFile) throws IOException {
+    private void persist(final Path localPath, final ServerEntry uploadedFile) throws IOException {
         FileEntity fileEntity = entityFactory.createFileEntity(localPath.toString(), uploadedFile.getRevision(), uploadedFile.lastModified());
         persistenceController.save(fileEntity);
     }
 
     @Override
-    public synchronized void delete(File localFile, Path remotePath) throws SynchronizationException {
+    public synchronized void delete(final File localFile, final Path remotePath) throws SynchronizationException {
         if (client.exist(localFile, remotePath)) {
-            client.delete(localFile, remotePath);
-            Path localPath = localFile.toPath();
+            client.delete(Paths.get(remotePath.toString(), localFile.getName()));
+            final Path localPath = localFile.toPath();
             persistenceController.delete(localPath.toString(), client.getEntityType());
             LOG.debug("Successfully deleted file '{}' from {}", remotePath, client.getAccountName());
         } else {
@@ -111,14 +112,14 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
         }
     }
 
-    private boolean isNewer(File fileToUpload) {
-        Path localPath = fileToUpload.toPath();
-        FileEntity dbEntry = persistenceController.get(localPath.toString(), client.getEntityType());
+    private boolean isNewer(final File fileToUpload) {
+        final Path localPath = fileToUpload.toPath();
+        final FileEntity dbEntry = persistenceController.get(localPath.toString(), client.getEntityType());
         if (dbEntry == null) {
             return true;
         }
-        Date dbLastModifiedDate = dbEntry.lastModified();
-        Date localLastModified = new Date(fileToUpload.lastModified());
+        final Date dbLastModifiedDate = dbEntry.lastModified();
+        final Date localLastModified = new Date(fileToUpload.lastModified());
         return dbLastModifiedDate.before(localLastModified);
     }
 

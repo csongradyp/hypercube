@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <bean id="propertyPlaceholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
@@ -42,6 +42,14 @@
         <constructor-arg>
             <list>
                 <ref bean="dbxFileEntityFactory"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="dropbox.accountProperties" parent="accountProperties" class="com.noe.hypercube.collector.AccountPropertiesCollector">
+        <constructor-arg>
+            <list merge="true">
+                <!--<util:properties location="dropbox.properties" />-->
             </list>
         </constructor-arg>
     </bean>

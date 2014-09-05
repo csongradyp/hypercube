@@ -10,20 +10,18 @@ public class FileListResponse {
 
     private final List<ServerEntry> fileList;
     private final Path folder;
+    private final Path previousFolder;
     private final String account;
     private final RemoteQuotaInfo quotaInfo;
-    private Path parentFolder;
+    private Boolean cloud;
 
-    public FileListResponse(final String account, final Path folder, List<ServerEntry> fileList, final RemoteQuotaInfo quotaInfo) {
+    public FileListResponse(final String account, Path previousFolder, final Path folder, List<ServerEntry> fileList, final RemoteQuotaInfo quotaInfo) {
         this.account = account;
+        this.previousFolder = previousFolder;
         this.folder = folder;
         this.fileList = fileList;
         this.quotaInfo = quotaInfo;
-    }
-
-    public FileListResponse(String account, Path parentFolder, Path folder, List<ServerEntry> fileList, final RemoteQuotaInfo quotaInfo) {
-        this(account, folder, fileList, quotaInfo);
-        this.parentFolder = parentFolder;
+        cloud = false;
     }
 
     public List<ServerEntry> getFileList() {
@@ -34,8 +32,8 @@ public class FileListResponse {
         return folder;
     }
 
-    public Path getParentFolder() {
-        return parentFolder;
+    public Path getPreviousFolder() {
+        return previousFolder;
     }
 
     public String getAccount() {
@@ -44,5 +42,13 @@ public class FileListResponse {
 
     public RemoteQuotaInfo getQuotaInfo() {
         return quotaInfo;
+    }
+
+    public void setCloud(Boolean cloud) {
+        this.cloud = cloud;
+    }
+
+    public Boolean isCloud() {
+        return cloud;
     }
 }

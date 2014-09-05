@@ -12,6 +12,7 @@ public class DriveServerEntry implements ServerEntry {
     private File remoteFile;
     private Path path;
     private String revision;
+    private String id;
     private Date lastModified;
     private boolean isFolder;
 
@@ -26,6 +27,7 @@ public class DriveServerEntry implements ServerEntry {
         this.remoteFile = remoteFile;
         this.revision = revision;
         this.lastModified = lastModified;
+        this.id = remoteFile.getId();
     }
 
     public File getRemoteFile() {
@@ -43,6 +45,11 @@ public class DriveServerEntry implements ServerEntry {
     }
 
     @Override
+    public Long getSize() {
+        return null;
+    }
+
+    @Override
     public boolean isFolder() {
         return isFolder;
     }
@@ -55,5 +62,15 @@ public class DriveServerEntry implements ServerEntry {
     @Override
     public Date lastModified() {
         return lastModified;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getAccount() {
+        return "Google Drive";
     }
 }

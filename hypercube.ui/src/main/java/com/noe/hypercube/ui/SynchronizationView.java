@@ -8,6 +8,8 @@ import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.elements.AccountSegmentedButton;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ContentDisplay;
@@ -61,23 +63,39 @@ public class SynchronizationView extends VBox implements EventHandler<FileEvent>
     @Override
     @Handler(rejectSubtypes = true)
     public void onEvent(FileEvent event) {
-        Label item = createListItem(event);
-        if (event.getDirection() == StreamDirection.DOWN) {
-            downloadList.getItems().add(item);
+        Platform.runLater(() -> {
+            if (StreamDirection.DOWN == event.getDirection()) {
+                handle(event, downloadList.getItems());
+            } else {
+                handle(event, uploadList.getItems());
+            }
+        });
+    }
+
+    private void handle(FileEvent event, ObservableList<Label> items) {
+        if (SUBMITTED == event.getEventType()) {
+            addListItem(event, items);
         } else {
-            uploadList.getItems().add(item);
+            updateItems(event, items);
         }
     }
 
-    private Label createListItem(final FileEvent event) {
-        Label item = null;
-        if (SUBMITTED == event.getEventType()) {
-            item = AwesomeDude.createIconLabel(AwesomeIcon.CLOCK_ALT, event.getLocalPath().toString(), "15", "12", ContentDisplay.LEFT);
-        } else if (STARTED == event.getEventType()) {
-            item = AwesomeDude.createIconLabel(AwesomeIcon.REFRESH, event.getLocalPath().toString(), "15", "12", ContentDisplay.LEFT);
-        } else if (FINISHED == event.getEventType()) {
-            item = AwesomeDude.createIconLabel(AwesomeIcon.CHECK_SQUARE, event.getLocalPath().toString(), "15", "12", ContentDisplay.LEFT);
-        }
-        return item;
+    private void addListItem(FileEvent event, ObservableList<Label> items) {
+        Label item = AwesomeDude.createIconLabel(AwesomeIcon.CLOCK_ALT, event.getLocalPath().toString(), "15", "12", ContentDisplay.LEFT);
+        items.add(0, item);
     }
+
+    private void updateItems(FileEvent event, ObservableList<Label> items) {
+        for (Label label : items) {
+            if(label.getText().equals(event.getLocalPath().toString())) {
+                if (STARTED == event.getEventType()) {
+                    AwesomeDude.setIcon(label, AwesomeIcon.REFRESH);
+                } else if (FINISHED == event.getEventType()) {
+                    items.remove(label);
+                }
+                break;
+            }
+        }
+    }
+
 }

@@ -41,7 +41,11 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
 
     ServerEntry download(String serverPath, FileOutputStream outputStream, Object... extraArgs) throws SynchronizationException;
 
-    void delete(final File fileToUpload, final Path remotePath) throws SynchronizationException;
+//    void delete(final File fileToUpload, final Path remotePath) throws SynchronizationException;
+
+    void delete(final Path remoteFilePath) throws SynchronizationException;
+
+    void delete(final String remoteFileId) throws SynchronizationException;
 
     ServerEntry uploadAsNew(final Path remotePath, final File fileToUpload, final InputStream inputStream) throws SynchronizationException;
 

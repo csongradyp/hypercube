@@ -156,14 +156,28 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
         throw new UnsupportedOperationException("Use the public void download(ServerEntry serverEntry, FileOutputStream outputStream) method.");
     }
 
+//    @Override
+//    public void delete(final File localFile, final Path remotePath) throws SynchronizationException {
+//        String fileId = getFileId(localFile);
+//        try {
+//            client.files().delete(fileId);
+//        } catch (IOException e) {
+//            LOG.error("Google Drive file deletion failed from server: {}", remotePath);
+//            throw new SynchronizationException("Google Drive file deletion failed from server: " + remotePath);
+//        }
+//    }
+
     @Override
-    public void delete(final File localFile, final Path remotePath) throws SynchronizationException {
-        String fileId = getFileId(localFile);
+    public void delete(Path remoteFilePath) throws SynchronizationException {
+        throw new UnsupportedOperationException("Delete operation is only available with file id");
+    }
+
+    @Override
+    public void delete(String remoteFileId) throws SynchronizationException {
         try {
-            client.files().delete(fileId);
+            client.files().delete(remoteFileId).execute();
         } catch (IOException e) {
-            LOG.error("Google Drive file deletion failed from server: {}", remotePath);
-            throw new SynchronizationException("Google Drive file deletion failed from server: " + remotePath);
+            throw new SynchronizationException(String.format("Failed to delete file (id=%s) from Google Drive", remoteFileId));
         }
     }
 
@@ -180,7 +194,7 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
         }
 
         Date lastModified = new Date(driveFile.getModifiedDate().getValue());
-        return new DriveServerEntry(remotePath.toString(), driveFile.getHeadRevisionId(), lastModified, false);
+        return new DriveServerEntry(remotePath.toString (), driveFile.getHeadRevisionId(), lastModified, false);
     }
 
     private List<ParentReference> getParentDirectories(final Path remotePath) throws SynchronizationException {

@@ -10,7 +10,11 @@
     -fx-border-width: 0;
 }
 
-.table-row-cell:odd:filled:focused:selected {
+.table-row-cell:empty .table-cell {
+    -fx-border-width: 0px;
+}
+
+.table-row-cell:odd:filled {
     -fx-background-color: -fx-table-cell-border-color, derive(-fx-control-inner-background, -5%);
     -fx-background-insets: 0, 0 0 1 0;
 }
@@ -24,6 +28,11 @@
 /* Selected row when table focused */
 .table-view:focused .table-row-cell:filled:focused:selected {
     -fx-background-color: steelblue;
+    /*-fx-background-color:*/
+        /*linear-gradient(steelblue 0%, lightsteelblue 20%, white 100%),*/
+        /*linear-gradient(steelblue 0%, white 50%),*/
+        /*linear-gradient(white 0%, lightsteelblue 20%, steelblue 100%);*/
+    /*-fx-background-color: linear-gradient(steelblue 0%, lightsteelblue 10%, white 20%, white 80%, lightsteelblue 90%, steelblue 100%);*/
     -fx-border-width: 0;
     -fx-background: -fx-accent;
     -fx-text-fill: -fx-selection-bar-text;
@@ -38,12 +47,6 @@
 
 /* Selected marked row when table focused*/
 .table-view:focused .table-row-cell:filled:focused:selected .table-row-marked {
-    /*-fx-background-color: #ED4040;*/
-    /*-fx-effect: dropshadow( gaussian , black , 0,0,0,0 );*/
-    /*-fx-background-color:
-            linear-gradient(#f2f2f2, #d6d6d6),
-            linear-gradient(#fcfcfc 0%, #d9d9d9 20%, #d6d6d6 100%),
-            linear-gradient(#dddddd 0%, #f6f6f6 50%);*/
     -fx-border-width: 0;
     -fx-background: -fx-accent;
     -fx-alternative-row-fill-visible: false
@@ -62,22 +65,6 @@
 }
 
 .table-row-shared {
-    /*-fx-text-fill: green;*/
-    /*-fx-background-color: #BBCC90;*/
-    -fx-background-color: #CFDBBB;
-    -fx-border-width: 0;
+    -fx-font-weight: bold;
 }
 
-.table-view:focused .table-row-cell:filled:focused:selected .table-row-shared {
-    /*-fx-background-color: #9AAD79;*/
-    /*-fx-background-color: #7BB446;*/
-    -fx-background-color: #97B446;
-    -fx-text-fill: -fx-selection-bar-text;
-    -fx-border-width: 0;
-    -fx-background: -fx-accent;
-}
-
-/* Selected shared marked row when table focused*/
-.table-view:focused .table-row-cell:filled:focused:selected .table-row-shared .table-row-marked {
-    -fx-text-fill: red;
-}

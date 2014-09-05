@@ -2,12 +2,14 @@ package com.noe.hypercube.ui;
 
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.CreateFolderRequest;
+import com.noe.hypercube.event.domain.DeleteRequest;
 import com.noe.hypercube.event.domain.DownloadRequest;
 import com.noe.hypercube.event.domain.UploadRequest;
 import com.noe.hypercube.ui.action.FileAction;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.dialog.FileProgressDialog;
 import com.noe.hypercube.ui.domain.IFile;
+import com.noe.hypercube.ui.domain.RemoteFile;
 import com.noe.hypercube.ui.elements.FileActionButton;
 import com.noe.hypercube.ui.util.ProgressAwareInputStream;
 import de.jensd.fx.fontawesome.AwesomeDude;
@@ -275,12 +277,20 @@ public class FileManager extends VBox implements Initializable {
 
     private void processRemoteFiles(final Collection<IFile> markedFiles, final FileAction action) {
         for (IFile markedFile : markedFiles) {
-            if (CLOUD_COPY == action) {
+            if(RemoteFile.class.isAssignableFrom(markedFile.getClass())) {
+                RemoteFile remoteFile = (RemoteFile) markedFile;
+                if (CLOUD_COPY == action) {
 
-            } else if (CLOUD_MOVE == action) {
+                } else if (CLOUD_MOVE == action) {
 
-            } else if (CLOUD_DELETE == action) {
-
+                } else if (CLOUD_DELETE == action) {
+                    final String remoteFileId = remoteFile.getId();
+                    if(remoteFileId != null) {
+                        EventBus.publish(new DeleteRequest(remoteFileId));
+                    } else {
+                        EventBus.publish(new DeleteRequest(remoteFile.getPath()));
+                    }
+                }
             }
         }
     }

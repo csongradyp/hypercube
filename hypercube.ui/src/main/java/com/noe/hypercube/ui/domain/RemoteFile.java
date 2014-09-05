@@ -5,9 +5,10 @@ import java.util.Date;
 
 public class RemoteFile extends File {
 
-    private boolean directory;
-    private long size;
-    private Date lastModified;
+    private final boolean directory;
+    private final long size;
+    private final Date lastModified;
+    private String id;
 
     public RemoteFile(final Path path, final long size, final boolean directory, final Date lastModified) {
         super(path);
@@ -33,6 +34,9 @@ public class RemoteFile extends File {
 
     @Override
     public long lastModified() {
+        if(lastModified == null) {
+            return 0L;
+        }
         return lastModified.getTime();
     }
 
@@ -41,4 +45,16 @@ public class RemoteFile extends File {
         return false;
     }
 
+    @Override
+    public boolean isShared() {
+        return sharedWith().size() > 1;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

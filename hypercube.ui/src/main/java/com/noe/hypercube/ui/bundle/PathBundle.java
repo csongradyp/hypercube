@@ -13,11 +13,11 @@ public class PathBundle {
 
     private PathBundle() {
         mappings = new HashMap<>();
-        mappings.put("test", new DualHashBidiMap(new HashMap<>()));
-        mappings.put("other", new DualHashBidiMap(new HashMap<>()));
+//        mappings.put("test", new DualHashBidiMap(new HashMap<>()));
+//        mappings.put("other", new DualHashBidiMap(new HashMap<>()));
         mappings.put("Dropbox", new DualHashBidiMap(new HashMap<>()));
-        mappings.get("test").put("C:\\Users", "/A/B/C");
-        mappings.get("test").put("C:\\Users", "/x");
+//        mappings.get("test").put("C:\\Users", "/A/B/C");
+//        mappings.get("test").put("C:\\Users", "/x");
         mappings.get("Dropbox").put("D:\\test", "/newtest");
     }
 
