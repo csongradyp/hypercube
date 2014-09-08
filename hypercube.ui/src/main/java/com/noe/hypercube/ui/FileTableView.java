@@ -4,10 +4,10 @@ import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.bundle.PathBundle;
-import com.noe.hypercube.ui.domain.IFile;
-import com.noe.hypercube.ui.domain.LocalFile;
-import com.noe.hypercube.ui.domain.RemoteFile;
-import com.noe.hypercube.ui.domain.StepBackFile;
+import com.noe.hypercube.ui.domain.file.IFile;
+import com.noe.hypercube.ui.domain.file.LocalFile;
+import com.noe.hypercube.ui.domain.file.RemoteFile;
+import com.noe.hypercube.ui.domain.file.StepBackFile;
 import com.noe.hypercube.ui.elements.FileListComparator;
 import com.noe.hypercube.ui.factory.FileCellFactory;
 import com.noe.hypercube.ui.factory.IconFactory;
@@ -109,6 +109,13 @@ public class FileTableView extends TableView<IFile> implements Initializable {
 
         dateColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
         dateColumn.setCellFactory(new FileCellFactory(TextAlignment.RIGHT, file -> file.lastModified() == 0L ? "" : DateUtil.format(file.lastModified())));
+
+        setOnDragDetected(event -> {
+            if (event.isSecondaryButtonDown()) {
+                startFullDrag();
+            }
+            event.consume();
+        });
     }
 
     private void setEmptyTablePlaceholder(ResourceBundle resources) {

@@ -28,6 +28,7 @@
 /* Selected row when table focused */
 .table-view:focused .table-row-cell:filled:focused:selected {
     -fx-background-color: steelblue;
+    -fx-selection-bar: steelblue;
     /*-fx-background-color:*/
         /*linear-gradient(steelblue 0%, lightsteelblue 20%, white 100%),*/
         /*linear-gradient(steelblue 0%, white 50%),*/

@@ -1,8 +1,8 @@
 package com.noe.hypercube.ui.factory;
 
 import com.noe.hypercube.ui.bundle.ImageBundle;
-import com.noe.hypercube.ui.domain.IFile;
-import com.noe.hypercube.ui.domain.LocalFile;
+import com.noe.hypercube.ui.domain.file.IFile;
+import com.noe.hypercube.ui.domain.file.LocalFile;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.embed.swing.SwingFXUtils;

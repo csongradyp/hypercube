@@ -1,6 +1,7 @@
 package com.noe.hypercube.ui.util;
 
 import com.noe.hypercube.ui.bundle.AccountBundle;
+import com.noe.hypercube.ui.domain.account.AccountInfo;
 import javafx.collections.ObservableList;
 import javafx.scene.Parent;
 
@@ -16,15 +17,27 @@ public final class StyleUtil {
     private StyleUtil() {
     }
 
-    public static void changeStyle(Parent parent, String storage) {
-        final ObservableList<String> accounts = AccountBundle.getAccounts();
-        for (String account : accounts) {
-            parent.getStylesheets().remove(STYLESHEETS_LOCATION + getStyleSheetFileName(account));
+    public static void changeStyle(final Parent view, final String storage) {
+        final ObservableList<AccountInfo> accounts = AccountBundle.getAccounts();
+        clearViewFromStyles(view, accounts);
+        final Path stylePath = Paths.get(STYLESHEETS_LOCATION, getStyleSheetFileName(storage));
+        final String styleURL = getFileURL(stylePath);
+        if(exists(stylePath) && !view.getStylesheets().contains(styleURL)) {
+            view.getStylesheets().add(styleURL);
         }
-        final String styleSheetFileName = getStyleSheetFileName(storage);
-        final Path stylePath = Paths.get(STYLESHEETS_LOCATION, styleSheetFileName);
-        if(stylePath.toFile().exists()) {
-            parent.getStylesheets().add("file:///" + stylePath.toFile().getAbsolutePath().replace("\\", "/"));
+    }
+
+    private static void clearViewFromStyles(Parent view, ObservableList<AccountInfo> accounts) {
+        for (AccountInfo account : accounts) {
+            view.getStylesheets().remove(STYLESHEETS_LOCATION + getStyleSheetFileName(account.getName()));
         }
+    }
+
+    private static boolean exists(Path stylePath) {
+        return stylePath.toFile().exists();
+    }
+
+    private static String getFileURL(Path stylePath) {
+        return "file:///" + stylePath.toFile().getAbsolutePath().replace("\\", "/");
     }
 }

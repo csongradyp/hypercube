@@ -2,14 +2,12 @@ package com.noe.hypercube.ui.elements;
 
 import com.noe.hypercube.ui.bundle.AccountBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
-import de.jensd.fx.fontawesome.AwesomeDude;
-import de.jensd.fx.fontawesome.AwesomeIcon;
+import com.noe.hypercube.ui.domain.account.AccountInfo;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import org.controlsfx.control.SegmentedButton;
@@ -23,30 +21,31 @@ public class AccountSegmentedButton extends SegmentedButton {
 
     public AccountSegmentedButton() {
         super();
-        final ObservableList<String> accounts = AccountBundle.getAccounts();
-        if(!accounts.isEmpty()) {
-            for (String account : accounts) {
-                final ToggleButton accountStorageButton = createAccountButton(account);
+        final ObservableList<AccountInfo> accounts = AccountBundle.getAccounts();
+        final ObservableList<ToggleButton> buttons = getButtons();
+        if (!accounts.isEmpty()) {
+            for (AccountInfo account : accounts) {
+                final ToggleButton accountStorageButton = createAccountButton(account.getName());
                 accountStorageButton.setMaxHeight(getHeight());
-                getButtons().add(accountStorageButton);
+                buttons.add(accountStorageButton);
             }
         }
-        final ToggleButton cloudButton = createCloudButton();
-        getButtons().add(0, cloudButton);
         addListenerForAccountChanges();
     }
 
     private void addListenerForAccountChanges() {
-        AccountBundle.getAccounts().addListener((ListChangeListener<String>) change -> {
+        AccountBundle.getAccounts().addListener((ListChangeListener<AccountInfo>) change -> {
             while (change.next()) {
-                final List<? extends String> addedAccount = change.getAddedSubList();
-                for (String account : addedAccount) {
-                    final ToggleButton accountStorageButton = createAccountButton(account);
-                    getButtons().add(accountStorageButton);
+                final List<? extends AccountInfo> addedAccount = change.getAddedSubList();
+                for (AccountInfo account : addedAccount) {
+                    if (account.isActive()) {
+                        final ToggleButton accountStorageButton = createAccountButton(account.getName());
+                        getButtons().add(accountStorageButton);
+                    }
                 }
-                final List<? extends String> removedAccount = change.getRemoved();
-                for (String account : removedAccount) {
-                    getButtons().removeIf(toggleButton -> toggleButton.getText().equals(account));
+                final List<? extends AccountInfo> removedAccount = change.getRemoved();
+                for (AccountInfo account : removedAccount) {
+                    getButtons().removeIf(toggleButton -> toggleButton.getText().equals(account.getName()));
                 }
             }
         });
@@ -58,13 +57,7 @@ public class AccountSegmentedButton extends SegmentedButton {
         return accountStorageButton;
     }
 
-    private ToggleButton createCloudButton() {
-        final ToggleButton accountStorageButton = createButton("Cloud");
-        AwesomeDude.setIcon(accountStorageButton, AwesomeIcon.CLOUD, ContentDisplay.GRAPHIC_ONLY);
-        return accountStorageButton;
-    }
-
-    private ToggleButton createButton(String account) {
+    protected ToggleButton createButton(String account) {
         final ToggleButton accountStorageButton = new ToggleButton();
         accountStorageButton.setMinHeight(25.0);
         accountStorageButton.setMaxHeight(25.0);
@@ -74,7 +67,7 @@ public class AccountSegmentedButton extends SegmentedButton {
         accountStorageButton.setOnAction(event -> {
             active.set(true);
             accountStorageButton.setSelected(true);
-            if(eventHandler != null) {
+            if (eventHandler != null) {
                 eventHandler.handle(event);
             }
         });

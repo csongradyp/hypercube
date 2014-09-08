@@ -1,6 +1,7 @@
 package com.noe.hypercube.ui.dialog;
 
 import com.noe.hypercube.ui.bundle.AccountBundle;
+import com.sun.javafx.collections.ObservableListWrapper;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.scene.control.Button;
@@ -22,7 +23,7 @@ public class FolderMappingChooser extends HBox {
 
     public FolderMappingChooser(final ValidationSupport validationSupport) {
         setSpacing(10.0d);
-        accountChoice = new ChoiceBox<>(AccountBundle.getAccounts());
+        accountChoice = new ChoiceBox<>(new ObservableListWrapper<>(AccountBundle.getAccountNames()));
         accountChoice.setMinWidth(100.0d);
         folderPath = new TextField();
         folderPath.prefWidthProperty().bind(widthProperty());

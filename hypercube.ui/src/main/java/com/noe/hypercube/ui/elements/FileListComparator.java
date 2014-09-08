@@ -1,6 +1,6 @@
 package com.noe.hypercube.ui.elements;
 
-import com.noe.hypercube.ui.domain.IFile;
+import com.noe.hypercube.ui.domain.file.IFile;
 
 import java.text.Collator;
 import java.util.Comparator;

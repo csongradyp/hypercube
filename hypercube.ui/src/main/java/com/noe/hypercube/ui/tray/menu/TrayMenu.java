@@ -82,7 +82,7 @@ public class TrayMenu extends AnchorPane implements Initializable {
     }
 
     private void createAccountButtons() {
-        final List<String> accountNames = AccountBundle.getAccounts();
+        final List<String> accountNames = AccountBundle.getAccountNames();
         for (String account : accountNames) {
             final ToggleButton accountButton = new ToggleButton(account);
             accountButton.setFocusTraversable(false);

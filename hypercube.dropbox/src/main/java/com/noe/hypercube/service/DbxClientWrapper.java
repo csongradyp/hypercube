@@ -17,7 +17,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.*;
 
-public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
+public class DbxClientWrapper extends Client<Dropbox,DbxFileEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DbxClientWrapper.class);
 
@@ -27,6 +27,15 @@ public class DbxClientWrapper implements IClient<Dropbox, DbxFileEntity> {
     public DbxClientWrapper(final DbxClient client) {
         this.client = client;
         cursor = null;
+    }
+
+    @Override
+    protected boolean testConnectionActive() {
+        try {
+            return client.getAccountInfo() != null;
+        } catch (DbxException e) {
+            return false;
+        }
     }
 
     @Override

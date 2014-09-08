@@ -12,7 +12,7 @@ import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.googledrive.domain.DriveFileEntity;
 import com.noe.hypercube.googledrive.domain.DriveServerEntry;
-import com.noe.hypercube.service.IClient;
+import com.noe.hypercube.service.Client;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
+public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DriveClient.class);
     private static final String EXCLUDE_FILE = "collaboration";
@@ -268,5 +268,10 @@ public class DriveClient implements IClient<GoogleDrive, DriveFileEntity> {
         content.setMimeType("text/plain");
         content.setParents(parentReferences);
         return content;
+    }
+
+    @Override
+    protected boolean testConnectionActive() {
+        return false;
     }
 }

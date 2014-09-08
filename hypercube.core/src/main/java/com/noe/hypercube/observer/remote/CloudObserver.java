@@ -79,4 +79,9 @@ public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     public IDownloader getDownloader() {
         return downloader;
     }
+
+    @Override
+    public Boolean isActive() {
+        return client.isConnected();
+    }
 }

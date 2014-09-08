@@ -7,6 +7,7 @@ import com.noe.hypercube.event.domain.*;
 import com.noe.hypercube.event.dto.RemoteQuotaInfo;
 import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
+import com.noe.hypercube.service.Client;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.downstream.Downloader;
@@ -21,14 +22,14 @@ import java.util.List;
 
 public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_TYPE extends MappingEntity> implements FileEventHandler {
 
-    private final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
+    private final Client<ACCOUNT_TYPE, ENTITY_TYPE> client;
     private final IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper;
     private final FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory;
 
     private final IDownloader downloader;
     private final IUploader<ACCOUNT_TYPE, ENTITY_TYPE> uploader;
 
-    public AccountBox(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory, IPersistenceController persistenceController) {
+    public AccountBox(Client<ACCOUNT_TYPE, ENTITY_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory, IPersistenceController persistenceController) {
         validate(client, mapper, entityFactory);
         this.entityFactory = entityFactory;
         this.client = client;
@@ -36,11 +37,37 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
 
         downloader = new Downloader(client, mapper, entityFactory, persistenceController);
         uploader = new QueueUploader<>(client, entityFactory, persistenceController);
+
+        if(client.isConnected()) {
+            subscribeForFileEvents();
+        }
+        manageSubscriptions();
+    }
+
+    public void manageSubscriptions() {
+        client.connectedProperty().addListener((observableValue, oldValue, connected) -> {
+            if (connected) {
+                subscribeForFileEvents();
+            } else {
+                unsubscribeFromFileEvents();
+            }
+        });
+    }
+
+    private void subscribeForFileEvents() {
         EventBus.subscribeToFileListRequest(this);
         EventBus.subscribeToUploadRequest(this);
         EventBus.subscribeToDownloadRequest(this);
         EventBus.subscribeToCreateFolderRequest(this);
         EventBus.subscribeToDeleteRequest(this);
+    }
+
+    private void unsubscribeFromFileEvents() {
+        EventBus.unsubscribeToFileListRequest(AccountBox.this);
+        EventBus.unsubscribeToUploadRequest(AccountBox.this);
+        EventBus.unsubscribeToDownloadRequest(AccountBox.this);
+        EventBus.unsubscribeToCreateFolderRequest(AccountBox.this);
+        EventBus.unsubscribeToDeleteRequest(AccountBox.this);
     }
 
     private void validate(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory) {

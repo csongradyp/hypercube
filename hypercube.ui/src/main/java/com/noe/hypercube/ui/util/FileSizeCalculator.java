@@ -1,7 +1,7 @@
 package com.noe.hypercube.ui.util;
 
 
-import com.noe.hypercube.ui.domain.IFile;
+import com.noe.hypercube.ui.domain.file.IFile;
 
 public final class FileSizeCalculator {
 

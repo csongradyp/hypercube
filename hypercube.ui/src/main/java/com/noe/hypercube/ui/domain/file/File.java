@@ -1,4 +1,4 @@
-package com.noe.hypercube.ui.domain;
+package com.noe.hypercube.ui.domain.file;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;

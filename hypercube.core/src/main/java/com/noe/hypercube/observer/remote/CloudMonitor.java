@@ -36,8 +36,10 @@ public class CloudMonitor {
         }
         executorService = Executors.newScheduledThreadPool(cloudObservers.size());
         for (CloudObserver observer : cloudObservers) {
-            submit(observer);
-            LOG.info("Cloud observer has been started for {}", observer.getAccountType().getName());
+            if(observer.isActive()) {
+                submit(observer);
+                LOG.info("Cloud observer has been started for {}", observer.getAccountType().getName());
+            }
         }
     }
 

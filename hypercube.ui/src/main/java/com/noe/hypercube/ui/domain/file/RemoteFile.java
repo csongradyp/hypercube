@@ -1,4 +1,4 @@
-package com.noe.hypercube.ui.domain;
+package com.noe.hypercube.ui.domain.file;
 
 import java.nio.file.Path;
 import java.util.Date;

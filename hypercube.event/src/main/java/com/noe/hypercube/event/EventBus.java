@@ -149,4 +149,28 @@ public final class EventBus {
     public static void unsubscribeToStorageEvent(EventHandler<StorageEvent> handler) {
         instance.storageEventBus.unsubscribe(handler);
     }
+
+    public static void unsubscribeToFileListResponse(EventHandler<FileEvent> handler) {
+        instance.fileListResponseBus.unsubscribe(handler);
+    }
+
+    public static void unsubscribeToFileListRequest(FileEventHandler handler) {
+        instance.fileListRequestBus.unsubscribe(handler);
+    }
+
+    public static void unsubscribeToUploadRequest(FileEventHandler handler) {
+        instance.uploadRequestBus.unsubscribe(handler);
+    }
+
+    public static void unsubscribeToDownloadRequest(FileEventHandler handler) {
+        instance.downloadRequestBus.unsubscribe(handler);
+    }
+
+    public static void unsubscribeToCreateFolderRequest(FileEventHandler handler) {
+        instance.createFolderRequestBus.unsubscribe(handler);
+    }
+
+    public static void unsubscribeToDeleteRequest(FileEventHandler handler) {
+        instance.deleteRequestBus.unsubscribe(handler);
+    }
 }

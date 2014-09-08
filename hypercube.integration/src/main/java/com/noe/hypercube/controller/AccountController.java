@@ -5,6 +5,7 @@ import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.domain.FileEntityFactory;
 import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
+import com.noe.hypercube.service.Client;
 import com.noe.hypercube.service.IClient;
 
 import javax.annotation.PostConstruct;
@@ -18,7 +19,7 @@ import java.util.Map;
 @Named
 public class AccountController implements IAccountController {
 
-    private Collection<IClient> clients;
+    private Collection<Client> clients;
     private Collection<IMapper> mappers;
     private Collection<FileEntityFactory> entityFactories;
     @Inject
@@ -30,7 +31,7 @@ public class AccountController implements IAccountController {
         accountBoxes = new LinkedHashMap<>();
     }
 
-    public AccountController(final List<IClient> clients, final List<IMapper> mappers, final List<FileEntityFactory> entityFactories) {
+    public AccountController(final List<Client> clients, final List<IMapper> mappers, final List<FileEntityFactory> entityFactories) {
         this();
         this.clients = clients;
         this.mappers = mappers;
@@ -39,7 +40,7 @@ public class AccountController implements IAccountController {
 
     @PostConstruct
     private void createAccountBoxes() {
-        Map<Class, IClient> clientMap = toMap(clients);
+        Map<Class, Client> clientMap = toMap(clients);
         Map<Class, IMapper> directoryMapperMap = toMap2(mappers);
         Map<Class, FileEntityFactory> entityFactoryMap = toMap3(entityFactories);
         persistenceController.createDaoMap();
@@ -47,7 +48,7 @@ public class AccountController implements IAccountController {
         // TODO validate collections - size, classes, etc
         for (IClient currentClient : clients) {
             Class accountType = currentClient.getAccountType();
-            IClient client = clientMap.get(accountType);
+            Client client = clientMap.get(accountType);
             IMapper mapper = directoryMapperMap.get(accountType);
             FileEntityFactory entityFactory = entityFactoryMap.get(accountType);
             accountBoxes.put(accountType, new AccountBox(client, mapper, entityFactory, persistenceController));
@@ -64,9 +65,9 @@ public class AccountController implements IAccountController {
         return accountBoxes.values();
     }
 
-    private Map<Class, IClient> toMap(Collection<IClient> clients) {
-        Map<Class, IClient> map = new LinkedHashMap<>();
-        for (IClient client : clients) {
+    private Map<Class, Client> toMap(Collection<Client> clients) {
+        Map<Class, Client> map = new LinkedHashMap<>();
+        for (Client client : clients) {
             map.put(client.getAccountType(), client);
         }
         return map;
@@ -88,7 +89,7 @@ public class AccountController implements IAccountController {
         return map;
     }
 
-    public void setClients(Collection<IClient> clients) {
+    public void setClients(Collection<Client> clients) {
         this.clients = clients;
     }
 

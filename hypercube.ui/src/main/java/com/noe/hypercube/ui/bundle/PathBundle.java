@@ -1,7 +1,7 @@
 package com.noe.hypercube.ui.bundle;
 
 
-import com.noe.hypercube.ui.domain.LocalFile;
+import com.noe.hypercube.ui.domain.file.LocalFile;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 import java.util.*;

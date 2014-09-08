@@ -1,6 +1,6 @@
 package com.noe.hypercube.ui.factory;
 
-import com.noe.hypercube.ui.domain.IFile;
+import com.noe.hypercube.ui.domain.file.IFile;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.TableCell;
@@ -35,19 +35,26 @@ public class FileCellFactory implements Callback<TableColumn<IFile, IFile>, Tabl
             public void updateItem(IFile file, boolean empty) {
                 super.updateItem(file, empty);
                 if (file != null && !empty) {
-                    file.getMarkedProperty().addListener((observable, oldValue, newValue) -> updateItem(file, false));
+//                    file.getMarkedProperty().addListener((observable, oldValue, newValue) -> updateItem(file, false));
+                    file.getMarkedProperty().addListener((observableValue, oldValue, newValue) -> {
+                        if (newValue) {
+                            getStyleClass().add("table-row-marked");
+                        } else {
+                            getStyleClass().remove("table-row-marked");
+                        }
+                    });
                     if (cellText != null) {
                         setText(cellText.getCellText(file));
                     }
                     if (cellGraphic != null) {
                         setGraphic(cellGraphic.getCellGraphic(file));
                     }
-                    if (file.isMarked()) {
-                        getStyleClass().add("table-row-marked");
-                    } else if (file.isShared()) {
+                    getStyleClass().removeAll("table-row-shared");
+//                    if (file.isMarked()) {
+//                        getStyleClass().add("table-row-marked");
+//                    }
+                    if (file.isShared()) {
                         getStyleClass().add("table-row-shared");
-                    } else {
-                        getStyleClass().removeAll("table-row-marked", "table-row-shared");
                     }
                     setTextAlignment(alignment);
                     switch (alignment) {
@@ -67,6 +74,15 @@ public class FileCellFactory implements Callback<TableColumn<IFile, IFile>, Tabl
                 }
             }
         };
+
+        tableCell.setOnMouseDragEntered(event -> {
+            final IFile item = tableCell.getItem();
+            if(item != null && event.getGestureSource() == tableCell.getTableView()) {
+                item.mark();
+            }
+            event.consume();
+        });
+
         return tableCell;
     }
 
