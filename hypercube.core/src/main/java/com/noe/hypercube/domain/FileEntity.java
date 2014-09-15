@@ -6,7 +6,7 @@ public interface FileEntity extends IEntity<String>, Comparable<FileEntity> {
 
     String getLocalPath();
 
-    void setLocalPath(String localPath);
+    String getRemotePath();
 
     String getRevision();
 
@@ -16,4 +16,5 @@ public interface FileEntity extends IEntity<String>, Comparable<FileEntity> {
 
     void setLastModified(Date lastModified);
 
+    String getAccountName();
 }

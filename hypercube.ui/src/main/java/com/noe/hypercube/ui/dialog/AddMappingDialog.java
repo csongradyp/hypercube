@@ -1,5 +1,7 @@
 package com.noe.hypercube.ui.dialog;
 
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.domain.MappingRequest;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
@@ -119,7 +121,7 @@ public class AddMappingDialog extends Dialog implements Initializable {
             public void handle(ActionEvent event) {
                 Dialog dialog = (Dialog) event.getSource();
                 if (validationSupport.getValidationResult().getWarnings().isEmpty()) {
-                    // TODO send mapping event
+                    EventBus.publish(new MappingRequest());
                     dialog.hide();
                 } else {
                     validationSupport.redecorate();

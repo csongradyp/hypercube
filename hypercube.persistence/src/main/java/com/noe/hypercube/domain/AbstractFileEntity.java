@@ -11,6 +11,7 @@ public abstract class AbstractFileEntity implements FileEntity {
 
     @Id
     private String localPath;
+    private String remotePath;
     private String revision;
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModifiedDate;
@@ -18,24 +19,20 @@ public abstract class AbstractFileEntity implements FileEntity {
     public AbstractFileEntity() {
     }
 
-    public AbstractFileEntity(String localPath, String revision) {
-        this(localPath, revision, new Date());
+    protected AbstractFileEntity(String localPath, String remotePath, String revision, Date lastModifiedDate) {
+        this.localPath = localPath;
+        this.remotePath = remotePath;
+        this.revision = revision;
+        this.lastModifiedDate = lastModifiedDate;
     }
 
-    public AbstractFileEntity(String localPath, String revision, Date lastModified) {
-        this.localPath = localPath;
-        this.revision = revision;
-        this.lastModifiedDate = lastModified;
+    protected AbstractFileEntity(String localPath, String remotePath, String revision) {
+        this(localPath, remotePath, revision, new Date());
     }
 
     @Override
     public String getLocalPath() {
         return localPath;
-    }
-
-    @Override
-    public void setLocalPath(String dbxPath) {
-        this.localPath = dbxPath;
     }
 
     @Override
@@ -61,6 +58,11 @@ public abstract class AbstractFileEntity implements FileEntity {
     @Override
     public String getId() {
         return localPath;
+    }
+
+    @Override
+    public String getRemotePath() {
+        return remotePath;
     }
 
     @Override

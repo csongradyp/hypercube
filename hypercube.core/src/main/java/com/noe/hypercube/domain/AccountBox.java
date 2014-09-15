@@ -9,6 +9,7 @@ import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.Client;
 import com.noe.hypercube.service.IClient;
+import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.downstream.Downloader;
 import com.noe.hypercube.synchronization.downstream.IDownloader;
@@ -38,7 +39,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
         downloader = new Downloader(client, mapper, entityFactory, persistenceController);
         uploader = new QueueUploader<>(client, entityFactory, persistenceController);
 
-        if(client.isConnected()) {
+        if (client.isConnected()) {
             subscribeForFileEvents();
         }
         manageSubscriptions();
@@ -101,7 +102,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     @Override
     @Handler(rejectSubtypes = true)
     public void onFileListRequest(final FileListRequest event) {
-        if(event.getAccount().equals(client.getAccountName()) || event.isCloud()) {
+        if (event.getAccount().equals(client.getAccountName()) || event.isCloud()) {
             try {
                 final List<ServerEntry> fileList;
                 final Path remoteFolder = event.getFolder();
@@ -121,7 +122,8 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     @Handler(rejectSubtypes = true)
     public void onUploadRequest(final UploadRequest event) {
         try {
-            uploader.uploadNew(event.getLocalFile().toFile(), event.getRemoteFolder());
+            // TODO uploadrequest type??? always ADDED?
+            uploader.uploadNew(new UploadEntity(event.getLocalFile().toFile(), event.getRemoteFolder(), Action.ADDED));
         } catch (SynchronizationException e) {
             //TODO send fail message
         }
@@ -154,7 +156,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     @Handler(rejectSubtypes = true)
     public void onDeleteRequest(final DeleteRequest event) {
         try {
-            if(event.getId() != null) {
+            if (event.getId() != null) {
                 client.delete(event.getId());
             } else {
                 client.delete(event.getPath());
@@ -167,5 +169,17 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     private RemoteQuotaInfo getRemoteQuotaInfo() throws SynchronizationException {
         final AccountQuota quota = client.getQuota();
         return new RemoteQuotaInfo(quota.getTotalSpace(), quota.getUsedSpace());
+    }
+
+    public void stopUploader() {
+        uploader.stop();
+    }
+
+    public void restartUploader() {
+        uploader.restart();
+    }
+
+    public Class<ENTITY_TYPE> getEntityType() {
+        return client.getEntityType();
     }
 }

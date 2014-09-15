@@ -1,5 +1,7 @@
 package com.noe.hypercube.synchronization;
 
+import com.noe.hypercube.controller.IAccountController;
+import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.observer.local.LocalFileMonitor;
 import com.noe.hypercube.observer.local.LocalFileObserver;
 import com.noe.hypercube.observer.local.LocalObserverFactory;
@@ -29,6 +31,8 @@ public class Synchronizer {
     private LocalObserverFactory localObserverFactory;
     @Inject
     private CloudObserverFactory cloudObserverFactory;
+    @Inject
+    private IAccountController accountController;
 
     private ExecutorService executorService;
 
@@ -57,14 +61,16 @@ public class Synchronizer {
     }
 
     private void submitDownloaders() {
-        for (CloudObserver observer : cloudObservers) {
-            executorService.submit(observer.getDownloader());
+        final Collection<AccountBox> accountBoxes = accountController.getAll();
+        for (AccountBox accountBox : accountBoxes) {
+            executorService.submit(accountBox.getDownloader());
         }
     }
 
     private void submitUploaders() {
-        for (LocalFileObserver observer : localObservers) {
-            executorService.submit(observer.getUploader());
+        final Collection<AccountBox> accountBoxes = accountController.getAll();
+        for (AccountBox accountBox : accountBoxes) {
+            executorService.submit(accountBox.getUploader());
         }
     }
 

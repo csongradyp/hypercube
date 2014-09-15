@@ -3,12 +3,11 @@ package com.noe.hypercube.service;
 import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
+import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import javafx.beans.property.SimpleBooleanProperty;
 
-import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -29,12 +28,15 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
     Class<ACCOUNT_TYPE> getAccountType();
 
     /**
-     * Checks if the file exists on the server for the given server specific path.
-     * @return {@code true} if the file exists on the server in the given path.
+     * Checks whether the file exists on the server or not.
+     * @return {@code true} if the file exists on the server in the given path in the {@link com.noe.hypercube.domain.ServerEntry} instance.
      */
-    boolean exist(final File fileToUpload, final Path remotePath);
-
-    boolean exist(final ServerEntry serverEntry);
+    boolean exist(final ServerEntry serverEntry) throws SynchronizationException;
+    /**
+     * Checks whether the file exists on the server or not.
+     * @return {@code true} if the file exists on the server in the given path in the {@link com.noe.hypercube.domain.UploadEntity} instance.
+     */
+    boolean exist(final UploadEntity uploadEntity) throws SynchronizationException;
 
     Collection<ServerEntry> getChanges() throws SynchronizationException;
 
@@ -42,15 +44,13 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
 
     ServerEntry download(String serverPath, FileOutputStream outputStream, Object... extraArgs) throws SynchronizationException;
 
-//    void delete(final File fileToUpload, final Path remotePath) throws SynchronizationException;
-
     void delete(final Path remoteFilePath) throws SynchronizationException;
 
     void delete(final String remoteFileId) throws SynchronizationException;
 
-    ServerEntry uploadAsNew(final Path remotePath, final File fileToUpload, final InputStream inputStream) throws SynchronizationException;
+    ServerEntry uploadAsNew(final UploadEntity uploadEntity) throws SynchronizationException;
 
-    ServerEntry uploadAsUpdated(final Path remotePath, final File fileToUpload, final InputStream inputStream) throws SynchronizationException;
+    ServerEntry uploadAsUpdated(final UploadEntity uploadEntity) throws SynchronizationException;
 
     List<ServerEntry> getFileList(final Path remoteFolder) throws SynchronizationException;
 

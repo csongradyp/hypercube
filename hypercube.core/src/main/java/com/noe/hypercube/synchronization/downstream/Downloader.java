@@ -74,7 +74,7 @@ public class Downloader implements IDownloader {
     @Override
     public void run() {
         while (!stop.get()) {
-            ServerEntry entry = getNext();
+            final ServerEntry entry = getNext();
             try {
                 if (client.exist(entry)) {
                     downloadFromServer(entry);
@@ -100,7 +100,7 @@ public class Downloader implements IDownloader {
 
     private void logQueueEmpty() {
         if (downloadQ.isEmpty()) {
-            LOG.info(client.getAccountName() + " download queue is empty. Waiting for changes from server");
+            LOG.info("{} download queue is empty. Waiting for changes from server", client.getAccountName());
         }
     }
 
@@ -128,11 +128,31 @@ public class Downloader implements IDownloader {
         return !dbEntry.getRevision().equals(entry.getRevision());
     }
 
-    private void downloadFromServer(ServerEntry entry) throws SynchronizationException {
+    private File createNewLocalFileReference(final ServerEntry entry, final Path localPath) {
+        File newLocalFile = new File(localPath.toString(), entry.getPath().getFileName().toString());
+        if (isConflicted(newLocalFile)) {
+            LOG.warn("{} Conflict {}", client.getAccountName(), newLocalFile);
+            final String conflictedFileName = String.format("%s (%s)", entry.getPath().getFileName().toString(), client.getAccountName());
+            LOG.info("{} already exists! File name updated to: {}", newLocalFile.toPath(), conflictedFileName);
+            newLocalFile = new File(localPath.toString(), conflictedFileName);
+        }
+        return newLocalFile;
+    }
+
+
+    private boolean isConflicted(File newLocalFile) {
+        return newLocalFile.exists() && isNotMapped(newLocalFile);
+    }
+
+    private boolean isNotMapped(File newLocalFile) {
+        return persistenceController.get(newLocalFile.toPath().toString(), client.getEntityType()) == null;
+    }
+
+    private void downloadFromServer(ServerEntry entry) {
         if (entry.isFile()) {
             final List<Path> localPaths = directoryMapper.getLocals(entry.getPath());
             for (Path localPath : localPaths) {
-                File newLocalFile = new File(localPath.toString(), entry.getPath().getFileName().toString());
+                final File newLocalFile = createNewLocalFileReference(entry, localPath);
                 final Action action = getDeltaAction(entry, newLocalFile);
                 final String accountName = client.getAccountName();
                 if (ADDED == action) {
@@ -153,11 +173,9 @@ public class Downloader implements IDownloader {
         }
     }
 
-
-    private void download(ServerEntry entry, File newLocalFile) throws SynchronizationException {
+    private void download(final ServerEntry entry, final File newLocalFile) {
         try (FileOutputStream outputStream = FileUtils.openOutputStream(newLocalFile)) {
             client.download(entry, outputStream);
-            setLocalFileLastModifiedDate(entry, newLocalFile);
             persist(entry, newLocalFile.toPath());
             LOG.info("{} Successfully downloaded {}", client.getAccountName(), newLocalFile.toPath());
         } catch (FileNotFoundException e) {
@@ -167,8 +185,8 @@ public class Downloader implements IDownloader {
         } catch (SynchronizationException e) {
             e.setRelatedFile(newLocalFile.toPath());
             LOG.error(e.getMessage(), e);
-            throw e;
         }
+        setLocalFileLastModifiedDate(entry, newLocalFile);
     }
 
     private void createDirsFor(File newLocalFile) {
@@ -189,7 +207,7 @@ public class Downloader implements IDownloader {
     }
 
     private void persist(ServerEntry entry, Path localPath) {
-        FileEntity fileEntity = entityFactory.createFileEntity(localPath.toString(), entry.getRevision(), entry.lastModified());
+        FileEntity fileEntity = entityFactory.createFileEntity(localPath.toString(), entry.getPath().toString(), entry.getRevision(), entry.lastModified());
         persistenceController.save(fileEntity);
     }
 

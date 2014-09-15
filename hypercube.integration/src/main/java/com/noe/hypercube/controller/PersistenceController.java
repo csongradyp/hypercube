@@ -8,10 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 @Named
 public class PersistenceController implements IPersistenceController {
@@ -85,7 +82,7 @@ public class PersistenceController implements IPersistenceController {
         Collection<MappingEntity> allMappings = new LinkedList<>();
         Collection<Dao> daos = daoMap.values();
         for (Dao dao : daos) {
-            if (MappingEntity.class.isAssignableFrom(dao.getEntityClass())) {
+            if (isMappingDao(dao)) {
                 allMappings.addAll(dao.getAll());
             }
         }
@@ -104,5 +101,61 @@ public class PersistenceController implements IPersistenceController {
         Class<? extends MappingEntity> entityClass = mapping.getClass();
         Dao dao = daoMap.get(entityClass);
         dao.remove(mapping);
+    }
+
+    @Override
+    public Set<Class<IEntity>> getEntitiesMapping(String folder) {
+        Set<Class<IEntity>> results = new HashSet<>();
+        for (Dao<String, IEntity> dao : daos) {
+            final IEntity entity = dao.findById(folder);
+            if(entity != null) {
+                results.add(dao.getEntityClass());
+            }
+        }
+        return results;
+    }
+
+    @Override
+    public Collection<String> getLocalMappings() {
+        Set<String> mappedLocalFolders = new HashSet<>();
+        Collection<Dao> daos = daoMap.values();
+        for (Dao dao : daos) {
+            if(isMappingDao(dao)) {
+                final Collection<MappingEntity> daoMappings = dao.getAll();
+                for (MappingEntity mapping : daoMappings) {
+                    mappedLocalFolders.add(mapping.getLocalDir());
+                }
+            }
+        }
+        return mappedLocalFolders;
+    }
+
+    private boolean isMappingDao(Dao dao) {
+        return MappingEntity.class.isAssignableFrom(dao.getEntityClass());
+    }
+
+    @Override
+    public Map<String, List<FileEntity>> getMappings(final String folder){
+        final Map<String, List<FileEntity>> fileEntities = new HashMap<>();
+        final Collection<Dao> daos = daoMap.values();
+        for (Dao dao : daos) {
+            if(isFileEntityDao(dao)) {
+                final Collection<? extends FileEntity> mappings = dao.getAll();
+                for (FileEntity fileEntity : mappings) {
+                    final String localPath = fileEntity.getLocalPath();
+                    if(localPath.startsWith(folder)) {
+                        if(!fileEntities.containsKey(localPath)) {
+                            fileEntities.put(localPath, new ArrayList<>());
+                        }
+                        fileEntities.get(localPath).add(fileEntity);
+                    }
+                }
+            }
+        }
+        return fileEntities;
+    }
+
+    private boolean isFileEntityDao(Dao dao) {
+        return FileEntity.class.isAssignableFrom(dao.getEntityClass());
     }
 }

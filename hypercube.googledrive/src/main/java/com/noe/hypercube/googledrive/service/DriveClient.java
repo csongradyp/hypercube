@@ -10,6 +10,7 @@ import com.google.api.services.drive.model.ParentReference;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.ServerEntry;
+import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.googledrive.domain.DriveFileEntity;
 import com.noe.hypercube.googledrive.domain.DriveServerEntry;
 import com.noe.hypercube.service.Client;
@@ -50,7 +51,7 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
 
     @Override
     public String getAccountName() {
-        return "Google Drive";
+        return GoogleDrive.name;
     }
 
     @Override
@@ -64,8 +65,8 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
     }
 
     @Override
-    public boolean exist(final File fileToUpload, final Path remotePath) {
-        DriveFileEntity fileEntity = (DriveFileEntity) persistenceController.get(fileToUpload.getPath(), DriveFileEntity.class);
+    public boolean exist(final UploadEntity uploadEntity) {
+        DriveFileEntity fileEntity = (DriveFileEntity) persistenceController.get(uploadEntity.getFile().toPath().toString(), DriveFileEntity.class);
         return isExisting(fileEntity.getFileId());
     }
 
@@ -182,10 +183,11 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
     }
 
     @Override
-    public ServerEntry uploadAsNew(final Path remotePath, final File fileToUpload, final InputStream inputStream) throws SynchronizationException {
-        List<ParentReference> parentReferences = getParentDirectories(remotePath);
-        com.google.api.services.drive.model.File content = getContent(fileToUpload, parentReferences);
-        FileContent mediaContent = new FileContent("text/plain", fileToUpload);
+    public ServerEntry uploadAsNew(final UploadEntity uploadEntity) throws SynchronizationException {
+        final File fileToUpload = uploadEntity.getFile();
+        final List<ParentReference> parentReferences = getParentDirectories(uploadEntity.getRemoteFolder());
+        final com.google.api.services.drive.model.File content = getContent(uploadEntity.getFile(), parentReferences);
+        final FileContent mediaContent = new FileContent("text/plain", fileToUpload);
         com.google.api.services.drive.model.File driveFile;
         try {
             driveFile = client.files().insert(content, mediaContent).execute();
@@ -194,7 +196,7 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
         }
 
         Date lastModified = new Date(driveFile.getModifiedDate().getValue());
-        return new DriveServerEntry(remotePath.toString (), driveFile.getHeadRevisionId(), lastModified, false);
+        return new DriveServerEntry(uploadEntity.getRemoteFilePath().toString(), driveFile.getHeadRevisionId(), lastModified, false);
     }
 
     private List<ParentReference> getParentDirectories(final Path remotePath) throws SynchronizationException {
@@ -208,20 +210,21 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
     }
 
     @Override
-    public ServerEntry uploadAsUpdated(Path remotePath, File fileToUpload, InputStream inputStream) throws SynchronizationException {
-        String driveFileId = getFileId(fileToUpload);
-        com.google.api.services.drive.model.File driveFile = getDriveFile(driveFileId);
-        FileContent mediaContent = new FileContent(driveFile.getMimeType(), fileToUpload);
+    public ServerEntry uploadAsUpdated(UploadEntity uploadEntity) throws SynchronizationException {
+        final File fileToUpload = uploadEntity.getFile();
+        final String driveFileId = getFileId(fileToUpload);
+        final com.google.api.services.drive.model.File driveFile = getDriveFile(driveFileId);
+        final FileContent mediaContent = new FileContent(driveFile.getMimeType(), fileToUpload);
 
         com.google.api.services.drive.model.File updatedFile;
         try {
             updatedFile = client.files().update(driveFileId, driveFile, mediaContent).execute();
         } catch (IOException e) {
-            throw new SynchronizationException("Drive remoteFile update failed", e);
+            throw new SynchronizationException("Drive remote file update failed", e);
         }
 
         Date lastModified = new Date(updatedFile.getModifiedDate().getValue());
-        return new DriveServerEntry(remotePath.toString(), updatedFile.getHeadRevisionId(), lastModified, false);
+        return new DriveServerEntry(uploadEntity.getRemoteFilePath().toString(), updatedFile.getHeadRevisionId(), lastModified, false);
     }
 
     @Override

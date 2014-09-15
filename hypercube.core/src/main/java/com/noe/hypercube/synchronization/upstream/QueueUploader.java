@@ -5,9 +5,6 @@ import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.FileEntityFactory;
 import com.noe.hypercube.domain.UploadEntity;
-import com.noe.hypercube.event.EventBus;
-import com.noe.hypercube.event.domain.FileEvent;
-import com.noe.hypercube.event.domain.type.FileActionType;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.Action;
@@ -20,7 +17,9 @@ import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import static com.noe.hypercube.synchronization.Action.*;
+import static com.noe.hypercube.synchronization.Action.ADDED;
+import static com.noe.hypercube.synchronization.Action.CHANGED;
+import static com.noe.hypercube.synchronization.Action.REMOVED;
 
 public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> extends Uploader<ACCOUNT_TYPE, ENTITY_TYPE> {
 
@@ -38,19 +37,16 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     public void run() {
         while (!stop) {
             final UploadEntity uploadEntity = uploadQ.poll();
-            final Path remotePath = uploadEntity.getRemotePath();
-            final File file = uploadEntity.getFile();
             try {
                 final Action action = uploadEntity.getAction();
                 if (ADDED == action) {
-                    uploadNew(file, remotePath);
+                    super.uploadNew(uploadEntity);
                 } else if (CHANGED == action) {
-                    uploadUpdated(file, remotePath);
+                    super.uploadUpdated(uploadEntity);
                 } else if (REMOVED == action) {
-                    delete(file, remotePath);
+                    super.delete(uploadEntity);
                 }
             } catch (SynchronizationException e) {
-                EventBus.publishUploadFinished(new FileEvent(client.getAccountName(), file.toPath(), remotePath, FileActionType.FAIL));
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -66,21 +62,16 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     }
 
     @Override
-    public void uploadNew(final File file, final Path remotePath) throws SynchronizationException {
-        submit(file, remotePath, ADDED);
+    public void uploadUpdated(final UploadEntity uploadEntity) throws SynchronizationException {
+        uploadQ.add(uploadEntity);
     }
 
     @Override
-    public void uploadUpdated(final File file, final Path remotePath) throws SynchronizationException {
-        submit(file, remotePath, CHANGED);
+    public void uploadNew(final UploadEntity uploadEntity) throws SynchronizationException {
+        uploadQ.add(uploadEntity);
     }
 
-    @Override
-    public void delete(final File file, final Path remotePath) throws SynchronizationException {
-        submit(file, remotePath, REMOVED);
-    }
-
-    public void submit(final File file, final Path remotePath, final Action action) throws SynchronizationException {
-        uploadQ.add(new UploadEntity(file, remotePath, action));
+    public void submit(final File file, final Path remotePath, final String origin) throws SynchronizationException {
+        uploadQ.add(new UploadEntity(file, remotePath, origin));
     }
 }

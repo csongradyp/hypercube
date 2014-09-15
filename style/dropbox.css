@@ -10,6 +10,10 @@
     -fx-table-header-border-color: transparent;
 }
 
+.table-view .table-row-cell {
+    -fx-border-width: 1;
+}
+
 .table-view .column-header-background {
     -fx-background-color: transparent;
 }
@@ -29,20 +33,11 @@
 .table-view:focused .table-row-cell:filled:focused:selected {
     -fx-background-color: -fx-focus-color;
     -fx-border-color: #000000;
-}
-
-.text-field {
-    -fx-font-size: 12;
-    -fx-font-family: "Franklin Gothic Condensed Demi Bold";
-}
-
-.table-row-cell:filled {
     -fx-border-width: 1;
 }
 
 .table-row-cell:odd:filled {
     -fx-background-color: white;
-    -fx-border-width: 1;
 }
 
 .table-row-cell:odd:filled:hover {

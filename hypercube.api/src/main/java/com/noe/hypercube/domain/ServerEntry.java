@@ -17,6 +17,10 @@ public interface ServerEntry {
 
     Date lastModified();
 
+    /**
+     * Returns the remote file id if there is any, otherwise it returns the remote file's revision number. {@link this.getRevision}
+     * @return main identifier of the file.
+     */
     String getId();
 
     String getAccount();
