@@ -10,6 +10,11 @@ public abstract class Client<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends F
 
     private SimpleBooleanProperty connected = new SimpleBooleanProperty(false);
 
+    @PostConstruct
+    public void initState() {
+        connected.set(testConnectionActive());
+    }
+
     @Override
     public Boolean isConnected() {
         return connected.get();
@@ -22,11 +27,6 @@ public abstract class Client<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends F
     @Override
     public SimpleBooleanProperty connectedProperty() {
         return connected;
-    }
-
-    @PostConstruct
-    public void initState() {
-        connected.set(testConnectionActive());
     }
 
     protected abstract boolean testConnectionActive();

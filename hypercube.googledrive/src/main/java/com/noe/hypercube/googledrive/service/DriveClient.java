@@ -1,15 +1,18 @@
 package com.noe.hypercube.googledrive.service;
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.ChangeList;
+import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.ServerEntry;
+import com.noe.hypercube.googledrive.Authentication;
 import com.noe.hypercube.googledrive.domain.DriveFileEntity;
 import com.noe.hypercube.googledrive.domain.DriveServerEntry;
 import com.noe.hypercube.service.Client;
@@ -32,25 +35,40 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
+public class DriveClient extends Client<GoogleDrive, DriveFileEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DriveClient.class);
     private static final String EXCLUDE_FILE = "collaboration";
 
     @Inject
     private IPersistenceController persistenceController;
-    @Inject
-    private DriveDirectoryUtil dirUtil;
+    private final DriveDirectoryUtil dirUtil;
 
     private final Drive client;
 
-    public DriveClient(Drive client) {
-        this.client = client;
+    public DriveClient() {
+        this.client = Authentication.getDriveService("hypercube.app@gmail.com");
+        dirUtil = new DriveDirectoryUtil(client);
+    }
+
+    @Override
+    protected boolean testConnectionActive() {
+        try {
+            final FileList list = client.files().list().execute();
+            return list != null;
+        } catch (GoogleJsonResponseException e) {
+            if(e.getStatusCode() == 401) {
+                LOG.error("Google Drive error: ", e);
+            }
+            return false;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     @Override
     public String getAccountName() {
-        return "Google Drive";
+        return GoogleDrive.name;
     }
 
     @Override
@@ -89,30 +107,26 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
     @Override
     public Collection<ServerEntry> getChanges() throws SynchronizationException {
         try {
-            return getFileList();
+            final List<ServerEntry> result = new ArrayList<>();
+            final List<Change> remotes = new ArrayList<>();
+            final Drive.Changes.List request = client.changes().list();
+            do {
+                final ChangeList files = request.execute();
+                remotes.addAll(files.getItems());
+                for (Change change : remotes) {
+                    com.google.api.services.drive.model.File remoteFile = change.getFile();
+                    if (!remoteFile.getTitle().equals(EXCLUDE_FILE)) {
+                        DriveServerEntry serverEntry = new DriveServerEntry(remoteFile, dirUtil.getPath(remoteFile), remoteFile.getHeadRevisionId(), new Date(remoteFile.getModifiedDate().getValue()));
+                        result.add(serverEntry);
+                    }
+                }
+                request.setPageToken(files.getNextPageToken());
+            } while (request.getPageToken() != null && !request.getPageToken().isEmpty());
+
+            return result;
         } catch (IOException e) {
             throw new SynchronizationException("An error while getting file list from Google Drive Server ", e);
         }
-    }
-
-    public List<ServerEntry> getFileList() throws IOException {
-        List<ServerEntry> result = new ArrayList<>();
-        List<Change> remotes = new ArrayList<>();
-        Drive.Changes.List request = client.changes().list();
-        do {
-            ChangeList files = request.execute();
-            remotes.addAll(files.getItems());
-            for (Change change : remotes) {
-                com.google.api.services.drive.model.File remoteFile = change.getFile();
-                if (!remoteFile.getTitle().equals(EXCLUDE_FILE)) {
-                    DriveServerEntry serverEntry = new DriveServerEntry(remoteFile, dirUtil.getPath(remoteFile), remoteFile.getHeadRevisionId(), new Date(remoteFile.getModifiedDate().getValue()));
-                    result.add(serverEntry);
-                }
-            }
-            request.setPageToken(files.getNextPageToken());
-        } while (request.getPageToken() != null && !request.getPageToken().isEmpty());
-
-        return result;
     }
 
     @Override
@@ -194,7 +208,7 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
         }
 
         Date lastModified = new Date(driveFile.getModifiedDate().getValue());
-        return new DriveServerEntry(remotePath.toString (), driveFile.getHeadRevisionId(), lastModified, false);
+        return new DriveServerEntry(remotePath.toString(), driveFile.getHeadRevisionId(), lastModified, false);
     }
 
     private List<ParentReference> getParentDirectories(final Path remotePath) throws SynchronizationException {
@@ -226,14 +240,42 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
 
     @Override
     public List<ServerEntry> getFileList(Path remoteFolder) throws SynchronizationException {
-        // TODO implement
-        return null;
+        final List<ServerEntry> result = new ArrayList<>();
+        final List<com.google.api.services.drive.model.File> remotes = new ArrayList<>();
+        final FileList fileList;
+        try {
+            fileList = client.files().list().execute();
+            remotes.addAll(fileList.getItems());
+            for (com.google.api.services.drive.model.File remoteFile : remotes) {
+                if (!remoteFile.getTitle().equals(EXCLUDE_FILE)) {
+                    DriveServerEntry serverEntry = new DriveServerEntry(remoteFile, dirUtil.getPath(remoteFile), remoteFile.getHeadRevisionId(), new Date(remoteFile.getModifiedDate().getValue()));
+                    result.add(serverEntry);
+                }
+            }
+        } catch (IOException e) {
+            throw new SynchronizationException(String.format("%s: %s", GoogleDrive.name, e.getMessage()));
+        }
+        return result;
     }
 
     @Override
     public List<ServerEntry> getRootFileList() throws SynchronizationException {
-        // TODO implement
-        return null;
+        final List<ServerEntry> result = new ArrayList<>();
+        final List<com.google.api.services.drive.model.File> remotes = new ArrayList<>();
+        final FileList fileList;
+        try {
+            fileList = client.files().list().execute();
+            remotes.addAll(fileList.getItems());
+            for (com.google.api.services.drive.model.File remoteFile : remotes) {
+                if (!remoteFile.getTitle().equals(EXCLUDE_FILE)) {
+                    DriveServerEntry serverEntry = new DriveServerEntry(remoteFile, dirUtil.getPath(remoteFile), remoteFile.getHeadRevisionId(), new Date(remoteFile.getModifiedDate().getValue()));
+                    result.add(serverEntry);
+                }
+            }
+        } catch (IOException e) {
+            throw new SynchronizationException(String.format("%s: %s", GoogleDrive.name, e.getMessage()));
+        }
+        return result;
     }
 
     @Override
@@ -270,8 +312,4 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
         return content;
     }
 
-    @Override
-    protected boolean testConnectionActive() {
-        return false;
-    }
 }

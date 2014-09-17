@@ -11,13 +11,9 @@ public class DbxMapping extends Mapping {
     public DbxMapping() {
     }
 
-    public DbxMapping(String localDir, String remoteDir) {
+    public DbxMapping(final String localDir, final String remoteDir) {
         super(localDir, remoteDir);
     }
-
-//    public DbxMapping(String localDir, String remoteDir, FileFilter fileFilters) {
-//        super(localDir, remoteDir, fileFilters);
-//    }
 
     @Override
     public Class<? extends Account> getAccountType() {
