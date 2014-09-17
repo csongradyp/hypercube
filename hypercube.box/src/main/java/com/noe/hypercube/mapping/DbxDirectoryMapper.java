@@ -1,19 +1,18 @@
 package com.noe.hypercube.mapping;
 
-import com.noe.hypercube.domain.DbxMapping;
-import com.noe.hypercube.mapping.DirectoryMapper;
-import com.noe.hypercube.service.Dropbox;
+import com.noe.hypercube.domain.BoxMapping;
+import com.noe.hypercube.service.Box;
 
-public class DbxDirectoryMapper extends DirectoryMapper<Dropbox, DbxMapping> {
+public class DbxDirectoryMapper extends DirectoryMapper<Box, BoxMapping> {
 
     @Override
-    public Class<DbxMapping> getMappingClass() {
-        return DbxMapping.class;
+    public Class<BoxMapping> getMappingClass() {
+        return BoxMapping.class;
     }
 
     @Override
-    public Class<Dropbox> getAccountType() {
-        return Dropbox.class;
+    public Class<Box> getAccountType() {
+        return Box.class;
     }
 
 }

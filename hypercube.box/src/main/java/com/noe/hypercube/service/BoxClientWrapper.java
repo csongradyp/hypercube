@@ -2,7 +2,16 @@ package com.noe.hypercube.service;
 
 
 import com.box.boxjavalibv2.BoxClient;
+import com.box.boxjavalibv2.dao.*;
 import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
+import com.box.boxjavalibv2.exceptions.BoxJSONException;
+import com.box.boxjavalibv2.exceptions.BoxServerException;
+import com.box.boxjavalibv2.requests.requestobjects.BoxFolderRequestObject;
+import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
+import com.box.boxjavalibv2.utils.ISO8601DateParser;
+import com.box.restclientv2.exceptions.BoxRestException;
+import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
+import com.box.restclientv2.requestsbase.BoxFileUploadRequestObject;
 import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.BoxFileEntity;
 import com.noe.hypercube.domain.BoxServerEntry;
@@ -11,14 +20,10 @@ import com.noe.hypercube.synchronization.SynchronizationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.text.ParseException;
+import java.util.*;
 
 public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
 
@@ -63,12 +68,23 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
 
     @Override
     public boolean exist(ServerEntry serverEntry) {
-        return exist(serverEntry);
+        BoxServerEntry boxServerEntry = (BoxServerEntry) serverEntry;
+        try {
+            final BoxItem item = client.getBoxItemsManager().getItem(boxServerEntry.getId(), null, BoxResourceType.FILE);
+            return item.getItemStatus().equals("active");
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
-    private boolean exist(String boxFilePath) {
+    private boolean exist(final String boxFilePath) {
         boolean exists = false;
-
+//        client.getFilesManager().
         return exists;
     }
 
@@ -81,6 +97,21 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
 
     @Override
     public void download(ServerEntry serverEntry, FileOutputStream outputStream) throws SynchronizationException {
+        BoxServerEntry boxServerEntry = (BoxServerEntry) serverEntry;
+        OutputStream[] o = {outputStream};
+        try {
+            client.getFilesManager().downloadFile(boxServerEntry.getId(), o, null, null );
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -91,17 +122,64 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
 
     @Override
     public void delete(final Path remoteFilePath) throws SynchronizationException {
-
+        throw new UnsupportedOperationException("Box support deleting by file id");
     }
 
     @Override
     public void delete(String remoteFileId) throws SynchronizationException {
-        throw new UnsupportedOperationException("box does not populate file id");
+        BoxDefaultRequestObject requestObj = new BoxDefaultRequestObject();
+//        requestObj.getRequestExtras().setIfMatch(etag);
+        try {
+            client.getFilesManager().deleteFile(remoteFileId, requestObj);
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public ServerEntry uploadAsNew(Path remotePath, File fileToUpload, InputStream inputStream) throws SynchronizationException {
-        return new BoxServerEntry("", false);
+        BoxFile bFile = null;
+        try {
+            BoxFileUploadRequestObject requestObj = BoxFileUploadRequestObject.uploadFileRequestObject("0", fileToUpload.toPath().getFileName().toString(), fileToUpload);
+//            requestObj.setListener(listener);
+            bFile = client.getFilesManager().uploadFile(requestObj);
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (BoxJSONException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
+
+        return new BoxServerEntry(getFolderPath(bFile), bFile.getSize().longValue(), bFile.getSequenceId(), getLastModified(bFile), false);
+    }
+
+    private Date getLastModified(final BoxFile bFile) {
+        try {
+            return ISO8601DateParser.parse(bFile.getModifiedAt());
+        } catch (ParseException e) {
+            return new Date();
+        }
+    }
+
+    private String getFolderPath(final BoxFile bFile) {
+        String folderPath = "/";
+
+        BoxFolder parent = bFile.getParent();
+        while (parent.getId().equals("0")) {
+            folderPath += parent.getName();
+            parent = parent.getParent();
+        }
+
+        return folderPath + "/" + bFile.getName();
     }
 
     @Override
@@ -113,6 +191,28 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
     public List<ServerEntry> getFileList(final Path remoteFolder) throws SynchronizationException {
         final List<ServerEntry> fileList = new ArrayList<>();
 
+        BoxPagingRequestObject pagingRequestObject = BoxPagingRequestObject.pagingRequestObject(1000, 0);
+        pagingRequestObject.getRequestExtras().addField(BoxFolder.FIELD_NAME);
+        pagingRequestObject.getRequestExtras().addField(BoxFolder.FIELD_PATH_COLLECTION);
+        pagingRequestObject.getRequestExtras().addField(BoxFolder.FIELD_SIZE);
+        pagingRequestObject.getRequestExtras().addField(BoxFolder.FIELD_MODIFIED_AT);
+        pagingRequestObject.getRequestExtras().addField(BoxFolder.FIELD_ETAG);
+
+        try {
+            final List<BoxTypedObject> folderEntries = client.getFoldersManager().getFolderItems("0", pagingRequestObject).getEntries();
+            for (BoxTypedObject entry : folderEntries) {
+                if (entry instanceof BoxItem) {
+                    BoxItem boxItem = (BoxItem) entry;
+                    fileList.add(new BoxServerEntry(boxItem.getName(), boxItem.getSize().longValue(), boxItem.getSequenceId(), boxItem.dateModifiedAt(), isFolder(boxItem)));
+                }
+            }
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
         return fileList;
     }
 
@@ -120,12 +220,41 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
     public List<ServerEntry> getRootFileList() throws SynchronizationException {
         final List<ServerEntry> fileList = new ArrayList<>();
 
+        try {
+            BoxFolder boxFolder = client.getFoldersManager().getFolder("0", null);
+            List<BoxTypedObject> folderEntries = boxFolder.getItemCollection().getEntries();
+            for (BoxTypedObject entry : folderEntries) {
+                if (entry instanceof BoxItem) {
+                    BoxItem boxItem = (BoxItem) entry;
+                    fileList.add(new BoxServerEntry(boxItem.getName(), boxItem.getSize().longValue(), boxItem.getSequenceId(), boxItem.dateModifiedAt(), isFolder(boxItem)));
+                }
+            }
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
         return fileList;
+    }
+
+    private boolean isFolder(final BoxItem boxItem) {
+        return boxItem.getType().equals(BoxResourceType.FOLDER);
     }
 
     @Override
     public void createFolder(final Path folder) throws SynchronizationException {
-
+        try {
+            final BoxFolderRequestObject folderRequestObject = BoxFolderRequestObject.createFolderRequestObject(folder.getFileName().toString(), "0");
+            client.getFoldersManager().createFolder(folderRequestObject);
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

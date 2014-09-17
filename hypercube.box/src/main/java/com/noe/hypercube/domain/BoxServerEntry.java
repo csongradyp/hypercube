@@ -14,6 +14,7 @@ public class BoxServerEntry implements ServerEntry {
     private Date lastModified;
     private Long size;
     private boolean isFolder;
+    private String id;
 
     public BoxServerEntry(String path, String revision, Date lastModified, boolean isFolder) {
         this.path = Paths.get(path);
@@ -77,9 +78,13 @@ public class BoxServerEntry implements ServerEntry {
         return lastModified;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Override
     public String getId() {
-        return null;
+        return id;
     }
 
     @Override
