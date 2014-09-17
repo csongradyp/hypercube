@@ -12,6 +12,7 @@ import com.box.boxjavalibv2.utils.ISO8601DateParser;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 import com.box.restclientv2.requestsbase.BoxFileUploadRequestObject;
+import com.noe.hypercube.BoxAuthentication;
 import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.BoxFileEntity;
 import com.noe.hypercube.domain.BoxServerEntry;
@@ -30,11 +31,9 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
     private static final Logger LOG = LoggerFactory.getLogger(BoxClientWrapper.class);
 
     private final BoxClient client;
-    private String cursor;
 
-    public BoxClientWrapper(final BoxClient client) {
-        this.client = client;
-        cursor = null;
+    public BoxClientWrapper() {
+        this.client = BoxAuthentication.create();
     }
 
     @Override
@@ -159,7 +158,7 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
             e.printStackTrace();
         }
 
-        return new BoxServerEntry(getFolderPath(bFile), bFile.getSize().longValue(), bFile.getSequenceId(), getLastModified(bFile), false);
+        return new BoxServerEntry(getFilePath(bFile), bFile.getSize().longValue(), bFile.getSequenceId(), getLastModified(bFile), false);
     }
 
     private Date getLastModified(final BoxFile bFile) {
@@ -170,7 +169,7 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
         }
     }
 
-    private String getFolderPath(final BoxFile bFile) {
+    private String getFilePath(final BoxFile bFile) {
         String folderPath = "/";
 
         BoxFolder parent = bFile.getParent();
