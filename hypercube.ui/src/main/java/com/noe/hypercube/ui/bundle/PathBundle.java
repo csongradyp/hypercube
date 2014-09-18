@@ -1,7 +1,9 @@
 package com.noe.hypercube.ui.bundle;
 
 
+import com.noe.hypercube.ui.domain.account.AccountInfo;
 import com.noe.hypercube.ui.domain.file.LocalFile;
+import javafx.collections.ListChangeListener;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 import java.util.*;
@@ -15,10 +17,26 @@ public class PathBundle {
         mappings = new HashMap<>();
 //        mappings.put("test", new DualHashBidiMap(new HashMap<>()));
 //        mappings.put("other", new DualHashBidiMap(new HashMap<>()));
-        mappings.put("Dropbox", new DualHashBidiMap(new HashMap<>()));
+//        mappings.put("Dropbox", new DualHashBidiMap(new HashMap<>()));
 //        mappings.get("test").put("C:\\Users", "/A/B/C");
 //        mappings.get("test").put("C:\\Users", "/x");
-        mappings.get("Dropbox").put("D:\\test", "/newtest");
+//        mappings.get("Dropbox").put("D:\\test", "/newtest");
+        addListenerForAccountChanges();
+    }
+
+    private void addListenerForAccountChanges() {
+        AccountBundle.getAccounts().addListener((ListChangeListener<AccountInfo>) change -> {
+            while (change.next()) {
+                final List<? extends AccountInfo> addedAccount = change.getAddedSubList();
+                for (AccountInfo account : addedAccount) {
+                    mappings.put(account.getName(), new DualHashBidiMap(new HashMap<>()));
+                }
+                final List<? extends AccountInfo> removedAccount = change.getRemoved();
+                for (AccountInfo account : removedAccount) {
+                    mappings.remove(account.getName());
+                }
+            }
+        });
     }
 
     public PathBundle(final Map<String, DualHashBidiMap<String, String>> mappings) {
@@ -29,7 +47,7 @@ public class PathBundle {
         return instance.mappings.get(account).get(localFolder);
     }
 
-    public static String getLocalFolder(String account, String folder) {
+    public static String getLocalFolder(final String account, final String folder) {
         final DualHashBidiMap<String, String> accountMapping = instance.mappings.get(account);
         return accountMapping.getKey(folder.replaceAll("\\\\", "/"));
     }
@@ -50,7 +68,7 @@ public class PathBundle {
         final Set<String> sharedAccounts = new HashSet<>();
         final Set<String> accounts = instance.mappings.keySet();
         for (String account : accounts) {
-            if(isMapped(account, folder)) {
+            if (isMapped(account, folder)) {
                 sharedAccounts.add(account);
             }
         }
@@ -60,7 +78,7 @@ public class PathBundle {
     private static boolean isMapped(final String account, final LocalFile folder) {
         final DualHashBidiMap<String, String> folderMap = instance.mappings.get(account);
         for (String mappedLocalFolder : folderMap.keySet()) {
-            if(folder.getPath().toString().contains(mappedLocalFolder)) {
+            if (folder.getPath().toString().contains(mappedLocalFolder)) {
                 return true;
             }
         }

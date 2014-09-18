@@ -31,16 +31,18 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
     private static final Logger LOG = LoggerFactory.getLogger(BoxClientWrapper.class);
 
     private final BoxClient client;
+    private final BoxDirectoryUtil directoryUtil;
 
     public BoxClientWrapper() {
         this.client = BoxAuthentication.create();
+        directoryUtil = new BoxDirectoryUtil(client);
     }
 
     @Override
     protected boolean testConnectionActive() {
         try {
-            return client.getAuthData() != null;
-        } catch (AuthFatalFailureException e) {
+            return !getRootFileList().isEmpty();
+        } catch (SynchronizationException e) {
             return false;
         }
     }
@@ -99,7 +101,7 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
         BoxServerEntry boxServerEntry = (BoxServerEntry) serverEntry;
         OutputStream[] o = {outputStream};
         try {
-            client.getFilesManager().downloadFile(boxServerEntry.getId(), o, null, null );
+            client.getFilesManager().downloadFile(boxServerEntry.getId(), o, null, null);
         } catch (BoxRestException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -158,27 +160,15 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
             e.printStackTrace();
         }
 
-        return new BoxServerEntry(getFilePath(bFile), bFile.getSize().longValue(), bFile.getSequenceId(), getLastModified(bFile), false);
+        return new BoxServerEntry(directoryUtil.getFilePath(bFile), bFile.getSize().longValue(), bFile.getSequenceId(), getLastModified(bFile), false);
     }
 
-    private Date getLastModified(final BoxFile bFile) {
+    private Date getLastModified(final BoxItem boxItem) {
         try {
-            return ISO8601DateParser.parse(bFile.getModifiedAt());
+            return ISO8601DateParser.parse(boxItem.getModifiedAt());
         } catch (ParseException e) {
             return new Date();
         }
-    }
-
-    private String getFilePath(final BoxFile bFile) {
-        String folderPath = "/";
-
-        BoxFolder parent = bFile.getParent();
-        while (parent.getId().equals("0")) {
-            folderPath += parent.getName();
-            parent = parent.getParent();
-        }
-
-        return folderPath + "/" + bFile.getName();
     }
 
     @Override
@@ -198,11 +188,12 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
         pagingRequestObject.getRequestExtras().addField(BoxFolder.FIELD_ETAG);
 
         try {
-            final List<BoxTypedObject> folderEntries = client.getFoldersManager().getFolderItems("0", pagingRequestObject).getEntries();
+            final String foldersId = directoryUtil.getFoldersId(remoteFolder);
+            final List<BoxTypedObject> folderEntries = client.getFoldersManager().getFolderItems(foldersId, pagingRequestObject).getEntries();
             for (BoxTypedObject entry : folderEntries) {
                 if (entry instanceof BoxItem) {
                     BoxItem boxItem = (BoxItem) entry;
-                    fileList.add(new BoxServerEntry(boxItem.getName(), boxItem.getSize().longValue(), boxItem.getSequenceId(), boxItem.dateModifiedAt(), isFolder(boxItem)));
+                    fileList.add(new BoxServerEntry(directoryUtil.getFilePath(boxItem), boxItem.getSize().longValue(), boxItem.getSequenceId(), boxItem.dateModifiedAt(), directoryUtil.isFolder(boxItem)));
                 }
             }
         } catch (BoxRestException e) {
@@ -210,6 +201,8 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
         } catch (BoxServerException e) {
             e.printStackTrace();
         } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return fileList;
@@ -221,11 +214,17 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
 
         try {
             BoxFolder boxFolder = client.getFoldersManager().getFolder("0", null);
-            List<BoxTypedObject> folderEntries = boxFolder.getItemCollection().getEntries();
+            final BoxCollection itemCollection = boxFolder.getItemCollection();
+            List<BoxTypedObject> folderEntries = itemCollection.getEntries();
             for (BoxTypedObject entry : folderEntries) {
                 if (entry instanceof BoxItem) {
                     BoxItem boxItem = (BoxItem) entry;
-                    fileList.add(new BoxServerEntry(boxItem.getName(), boxItem.getSize().longValue(), boxItem.getSequenceId(), boxItem.dateModifiedAt(), isFolder(boxItem)));
+                    final String name = boxItem.getName();
+//                    final long size = boxItem.getSize().longValue();
+                    final long size = 0L;
+                    final String sequenceId = boxItem.getSequenceId();
+                    final Date lastModified = getLastModified(boxItem);
+                    fileList.add(new BoxServerEntry(name, size, sequenceId, lastModified, directoryUtil.isFolder(boxItem)));
                 }
             }
         } catch (BoxRestException e) {
@@ -236,10 +235,6 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
             e.printStackTrace();
         }
         return fileList;
-    }
-
-    private boolean isFolder(final BoxItem boxItem) {
-        return boxItem.getType().equals(BoxResourceType.FOLDER);
     }
 
     @Override

@@ -18,13 +18,15 @@ import java.net.Socket;
 
 public class BoxAuthentication {
 
-    private static final int PORT = 4000;
+    private static final int PORT = 8080;
     private static final String CLIENT_ID = "s0fym1o198dy9k0qaesuiyuvyurnh080";
+    private static final String API_KEY = "s0fym1o198dy9k0qaesuiyuvyurnh080";
     private static final String CLIENT_SECRET = "uTCbyzgarF2PQREyBSa59GLoG0VQ6F3R";
 
     public static BoxClient create() {
         String code = "";
-        String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + CLIENT_ID + "&redirect_uri=http%3A//localhost%3A" + PORT;
+//        String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + CLIENT_ID + "&redirect_uri=http%3A//localhost%3A" + PORT;
+        String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + CLIENT_ID + "&redirect_uri=http%3A//127.0.0.1%3A" + PORT;
         try {
             Desktop.getDesktop().browse(java.net.URI.create(url));
             code = getCode();
@@ -80,7 +82,7 @@ public class BoxAuthentication {
                     code = code.substring(code.indexOf(match), httpstr);
                     String parts[] = code.split("=");
                     code=parts[1];
-                    out.write("Now return to command line to see the output of the HelloWorld sample app.");
+                    out.write("Thanks for using Hypercube!");
                 } else {
                     // It doesn't have a code
                     out.write("Code not found in the URL!");

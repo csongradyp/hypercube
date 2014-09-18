@@ -110,11 +110,19 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
                 } else {
                     fileList = client.getFileList(remoteFolder);
                 }
-                EventBus.publish(new FileListResponse(client.getAccountName(), event.getPreviousFolder(), remoteFolder, fileList, getRemoteQuotaInfo()));
+                EventBus.publish(new FileListResponse(client.getAccountName(), event.getPreviousFolder(), getRemoteFolderPath(event), fileList, getRemoteQuotaInfo()));
             } catch (SynchronizationException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private Path getRemoteFolderPath(FileListRequest event) {
+        final Path remoteFolder = event.getFolder();
+        if(remoteFolder.startsWith("/") || remoteFolder.toString().equals(event.getAccount())) {
+            return remoteFolder;
+        }
+        return Paths.get("/" + remoteFolder);
     }
 
     @Override
