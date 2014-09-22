@@ -6,7 +6,6 @@ import com.box.boxjavalibv2.dao.*;
 import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
 import com.box.boxjavalibv2.exceptions.BoxJSONException;
 import com.box.boxjavalibv2.exceptions.BoxServerException;
-import com.box.boxjavalibv2.requests.requestobjects.BoxFolderRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
 import com.box.boxjavalibv2.utils.ISO8601DateParser;
 import com.box.restclientv2.exceptions.BoxRestException;
@@ -64,7 +63,7 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
 
     @Override
     public boolean exist(File fileToUpload, Path remotePath) {
-        return exist("");
+        throw new UnsupportedOperationException("cannot check existence via path");
     }
 
     @Override
@@ -81,12 +80,6 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
             e.printStackTrace();
         }
         return false;
-    }
-
-    private boolean exist(final String boxFilePath) {
-        boolean exists = false;
-//        client.getFilesManager().
-        return exists;
     }
 
     @Override
@@ -202,8 +195,6 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
             e.printStackTrace();
         } catch (AuthFatalFailureException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return fileList;
     }
@@ -240,8 +231,7 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
     @Override
     public void createFolder(final Path folder) throws SynchronizationException {
         try {
-            final BoxFolderRequestObject folderRequestObject = BoxFolderRequestObject.createFolderRequestObject(folder.getFileName().toString(), "0");
-            client.getFoldersManager().createFolder(folderRequestObject);
+            directoryUtil.createFoldersPath(folder);
         } catch (BoxRestException e) {
             e.printStackTrace();
         } catch (BoxServerException e) {

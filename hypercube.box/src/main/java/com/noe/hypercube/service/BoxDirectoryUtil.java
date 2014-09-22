@@ -11,7 +11,6 @@ import com.box.boxjavalibv2.requests.requestobjects.BoxFolderRequestObject;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.noe.hypercube.synchronization.SynchronizationException;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,80 +50,71 @@ public class BoxDirectoryUtil {
     }
 
 
-    public String getFoldersId(String... directories) throws IOException, SynchronizationException {
+    public String getFoldersId(String... directories) throws BoxServerException, BoxRestException, AuthFatalFailureException, SynchronizationException {
         List<String> subDirs = new ArrayList<>();
         Collections.addAll(subDirs, directories);
 
-        String parentId = ROOT_DIRECTORY;
+        String folderId = ROOT_DIRECTORY;
         for (String dirName : directories) {
-            BoxTypedObject existingFolder = getExistsFolder(dirName, parentId);
+            BoxTypedObject existingFolder = getExistsFolder(dirName, folderId);
             if (existingFolder == null) {
-                throw new SynchronizationException("Box folder does not exists");
+                throw new SynchronizationException("Box folder does not exist");
             }
             subDirs.remove(0);
-            parentId = existingFolder.getId();
+            folderId = existingFolder.getId();
         }
-        return parentId;
+        return folderId;
     }
 
-    public String createFoldersPath(String... directories) throws IOException {
-        List<String> subDirs = new ArrayList<>();
-        Collections.addAll(subDirs, directories);
-
-        String parentId = ROOT_DIRECTORY;
-        for (String dirName : directories) {
-            BoxTypedObject existingFolder = getExistsFolder(dirName, parentId);
-            if (existingFolder == null) {
-                existingFolder = createFolder(dirName, parentId);
-            }
-            subDirs.remove(0);
-            parentId = existingFolder.getId();
-        }
-        return parentId;
-    }
-
-    public String getFoldersId(final Path remoteFolder) throws IOException, SynchronizationException {
+    public String getFoldersId(final Path remoteFolder) throws BoxServerException, AuthFatalFailureException, BoxRestException, SynchronizationException {
         String folderPath = remoteFolder.toString();
-        if(folderPath.startsWith("\\") || folderPath.startsWith("/")) {
+        if (folderPath.startsWith("\\") || folderPath.startsWith("/")) {
             folderPath = folderPath.substring(1);
         }
-        final String[] folders = folderPath.replace("\\", "/").split("/");
+        final String[] folders = getFolders(folderPath);
 
         return getFoldersId(folders);
     }
 
-    private BoxTypedObject createFolder(final String dirName, final String parentId) {
-        try {
-            final BoxFolderRequestObject folderRequestObject = BoxFolderRequestObject.createFolderRequestObject(dirName, parentId);
-            return client.getFoldersManager().createFolder(folderRequestObject);
-        } catch (BoxRestException e) {
-            e.printStackTrace();
-        } catch (BoxServerException e) {
-            e.printStackTrace();
-        } catch (AuthFatalFailureException e) {
-            e.printStackTrace();
-        }
-        return null;
+    private String[] getFolders(String folderPath) {
+        return folderPath.replace("\\", "/").split("/");
     }
 
-    private BoxTypedObject getExistsFolder(String dirName, String parentId) {
-            try {
-                final BoxFolder boxFolder = client.getFoldersManager().getFolder(parentId, null);
-                List<BoxTypedObject> folderEntries = boxFolder.getItemCollection().getEntries();
-                for (BoxTypedObject folderEntry : folderEntries) {
-                    if (folderEntry instanceof BoxItem) {
-                        if(((BoxItem) folderEntry).getName().equals(dirName)){
-                            return folderEntry;
-                        }
-                    }
-                }
-            } catch (BoxRestException e) {
-                e.printStackTrace();
-            } catch (BoxServerException e) {
-                e.printStackTrace();
-            } catch (AuthFatalFailureException e) {
-                e.printStackTrace();
+    public String createFoldersPath(final Path folder) throws BoxServerException, AuthFatalFailureException, BoxRestException {
+        return createFoldersPath(getFolders(folder.toString()));
+    }
+
+    public String createFoldersPath(final String... directories) throws BoxServerException, BoxRestException, AuthFatalFailureException {
+        List<String> subDirs = new ArrayList<>();
+        Collections.addAll(subDirs, directories);
+
+        String folderId = ROOT_DIRECTORY;
+        for (String dirName : directories) {
+            BoxTypedObject existingFolder = getExistsFolder(dirName, folderId);
+            if (existingFolder == null) {
+                existingFolder = createFolder(dirName, folderId);
             }
+            subDirs.remove(0);
+            folderId = existingFolder.getId();
+        }
+        return folderId;
+    }
+
+    private BoxTypedObject createFolder(final String dirName, final String parentId) throws BoxServerException, AuthFatalFailureException, BoxRestException {
+        final BoxFolderRequestObject folderRequestObject = BoxFolderRequestObject.createFolderRequestObject(dirName, parentId);
+        return client.getFoldersManager().createFolder(folderRequestObject);
+    }
+
+    private BoxTypedObject getExistsFolder(String dirName, String parentId) throws BoxServerException, AuthFatalFailureException, BoxRestException {
+        final BoxFolder boxFolder = client.getFoldersManager().getFolder(parentId, null);
+        List<BoxTypedObject> folderEntries = boxFolder.getItemCollection().getEntries();
+        for (BoxTypedObject folderEntry : folderEntries) {
+            if (folderEntry instanceof BoxItem) {
+                if (((BoxItem) folderEntry).getName().equals(dirName)) {
+                    return folderEntry;
+                }
+            }
+        }
         return null;
     }
 }
