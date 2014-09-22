@@ -13,6 +13,7 @@
         <module>hypercube.core</module>
         <module>hypercube.persistence</module>
         <module>hypercube.dropbox</module>
+        <module>hypercube.box</module>
         <module>hypercube.googledrive</module>
         <module>hypercube.ui</module>
         <module>hypercube.integration</module>
