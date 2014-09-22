@@ -40,9 +40,9 @@ public class AccountController implements IAccountController {
 
     @PostConstruct
     private void createAccountBoxes() {
-        Map<Class, Client> clientMap = toMap(clients);
-        Map<Class, IMapper> directoryMapperMap = toMap2(mappers);
-        Map<Class, FileEntityFactory> entityFactoryMap = toMap3(entityFactories);
+        Map<Class, Client> clientMap = clientsToMap(clients);
+        Map<Class, IMapper> directoryMapperMap = mappersToMap(mappers);
+        Map<Class, FileEntityFactory> entityFactoryMap = entityFactoriesToMap(entityFactories);
         persistenceController.createDaoMap();
 
         // TODO validate collections - size, classes, etc
@@ -56,7 +56,7 @@ public class AccountController implements IAccountController {
     }
 
     @Override
-    public AccountBox getAccountBox(Class<? extends Account> accountType) {
+    public AccountBox getAccountBox(final Class<? extends Account> accountType) {
         return accountBoxes.get(accountType);
     }
 
@@ -65,7 +65,17 @@ public class AccountController implements IAccountController {
         return accountBoxes.values();
     }
 
-    private Map<Class, Client> toMap(Collection<Client> clients) {
+    @Override
+    public AccountBox getAccountBox(final String accountName) {
+        for (Class<? extends Account> accountType : accountBoxes.keySet()) {
+            if (accountType.getName().equals(accountName)) {
+                return accountBoxes.get(accountType);
+            }
+        }
+        throw new IllegalStateException(String.format("%s was not found in registered accounts", accountName));
+    }
+
+    private Map<Class, Client> clientsToMap(final Collection<Client> clients) {
         Map<Class, Client> map = new LinkedHashMap<>();
         for (Client client : clients) {
             map.put(client.getAccountType(), client);
@@ -73,7 +83,7 @@ public class AccountController implements IAccountController {
         return map;
     }
 
-    private Map<Class, IMapper> toMap2(Collection<IMapper> mappers) {
+    private Map<Class, IMapper> mappersToMap(final Collection<IMapper> mappers) {
         Map<Class, IMapper> map = new LinkedHashMap<>();
         for (IMapper mapper : mappers) {
             map.put(mapper.getAccountType(), mapper);
@@ -81,7 +91,7 @@ public class AccountController implements IAccountController {
         return map;
     }
 
-    private Map<Class, FileEntityFactory> toMap3(Collection<FileEntityFactory> factories) {
+    private Map<Class, FileEntityFactory> entityFactoriesToMap(final Collection<FileEntityFactory> factories) {
         Map<Class, FileEntityFactory> map = new LinkedHashMap<>();
         for (FileEntityFactory entityFactory : factories) {
             map.put(entityFactory.getAccountType(), entityFactory);

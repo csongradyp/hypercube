@@ -5,10 +5,12 @@ import com.noe.hypercube.event.domain.MappingRequest;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -29,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -121,13 +124,25 @@ public class AddMappingDialog extends Dialog implements Initializable {
             public void handle(ActionEvent event) {
                 Dialog dialog = (Dialog) event.getSource();
                 if (validationSupport.getValidationResult().getWarnings().isEmpty()) {
-                    EventBus.publish(new MappingRequest());
+                    EventBus.publish(createAddMappingRequest());
                     dialog.hide();
                 } else {
                     validationSupport.redecorate();
                 }
             }
         };
+    }
+
+    private MappingRequest createAddMappingRequest() {
+        final MappingRequest mappingRequest = new MappingRequest(Paths.get(localFolder.getText()));
+        final ObservableList<Node> remoteMappingChoosers = remoteMappings.getChildren();
+        for (Node remoteMappingChooser : remoteMappingChoosers) {
+            FolderMappingChooser mappingChooser = (FolderMappingChooser) remoteMappingChooser;
+            final String account = mappingChooser.getAccount();
+            final String folder = mappingChooser.getFolder();
+            mappingRequest.add(account, Paths.get(folder));
+        }
+        return mappingRequest;
     }
 
     private void setupFolderChooser() {

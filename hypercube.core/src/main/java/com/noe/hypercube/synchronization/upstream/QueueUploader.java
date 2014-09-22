@@ -30,14 +30,14 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
 
     public QueueUploader(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> persistenceController, IPersistenceController entityFactory) {
         super(client, entityFactory, persistenceController);
-        uploadQ = new LinkedBlockingDeque<>(20);
+        uploadQ = new LinkedBlockingDeque<>(100);
     }
 
     @Override
     public void run() {
         while (!stop) {
-            final UploadEntity uploadEntity = uploadQ.poll();
             try {
+                final UploadEntity uploadEntity = uploadQ.take();
                 final Action action = uploadEntity.getAction();
                 if (ADDED == action) {
                     super.uploadNew(uploadEntity);
@@ -48,6 +48,8 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
                 }
             } catch (SynchronizationException e) {
                 LOG.error(e.getMessage(), e);
+            } catch (InterruptedException e) {
+                LOG.error(String.format("%s upload queue reading  has been interrupted", client.getAccountName()));
             }
         }
     }

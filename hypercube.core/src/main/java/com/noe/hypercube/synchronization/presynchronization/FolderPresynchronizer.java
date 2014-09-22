@@ -1,24 +1,32 @@
 package com.noe.hypercube.synchronization.presynchronization;
 
+import com.noe.hypercube.controller.IAccountController;
 import com.noe.hypercube.controller.IPersistenceController;
+import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
+import com.noe.hypercube.observer.local.LocalFileListener;
 import com.noe.hypercube.synchronization.Action;
+import com.noe.hypercube.synchronization.SynchronizationException;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class PresynchronizerImpl {
+public class FolderPresynchronizer {
 
+    @Inject
     private IPersistenceController persistenceController;
+    @Inject
+    private IAccountController accountController;
 
-    public void run(final File localFolder, final Collection<FileEntity> mappedFiles, final Map<String, Collection<ServerEntry>> remoteFileLists) {
+    public void run(final File localFolder, final LocalFileListener localFileListener, final Map<String, Collection<ServerEntry>> remoteFileLists) {
         final Collection<File> localFiles = FileUtils.listFiles(localFolder, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
         final Map<String, List<FileEntity>> files = persistenceController.getMappings(localFolder.toPath().toString());
 
@@ -26,13 +34,48 @@ public class PresynchronizerImpl {
             final File mappedLocalFile = Paths.get(localFilePath).toFile();
             final List<FileEntity> mappings = files.get(localFilePath);
             // local file exist?
+            final Map<Action, Collection<FileEntity>> sort = sort(mappings, remoteFileLists);
             if(localFiles.contains(mappedLocalFile)) {
                 // local file exist scenarios
-                final Map<Action, Collection<FileEntity>> sort = sort(mappings, remoteFileLists);
-
+                final Collection<FileEntity> updated = sort.get(Action.CHANGED);
+                if (updated.isEmpty()) {
+                    // no updates
+                    final Collection<FileEntity> deleted = sort.get(Action.REMOVED);
+                    if (deleted.isEmpty() && !sort.get(Action.IDENTICAL).isEmpty()) {
+                        // nothing to do -> log
+                    } else {
+                        // delete identical files - all remaining -> there are no updated
+                        localFileListener.onFileDelete(mappedLocalFile);
+                        final Collection<FileEntity> identicals = sort.get(Action.IDENTICAL);
+                        for (FileEntity identical : identicals) {
+                            localFileListener.onFileDelete(Paths.get(identical.getLocalPath()).toFile());
+                        }
+                    }
+                } else if (updated.size() == 1) {
+                    // single update found
+                    final Collection<FileEntity> deleted = sort.get(Action.REMOVED);
+                    final FileEntity updatedRemoteFile = updated.iterator().next();
+                    final AccountBox accountBox = accountController.getAccountBox(updatedRemoteFile.getAccountName());
+                    if (deleted.isEmpty()) {
+                        // all files are identical except the updated one -> update all
+                        try {
+                            accountBox.getDownloader().download(Paths.get(updatedRemoteFile.getRemotePath()), Paths.get(updatedRemoteFile.getLocalPath()).getParent());
+                        } catch (SynchronizationException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        // upload updated file to the deleted ones remote space -> add + update all
+                        try {
+                            accountBox.getDownloader().download(Paths.get(updatedRemoteFile.getRemotePath()), Paths.get(updatedRemoteFile.getLocalPath()).getParent());
+                        } catch (SynchronizationException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    // conflict - which update to choose?
+                }
             } else {
                 // local file deleted scenario
-                final Map<Action, Collection<FileEntity>> sort = sort(mappings, remoteFileLists);
             }
         }
     }

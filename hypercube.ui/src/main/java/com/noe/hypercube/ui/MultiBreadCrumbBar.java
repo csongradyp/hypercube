@@ -89,7 +89,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         TreeItem<String> selectedCrumb = event.getSelectedCrumb();
         while (selectedCrumb != null) {
             final String folder = selectedCrumb.getValue();
-            if (folder.equals(account) && selectedCrumb.getParent() != null) {
+            if (isAccountMarkerRootCrumb(account, selectedCrumb)) {
                 path = "/" + path;
             } else {
                 path = folder + "/" + path;
@@ -97,6 +97,10 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
             selectedCrumb = selectedCrumb.getParent();
         }
         return Paths.get(path);
+    }
+
+    private boolean isAccountMarkerRootCrumb(final String account, final TreeItem<String> selectedCrumb) {
+        return selectedCrumb.getValue().equals(account) && selectedCrumb.getParent() != null;
     }
 
     public Path getNewLocalPath(final BreadCrumbBar.BreadCrumbActionEvent<String> event) {

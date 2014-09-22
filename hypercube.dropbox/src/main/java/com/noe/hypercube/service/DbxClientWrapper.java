@@ -38,7 +38,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity> {
 
     @Override
     public String getAccountName() {
-        return "Dropbox";
+        return Dropbox.getName();
     }
 
     @Override
@@ -52,16 +52,16 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity> {
     }
 
     @Override
-    public boolean exist(UploadEntity uploadEntity) {
+    public boolean exist(final UploadEntity uploadEntity) {
         return exist(uploadEntity.getRemoteFilePath().toString());
     }
 
     @Override
-    public boolean exist(ServerEntry serverEntry) {
+    public boolean exist(final ServerEntry serverEntry) {
         return exist(getDropboxPath(serverEntry.getPath()));
     }
 
-    private boolean exist(String dropboxFilePath) {
+    private boolean exist(final String dropboxFilePath) {
         boolean exists = false;
         try {
             exists = client.getMetadata(dropboxFilePath) != null;

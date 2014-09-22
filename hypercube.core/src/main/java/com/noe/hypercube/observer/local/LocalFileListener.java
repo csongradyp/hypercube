@@ -82,40 +82,34 @@ public class LocalFileListener implements FileAlterationListener {
     }
 
     private void delete(final File file) {
-        for (AccountBox accountBox : accountBoxes) {
-            try {
-                List<Path> remotes = accountBox.getMapper().getRemotes(file);
-                for (Path remote : remotes) {
-                    final UploadEntity removedLocalContent = new UploadEntity(file, remote, Action.REMOVED);
-                    accountBox.getUploader().delete(removedLocalContent);
-                }
-            } catch (SynchronizationException e) {
-                LOG.error(e.getMessage());
-            }
-        }
+        forAllAccounts(file, (accountBox, remotePath) -> {
+            final UploadEntity removedLocalContent = new UploadEntity(file, remotePath, Action.REMOVED);
+            accountBox.getUploader().delete(removedLocalContent);
+        });
     }
 
     private void update(final File file) {
-        for (AccountBox accountBox : accountBoxes) {
-            try {
-                List<Path> remotes = accountBox.getMapper().getRemotes(file);
-                for (Path remote : remotes) {
-                    final UploadEntity changedLocalContent = new UploadEntity(file, remote, Action.CHANGED);
-                    accountBox.getUploader().uploadUpdated(changedLocalContent);
-                }
-            } catch (SynchronizationException e) {
-                LOG.error(e.getMessage());
-            }
-        }
+        forAllAccounts(file, (accountBox, remotePath) -> {
+            final UploadEntity changedLocalContent = new UploadEntity(file, remotePath, Action.CHANGED);
+            accountBox.getUploader().uploadUpdated(changedLocalContent);
+        });
     }
 
     private void upload(final File file) {
-        for (AccountBox accountBox : accountBoxes) {
+        forAllAccounts(file, (accountBox, remotePath) -> {
+            final UploadEntity addedLocalContent = new UploadEntity(file, remotePath, getOrigin(file));
+            accountBox.getUploader().uploadNew(addedLocalContent);
+        });
+    }
+
+    private void forAllAccounts(final File file, final AccountActionCallback accountAction) {
+        for (final AccountBox<?, ?, ?> accountBox : accountBoxes) {
             try {
                 List<Path> remotes = accountBox.getMapper().getRemotes(file);
-                for (Path remote : remotes) {
-                    final UploadEntity addedLocalContent = new UploadEntity(file, remote, getOrigin(file));
-                    accountBox.getUploader().uploadNew(addedLocalContent);
+                if (remotes != null) {
+                    for (final Path mappedRemoteFolder : remotes) {
+                        accountAction.call(accountBox, mappedRemoteFolder);
+                    }
                 }
             } catch (SynchronizationException e) {
                 LOG.error(e.getMessage());
@@ -136,7 +130,7 @@ public class LocalFileListener implements FileAlterationListener {
 
             }
             LOG.debug("{} origin is ambiguous", file);
-            return "(" + System.currentTimeMillis() + ")";
+            return String.format("(%d)", System.currentTimeMillis());
         }
         LOG.debug("{} origin is Local", file);
         return "local";

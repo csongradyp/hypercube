@@ -41,4 +41,13 @@ public class FolderMappingChooser extends HBox {
     public void setAccount(final String account) {
         accountChoice.getSelectionModel().select(account);
     }
+
+    public String getAccount() {
+        return accountChoice.getSelectionModel().getSelectedItem();
+    }
+
+    public String getFolder() {
+        return folderPath.getText();
+    }
+
 }
