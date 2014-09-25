@@ -24,6 +24,7 @@
     <bean id="drive.mappers" parent="mappers" class="com.noe.hypercube.collector.MapperCollector">
         <constructor-arg>
             <list>
+                <bean class="com.noe.hypercube.mapping.BoxDirectoryMapper" />
             </list>
         </constructor-arg>
     </bean>

@@ -22,6 +22,6 @@ public class DbxFileEntity extends AbstractFileEntity {
 
     @Override
     public String getAccountName() {
-        return Dropbox.name;
+        return Dropbox.getName();
     }
 }

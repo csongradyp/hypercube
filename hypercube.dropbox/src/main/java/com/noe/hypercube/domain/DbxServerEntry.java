@@ -84,7 +84,7 @@ public class DbxServerEntry implements ServerEntry {
 
     @Override
     public String getAccount() {
-        return Dropbox.name;
+        return Dropbox.getName();
     }
 
     @Override

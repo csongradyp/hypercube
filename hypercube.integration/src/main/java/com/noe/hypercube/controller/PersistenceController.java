@@ -135,7 +135,7 @@ public class PersistenceController implements IPersistenceController {
     }
 
     @Override
-    public Map<String, List<FileEntity>> getMappings(final String folder){
+    public Map<String, List<FileEntity>> getMappedEntities(final String folder){
         final Map<String, List<FileEntity>> fileEntities = new HashMap<>();
         final Collection<Dao> daos = daoMap.values();
         for (Dao dao : daos) {

@@ -50,38 +50,42 @@ public class BoxDirectoryUtil {
     }
 
 
-    public String getFoldersId(String... directories) throws BoxServerException, BoxRestException, AuthFatalFailureException, SynchronizationException {
-        List<String> subDirs = new ArrayList<>();
-        Collections.addAll(subDirs, directories);
-
-        String folderId = ROOT_DIRECTORY;
-        for (String dirName : directories) {
-            BoxTypedObject existingFolder = getExistsFolder(dirName, folderId);
-            if (existingFolder == null) {
-                throw new SynchronizationException("Box folder does not exist");
-            }
-            subDirs.remove(0);
-            folderId = existingFolder.getId();
-        }
-        return folderId;
-    }
-
     public String getFoldersId(final Path remoteFolder) throws BoxServerException, AuthFatalFailureException, BoxRestException, SynchronizationException {
-        String folderPath = remoteFolder.toString();
-        if (folderPath.startsWith("\\") || folderPath.startsWith("/")) {
-            folderPath = folderPath.substring(1);
-        }
-        final String[] folders = getFolders(folderPath);
-
-        return getFoldersId(folders);
+        final String[] folders = getPathParts(remoteFolder.toString());
+        return getId(folders);
     }
 
-    private String[] getFolders(String folderPath) {
-        return folderPath.replace("\\", "/").split("/");
+    public String getFileId(Path remoteFilePath) throws BoxServerException, BoxRestException, AuthFatalFailureException, SynchronizationException {
+        final String[] pathParts = getPathParts(remoteFilePath.toString());
+        return getId(pathParts);
+    }
+
+    public String getId(final String... pathParts) throws BoxServerException, BoxRestException, AuthFatalFailureException, SynchronizationException {
+        final List<String> subPaths = new ArrayList<>();
+        Collections.addAll(subPaths, pathParts);
+
+        String id = ROOT_DIRECTORY;
+        for (String dirName : pathParts) {
+            BoxTypedObject existing = getExisting(dirName, id);
+            if (existing == null) {
+                throw new SynchronizationException("Box folder/file does not exist");
+            }
+            subPaths.remove(0);
+            id = existing.getId();
+        }
+        return id;
+    }
+
+    private String[] getPathParts(final String remotePath) {
+        String path = remotePath;
+        if (path.startsWith("\\") || path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return path.replace("\\", "/").split("/");
     }
 
     public String createFoldersPath(final Path folder) throws BoxServerException, AuthFatalFailureException, BoxRestException {
-        return createFoldersPath(getFolders(folder.toString()));
+        return createFoldersPath(getPathParts(folder.toString()));
     }
 
     public String createFoldersPath(final String... directories) throws BoxServerException, BoxRestException, AuthFatalFailureException {
@@ -90,7 +94,7 @@ public class BoxDirectoryUtil {
 
         String folderId = ROOT_DIRECTORY;
         for (String dirName : directories) {
-            BoxTypedObject existingFolder = getExistsFolder(dirName, folderId);
+            BoxTypedObject existingFolder = getExisting(dirName, folderId);
             if (existingFolder == null) {
                 existingFolder = createFolder(dirName, folderId);
             }
@@ -105,16 +109,17 @@ public class BoxDirectoryUtil {
         return client.getFoldersManager().createFolder(folderRequestObject);
     }
 
-    private BoxTypedObject getExistsFolder(String dirName, String parentId) throws BoxServerException, AuthFatalFailureException, BoxRestException {
+    private BoxTypedObject getExisting(final String searchedName, final String parentId) throws BoxServerException, AuthFatalFailureException, BoxRestException {
         final BoxFolder boxFolder = client.getFoldersManager().getFolder(parentId, null);
-        List<BoxTypedObject> folderEntries = boxFolder.getItemCollection().getEntries();
-        for (BoxTypedObject folderEntry : folderEntries) {
+        final List<BoxTypedObject> folderEntries = boxFolder.getItemCollection().getEntries();
+        for (final BoxTypedObject folderEntry : folderEntries) {
             if (folderEntry instanceof BoxItem) {
-                if (((BoxItem) folderEntry).getName().equals(dirName)) {
+                if (((BoxItem) folderEntry).getName().equals(searchedName)) {
                     return folderEntry;
                 }
             }
         }
         return null;
     }
+
 }

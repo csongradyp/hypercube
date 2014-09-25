@@ -28,7 +28,7 @@ public class FolderPresynchronizer {
 
     public void run(final File localFolder, final LocalFileListener localFileListener, final Map<String, Collection<ServerEntry>> remoteFileLists) {
         final Collection<File> localFiles = FileUtils.listFiles(localFolder, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
-        final Map<String, List<FileEntity>> files = persistenceController.getMappings(localFolder.toPath().toString());
+        final Map<String, List<FileEntity>> files = persistenceController.getMappedEntities(localFolder.toPath().toString());
 
         for (String localFilePath : files.keySet()) {
             final File mappedLocalFile = Paths.get(localFilePath).toFile();

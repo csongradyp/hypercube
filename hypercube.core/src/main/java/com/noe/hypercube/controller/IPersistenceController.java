@@ -14,5 +14,5 @@ public interface IPersistenceController extends EntityController, MappingControl
 
     Collection<String> getLocalMappings();
 
-    Map<String, List<FileEntity>> getMappings(String folder);
+    Map<String, List<FileEntity>> getMappedEntities(String folder);
 }

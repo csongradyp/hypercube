@@ -7,8 +7,8 @@ import java.util.Date;
 public class BoxFileEntityFactory implements FileEntityFactory<Box, BoxFileEntity> {
 
     @Override
-    public FileEntity createFileEntity(final String localPath, final String revision, final Date date) {
-        return new BoxFileEntity(localPath, revision, date);
+    public FileEntity createFileEntity(final String localPath, final String remotePath, final String revision, final Date date) {
+        return new BoxFileEntity(localPath, remotePath, revision, date);
     }
 
     @Override

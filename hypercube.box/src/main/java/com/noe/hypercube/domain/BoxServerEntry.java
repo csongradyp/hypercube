@@ -14,21 +14,24 @@ public class BoxServerEntry implements ServerEntry {
     private Date lastModified;
     private Long size;
     private boolean isFolder;
-    private String id;
+    private final String id;
 
-    public BoxServerEntry(String path, String revision, Date lastModified, boolean isFolder) {
+    public BoxServerEntry(String path, String id, String revision, Date lastModified, boolean isFolder) {
+        this.id = id;
         this.path = Paths.get(path);
         this.revision = revision;
         this.lastModified = lastModified;
         this.isFolder = isFolder;
     }
 
-    public BoxServerEntry(String path, boolean isFolder) {
+    public BoxServerEntry(String path, String id, boolean isFolder) {
+        this.id = id;
         this.path = Paths.get(path);
         this.isFolder = isFolder;
     }
 
-    public BoxServerEntry(String path, Long size, String revision, Date lastModified, boolean isFolder) {
+    public BoxServerEntry(String path, String id, Long size, String revision, Date lastModified, boolean isFolder) {
+        this.id = id;
         this.path = Paths.get(path);
         this.size = size;
         this.revision = revision;
@@ -78,10 +81,6 @@ public class BoxServerEntry implements ServerEntry {
         return lastModified;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     @Override
     public String getId() {
         return id;
@@ -89,7 +88,7 @@ public class BoxServerEntry implements ServerEntry {
 
     @Override
     public String getAccount() {
-        return Box.name;
+        return Box.getName();
     }
 
     @Override

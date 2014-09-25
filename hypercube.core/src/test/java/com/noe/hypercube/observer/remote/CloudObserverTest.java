@@ -13,8 +13,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
