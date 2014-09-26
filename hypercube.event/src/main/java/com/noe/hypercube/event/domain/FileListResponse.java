@@ -6,17 +6,16 @@ import com.noe.hypercube.event.dto.RemoteQuotaInfo;
 import java.nio.file.Path;
 import java.util.List;
 
-public class FileListResponse {
+public class FileListResponse extends AccountActionEvent {
 
     private final List<ServerEntry> fileList;
     private final Path folder;
     private final Path previousFolder;
-    private final String account;
     private final RemoteQuotaInfo quotaInfo;
     private Boolean cloud;
 
-    public FileListResponse(final String account, Path previousFolder, final Path folder, List<ServerEntry> fileList, final RemoteQuotaInfo quotaInfo) {
-        this.account = account;
+    public FileListResponse(final String account, final Path previousFolder, final Path folder, List<ServerEntry> fileList, final RemoteQuotaInfo quotaInfo) {
+        super(account);
         this.previousFolder = previousFolder;
         this.folder = folder;
         this.fileList = fileList;
@@ -34,10 +33,6 @@ public class FileListResponse {
 
     public Path getPreviousFolder() {
         return previousFolder;
-    }
-
-    public String getAccount() {
-        return account;
     }
 
     public RemoteQuotaInfo getQuotaInfo() {

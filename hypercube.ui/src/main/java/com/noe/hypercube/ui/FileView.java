@@ -38,6 +38,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.noe.hypercube.ui.util.PathConverterUtil.getEventPath;
 import static javafx.scene.input.KeyCombination.ModifierValue.DOWN;
 import static javafx.scene.input.KeyCombination.ModifierValue.UP;
 
@@ -93,12 +94,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
                 if (isRemote()) {
                     waitForResponce = true;
                     final IFile folder = table.getSelectionModel().getSelectedItem();
-                    if (folder != null) {
-                        final Collection<String> accounts = folder.sharedWith();
-                        System.out.println(accounts);
-                    }
-
-                    EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), newFolder, previousFolder));
+                    EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getEventPath(newFolder), previousFolder));
                 } else {
                     waitForResponce = false;
                     multiBreadCrumbBar.setAllRemoteCrumbsInactive();
@@ -166,11 +162,12 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     public void refresh() {
         table.getItems().clear();
+        final Path location = getLocation();
         if (isRemote()) {
             waitForResponce = true;
-            EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getLocation(), null));
+            EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getEventPath(location), null));
         } else {
-            table.setLocalFileList(getLocation(), null);
+            table.setLocalFileList(location, null);
         }
     }
 

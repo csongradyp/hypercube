@@ -38,7 +38,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
         downloader = new Downloader(client, mapper, entityFactory, persistenceController);
         uploader = new QueueUploader<>(client, entityFactory, persistenceController);
 
-        if(client.isConnected()) {
+        if (client.isConnected()) {
             subscribeForFileEvents();
         }
         manageSubscriptions();
@@ -101,14 +101,14 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     @Override
     @Handler(rejectSubtypes = true)
     public void onFileListRequest(final FileListRequest event) {
-        if(event.getAccount().equals(client.getAccountName()) || event.isCloud()) {
+        if (event.getAccount().equals(client.getAccountName()) || event.isCloud()) {
             try {
                 final List<ServerEntry> fileList;
                 final Path remoteFolder = event.getFolder();
                 if (remoteFolder == null || remoteFolder.toString().isEmpty() || remoteFolder.equals(Paths.get(event.getAccount()))) {
                     fileList = client.getRootFileList();
                 } else {
-                    fileList = client.getFileList(remoteFolder);
+                    fileList = client.getFileList(normalizeToRequest(remoteFolder));
                 }
                 EventBus.publish(new FileListResponse(client.getAccountName(), event.getPreviousFolder(), remoteFolder, fileList, getRemoteQuotaInfo()));
             } catch (SynchronizationException e) {
@@ -117,23 +117,34 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
         }
     }
 
+    private Path normalizeToRequest(final Path remoteFolder) {
+        if(remoteFolder.startsWith("/")) {
+            return remoteFolder;
+        }
+        return Paths.get("/" + remoteFolder);
+    }
+
     @Override
     @Handler(rejectSubtypes = true)
     public void onUploadRequest(final UploadRequest event) {
-        try {
-            uploader.uploadNew(event.getLocalFile().toFile(), event.getRemoteFolder());
-        } catch (SynchronizationException e) {
-            //TODO send fail message
+        if (event.getAccount().equals(client.getAccountName())) {
+            try {
+                uploader.uploadNew(event.getLocalFile().toFile(), event.getRemoteFolder());
+            } catch (SynchronizationException e) {
+                //TODO send fail message
+            }
         }
     }
 
     @Override
     @Handler(rejectSubtypes = true)
     public void onDownloadRequest(final DownloadRequest event) {
-        try {
-            downloader.download(event.getRemoteFile(), event.getLocalFolder());
-        } catch (SynchronizationException e) {
-            // send fail message
+        if (event.getAccount().equals(client.getAccountName())) {
+            try {
+                downloader.download(event.getRemoteFile(), event.getLocalFolder());
+            } catch (SynchronizationException e) {
+                // send fail message
+            }
         }
     }
 
@@ -153,14 +164,16 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     @Override
     @Handler(rejectSubtypes = true)
     public void onDeleteRequest(final DeleteRequest event) {
-        try {
-            if(event.getId() != null) {
-                client.delete(event.getId());
-            } else {
-                client.delete(event.getPath());
-            }
-        } catch (SynchronizationException e) {
+        if (event.getAccount().equals(client.getAccountName())) {
+            try {
+                if (event.getId() != null) {
+                    client.delete(event.getId());
+                } else {
+                    client.delete(event.getPath());
+                }
+            } catch (SynchronizationException e) {
 //            throw new SynchronizationException();
+            }
         }
     }
 

@@ -2,20 +2,21 @@ package com.noe.hypercube.event.domain;
 
 import java.nio.file.Path;
 
-public class UploadRequest implements IEvent {
+public class UploadRequest extends AccountActionEvent {
 
     private final Path localFile;
     private final Path remoteFolder;
     private Boolean deleteFileAfterUpload;
 
-    public UploadRequest(final Path localFile, final Path remoteFolder) {
+    public UploadRequest(final String account, final Path localFile, final Path remoteFolder) {
+        super(account);
         this.localFile = localFile;
         this.remoteFolder = remoteFolder;
         deleteFileAfterUpload = false;
     }
 
-    public UploadRequest(final Path localFile, final Path remoteFolder, final Boolean deleteFileAfterUpload) {
-        this(localFile, remoteFolder);
+    public UploadRequest(final String account, final Path localFile, final Path remoteFolder, final Boolean deleteFileAfterUpload) {
+        this(account, localFile, remoteFolder);
         this.deleteFileAfterUpload = deleteFileAfterUpload;
     }
 
