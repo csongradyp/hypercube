@@ -77,7 +77,7 @@ public class LocalFileListener implements FileAlterationListener {
     @Override
     public void onStop(final FileAlterationObserver observer) {
         for (AccountBox accountBox : accountBoxes) {
-            accountBox.stopUploader();
+            accountBox.getDownloader().stop();
         }
     }
 

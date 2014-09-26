@@ -118,13 +118,6 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
         }
     }
 
-    private Path normalizeToRequest(final Path remoteFolder) {
-        if (remoteFolder.startsWith("/")) {
-            return remoteFolder;
-        }
-        return Paths.get("/" + remoteFolder);
-    }
-
     @Override
     @Handler(rejectSubtypes = true)
     public void onUploadRequest(final UploadRequest event) {
@@ -157,7 +150,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
             final Path remoteFolder = event.getBaseFolder();
             final Path folder = Paths.get(remoteFolder.toString(), event.getFolderName());
             client.createFolder(folder);
-            EventBus.publish(new FileListResponse(client.getAccountName(), event.getBaseFolder(), remoteFolder, client.getFileList(remoteFolder), getRemoteQuotaInfo()));
+            EventBus.publish(new FileListResponse(client.getAccountName(), null, remoteFolder, client.getFileList(remoteFolder), getRemoteQuotaInfo()));
         } catch (SynchronizationException e) {
             //TODO send fail message
         }
@@ -177,6 +170,13 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
 //            throw new SynchronizationException();
             }
         }
+    }
+
+    private Path normalizeToRequest(final Path remoteFolder) {
+        if (remoteFolder.startsWith("/")) {
+            return remoteFolder;
+        }
+        return Paths.get("/" + remoteFolder);
     }
 
     private RemoteQuotaInfo getRemoteQuotaInfo() throws SynchronizationException {
