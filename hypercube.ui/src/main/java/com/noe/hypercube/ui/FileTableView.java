@@ -199,7 +199,8 @@ public class FileTableView extends TableView<IFile> implements Initializable {
                 dirs.add(stepBack);
             }
             for (ServerEntry file : list) {
-                final RemoteFile remoteFile = new RemoteFile(file.getPath(), 0, file.isFolder(), file.lastModified());
+                final Path path = Paths.get(file.getAccount(), file.getPath().toString());
+                final RemoteFile remoteFile = new RemoteFile(path, 0, file.isFolder(), file.lastModified());
                 if (file.isFolder()) {
                     dirs.add(remoteFile);
                 } else {
@@ -229,7 +230,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
                 dirs.add(stepBack);
             }
             for (ServerEntry file : list) {
-                final RemoteFile remoteFile = new RemoteFile(file.getPath(), 0, file.isFolder(), file.lastModified());
+                final RemoteFile remoteFile = new RemoteFile(Paths.get(file.getAccount(), file.getPath().toString()), 0, file.isFolder(), file.lastModified());
                 remoteFile.share(file.getAccount());
                 if(getItems().contains(remoteFile)) {
                     final IFile iFile = getItems().filtered(file1 -> file1.equals(remoteFile)).get(0);
@@ -278,7 +279,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         return location.get();
     }
 
-    public void setLocation(Path location) {
+    public void setLocation(final Path location) {
         this.location.set(location);
     }
 }

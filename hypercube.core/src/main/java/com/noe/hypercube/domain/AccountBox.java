@@ -109,18 +109,17 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
                 if (remoteFolder == null || remoteFolder.toString().isEmpty() || remoteFolder.equals(Paths.get(event.getAccount()))) {
                     fileList = client.getRootFileList();
                 } else {
-                    fileList = client.getFileList(remoteFolder);
+                    fileList = client.getFileList(normalizeToRequest(remoteFolder));
                 }
-                EventBus.publish(new FileListResponse(client.getAccountName(), event.getPreviousFolder(), getRemoteFolderPath(event), fileList, getRemoteQuotaInfo()));
+                EventBus.publish(new FileListResponse(client.getAccountName(), event.getPreviousFolder(), remoteFolder, fileList, getRemoteQuotaInfo()));
             } catch (SynchronizationException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private Path getRemoteFolderPath(FileListRequest event) {
-        final Path remoteFolder = event.getFolder();
-        if(remoteFolder.startsWith("/") || remoteFolder.toString().equals(event.getAccount())) {
+    private Path normalizeToRequest(final Path remoteFolder) {
+        if (remoteFolder.startsWith("/")) {
             return remoteFolder;
         }
         return Paths.get("/" + remoteFolder);
@@ -129,21 +128,25 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     @Override
     @Handler(rejectSubtypes = true)
     public void onUploadRequest(final UploadRequest event) {
-        try {
-            // TODO uploadrequest type??? always ADDED?
-            uploader.uploadNew(new UploadEntity(event.getLocalFile().toFile(), event.getRemoteFolder(), Action.ADDED));
-        } catch (SynchronizationException e) {
-            //TODO send fail message
+        if (event.getAccount().equals(client.getAccountName())) {
+            try {
+                // TODO uploadrequest type??? always ADDED?
+                uploader.uploadNew(new UploadEntity(event.getLocalFile().toFile(), event.getRemoteFolder(), Action.ADDED));
+            } catch (SynchronizationException e) {
+                //TODO send fail message
+            }
         }
     }
 
     @Override
     @Handler(rejectSubtypes = true)
     public void onDownloadRequest(final DownloadRequest event) {
-        try {
-            downloader.download(event.getRemoteFile(), event.getLocalFolder());
-        } catch (SynchronizationException e) {
-            // send fail message
+        if (event.getAccount().equals(client.getAccountName())) {
+            try {
+                downloader.download(event.getRemoteFile(), event.getLocalFolder());
+            } catch (SynchronizationException e) {
+                // send fail message
+            }
         }
     }
 
@@ -163,31 +166,21 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     @Override
     @Handler(rejectSubtypes = true)
     public void onDeleteRequest(final DeleteRequest event) {
-        try {
-            if (event.getId() != null) {
-                client.delete(event.getId());
-            } else {
-                client.delete(event.getPath());
-            }
-        } catch (SynchronizationException e) {
+        if (event.getAccount().equals(client.getAccountName())) {
+            try {
+                if (event.getId() != null) {
+                    client.delete(event.getId());
+                } else {
+                    client.delete(event.getPath());
+                }
+            } catch (SynchronizationException e) {
 //            throw new SynchronizationException();
+            }
         }
     }
 
     private RemoteQuotaInfo getRemoteQuotaInfo() throws SynchronizationException {
         final AccountQuota quota = client.getQuota();
         return new RemoteQuotaInfo(quota.getTotalSpace(), quota.getUsedSpace());
-    }
-
-    public void stopUploader() {
-        uploader.stop();
-    }
-
-    public void restartUploader() {
-        uploader.restart();
-    }
-
-    public Class<ENTITY_TYPE> getEntityType() {
-        return client.getEntityType();
     }
 }

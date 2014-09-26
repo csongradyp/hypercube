@@ -47,6 +47,8 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static com.noe.hypercube.ui.action.FileAction.*;
+import static com.noe.hypercube.ui.util.PathConverterUtil.getAccount;
+import static com.noe.hypercube.ui.util.PathConverterUtil.getEventPath;
 import static org.controlsfx.dialog.Dialog.Actions.YES;
 
 public class FileManager extends VBox implements Initializable {
@@ -277,7 +279,7 @@ public class FileManager extends VBox implements Initializable {
 
     private void processRemoteFiles(final Collection<IFile> markedFiles, final FileAction action) {
         for (IFile markedFile : markedFiles) {
-            if(RemoteFile.class.isAssignableFrom(markedFile.getClass())) {
+            if (RemoteFile.class.isAssignableFrom(markedFile.getClass())) {
                 RemoteFile remoteFile = (RemoteFile) markedFile;
                 if (CLOUD_COPY == action) {
 
@@ -285,10 +287,11 @@ public class FileManager extends VBox implements Initializable {
 
                 } else if (CLOUD_DELETE == action) {
                     final String remoteFileId = remoteFile.getId();
-                    if(remoteFileId != null) {
-                        EventBus.publish(new DeleteRequest(remoteFileId));
+                    final String account = getAccount(getActiveFileView().getLocation());
+                    if (remoteFileId != null) {
+                        EventBus.publish(new DeleteRequest(account, remoteFileId));
                     } else {
-                        EventBus.publish(new DeleteRequest(remoteFile.getPath()));
+                        EventBus.publish(new DeleteRequest(account, getEventPath(remoteFile.getPath())));
                     }
                 }
             }
@@ -297,15 +300,16 @@ public class FileManager extends VBox implements Initializable {
 
     private void processCrossFileAction(Collection<IFile> markedFiles, FileAction action) {
         final FileView inactiveFileView = getInactiveFileView();
+        final String account = getAccount(inactiveFileView.getLocation());
         for (IFile markedFile : markedFiles) {
             if (UPLOAD == action) {
-                EventBus.publish(new UploadRequest(markedFile.getPath(), inactiveFileView.getLocation()));
+                EventBus.publish(new UploadRequest(account, markedFile.getPath(), getEventPath(inactiveFileView.getLocation())));
             } else if (DOWNLOAD == action) {
-                EventBus.publish(new DownloadRequest(markedFile.getPath(), inactiveFileView.getLocation()));
+                EventBus.publish(new DownloadRequest(account, markedFile.getPath(), getEventPath(inactiveFileView.getLocation())));
             } else if (MOVE_UPLOAD == action) {
-                EventBus.publish(new UploadRequest(markedFile.getPath(), inactiveFileView.getLocation(), true));
+                EventBus.publish(new UploadRequest(account, markedFile.getPath(), getEventPath(inactiveFileView.getLocation()), true));
             } else if (MOVE_DOWNLOAD == action) {
-                EventBus.publish(new DownloadRequest(markedFile.getPath(), inactiveFileView.getLocation(), true));
+                EventBus.publish(new DownloadRequest(account, markedFile.getPath(), getEventPath(inactiveFileView.getLocation()), true));
             }
         }
     }
@@ -366,7 +370,7 @@ public class FileManager extends VBox implements Initializable {
                     Dialogs.create().message(resources.getString("dialog.newfolder.fail")).showError();
                 }
             } else if (NEW_CLOUD_FOLDER == action) {
-                EventBus.publish(new CreateFolderRequest(location == null ? Paths.get("") : location, folderName.get()));
+                EventBus.publish(new CreateFolderRequest(getAccount(location), getEventPath(location), folderName.get()));
             }
         }
     }

@@ -2,20 +2,21 @@ package com.noe.hypercube.event.domain;
 
 import java.nio.file.Path;
 
-public class DownloadRequest implements IEvent {
+public class DownloadRequest extends AccountActionEvent {
 
     private final Path remoteFile;
     private final Path localFolder;
     private Boolean deleteFileAfterDownload;
 
-    public DownloadRequest(final Path remoteFile, final Path localFolder) {
+    public DownloadRequest(final String account, final Path remoteFile, final Path localFolder) {
+        super(account);
         this.remoteFile = remoteFile;
         this.localFolder = localFolder;
         deleteFileAfterDownload = false;
     }
 
-    public DownloadRequest(final Path remoteFile, final Path localFolder, final Boolean deleteFileAfterDownload) {
-        this(remoteFile, localFolder);
+    public DownloadRequest(final String account, final Path remoteFile, final Path localFolder, final Boolean deleteFileAfterDownload) {
+        this(account, remoteFile, localFolder);
         this.deleteFileAfterDownload = deleteFileAfterDownload;
     }
 

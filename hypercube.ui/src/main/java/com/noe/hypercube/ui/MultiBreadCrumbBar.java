@@ -104,7 +104,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         });
     }
 
-    public Path getNewRemotePath(final BreadCrumbBar.BreadCrumbActionEvent<String> event, String account) {
+    public Path getNewRemotePath(final BreadCrumbBar.BreadCrumbActionEvent<String> event, final String account) {
         String path = "";
         TreeItem<String> selectedCrumb = event.getSelectedCrumb();
         while (selectedCrumb != null) {
@@ -204,8 +204,8 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     }
 
     private void setRemoteBreadCrumb(final String path, final String account, final RemoteFileBreadCrumbBar breadcrumb) {
-        String breadcrumbPath = account + path;
-        breadcrumbPath = SLASH_SEPARATOR.matcher(breadcrumbPath).replaceAll("\\\\");
+        final Path pathWithAccount = Paths.get(account, path);
+        final String breadcrumbPath = SLASH_SEPARATOR.matcher(pathWithAccount.toString()).replaceAll("\\\\");
         final TreeItem<String> model = BreadCrumbBar.buildTreeModel(breadcrumbPath.split(SEPARATOR_PATTERN));
         breadcrumb.setSelectedCrumb(model);
     }

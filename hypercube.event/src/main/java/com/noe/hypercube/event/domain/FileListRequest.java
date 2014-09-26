@@ -2,20 +2,19 @@ package com.noe.hypercube.event.domain;
 
 import java.nio.file.Path;
 
-public class FileListRequest implements IEvent {
+public class FileListRequest extends AccountActionEvent {
 
-    private final String account;
     private Path folder;
     private Path previousFolder;
 
-    public FileListRequest(String account, final Path remoteFolder, Path previousFolder) {
-        this.account = account;
+    public FileListRequest(final String account, final Path remoteFolder, final Path previousFolder) {
+       super(account);
         this.folder = remoteFolder;
         this.previousFolder = previousFolder;
     }
 
-    public FileListRequest(String account) {
-        this.account = account;
+    public FileListRequest(final String account) {
+        super(account);
     }
 
     public Path getFolder() {
@@ -26,11 +25,7 @@ public class FileListRequest implements IEvent {
         return previousFolder;
     }
 
-    public String getAccount() {
-        return account;
-    }
-
     public boolean isCloud() {
-        return account.equals("Cloud");
+        return getAccount().equals("Cloud");
     }
 }
