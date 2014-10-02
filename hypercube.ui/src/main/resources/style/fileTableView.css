@@ -14,7 +14,7 @@
     -fx-border-width: 0px;
 }
 
-.table-row-cell:odd:filled {
+.table-row-cell:odd:filled:focused:selected {
     -fx-background-color: -fx-table-cell-border-color, derive(-fx-control-inner-background, -5%);
     -fx-background-insets: 0, 0 0 1 0;
 }
