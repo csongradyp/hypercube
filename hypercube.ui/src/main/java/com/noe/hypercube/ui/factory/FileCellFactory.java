@@ -30,29 +30,22 @@ public class FileCellFactory implements Callback<TableColumn<IFile, IFile>, Tabl
 
     @Override
     public TableCell<IFile, IFile> call(TableColumn<IFile, IFile> tableColumn) {
-        TableCell<IFile, IFile> tableCell = new TableCell<IFile, IFile>() {
+        final TableCell<IFile, IFile> tableCell = new TableCell<IFile, IFile>() {
             @Override
             public void updateItem(IFile file, boolean empty) {
                 super.updateItem(file, empty);
                 if (file != null && !empty) {
-//                    file.getMarkedProperty().addListener((observable, oldValue, newValue) -> updateItem(file, false));
-                    file.getMarkedProperty().addListener((observableValue, oldValue, newValue) -> {
-                        if (newValue) {
-                            getStyleClass().add("table-row-marked");
-                        } else {
-                            getStyleClass().remove("table-row-marked");
-                        }
-                    });
+                    file.getMarkedProperty().addListener((observable, oldValue, newValue) -> updateItem(file, false));
                     if (cellText != null) {
                         setText(cellText.getCellText(file));
                     }
                     if (cellGraphic != null) {
                         setGraphic(cellGraphic.getCellGraphic(file));
                     }
-                    getStyleClass().removeAll("table-row-shared");
-//                    if (file.isMarked()) {
-//                        getStyleClass().add("table-row-marked");
-//                    }
+                    getStyleClass().removeAll("table-row-marked", "table-row-shared");
+                    if (file.isMarked()) {
+                        getStyleClass().add("table-row-marked");
+                    }
                     if (file.isShared()) {
                         getStyleClass().add("table-row-shared");
                     }
