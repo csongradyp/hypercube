@@ -4,6 +4,7 @@ import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -14,11 +15,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
-import org.controlsfx.control.ButtonBar;
-import org.controlsfx.control.action.AbstractAction;
-import org.controlsfx.control.action.Action;
+import org.controlsfx.control.action.ActionUtils;
 import org.controlsfx.dialog.Dialog;
-import org.controlsfx.dialog.DialogStyle;
 import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
@@ -47,7 +45,7 @@ public class AddMappingDialog extends Dialog implements Initializable {
     private ValidationSupport validationSupport;
 
     public AddMappingDialog() {
-        super(null, "", false, DialogStyle.NATIVE);
+        super(null, "", false);
         validationSupport = new ValidationSupport();
         bundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("mappingdialog.fxml"), bundle);
@@ -86,8 +84,8 @@ public class AddMappingDialog extends Dialog implements Initializable {
         setupFolderChooser();
         setupAddMappingChooserButton();
         validationSupport.registerValidator(localFolder, Validator.createEmptyValidator("Text is required", Severity.WARNING));
-        final Action bindAction = createBindAction();
-        getActions().addAll(bindAction, Actions.CANCEL);
+//        final Button bindAction = createBindAction();
+        getActions().addAll(ACTION_OK, ACTION_CANCEL);
         initialRemoteMappingChooser = new FolderMappingChooser(validationSupport);
         remoteMappings.getChildren().add(initialRemoteMappingChooser);
     }
@@ -111,13 +109,13 @@ public class AddMappingDialog extends Dialog implements Initializable {
         folderMappingChooser.getChildren().add(remove);
     }
 
-    private Action createBindAction() {
-        return new AbstractAction(bundle.getString("dialog.mapping.action.add")) {
-            { ButtonBar.setType(this, ButtonBar.ButtonType.OK_DONE); }
-
+    private Button createBindAction() {
+        final Button bindActionButton = ActionUtils.createButton(ACTION_OK, ActionUtils.ActionTextBehavior.HIDE);
+        bindActionButton.setText(bundle.getString("dialog.mapping.action.add"));
+        bindActionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent event) {
-                Dialog dialog = (Dialog) event.getSource();
+            public void handle(ActionEvent actionEvent) {
+                Dialog dialog = (Dialog) actionEvent.getSource();
                 if (validationSupport.getValidationResult().getWarnings().isEmpty()) {
                     // TODO send mapping event
                     dialog.hide();
@@ -125,7 +123,8 @@ public class AddMappingDialog extends Dialog implements Initializable {
                     validationSupport.redecorate();
                 }
             }
-        };
+        });
+        return bindActionButton;
     }
 
     private void setupFolderChooser() {

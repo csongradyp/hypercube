@@ -7,7 +7,8 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ToggleButton;
 import javafx.util.Callback;
-import org.controlsfx.dialog.Dialogs;
+import javafx.util.Pair;
+import org.controlsfx.dialog.LoginDialog;
 
 public class ManagedAccountSegmentedButton extends AccountSegmentedButton {
 
@@ -23,12 +24,13 @@ public class ManagedAccountSegmentedButton extends AccountSegmentedButton {
         AwesomeDude.setIcon(addConnectionButton, AwesomeIcon.PLUS, ContentDisplay.GRAPHIC_ONLY);
         addConnectionButton.setOnAction(actionEvent -> {
             addConnectionButton.setSelected(false);
-            Dialogs.create().showLogin(new Dialogs.UserInfo("", ""), new Callback<Dialogs.UserInfo, Void>() {
+            final LoginDialog loginDialog = new LoginDialog(new Pair<>("", ""), new Callback<Pair<String, String>, Void>() {
                 @Override
-                public Void call(Dialogs.UserInfo userInfo) {
+                public Void call(Pair<String, String> stringStringPair) {
                     return null;
                 }
             });
+            loginDialog.show();
         });
         return addConnectionButton;
     }
