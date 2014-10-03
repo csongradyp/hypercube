@@ -20,7 +20,7 @@
         <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
         <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
     </ToolBar>
-    <MenuBar maxHeight="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <MenuBar maxHeight="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" stylesheets="style/HyperCubeMenu.css">
         <Menu mnemonicParsing="false" text="%menu.file">
             <MenuItem onAction="#onClose" mnemonicParsing="false" text="%menu.file.close">
                 <accelerator>
