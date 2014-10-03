@@ -5,64 +5,65 @@
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.String?>
-<AnchorPane fx:id="commander" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.noe.hypercube.ui.Controller">
-    <children>
-        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
-            <children>
-                <FileManager fx:id="fileManager"/>
-            </children>
-        </VBox>
-        <ToolBar id="buttonBox" focusTraversable="false" prefHeight="25.0" prefWidth="800.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
-            <items>
-                <Button fx:id="refresh" mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
-                <ChoiceBox fx:id="languages" value="Languages" prefHeight="10.0" prefWidth="80.0" focusTraversable="false">
-                    <String fx:value="Magyar"/>
-                    <String fx:value="English"/>
-                </ChoiceBox>
-                <Separator orientation="VERTICAL" prefHeight="20.0"/>
-                <Button fx:id="queue" onAction="#onShowSyncView" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
-                <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
-                <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
-            </items>
-        </ToolBar>
-        <MenuBar maxHeight="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-            <Menu mnemonicParsing="false" text="%menu.file">
-                <MenuItem onAction="#onClose" mnemonicParsing="false" text="%menu.file.close">
-                    <accelerator>
-                        <KeyCodeCombination alt="DOWN" code="F4" control="UP" meta="UP" shift="UP" shortcut="UP"/>
-                    </accelerator>
-                </MenuItem>
-            </Menu>
-            <Menu mnemonicParsing="false" text="%menu.edit">
-                <MenuItem fx:id="delete" mnemonicParsing="false" text="%menu.edit.delete">
-                    <accelerator>
-                        <KeyCodeCombination code="F8" alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP"/>
-                    </accelerator>
-                </MenuItem>
-            </Menu>
-            <Menu mnemonicParsing="false" text="%menu.settings">
-                <MenuItem fx:id="preferences" mnemonicParsing="false" text="%menu.settings.preferences">
-                    <accelerator>
-                        <KeyCodeCombination code="S" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                    </accelerator>
-                </MenuItem>
-            </Menu>
-            <Menu mnemonicParsing="false" text="%menu.cloud">
-                <MenuItem fx:id="manageCloud" mnemonicParsing="false" text="%menu.cloud.manage">
-                    <accelerator>
-                        <KeyCodeCombination code="M" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                    </accelerator>
-                </MenuItem>
-                <MenuItem fx:id="addConnection" mnemonicParsing="false" text="%menu.cloud.add">
-                    <accelerator>
-                        <KeyCodeCombination code="PLUS" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                    </accelerator>
-                </MenuItem>
-            </Menu>
-            <Menu mnemonicParsing="false" text="%menu.about">
-                <MenuItem fx:id="about" mnemonicParsing="false" text="%menu.about"/>
-            </Menu>
-        </MenuBar>
-    </children>
+<AnchorPane fx:id="commander" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.noe.hypercube.ui.Controller">
+    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
+        <FileManager fx:id="fileManager"/>
+    </VBox>
+    <ToolBar id="buttonBox" focusTraversable="false" prefHeight="25.0" prefWidth="800.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+        <Button fx:id="refresh" mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
+        <ChoiceBox fx:id="languages" value="Languages" prefHeight="10.0" prefWidth="80.0" focusTraversable="false">
+            <String fx:value="Magyar"/>
+            <String fx:value="English"/>
+        </ChoiceBox>
+        <Separator orientation="VERTICAL" prefHeight="20.0"/>
+        <Button fx:id="queue" onAction="#onShowSyncView" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
+        <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
+        <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
+    </ToolBar>
+    <MenuBar maxHeight="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Menu mnemonicParsing="false" text="%menu.file">
+            <MenuItem onAction="#onClose" mnemonicParsing="false" text="%menu.file.close">
+                <accelerator>
+                    <KeyCodeCombination alt="DOWN" code="F4" control="UP" meta="UP" shift="UP" shortcut="UP"/>
+                </accelerator>
+            </MenuItem>
+        </Menu>
+        <Menu mnemonicParsing="false" text="%menu.edit">
+            <MenuItem fx:id="delete" mnemonicParsing="false" text="%menu.edit.delete">
+                <accelerator>
+                    <KeyCodeCombination code="F8" alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP"/>
+                </accelerator>
+            </MenuItem>
+        </Menu>
+        <Menu mnemonicParsing="false" text="%menu.bind">
+            <MenuItem mnemonicParsing="false" text="%menu.bind.manage" onAction="#onManageBindings"/>
+        </Menu>
+        <Menu mnemonicParsing="false" text="%menu.settings">
+            <MenuItem fx:id="preferences" mnemonicParsing="false" text="%menu.settings.preferences">
+                <accelerator>
+                    <KeyCodeCombination code="S" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                </accelerator>
+            </MenuItem>
+        </Menu>
+        <Menu mnemonicParsing="false" text="%menu.cloud">
+            <MenuItem fx:id="manageCloud" mnemonicParsing="false" text="%menu.cloud.manage">
+                <accelerator>
+                    <KeyCodeCombination code="M" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                </accelerator>
+            </MenuItem>
+            <MenuItem fx:id="addConnection" mnemonicParsing="false" text="%menu.cloud.add">
+                <accelerator>
+                    <KeyCodeCombination code="PLUS" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                </accelerator>
+            </MenuItem>
+            <MenuItem fx:id="removeConnection" mnemonicParsing="false" text="%menu.cloud.remove">
+                <accelerator>
+                    <KeyCodeCombination code="MINUS" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                </accelerator>
+            </MenuItem>
+        </Menu>
+        <Menu mnemonicParsing="false" text="%menu.about">
+            <MenuItem fx:id="about" mnemonicParsing="false" text="%menu.about"/>
+        </Menu>
+    </MenuBar>
 </AnchorPane>

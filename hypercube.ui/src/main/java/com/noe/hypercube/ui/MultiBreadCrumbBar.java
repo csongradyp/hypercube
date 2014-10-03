@@ -57,7 +57,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         for (String account : accounts) {
             final RemoteFileBreadCrumbBar remoteBreadcrumb = new RemoteFileBreadCrumbBar(account);
             addRemoteCrumbEventHandler(remoteBreadcrumb);
-            remoteBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapRemoteDialog( remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation()));
+            remoteBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapRemoteDialog(remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation()));
             setOnRemoveRemoteMapping(remoteBreadcrumb);
             remotebreadcrumbs.put(account, remoteBreadcrumb);
         }
@@ -124,7 +124,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
 
     public void setBreadCrumbs(Path path) {
         setBreadCrumb(path.toString(), localBreadcrumb);
-        final Map<String, String> remoteFolders = PathBundle.getAllFolders(path.toString());
+        final Map<String, String> remoteFolders = PathBundle.getAllRemoteFolders(path.toString());
         getChildren().clear();
         if (path.toFile().exists()) {
             getChildren().add(localBreadcrumb);
@@ -134,8 +134,8 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
             final RemoteFileBreadCrumbBar remoteBreadcrumb = remotebreadcrumbs.get(account);
             final String folderPath = entry.getValue();
             setRemoteBreadCrumb(folderPath, account, remoteBreadcrumb);
-            if(remoteBreadcrumb.isActive()) {
-                getChildren().add(0,remoteBreadcrumb);
+            if (remoteBreadcrumb.isActive()) {
+                getChildren().add(0, remoteBreadcrumb);
             } else {
                 getChildren().add(remoteBreadcrumb);
             }
@@ -148,7 +148,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         activeAccountCrumb.setActive(true);
         final String crumbPath = path == null || Paths.get(account).equals(path) ? "" : path.toString();
         final String localFolder = PathBundle.getLocalFolder(account, crumbPath);
-        if(isMapped(localFolder)) {
+        if (isMapped(localFolder)) {
             setBreadCrumbs(Paths.get(localFolder));
         } else {
             getChildren().clear();

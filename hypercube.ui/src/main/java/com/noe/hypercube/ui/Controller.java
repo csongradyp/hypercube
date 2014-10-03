@@ -1,6 +1,7 @@
 package com.noe.hypercube.ui;
 
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
+import com.noe.hypercube.ui.dialog.BindManagerDialog;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import impl.org.controlsfx.i18n.Localization;
@@ -50,7 +51,7 @@ public class Controller implements Initializable {
         loadView(locale);
     }
 
-    public void loadView(Locale locale) {
+    public void loadView(final Locale locale) {
         try {
             AnchorPane fileCommander = FXMLLoader.load(getClass().getClassLoader().getResource("main.fxml"), ResourceBundle.getBundle("internationalization/messages", locale));
             commander.getChildren().add(fileCommander);
@@ -65,5 +66,11 @@ public class Controller implements Initializable {
 
     @FXML
     public void onShowSyncView() {
+    }
+
+
+    @FXML
+    public void onManageBindings() {
+        new BindManagerDialog().show();
     }
 }
