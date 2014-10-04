@@ -3,13 +3,14 @@ package com.noe.hypercube.ui.bundle;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.PropertyResourceBundle;
+import java.util.WeakHashMap;
 
 import static com.noe.hypercube.ui.util.FileNameConvensionUtil.getIconFileName;
 
@@ -17,11 +18,11 @@ public class ImageBundle {
 
     private static final ImageBundle INSTANCE = new ImageBundle();
     public static final String IMAGES_LOCATION = "./images/";
-    private PropertyResourceBundle bundle;
-    private Map<String, Image> imageCache;
+    private final PropertyResourceBundle bundle;
+    private final Map<String, Image> imageCache;
 
     private ImageBundle() {
-        imageCache = Collections.synchronizedMap(new WeakHashMap<String, Image>());
+        imageCache = Collections.synchronizedMap(new WeakHashMap<>());
         try {
             bundle = new PropertyResourceBundle(ImageBundle.class.getClassLoader().getResourceAsStream("images.properties"));
         } catch (IOException e) {
@@ -29,7 +30,7 @@ public class ImageBundle {
         }
     }
 
-    public static Image getImage(String imageId) {
+    public static Image getImage(final String imageId) {
         if (INSTANCE.imageCache.containsKey(imageId)) {
             return INSTANCE.imageCache.get(imageId);
         }
@@ -38,23 +39,19 @@ public class ImageBundle {
         return image;
     }
 
-    public static ImageView getImageView(String imageId) {
+    public static ImageView getImageView(final String imageId) {
         return new ImageView(getImage(imageId));
     }
 
-    private static Image loadImage(String imageId) {
+    private static Image loadImage(final String imageId) {
         String imageFileName = INSTANCE.bundle.getString(imageId);
         final URI imageLocation = Paths.get(IMAGES_LOCATION + imageFileName).toUri();
         return new Image(imageLocation.toString(), true);
     }
 
-    public static java.awt.Image getRawImage(String imageId) {
+    public static java.awt.Image getRawImage(final String imageId) {
         String imagePath = INSTANCE.bundle.getString(imageId);
-        try {
-            return ImageIO.read(new File(IMAGES_LOCATION + imagePath));
-        } catch (IOException e) {
-            return new BufferedImage(0, 0, 0);
-        }
+        return Toolkit.getDefaultToolkit().getImage(IMAGES_LOCATION + imagePath);
     }
 
     public static Image getAccountImage(final String account) {
