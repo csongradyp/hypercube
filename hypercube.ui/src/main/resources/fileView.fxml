@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.noe.hypercube.ui.DriveSpaceBar?>
+<?import com.noe.hypercube.ui.elements.LocalDriveSegmentedButton?>
 <?import com.noe.hypercube.ui.elements.ManagedAccountSegmentedButton?>
 <?import com.noe.hypercube.ui.FileTableView?>
 <?import com.noe.hypercube.ui.MultiBreadCrumbBar?>
@@ -8,12 +9,11 @@
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import org.controlsfx.control.SegmentedButton?>
 <fx:root alignment="TOP_RIGHT" prefWidth="400.0" type="javafx.scene.layout.VBox" HBox.hgrow="ALWAYS" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <ToolBar prefHeight="30.0" prefWidth="400.0" VBox.vgrow="NEVER">
             <Label text="%storage.locals"/>
-            <SegmentedButton fx:id="localDrives" onMouseClicked="#onLocalDriveAction"/>
+            <LocalDriveSegmentedButton fx:id="localDrives" onMouseClicked="#onLocalDriveAction"/>
             <Label text="%storage.remotes"/>
             <ManagedAccountSegmentedButton fx:id="remoteDrives"/>
         </ToolBar>

@@ -7,8 +7,8 @@ import com.noe.hypercube.event.domain.FileListResponse;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.domain.file.IFile;
 import com.noe.hypercube.ui.domain.file.LocalFile;
-import com.noe.hypercube.ui.elements.ManagedAccountSegmentedButton;
-import com.noe.hypercube.ui.factory.IconFactory;
+import com.noe.hypercube.ui.elements.AccountSegmentedButton;
+import com.noe.hypercube.ui.elements.LocalDriveSegmentedButton;
 import com.noe.hypercube.ui.util.StyleUtil;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -21,7 +21,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.VBox;
 import net.engio.mbassy.listener.Handler;
@@ -31,11 +30,12 @@ import org.controlsfx.control.SegmentedButton;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import static com.noe.hypercube.ui.util.PathConverterUtil.getEventPath;
@@ -52,16 +52,15 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     private final KeyCombination ctrlF5 = new KeyCodeCombination(KeyCode.F5, UP, DOWN, UP, UP, UP);
     private final KeyCombination ctrlA = new KeyCodeCombination(KeyCode.A, UP, DOWN, UP, UP, UP);
 
-
     @FXML
     private FileTableView table;
 
     @FXML
     private MultiBreadCrumbBar multiBreadCrumbBar;
     @FXML
-    private SegmentedButton localDrives;
+    private LocalDriveSegmentedButton localDrives;
     @FXML
-    private ManagedAccountSegmentedButton remoteDrives;
+    private AccountSegmentedButton remoteDrives;
     @FXML
     private DriveSpaceBar driveSpaceBar;
 
@@ -87,7 +86,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        initLocalDrives();
+        localDrives.setOnAction(this::onLocalDriveAction);
         initRemoteDrives();
         table.getLocationProperty().addListener((observable, previousFolder, newFolder) -> {
             if (newFolder != null) {
@@ -123,28 +122,6 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
                 button.setSelected(true);
             }
         }
-    }
-
-    private void initLocalDrives() {
-        List<ToggleButton> drives = collectLocalDrives();
-        localDrives.getButtons().addAll(drives);
-        localDrives.getButtons().get(0).setSelected(true);
-    }
-
-    private List<ToggleButton> collectLocalDrives() {
-        List<ToggleButton> drives = new ArrayList<>(5);
-        Iterable<Path> rootDirectories = FileSystems.getDefault().getRootDirectories();
-        for (Path root : rootDirectories) {
-            drives.add(createLocalStorageButton(root));
-        }
-        return drives;
-    }
-
-    private ToggleButton createLocalStorageButton(Path root) {
-        ToggleButton button = new ToggleButton(root.toString(), new ImageView(IconFactory.getStorageIcon(root)));
-        button.setFocusTraversable(false);
-        button.setOnAction(this::onLocalDriveAction);
-        return button;
     }
 
     private void initRemoteDrives() {
@@ -255,7 +232,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     private void setDefaultStyle() {
         table.getStylesheets().clear();
-        table.getStylesheets().add("style/fileTableView.css");
+        table.getStylesheets().add("style/HyperCubeTableView.css");
     }
 
     public IFile getSelectedFile() {

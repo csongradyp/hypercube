@@ -21,6 +21,7 @@ public class PathBundle {
 //        mappings.get("test").put("C:\\Users", "/A/B/C");
 //        mappings.get("test").put("C:\\Users", "/x");
 //        mappings.get("Dropbox").put("D:\\test", "/newtest");
+//        mappings.get("Dropbox").put("D:\\install", "/other");
         addListenerForAccountChanges();
     }
 
@@ -52,7 +53,7 @@ public class PathBundle {
         return accountMapping.getKey(folder.replaceAll("\\\\", "/"));
     }
 
-    public static Map<String, String> getAllFolders(final String folder) {
+    public static Map<String, String> getAllRemoteFolders(final String folder) {
         final Map<String, String> folders = new HashMap<>();
         final Set<String> accounts = instance.mappings.keySet();
         for (String account : accounts) {
@@ -64,7 +65,51 @@ public class PathBundle {
         return folders;
     }
 
-    public static Set<String> getAccounts(LocalFile folder) {
+    public static Set<String> getLocalFolders() {
+        final Set<String> localFolders = new HashSet<>();
+        final Collection<DualHashBidiMap<String, String>> mappings = instance.mappings.values();
+        for (DualHashBidiMap<String, String> mapping : mappings) {
+            localFolders.addAll(mapping.keySet());
+        }
+        return localFolders;
+    }
+
+    public static Set<String> getLocalFolders(final String localRoot) {
+        final Set<String> localFolders = new HashSet<>();
+        final Collection<DualHashBidiMap<String, String>> mappings = instance.mappings.values();
+        for (DualHashBidiMap<String, String> mapping : mappings) {
+            final Set<String> folders = mapping.keySet();
+            for (String folder : folders) {
+                if(folder.contains(localRoot)) {
+                    localFolders.add(folder);
+                }
+            }
+        }
+        return localFolders;
+    }
+
+    public static Set<String> getLocalFoldersByRemote(final String remoteFolder) {
+        final Set<String> localFolders = new HashSet<>();
+        final Set<String> accounts = instance.mappings.keySet();
+        for (String account : accounts) {
+            final Set<Map.Entry<String, String>> mappings = instance.mappings.get(account).entrySet();
+            for (Map.Entry<String, String> mapping : mappings) {
+                if(mapping.getValue().equals(remoteFolder)) {
+                    localFolders.add(mapping.getKey());
+                }
+            }
+        }
+        return localFolders;
+    }
+
+    public static Set<String> getRemoteFolders(final String account) {
+        final Set<String> remoteFolders = new HashSet<>();
+        final DualHashBidiMap<String, String> mappings = instance.mappings.get(account);
+        remoteFolders.addAll(mappings.values());
+        return remoteFolders;
+    }
+
+    public static Set<String> getAccounts(final LocalFile folder) {
         final Set<String> sharedAccounts = new HashSet<>();
         final Set<String> accounts = instance.mappings.keySet();
         for (String account : accounts) {
