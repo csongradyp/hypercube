@@ -3,11 +3,15 @@ package com.noe.hypercube.controller;
 import com.noe.hypercube.dao.Dao;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.IEntity;
+import com.noe.hypercube.domain.LocalFileEntity;
 import com.noe.hypercube.domain.MappingEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.inject.Named;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @Named
@@ -17,6 +21,8 @@ public class PersistenceController implements IPersistenceController {
 
     private final Map<Class<? extends IEntity>, Dao> daoMap;
     private final Collection<Dao<String, IEntity>> daos;
+    @Inject
+    private Dao<String, LocalFileEntity> localFileEntityDao;
 
     public PersistenceController(final Collection<Dao<String, IEntity>> daos) {
         daoMap = new HashMap<>();
@@ -104,6 +110,17 @@ public class PersistenceController implements IPersistenceController {
     }
 
     @Override
+    public Path getRemoteFolder(final Class<? extends MappingEntity> mappingType, final Path targetFolder) {
+        final Collection<MappingEntity> mappings = getMappings(mappingType);
+        for (MappingEntity mapping : mappings) {
+            if(targetFolder.equals(mapping.getLocalDir())) {
+                return Paths.get(mapping.getRemoteDir());
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Set<Class<IEntity>> getEntitiesMapping(String folder) {
         Set<Class<IEntity>> results = new HashSet<>();
         for (Dao<String, IEntity> dao : daos) {
@@ -157,5 +174,16 @@ public class PersistenceController implements IPersistenceController {
 
     private boolean isFileEntityDao(Dao dao) {
         return FileEntity.class.isAssignableFrom(dao.getEntityClass());
+    }
+
+    @Override
+    public void save(LocalFileEntity localFileEntity) {
+        localFileEntityDao.persist(localFileEntity);
+    }
+
+    @Override
+    public LocalFileEntity getLocalFileEntity(final Path localFilePath) {
+        final LocalFileEntity byId = localFileEntityDao.findById(localFilePath.toString());
+        return byId;
     }
 }

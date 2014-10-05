@@ -4,6 +4,7 @@ package com.noe.hypercube.synchronization.upstream;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.FileEntityFactory;
+import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
@@ -28,7 +29,7 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     private final BlockingQueue<UploadEntity> uploadQ;
     private boolean stop = false;
 
-    public QueueUploader(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> persistenceController, IPersistenceController entityFactory) {
+    public QueueUploader(IClient<ACCOUNT_TYPE, ENTITY_TYPE, ? extends MappingEntity> client, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> persistenceController, IPersistenceController entityFactory) {
         super(client, entityFactory, persistenceController);
         uploadQ = new LinkedBlockingDeque<>(100);
     }

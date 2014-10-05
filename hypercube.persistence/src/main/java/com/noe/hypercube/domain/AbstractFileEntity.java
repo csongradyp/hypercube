@@ -36,6 +36,11 @@ public abstract class AbstractFileEntity implements FileEntity {
     }
 
     @Override
+    public void setRemotePath(String remotePath) {
+        this.remotePath = remotePath;
+    }
+
+    @Override
     public String getRevision() {
         return revision;
     }

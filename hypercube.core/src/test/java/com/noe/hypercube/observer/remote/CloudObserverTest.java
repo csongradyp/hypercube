@@ -24,7 +24,7 @@ public class CloudObserverTest {
     @Mock
     private IPersistenceController mockPersistence;
     @Mock
-    private IClient<TestAccount, TestEntity> mockClient;
+    private IClient<TestAccount, TestEntity, TestMapping> mockClient;
     @Mock
     private IMapper<TestAccount, TestMapping> mockMapper;
     @Mock

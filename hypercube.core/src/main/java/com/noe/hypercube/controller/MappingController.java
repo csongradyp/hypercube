@@ -3,6 +3,7 @@ package com.noe.hypercube.controller;
 
 import com.noe.hypercube.domain.MappingEntity;
 
+import java.nio.file.Path;
 import java.util.Collection;
 
 public interface MappingController {
@@ -15,4 +16,5 @@ public interface MappingController {
 
     void removeMapping(MappingEntity mapping);
 
+    Path getRemoteFolder(Class<? extends MappingEntity> mappingType, Path targetFolder);
 }

@@ -1,27 +1,24 @@
 package com.noe.hypercube.synchronization;
 
-import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.observer.local.LocalFileListener;
-import com.noe.hypercube.synchronization.presynchronization.IFilePreSynchronizer;
+import com.noe.hypercube.observer.local.LocalFileObserver;
+import com.noe.hypercube.synchronization.presynchronization.FolderPreSynchronizer;
+import com.noe.hypercube.synchronization.presynchronization.IPreSynchronizer;
 
-import javax.inject.Inject;
+import javax.inject.Named;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
+@Named
 public class PreSynchronizerFactory {
 
-    @Inject
-    private IPersistenceController persistenceController;
-
-    public Collection<IFilePreSynchronizer> create(final Collection<LocalFileListener> fileListeners) {
-        final Collection<IFilePreSynchronizer> filePreSynchronizers = new ArrayList<>();
-        for (LocalFileListener listener : fileListeners) {
-            final Map<String,List<FileEntity>> mappings = persistenceController.getMappedEntities(listener.getTargetDir().toString());
-//            new FilePreSynchronizer(listener, mappings);
+    public Collection<IPreSynchronizer> create(final List<LocalFileObserver> localObservers) {
+        final Collection<IPreSynchronizer> preSynchronizers = new ArrayList<>();
+        for (LocalFileObserver localObserver : localObservers) {
+            final Path localFolder = localObserver.getTargetDir();
+            preSynchronizers.add(new FolderPreSynchronizer(localFolder));
         }
-        return filePreSynchronizers;
+        return preSynchronizers;
     }
 }

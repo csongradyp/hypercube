@@ -2,11 +2,12 @@ package com.noe.hypercube.service;
 
 
 import com.noe.hypercube.domain.FileEntity;
+import com.noe.hypercube.domain.MappingEntity;
 import javafx.beans.property.SimpleBooleanProperty;
 
 import javax.annotation.PostConstruct;
 
-public abstract class Client<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> implements IClient<ACCOUNT_TYPE, ENTITY_TYPE> {
+public abstract class Client<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_ENTITY extends MappingEntity> implements IClient<ACCOUNT_TYPE, ENTITY_TYPE, MAPPING_ENTITY> {
 
     private SimpleBooleanProperty connected = new SimpleBooleanProperty(false);
 

@@ -118,7 +118,7 @@ public class LocalFileListener implements FileAlterationListener {
     }
 
     public String getOrigin(final File file) {
-        final Set<Class<IEntity>> entityTypes = persistenceController.getEntitiesMapping(file.toPath().toString().toString());
+        final Set<Class<IEntity>> entityTypes = persistenceController.getEntitiesMapping(file.toPath().toString());
         final int foundOrigins = entityTypes.size();
         if (foundOrigins > 0) {
             if (foundOrigins == 1) {
@@ -127,7 +127,6 @@ public class LocalFileListener implements FileAlterationListener {
                         return accountBox.getClient().getAccountName();
                     }
                 }
-
             }
             LOG.debug("{} origin is ambiguous", file);
             return String.format("(%d)", System.currentTimeMillis());

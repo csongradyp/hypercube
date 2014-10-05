@@ -2,11 +2,12 @@ package com.noe.hypercube.domain;
 
 
 import com.noe.hypercube.synchronization.Action;
-import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil.createResolvedFileName;
 
 public class UploadEntity {
 
@@ -38,15 +39,9 @@ public class UploadEntity {
 
     public Path getRemoteFilePath() {
         if (conflicted) {
-            return Paths.get(remoteFolder.toString(), createResolvedFileName());
+            return Paths.get(remoteFolder.toString(), createResolvedFileName(this));
         }
         return Paths.get(remoteFolder.toString(), file.getName());
-    }
-
-    private String createResolvedFileName() {
-        final String ext = FilenameUtils.getExtension(file.toString());
-        final String baseName = FilenameUtils.getBaseName(file.toString());
-        return String.format("%s (%s).%s", baseName, origin, ext);
     }
 
     public File getFile() {

@@ -15,6 +15,10 @@ public class TestEntity implements FileEntity {
     }
 
     @Override
+    public void setRemotePath(String remotePath) {
+    }
+
+    @Override
     public String getRevision() {
         return "1";
     }

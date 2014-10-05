@@ -8,6 +8,8 @@ public interface FileEntity extends IEntity<String>, Comparable<FileEntity> {
 
     String getRemotePath();
 
+    void setRemotePath(String remotePath);
+
     String getRevision();
 
     void setRevision(String revision);

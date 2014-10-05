@@ -1,10 +1,7 @@
 package com.noe.hypercube.synchronization.upstream;
 
 import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.FileEntityFactory;
-import com.noe.hypercube.domain.ServerEntry;
-import com.noe.hypercube.domain.UploadEntity;
+import com.noe.hypercube.domain.*;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.FileEvent;
 import com.noe.hypercube.event.domain.type.FileActionType;
@@ -27,11 +24,11 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
 
     private static final Logger LOG = LoggerFactory.getLogger(Uploader.class);
 
-    protected final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
+    protected final IClient<ACCOUNT_TYPE, ENTITY_TYPE, ? extends MappingEntity> client;
     private final IPersistenceController persistenceController;
     private final FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory;
 
-    protected Uploader(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, IPersistenceController persistenceController, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory) {
+    protected Uploader(IClient<ACCOUNT_TYPE, ENTITY_TYPE, ? extends MappingEntity> client, IPersistenceController persistenceController, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory) {
         this.persistenceController = persistenceController;
         this.client = client;
         this.entityFactory = entityFactory;
@@ -68,7 +65,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
         }
     }
 
-    private void upload(final UploadEntity uploadEntity, Action action) throws SynchronizationException {
+    private void upload(final UploadEntity uploadEntity, final Action action) throws SynchronizationException {
         final Path localPath = uploadEntity.getFile().toPath();
         final Path remotePath = uploadEntity.getRemoteFilePath();
         final String accountName = client.getAccountName();
@@ -101,6 +98,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
     private void persist(final Path localPath, final ServerEntry uploadedFile) throws IOException {
         FileEntity fileEntity = entityFactory.createFileEntity(localPath.toString(), uploadedFile.getPath().toString(), uploadedFile.getRevision(), uploadedFile.lastModified());
         persistenceController.save(fileEntity);
+        persistenceController.save(new LocalFileEntity(localPath.toFile()));
     }
 
     @Override

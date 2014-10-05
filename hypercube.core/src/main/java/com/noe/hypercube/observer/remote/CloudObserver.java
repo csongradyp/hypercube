@@ -22,7 +22,7 @@ public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     private static final Logger LOG = LoggerFactory.getLogger(CloudObserver.class);
 
     private final IPersistenceController persistenceController;
-    private final IClient<ACCOUNT_TYPE, ENTITY_TYPE> client;
+    private final IClient<ACCOUNT_TYPE, ENTITY_TYPE, ? extends MappingEntity> client;
     private final IMapper<ACCOUNT_TYPE, ? extends MappingEntity> directoryMapper;
     private final IDownloader downloader;
 

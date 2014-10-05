@@ -23,14 +23,14 @@ import java.util.List;
 
 public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_TYPE extends MappingEntity> implements FileEventHandler {
 
-    private final Client<ACCOUNT_TYPE, ENTITY_TYPE> client;
+    private final Client<ACCOUNT_TYPE, ENTITY_TYPE, MAPPING_TYPE> client;
     private final IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper;
     private final FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory;
 
     private final IDownloader downloader;
     private final IUploader<ACCOUNT_TYPE, ENTITY_TYPE> uploader;
 
-    public AccountBox(Client<ACCOUNT_TYPE, ENTITY_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory, IPersistenceController persistenceController) {
+    public AccountBox(Client<ACCOUNT_TYPE, ENTITY_TYPE, MAPPING_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory, IPersistenceController persistenceController) {
         validate(client, mapper, entityFactory);
         this.entityFactory = entityFactory;
         this.client = client;
@@ -71,7 +71,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
         EventBus.unsubscribeToDeleteRequest(AccountBox.this);
     }
 
-    private void validate(IClient<ACCOUNT_TYPE, ENTITY_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory) {
+    private void validate(IClient<ACCOUNT_TYPE, ENTITY_TYPE, MAPPING_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory) {
         // TODO validate types
     }
 
@@ -79,7 +79,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
         return client.getAccountType();
     }
 
-    public IClient<ACCOUNT_TYPE, ENTITY_TYPE> getClient() {
+    public IClient<ACCOUNT_TYPE, ENTITY_TYPE, MAPPING_TYPE> getClient() {
         return client;
     }
 

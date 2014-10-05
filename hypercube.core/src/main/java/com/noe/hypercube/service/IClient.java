@@ -1,9 +1,6 @@
 package com.noe.hypercube.service;
 
-import com.noe.hypercube.domain.AccountQuota;
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.ServerEntry;
-import com.noe.hypercube.domain.UploadEntity;
+import com.noe.hypercube.domain.*;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -12,7 +9,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
-public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> {
+    public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_ENTITY extends MappingEntity> {
 
     /**
      * Returns the official name of the file hosting service.
@@ -24,6 +21,8 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
      * Returns the account specific <code>Class</code> which is annotated with @Entity.
      */
     Class<ENTITY_TYPE> getEntityType();
+
+    Class<MAPPING_ENTITY> getMappingType();
 
     Class<ACCOUNT_TYPE> getAccountType();
 

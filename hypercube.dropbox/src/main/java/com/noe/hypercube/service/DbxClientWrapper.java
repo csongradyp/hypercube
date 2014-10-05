@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity> {
+public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DbxClientWrapper.class);
 
@@ -49,6 +49,11 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity> {
     @Override
     public Class<DbxFileEntity> getEntityType() {
         return DbxFileEntity.class;
+    }
+
+    @Override
+    public Class<DbxMapping> getMappingType() {
+        return DbxMapping.class;
     }
 
     @Override

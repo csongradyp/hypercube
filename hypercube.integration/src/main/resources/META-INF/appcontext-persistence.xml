@@ -29,4 +29,6 @@
         </property>
     </bean>
 
+    <bean id="localFileEntityDao" class="com.noe.hypercube.dao.LocalFileEntityDao" />
+
 </beans>

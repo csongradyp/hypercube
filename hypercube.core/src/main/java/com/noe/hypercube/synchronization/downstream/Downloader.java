@@ -3,6 +3,7 @@ package com.noe.hypercube.synchronization.downstream;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.FileEntityFactory;
+import com.noe.hypercube.domain.LocalFileEntity;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.FileEvent;
@@ -40,7 +41,7 @@ public class Downloader implements IDownloader {
 
     private AtomicBoolean stop = new AtomicBoolean(false);
 
-    public Downloader(IClient client, IMapper directoryMapper, FileEntityFactory entityFactory, IPersistenceController persistenceController) {
+    public Downloader(final IClient client, final IMapper directoryMapper, final FileEntityFactory entityFactory, final IPersistenceController persistenceController) {
         this.client = client;
         this.persistenceController = persistenceController;
         this.directoryMapper = directoryMapper;
@@ -49,7 +50,7 @@ public class Downloader implements IDownloader {
     }
 
     @Override
-    public void download(ServerEntry entry) {
+    public void download(final ServerEntry entry) {
         downloadQ.add(entry);
     }
 
@@ -113,7 +114,7 @@ public class Downloader implements IDownloader {
         run();
     }
 
-    private Action getDeltaAction(ServerEntry entry, File localPath) {
+    private Action getDeltaAction(final ServerEntry entry, final File localPath) {
         FileEntity fileEntity = persistenceController.get(localPath.toString(), client.getEntityType());
         if (fileEntity != null) {
             if (isDifferentRevision(entry, fileEntity)) {
@@ -124,7 +125,7 @@ public class Downloader implements IDownloader {
         return ADDED;
     }
 
-    private boolean isDifferentRevision(ServerEntry entry, FileEntity dbEntry) {
+    private boolean isDifferentRevision(final ServerEntry entry, final FileEntity dbEntry) {
         return !dbEntry.getRevision().equals(entry.getRevision());
     }
 
@@ -140,15 +141,15 @@ public class Downloader implements IDownloader {
     }
 
 
-    private boolean isConflicted(File newLocalFile) {
+    private boolean isConflicted(final File newLocalFile) {
         return newLocalFile.exists() && isNotMapped(newLocalFile);
     }
 
-    private boolean isNotMapped(File newLocalFile) {
+    private boolean isNotMapped(final File newLocalFile) {
         return persistenceController.get(newLocalFile.toPath().toString(), client.getEntityType()) == null;
     }
 
-    private void downloadFromServer(ServerEntry entry) {
+    private void downloadFromServer(final ServerEntry entry) {
         if (entry.isFile()) {
             final List<Path> localPaths = directoryMapper.getLocals(entry.getPath());
             for (Path localPath : localPaths) {
@@ -198,7 +199,7 @@ public class Downloader implements IDownloader {
         }
     }
 
-    private void setLocalFileLastModifiedDate(ServerEntry entry, File newLocalFile) {
+    private void setLocalFileLastModifiedDate(final ServerEntry entry, final File newLocalFile) {
         long lastModified = entry.lastModified().getTime();
         boolean success = newLocalFile.setLastModified(lastModified);
         if (!success) {
@@ -206,12 +207,13 @@ public class Downloader implements IDownloader {
         }
     }
 
-    private void persist(ServerEntry entry, Path localPath) {
+    private void persist(final ServerEntry entry, final Path localPath) {
         FileEntity fileEntity = entityFactory.createFileEntity(localPath.toString(), entry.getPath().toString(), entry.getRevision(), entry.lastModified());
         persistenceController.save(fileEntity);
+        persistenceController.save(new LocalFileEntity(localPath.toFile()));
     }
 
-    private void deleteLocalFile(ServerEntry entry) {
+    private void deleteLocalFile(final ServerEntry entry) {
         List<Path> localDirs = directoryMapper.getLocals(entry.getPath());
         for (Path localDir : localDirs) {
             final Path localFile = Paths.get(localDir.toString(), entry.getPath().getFileName().toString());
@@ -219,7 +221,7 @@ public class Downloader implements IDownloader {
         }
     }
 
-    private void delete(Path localFile, ServerEntry entry) {
+    private void delete(final Path localFile, final ServerEntry entry) {
         File fileToDelete = localFile.toFile();
         if (fileToDelete.isFile()) {
             try {

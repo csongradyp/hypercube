@@ -12,6 +12,7 @@ import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.googledrive.domain.DriveFileEntity;
+import com.noe.hypercube.googledrive.domain.DriveMapping;
 import com.noe.hypercube.googledrive.domain.DriveServerEntry;
 import com.noe.hypercube.service.Client;
 import com.noe.hypercube.synchronization.SynchronizationException;
@@ -33,7 +34,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
+public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DriveClient.class);
     private static final String EXCLUDE_FILE = "collaboration";
@@ -57,6 +58,11 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity> {
     @Override
     public Class<DriveFileEntity> getEntityType() {
         return DriveFileEntity.class;
+    }
+
+    @Override
+    public Class<DriveMapping> getMappingType() {
+        return DriveMapping.class;
     }
 
     @Override

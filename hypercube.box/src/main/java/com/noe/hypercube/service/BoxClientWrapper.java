@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
 
-public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
+public class BoxClientWrapper extends Client<Box, BoxFileEntity, BoxMapping> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BoxClientWrapper.class);
 
@@ -64,6 +64,11 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity> {
     @Override
     public Class<BoxFileEntity> getEntityType() {
         return BoxFileEntity.class;
+    }
+
+    @Override
+    public Class<BoxMapping> getMappingType() {
+        return BoxMapping.class;
     }
 
     @Override
