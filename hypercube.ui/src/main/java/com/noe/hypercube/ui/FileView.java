@@ -9,7 +9,6 @@ import com.noe.hypercube.ui.domain.file.IFile;
 import com.noe.hypercube.ui.domain.file.LocalFile;
 import com.noe.hypercube.ui.elements.AccountSegmentedButton;
 import com.noe.hypercube.ui.elements.LocalDriveSegmentedButton;
-import com.noe.hypercube.ui.util.StyleUtil;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -87,6 +86,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         localDrives.setOnAction(this::onLocalDriveAction);
+        localDrives.setActive(true);
         initRemoteDrives();
         table.getLocationProperty().addListener((observable, previousFolder, newFolder) -> {
             if (newFolder != null) {
@@ -186,10 +186,8 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
             selectedFile.mark();
         } else if (shiftUp.match(event)) {
             selectedFile.mark();
-            table.getSelectionModel().selectAboveCell();
         } else if (shiftDown.match(event)) {
             selectedFile.mark();
-            table.getSelectionModel().selectBelowCell();
         } else if (ctrlF5.match(event)) {
             refresh();
         } else if (ctrlA.match(event)) {
@@ -327,7 +325,6 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
                 } else {
                     multiBreadCrumbBar.setRemoteBreadCrumbs(event.getAccount(), event.getFolder());
                 }
-                StyleUtil.changeStyle(table, event.getAccount());
                 setRemoteFileList(event);
                 driveSpaceBar.update(event.getQuotaInfo());
             });

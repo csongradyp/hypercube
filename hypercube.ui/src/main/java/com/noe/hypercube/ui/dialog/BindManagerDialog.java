@@ -1,16 +1,20 @@
 package com.noe.hypercube.ui.dialog;
 
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
-import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.bundle.PathBundle;
 import com.noe.hypercube.ui.elements.AccountSegmentedButton;
 import com.noe.hypercube.ui.elements.LocalDriveSegmentedButton;
+import com.noe.hypercube.ui.factory.MappingListCellFactory;
+import de.jensd.fx.fontawesome.AwesomeDude;
+import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ListCell;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ToggleButton;
 import javafx.util.Callback;
@@ -61,26 +65,7 @@ public class BindManagerDialog extends Dialog implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        mappingFolderList.setCellFactory(new Callback<ListView<Map.Entry<String, String>>, ListCell<Map.Entry<String, String>>>() {
-            @Override
-            public ListCell<Map.Entry<String, String>> call(ListView<Map.Entry<String, String>> param) {
-                return new ListCell<Map.Entry<String, String>>() {
-                    @Override
-                    protected void updateItem(Map.Entry<String, String> entry, boolean empty) {
-                        super.updateItem(entry, empty);
-                        if (entry != null) {
-                            final String key = entry.getKey();
-                            if (key.isEmpty()) {
-                                setGraphic(ImageBundle.getImageView("thumb.folder"));
-                            } else {
-                                setGraphic(ImageBundle.getAccountImageView(key));
-                            }
-                            setText(entry.getValue());
-                        }
-                    }
-                };
-            }
-        });
+        mappingFolderList.setCellFactory(new MappingListCellFactory(remoteDrives));
         sourceFolderList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 final Collection<Map.Entry<String, String>> mappedFolders = new HashSet<>();
@@ -94,37 +79,46 @@ public class BindManagerDialog extends Dialog implements Initializable {
                     final Map<String, String> allRemoteFolders = PathBundle.getAllRemoteFolders(newValue);
                     mappedFolders.addAll(allRemoteFolders.entrySet());
                 }
-//                mappingFolderList.setItems(FXCollections.observableArrayList(mappedFolders));
-                mappingFolderList.getItems().clear();
-                mappingFolderList.getItems().addAll(mappedFolders);
+                mappingFolderList.setItems(FXCollections.observableArrayList(mappedFolders));
             }
         });
-        localDrives.setOnAction(event -> {
+        localDrives.setOnAction(onDriveAction(localRoot -> {
             remoteDrives.deselectButtons();
+            return PathBundle.getLocalFolders(localRoot);
+        }));
+        remoteDrives.setOnAction(onDriveAction(account -> {
+            localDrives.setActive(false);
+            return PathBundle.getRemoteFolders(account);
+        }));
+        setEmptyTablePlaceholder(sourceFolderList, resources);
+        setEmptyTablePlaceholder(mappingFolderList, resources);
+        localDrives.getButtons().get(0).fire();
+    }
+
+    private EventHandler<ActionEvent> onDriveAction(final Callback<String, Set<String>> mappingListCallback) {
+        return event -> {
             final ToggleButton driveButton = (ToggleButton) event.getSource();
             driveButton.setSelected(true);
-            final String driveLabel = driveButton.getText();
-            sourceFolderList.setItems(FXCollections.observableArrayList(PathBundle.getLocalFolders(driveLabel)));
-            sourceFolderList.getSelectionModel().selectFirst();
-        });
-        remoteDrives.setOnAction(event -> {
-            localDrives.deselectButtons();
-            final ToggleButton driveButton = (ToggleButton) event.getSource();
-            driveButton.setSelected(true);
-            final String account = driveButton.getId();
-            sourceFolderList.setItems(FXCollections.observableArrayList(PathBundle.getRemoteFolders(account)));
-            sourceFolderList.getSelectionModel().selectFirst();
-        });
+            final String listRoot = driveButton.getId();
+            final Set<String> folders = mappingListCallback.call(listRoot);
+            sourceFolderList.setItems(FXCollections.observableArrayList(folders));
+            if(folders.isEmpty()) {
+                mappingFolderList.setItems(null);
+            } else {
+                sourceFolderList.getSelectionModel().selectFirst();
+            }
+            sourceFolderList.requestFocus();
+        };
+    }
+
+    private void setEmptyTablePlaceholder(final ListView listView, final ResourceBundle resources) {
+        final Label iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.CHAIN_BROKEN, resources.getString("bind.empty"), "100px", "12", ContentDisplay.TOP);
+        iconLabel.getGraphic().setOpacity(0.3d);
+        listView.setPlaceholder(iconLabel);
     }
 
     public void onAdd() {
         final AddMappingDialog addMappingDialog = new AddMappingDialog();
         addMappingDialog.show();
     }
-
-    @FXML
-    public void onRemove() {
-
-    }
-
 }
