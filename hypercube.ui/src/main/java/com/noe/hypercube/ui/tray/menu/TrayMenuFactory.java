@@ -12,7 +12,7 @@ public class TrayMenuFactory {
 
     private static final Integer WINDOW_SIZE = 300;
 
-    public static void showPopupMenuDialog(final Integer x, final Integer y, final Stage primaryView) {
+    public static JDialog createPopupMenuDialog(final Integer x, final Integer y, final Stage primaryView) {
         final TrayMenu trayMenu = new TrayMenu(primaryView);
         final JFXPanel fxPanel = new JFXPanel();
         final JDialog trayPopupMenu = new JDialog();
@@ -27,7 +27,6 @@ public class TrayMenuFactory {
                 trayPopupMenu.dispose();
             }
         });
-        trayPopupMenu.setVisible(true);
+        return trayPopupMenu;
     }
-
 }
