@@ -15,4 +15,13 @@ public class DbxDirectoryMapper extends DirectoryMapper<Dropbox, DbxMapping> {
         return Dropbox.class;
     }
 
+    @Override
+    protected DbxMapping createMapping() {
+        return new DbxMapping();
+    }
+
+    @Override
+    protected String getAccountName() {
+        return Dropbox.getName();
+    }
 }

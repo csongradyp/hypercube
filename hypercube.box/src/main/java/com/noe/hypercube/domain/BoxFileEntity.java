@@ -16,8 +16,17 @@ public class BoxFileEntity extends AbstractFileEntity {
         super(localPath, remotePath, revision);
     }
 
+    public BoxFileEntity(AbstractFileEntity fileEntity) {
+        super(fileEntity);
+    }
+
     public BoxFileEntity(final String localPath, final String remotePath, final String revision, final Date lastModified) {
         super(localPath, remotePath, revision, lastModified);
+    }
+
+    @Override
+    public FileEntity getNewInstance(AbstractFileEntity fileEntity) {
+        return new BoxFileEntity(fileEntity);
     }
 
     @Override

@@ -19,4 +19,6 @@ public interface FileEntity extends IEntity<String>, Comparable<FileEntity> {
     void setLastModified(Date lastModified);
 
     String getAccountName();
+
+    FileEntity duplicate();
 }

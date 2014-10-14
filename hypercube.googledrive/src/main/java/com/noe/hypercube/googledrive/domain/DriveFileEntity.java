@@ -1,6 +1,7 @@
 package com.noe.hypercube.googledrive.domain;
 
 import com.noe.hypercube.domain.AbstractFileEntity;
+import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.googledrive.service.GoogleDrive;
 
 import javax.persistence.Entity;
@@ -22,12 +23,22 @@ public class DriveFileEntity extends AbstractFileEntity {
         super(localPath, remotePath, revision);
     }
 
+    public DriveFileEntity(AbstractFileEntity fileEntity, String fileId) {
+        super(fileEntity);
+        this.fileId = fileId;
+    }
+
     public String getFileId() {
         return fileId;
     }
 
     public void setFileId(final String fileId) {
         this.fileId = fileId;
+    }
+
+    @Override
+    public FileEntity getNewInstance(AbstractFileEntity fileEntity) {
+        return new DriveFileEntity(fileEntity, fileId);
     }
 
     @Override

@@ -19,6 +19,7 @@ public final class EventBus {
     private final MBassador<CreateFolderRequest> createFolderRequestBus;
     private final MBassador<DeleteRequest> deleteRequestBus;
     private final MBassador<MappingRequest> mappingRequestBus;
+    private final MBassador<MappingResponse> mappingResponseBus;
 
     private EventBus() {
         storageEventBus = new MBassador<>(BusConfiguration.Default());
@@ -31,7 +32,8 @@ public final class EventBus {
         createFolderRequestBus = new MBassador<>(BusConfiguration.Default());
         deleteRequestBus = new MBassador<>(BusConfiguration.Default());
         mappingRequestBus = new MBassador<>(BusConfiguration.Default());
-        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, fileListRequestBus, fileListResponseBus, uploadRequestBus, downloadRequestBus, createFolderRequestBus, deleteRequestBus, mappingRequestBus);
+        mappingResponseBus = new MBassador<>(BusConfiguration.Default());
+        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, fileListRequestBus, fileListResponseBus, uploadRequestBus, downloadRequestBus, createFolderRequestBus, deleteRequestBus, mappingRequestBus, mappingResponseBus);
     }
 
     private void registerShutdownHook(MBassador<?>... mBassadors) {
@@ -114,6 +116,14 @@ public final class EventBus {
 
     public static void subscribeToMappingRequest(EventHandler<MappingRequest> handler) {
         instance.mappingRequestBus.subscribe(handler);
+    }
+
+    public static void publish(MappingResponse mappingResponse) {
+        instance.mappingResponseBus.publish(mappingResponse);
+    }
+
+    public static void subscribeToMappingResponse(EventHandler<MappingResponse> handler) {
+        instance.mappingResponseBus.subscribe(handler);
     }
 
     public static void subscribeToDeleteRequest(FileEventHandler handler) {

@@ -4,41 +4,61 @@ import java.util.Date;
 
 public class TestEntity implements FileEntity {
 
+    private String rev;
+    private Date lastModified;
+    private String remotePath;
+    private final String localPath;
+
+    public TestEntity(String localPath, String remotePath, Date lastModified, String rev) {
+        this.localPath = localPath;
+        this.remotePath = remotePath;
+        this.lastModified = lastModified;
+        this.rev = rev;
+    }
+
     @Override
     public String getLocalPath() {
-        return "A/B";
+        return localPath;
     }
 
     @Override
     public String getRemotePath() {
-        return "";
+        return remotePath;
     }
 
     @Override
     public void setRemotePath(String remotePath) {
+        this.remotePath = remotePath;
     }
 
     @Override
     public String getRevision() {
-        return "1";
+        return rev;
     }
 
     @Override
     public void setRevision(String revision) {
+        rev = revision;
     }
 
     @Override
     public Date lastModified() {
-        return new Date();
+        return lastModified;
     }
 
     @Override
     public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
     }
 
     @Override
     public String getAccountName() {
-        return null;
+        return "test";
+    }
+
+    @Override
+    public FileEntity duplicate() {
+        return this;
     }
 
     @Override
@@ -49,5 +69,15 @@ public class TestEntity implements FileEntity {
     @Override
     public String getId() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "TestEntity{" +
+                "rev='" + rev + '\'' +
+                ", lastModified=" + lastModified +
+                ", remotePath='" + remotePath + '\'' +
+                ", localPath='" + localPath + '\'' +
+                '}';
     }
 }

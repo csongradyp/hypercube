@@ -16,4 +16,13 @@ public class DriveDirectoryMapper extends DirectoryMapper<GoogleDrive, DriveMapp
         return GoogleDrive.class;
     }
 
+    @Override
+    protected DriveMapping createMapping() {
+        return new DriveMapping();
+    }
+
+    @Override
+    protected String getAccountName() {
+        return GoogleDrive.name;
+    }
 }

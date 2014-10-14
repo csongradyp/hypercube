@@ -29,7 +29,6 @@ public class Runner {
     private static HyperCubeApp app;
 
     public static void main(String[] args) throws IOException {
-//        updateAuthProperty();
         if (INSTANCE_MONITOR.isAlreadyRunning()) {
             JOptionPane.showMessageDialog(new Frame(), ALREADY_RUNNING_ERROR_MSG, ALREADY_RUNNING_ERROR_TITLE, JOptionPane.ERROR_MESSAGE);
             Runner.exit();
@@ -47,20 +46,6 @@ public class Runner {
             });
         }
     }
-
-//    private static void updateAuthProperty() {
-//        String url = Connect.getUrl();
-//        JOptionPane.showInputDialog(null, "Open in browser", url);
-//        String authCode = JOptionPane.showInputDialog("Enter Authorization code");
-//        Properties properties = new Properties();
-//        InputStream resourceAsStream = Connect.class.getClassLoader().getResourceAsStream("auth.properties");
-//        try {
-//            properties.load(resourceAsStream);
-//            properties.setProperty("google.auth.code", authCode);
-//            properties.store(new FileWriter(new File("D:\\Code\\hypercube\\src\\main\\resources\\auth.properties")),"");
-//        } catch (IOException e) {
-//        }
-//    }
 
     public static void exit() {
         if (canExit()) {

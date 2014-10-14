@@ -55,7 +55,7 @@ public class CloudObserverTest {
     public void downloadsFileWhenChangedFileOnServerIsInWatchedDirectory() throws SynchronizationException {
         final Collection<ServerEntry> changes = givenChangesOnServer();
         given(mockClient.getChanges()).willReturn(changes);
-        given(mockPersistence.getMappings(any())).willReturn(givenMappings());
+        given(mockPersistence.getMappings(any(Class.class))).willReturn(givenMappings());
 
         underTest.run();
 

@@ -30,6 +30,10 @@ public abstract class AbstractFileEntity implements FileEntity {
         this(localPath, remotePath, revision, new Date());
     }
 
+    public AbstractFileEntity(final AbstractFileEntity fileEntity) {
+        this(fileEntity.getLocalPath(), fileEntity.getRemotePath(), fileEntity.getRevision(), fileEntity.lastModified());
+    }
+
     @Override
     public String getLocalPath() {
         return localPath;
@@ -77,4 +81,11 @@ public abstract class AbstractFileEntity implements FileEntity {
         }
         return -1;
     }
+
+    @Override
+    public FileEntity duplicate() {
+        return getNewInstance(this);
+    }
+
+    public abstract FileEntity getNewInstance(AbstractFileEntity fileEntity);
 }

@@ -20,6 +20,15 @@ public class DbxFileEntity extends AbstractFileEntity {
         super(localPath, remotePath, revision);
     }
 
+    public DbxFileEntity(AbstractFileEntity fileEntity) {
+        super(fileEntity);
+    }
+
+    @Override
+    public FileEntity getNewInstance(AbstractFileEntity fileEntity) {
+        return new DbxFileEntity(fileEntity);
+    }
+
     @Override
     public String getAccountName() {
         return Dropbox.getName();

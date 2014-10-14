@@ -37,6 +37,7 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     @Override
     public void run() {
         while (!stop) {
+            LOG.info("AAAAAA: "  + this);
             try {
                 final UploadEntity uploadEntity = uploadQ.take();
                 final Action action = uploadEntity.getAction();
@@ -52,6 +53,7 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
             } catch (InterruptedException e) {
                 LOG.error(String.format("%s upload queue reading  has been interrupted", client.getAccountName()));
             }
+            LOG.info("BBBBBB: "  + this);
         }
     }
 

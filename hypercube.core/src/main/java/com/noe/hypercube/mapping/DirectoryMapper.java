@@ -2,10 +2,15 @@ package com.noe.hypercube.mapping;
 
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.MappingRequest;
+import com.noe.hypercube.event.domain.MappingResponse;
 import com.noe.hypercube.mapping.collector.Collector;
 import com.noe.hypercube.mapping.collector.LocalDirectoryCollector;
 import com.noe.hypercube.mapping.collector.RemoteDirectoryCollector;
 import com.noe.hypercube.service.Account;
+import net.engio.mbassy.listener.Handler;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -19,7 +24,7 @@ import java.util.List;
 import static com.noe.hypercube.converter.DirectoryConverter.convertToLocalPath;
 import static com.noe.hypercube.converter.DirectoryConverter.convertToRemotePath;
 
-public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE extends MappingEntity> implements IMapper<ACCOUNT_TYPE, MAPPING_TYPE> {
+public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE extends MappingEntity> implements IMapper<ACCOUNT_TYPE, MAPPING_TYPE>, EventHandler<MappingRequest> {
 
     @Inject
     private IPersistenceController persistenceController;
@@ -27,6 +32,10 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
     private LocalDirectoryCollector localDirectoryCollector;
     @Inject
     private RemoteDirectoryCollector remoteDirectoryCollector;
+
+    protected DirectoryMapper() {
+        EventBus.subscribeToMappingRequest(this);
+    }
 
     @Override
     public List<Path> getLocals(final String remotePath) {
@@ -75,6 +84,20 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
         return matchedMappings;
     }
 
+    @Override
+    @Handler(rejectSubtypes = true)
+    public void onEvent(final MappingRequest event) {
+        if (event.getAccount().equals(getAccountName())) {
+            final MAPPING_TYPE mapping = createMapping();
+            mapping.setLocalDir(event.getLocalFolder().toString());
+            mapping.setRemoteDir(event.getRemoteFolder().toString());
+            persistenceController.addMapping(mapping);
+            EventBus.publish(new MappingResponse(getAccountName(), mapping.getLocalDir(), mapping.getRemoteDir()));
+        }
+    }
+
+    protected abstract MAPPING_TYPE createMapping();
+
     public void setPersistenceController(final IPersistenceController persistenceController) {
         this.persistenceController = persistenceController;
     }
@@ -86,4 +109,6 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
     public void setRemoteDirectoryCollector(final RemoteDirectoryCollector remoteDirectoryCollector) {
         this.remoteDirectoryCollector = remoteDirectoryCollector;
     }
+
+    protected abstract String getAccountName();
 }

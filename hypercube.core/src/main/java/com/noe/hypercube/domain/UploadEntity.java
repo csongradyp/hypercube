@@ -16,6 +16,7 @@ public class UploadEntity {
     private final Action action;
     private final String origin;
     private boolean conflicted;
+    private LocalFileEntity dependent;
 
     public UploadEntity(final File file, final Path remoteFolder, final Action action) {
         this.file = file;
@@ -58,5 +59,13 @@ public class UploadEntity {
 
     public String getOrigin() {
         return origin;
+    }
+
+    public boolean isDependent() {
+        return dependent != null;
+    }
+
+    public void setDependent(LocalFileEntity dependent) {
+        this.dependent = dependent;
     }
 }

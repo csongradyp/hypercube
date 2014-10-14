@@ -15,4 +15,13 @@ public class BoxDirectoryMapper extends DirectoryMapper<Box, BoxMapping> {
         return Box.class;
     }
 
+    @Override
+    protected BoxMapping createMapping() {
+        return new BoxMapping();
+    }
+
+    @Override
+    protected String getAccountName() {
+        return Box.getName();
+    }
 }

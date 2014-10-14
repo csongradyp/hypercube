@@ -96,7 +96,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
 
 
     private void persist(final Path localPath, final ServerEntry uploadedFile) throws IOException {
-        FileEntity fileEntity = entityFactory.createFileEntity(localPath.toString(), uploadedFile.getPath().toString(), uploadedFile.getRevision(), uploadedFile.lastModified());
+        final FileEntity fileEntity = entityFactory.createFileEntity(localPath.toString(), uploadedFile.getPath().toString(), uploadedFile.getRevision(), uploadedFile.lastModified());
         persistenceController.save(fileEntity);
         persistenceController.save(new LocalFileEntity(localPath.toFile()));
     }

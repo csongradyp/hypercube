@@ -24,7 +24,7 @@ public class TestServerEntry implements ServerEntry {
 
     @Override
     public String getRevision() {
-        return null;
+        return "1";
     }
 
     @Override
@@ -60,5 +60,15 @@ public class TestServerEntry implements ServerEntry {
     @Override
     public String getAccount() {
         return "test";
+    }
+
+    @Override
+    public String toString() {
+        return "TestServerEntry{" +
+                "path=" + path +
+                ", revision='" + revision + '\'' +
+                ", lastModified=" + lastModified +
+                ", isFolder=" + isFolder +
+                '}';
     }
 }

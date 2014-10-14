@@ -122,7 +122,7 @@ public class AddMappingDialog extends Dialog implements Initializable {
             public void handle(ActionEvent actionEvent) {
                 Dialog dialog = (Dialog) actionEvent.getSource();
                 if (validationSupport.getValidationResult().getWarnings().isEmpty()) {
-                    EventBus.publish(createAddMappingRequest());
+                    publishMappingRequests();
                     dialog.hide();
                 } else {
                     validationSupport.redecorate();
@@ -132,16 +132,15 @@ public class AddMappingDialog extends Dialog implements Initializable {
         return bindActionButton;
     }
 
-    private MappingRequest createAddMappingRequest() {
-        final MappingRequest mappingRequest = new MappingRequest(Paths.get(localFolder.getText()));
+    private void publishMappingRequests() {
         final ObservableList<Node> remoteMappingChoosers = remoteMappings.getChildren();
         for (Node remoteMappingChooser : remoteMappingChoosers) {
             FolderMappingChooser mappingChooser = (FolderMappingChooser) remoteMappingChooser;
             final String account = mappingChooser.getAccount();
-            final String folder = mappingChooser.getFolder();
-            mappingRequest.add(account, Paths.get(folder));
+            final String remoteFolder = mappingChooser.getFolder();
+            final MappingRequest mappingRequest = new MappingRequest(account, Paths.get(localFolder.getText()), Paths.get(remoteFolder));
+            EventBus.publish(mappingRequest);
         }
-        return mappingRequest;
     }
 
     private void setupFolderChooser() {

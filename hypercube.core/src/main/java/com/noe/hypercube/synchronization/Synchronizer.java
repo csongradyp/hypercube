@@ -2,6 +2,9 @@ package com.noe.hypercube.synchronization;
 
 import com.noe.hypercube.controller.IAccountController;
 import com.noe.hypercube.domain.AccountBox;
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.MappingResponse;
 import com.noe.hypercube.observer.local.LocalFileMonitor;
 import com.noe.hypercube.observer.local.LocalFileObserver;
 import com.noe.hypercube.observer.local.LocalObserverFactory;
@@ -9,6 +12,7 @@ import com.noe.hypercube.observer.remote.CloudMonitor;
 import com.noe.hypercube.observer.remote.CloudObserver;
 import com.noe.hypercube.observer.remote.CloudObserverFactory;
 import com.noe.hypercube.synchronization.presynchronization.IPreSynchronizer;
+import net.engio.mbassy.listener.Handler;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
@@ -20,7 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Named
-public class Synchronizer {
+public class Synchronizer implements EventHandler<MappingResponse> {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(Synchronizer.class);
 
@@ -43,12 +47,16 @@ public class Synchronizer {
     private Collection<CloudObserver> cloudObservers;
     private Collection<IPreSynchronizer> preSynchronizers;
 
-    @PostConstruct
-    public void createExecutors() {
+    public Synchronizer() {
         localObservers = localObserverFactory.create();
         cloudObservers = cloudObserverFactory.create();
         preSynchronizers = preSynchronizerFactory.create(localObservers);
-        executorService = Executors.newFixedThreadPool(localObservers.size() + cloudObservers.size() + preSynchronizers.size());
+        executorService = Executors.newFixedThreadPool(16);
+    }
+
+    @PostConstruct
+    public void subscribeToEvent() {
+        EventBus.subscribeToMappingResponse(this);
     }
 
     public void start() {
@@ -97,5 +105,14 @@ public class Synchronizer {
 
     public CloudMonitor getCloudMonitor() {
         return cloudMonitor;
+    }
+
+    @Override
+    @Handler(rejectSubtypes = true)
+    public void onEvent(final MappingResponse event) {
+        final AccountBox accountBox = accountController.getAccountBox(event.getAccount());
+        if (event.getAccount().equals(accountBox.getClient().getAccountName())) {
+            // TODO presynchronize and submit observer ...
+        }
     }
 }

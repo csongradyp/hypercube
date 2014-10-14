@@ -1,5 +1,7 @@
 package com.noe.hypercube.ui.dialog;
 
+import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.MappingResponse;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.bundle.PathBundle;
@@ -23,7 +25,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class BindManagerDialog extends Dialog implements Initializable {
+public class BindManagerDialog extends Dialog implements Initializable, EventHandler<MappingResponse> {
 
     @FXML
     private LocalDriveSegmentedButton localDrives;
@@ -127,4 +129,8 @@ public class BindManagerDialog extends Dialog implements Initializable {
 
     }
 
+    @Override
+    public void onEvent(final MappingResponse event) {
+        // TODO add persisted mapping o the list
+    }
 }

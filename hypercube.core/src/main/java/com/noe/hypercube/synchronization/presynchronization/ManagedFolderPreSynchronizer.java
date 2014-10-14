@@ -12,7 +12,6 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -21,63 +20,61 @@ import java.util.*;
 
 import static com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil.resolveFileName;
 
-public class FolderPreSynchronizer implements IPreSynchronizer {
+public class ManagedFolderPreSynchronizer implements IPreSynchronizer {
 
     private static final Logger LOG = LoggerFactory.getLogger(FolderPreSynchronizer.class);
-    @Inject
-    private IPersistenceController persistenceController;
-    @Inject
-    private IAccountController accountController;
 
-    private final List<AccountBox> accountBoxes;
+    private final IPersistenceController persistenceController;
+    private final IAccountController accountController;
+    private final Set<AccountBox> accountBoxes;
     private final Path targetFolder;
 
-    public FolderPreSynchronizer(final Path targetFolder) {
+    public ManagedFolderPreSynchronizer(final Path targetFolder, IPersistenceController persistenceController, IAccountController accountController) {
         this.targetFolder = targetFolder;
-        accountBoxes = new ArrayList<>();
-        collectAccountsMapping(targetFolder);
+        this.persistenceController = persistenceController;
+        this.accountController = accountController;
+        accountBoxes = new HashSet<>();
     }
 
-    private void collectAccountsMapping(final Path targetFolder) {
+    @Override
+    public void run() {
+        collectAccountBoxes(targetFolder);
+        final Map<String, Collection<ServerEntry>> remoteFileLists = createRemoteFileList();
+        final Collection<File> localFiles = FileUtils.listFiles(targetFolder.toFile(), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+        final Map<String, List<FileEntity>> mappedFilesByLocalPath = persistenceController.getMappedEntities(targetFolder.toString());
+
+        for (Map.Entry<String, List<FileEntity>> mappedFilesEntity : mappedFilesByLocalPath.entrySet()) {
+            final File mappedLocalFile = Paths.get(mappedFilesEntity.getKey()).toFile();
+            final List<FileEntity> mappedRemoteFiles = mappedFilesEntity.getValue();
+            final ManagedMappings sortedMappings = getMappingsByAction(mappedRemoteFiles, remoteFileLists);
+            // local file exist scenarios
+            if (localFiles.contains(mappedLocalFile)) {
+                if (isLocalFileChanged(mappedLocalFile)) {
+                    // local file updated scenarios
+                    localFileUpdatedScenarios(mappedLocalFile, sortedMappings);
+                } else {
+                    // local file is identical scenarios
+                    localFileIdenticalScenarios(mappedLocalFile, sortedMappings);
+                }
+            } else {
+                // local file deleted scenario
+                localFileDeletedScenario(mappedLocalFile, sortedMappings);
+            }
+            final AddedFiles addedFiles = getAddedFiles(remoteFileLists, localFiles, sortedMappings);
+        }
+    }
+
+    private void collectAccountBoxes(final Path targetFolder) {
         final List<MappingEntity> mappings = persistenceController.getMappings(targetFolder.toString());
         for (MappingEntity mapping : mappings) {
             accountBoxes.add(accountController.getAccountBox(mapping.getAccountType()));
         }
     }
 
-    @Override
-    public void run() {
-        final Map<String, Collection<ServerEntry>> remoteFileLists = createRemoteFileList();
-        final Collection<File> localFiles = FileUtils.listFiles(targetFolder.toFile(), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
-        final Map<String, List<FileEntity>> files = persistenceController.getMappedEntities(targetFolder.toString());
-
-        for (String localFilePath : files.keySet()) {
-            final File mappedLocalFile = Paths.get(localFilePath).toFile();
-            final List<FileEntity> mappings = files.get(localFilePath);
-            final Map<Action, Collection<FileEntity>> sort = sort(mappings, remoteFileLists);
-            final Collection<FileEntity> updateds = sort.get(Action.CHANGED);
-            // local file exist scenarios
-            if (localFiles.contains(mappedLocalFile)) {
-                final Collection<FileEntity> identicals = sort.get(Action.IDENTICAL);
-                if (isLocalFileChanged(mappedLocalFile)) {
-                    // local file updated scenarios
-                    localFileUpdatedScenarios(mappedLocalFile, sort);
-                }
-                else {
-                    // local file is identical scenarios
-                    localFileIdenticalScenarios(mappedLocalFile, sort);
-                }
-            } else {
-                // local file deleted scenario
-                localFileDeletedScenario(mappedLocalFile, sort);
-            }
-        }
-    }
-
-    private void localFileIdenticalScenarios(File mappedLocalFile, Map<Action, Collection<FileEntity>> sort) {
-        final Collection<FileEntity> identicals = sort.get(Action.IDENTICAL);
-        final Collection<FileEntity> updateds = sort.get(Action.CHANGED);
-        final Collection<FileEntity> deleteds = sort.get(Action.REMOVED);
+    private void localFileIdenticalScenarios(File mappedLocalFile, ManagedMappings sort) {
+        final Collection<FileEntity> identicals = sort.getIdenticals();
+        final Collection<FileEntity> updateds = sort.getUpdateds();
+        final Collection<FileEntity> deleteds = sort.getDeleteds();
         if (updateds.isEmpty()) {
             // no updates
             if (deleteds.isEmpty()) {
@@ -110,33 +107,33 @@ public class FolderPreSynchronizer implements IPreSynchronizer {
         }
     }
 
-    private void localFileUpdatedScenarios(File mappedLocalFile, Map<Action, Collection<FileEntity>> sort) {
-        final Collection<FileEntity> deleted = sort.get(Action.REMOVED);
-        final Collection<FileEntity> identicals = sort.get(Action.IDENTICAL);
-        final Collection<FileEntity> updateds = sort.get(Action.CHANGED);
+    private void localFileUpdatedScenarios(File mappedLocalFile, ManagedMappings sort) {
+        final Collection<FileEntity> identicals = sort.getIdenticals();
+        final Collection<FileEntity> updateds = sort.getUpdateds();
+        final Collection<FileEntity> deleteds = sort.getDeleteds();
         if (updateds.isEmpty()) {
             // no remote file has been updated
-            if (deleted.isEmpty()) {
+            if (deleteds.isEmpty()) {
                 // no remote changes - update updated local file for all accounts
                 uploadUpdated(mappedLocalFile, identicals);
             } else {
                 // all remotes deleted - upload updated local file as new
-                uploadAllAccountsAsNew(deleted);
+                uploadAllAccountsAsNew(deleteds);
             }
         } else {
-            // there are updated files
-            if (deleted.isEmpty()) {
-                // there are just updated remote files
+            if (deleteds.isEmpty()) {
+                // there are updated files
             } else {
+                // there are just updated remote files
 
             }
         }
     }
 
-    private void localFileDeletedScenario(File mappedLocalFile, Map<Action, Collection<FileEntity>> sort) {
-        final Collection<FileEntity> identicals = sort.get(Action.IDENTICAL);
-        final Collection<FileEntity> updateds = sort.get(Action.CHANGED);
-        final Collection<FileEntity> deleteds = sort.get(Action.REMOVED);
+    private void localFileDeletedScenario(File mappedLocalFile, ManagedMappings sort) {
+        final Collection<FileEntity> identicals = sort.getIdenticals();
+        final Collection<FileEntity> updateds = sort.getUpdateds();
+        final Collection<FileEntity> deleteds = sort.getDeleteds();
         if (updateds.isEmpty()) {
             // no updates
             if (deleteds.isEmpty()) {
@@ -164,7 +161,7 @@ public class FolderPreSynchronizer implements IPreSynchronizer {
             // conflict - resolve all names with account
         } else {
             // TODO original updated files should be removed too - resolveFileName should create new Entity ????
-            List<FileEntity> resolvedRemoteFiles  = GetAsResolved(updateds);
+            List<FileEntity> resolvedRemoteFiles = getAsResolved(updateds);
             // download all updated files  with resolved names
 //            downloadWithResolvedName(updateds);
             download(resolvedRemoteFiles);
@@ -178,7 +175,7 @@ public class FolderPreSynchronizer implements IPreSynchronizer {
         }
     }
 
-    private List<FileEntity> GetAsResolved(Collection<FileEntity> updateds) {
+    private List<FileEntity> getAsResolved(Collection<FileEntity> updateds) {
         List<FileEntity> resolvedRemoteFiles = new ArrayList<>(updateds.size());
         for (FileEntity updated : updateds) {
             final FileEntity duplicated = updated.duplicate();
@@ -197,7 +194,7 @@ public class FolderPreSynchronizer implements IPreSynchronizer {
                 if (remoteFolder != null) {
                     // local folder is mapped for account
                     final List<ServerEntry> fileList = accountBox.getClient().getFileList(remoteFolder);
-                    remoteFileLists.put(accountBox.getAccountType().getName(), fileList);
+                    remoteFileLists.put(accountBox.getClient().getAccountName(), fileList);
                 }
             } catch (SynchronizationException e) {
                 LOG.error(e.getMessage(), e);
@@ -243,11 +240,11 @@ public class FolderPreSynchronizer implements IPreSynchronizer {
         }
     }
 
-    private void uploadAsNew(final File mappedLocalFile, final FileEntity deletedRemoteFile) {
+    private void uploadAsNew(final File mappedLocalFile, final FileEntity remoteFile) {
         try {
-            final UploadEntity uploadEntity = new UploadEntity(mappedLocalFile, Paths.get(deletedRemoteFile.getRemotePath()), Action.ADDED);
+            final UploadEntity uploadEntity = new UploadEntity(mappedLocalFile, Paths.get(remoteFile.getRemotePath()), Action.ADDED);
             uploadEntity.setDependent(new LocalFileEntity(mappedLocalFile));
-            accountController.getAccountBox(deletedRemoteFile.getAccountName()).getUploader().uploadUpdated(uploadEntity);
+            accountController.getAccountBox(remoteFile.getAccountName()).getUploader().uploadUpdated(uploadEntity);
         } catch (SynchronizationException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -325,40 +322,79 @@ public class FolderPreSynchronizer implements IPreSynchronizer {
         }
     }
 
-    private Map<Action, Collection<FileEntity>> sort(final List<FileEntity> mappings, final Map<String, Collection<ServerEntry>> remoteFileLists) {
-        final Map<Action, Collection<FileEntity>> actionMap = new EnumMap<>(Action.class);
-        final Collection<FileEntity> updated = new ArrayList<>();
-        final Collection<FileEntity> deleted = new ArrayList<>();
-        final Collection<FileEntity> identical = new ArrayList<>();
+    private ManagedMappings getMappingsByAction(final List<FileEntity> mappedRemoteFiles, final Map<String, Collection<ServerEntry>> remoteFileLists) {
+        final ManagedMappings managedMappings = new ManagedMappings(mappedRemoteFiles);
         // sort local file mappings by action
-        for (FileEntity mapping : mappings) {
-            final Collection<ServerEntry> accountFileList = remoteFileLists.get(mapping.getAccountName());
+        for (FileEntity mappedRemoteFile : mappedRemoteFiles) {
+            final String accountName = mappedRemoteFile.getAccountName();
+            final Collection<ServerEntry> accountFileList = remoteFileLists.get(accountName);
             for (ServerEntry serverEntry : accountFileList) {
-                if (serverEntry.getPath().equals(Paths.get(mapping.getRemotePath()))) {
-                    if (serverEntry.getRevision().equals(mapping.getRevision())) {
-                        identical.add(mapping);
+                if (serverEntry.getPath().equals(Paths.get(mappedRemoteFile.getRemotePath()))) {
+                    if (isSameRevision(mappedRemoteFile, serverEntry)) {
+//                    if (revision.equals(revision1)) {
+                        managedMappings.addIdentical(mappedRemoteFile);
                     } else {
-                        updated.add(mapping);
+                        managedMappings.addUpdated(mappedRemoteFile);
                     }
-                } else {
-                    deleted.add(mapping);
                 }
             }
         }
-        actionMap.put(Action.REMOVED, deleted);
-        actionMap.put(Action.CHANGED, updated);
-        actionMap.put(Action.IDENTICAL, identical);
-        return actionMap;
+
+        return managedMappings;
     }
 
-    private Map<String, List<FileEntity>> toMap(Collection<FileEntity> mappedFiles) {
-        final HashMap<String, List<FileEntity>> map = new HashMap<>();
-        for (FileEntity mappedFile : mappedFiles) {
-            if (map.containsKey(mappedFile.getLocalPath())) {
-                map.get(mappedFile.getLocalPath()).add(mappedFile);
+    private AddedFiles getAddedFiles(Map<String, Collection<ServerEntry>> remoteFileLists, Collection<File> localFiles, ManagedMappings sortedMappings) {
+        final AddedFiles addedFiles = new AddedFiles();
+        getRemoteAddeds(addedFiles, remoteFileLists, sortedMappings);
+        final Collection<File> localAddeds = getLocalAddeds(localFiles);
+        addedFiles.addLocals(localAddeds);
+        return addedFiles;
+    }
+
+    private Collection<File> getLocalAddeds(final Collection<File> localFiles) {
+        final Collection<File> addedLocalFiles = new ArrayList<>(localFiles);
+        final Iterator<File> iterator = addedLocalFiles.iterator();
+        while (iterator.hasNext()) {
+            final File localFile = iterator.next();
+            if (persistenceController.getLocalFileEntity(localFile.toPath()) != null) {
+                iterator.remove();
             }
         }
-        return map;
+        return addedLocalFiles;
+    }
+
+    private Collection<File> getLocalAddeds(final Collection<File> localFiles, final ManagedMappings managedMappings) {
+        final Collection<File> addedLocalFiles = new ArrayList<>(localFiles);
+        final Collection<FileEntity> mappedExistingFiles = new ArrayList<>(managedMappings.getIdenticals());
+        mappedExistingFiles.addAll(managedMappings.getUpdateds());
+        mappedExistingFiles.addAll(managedMappings.getDeleteds());
+        for (FileEntity mappedExistingFile : mappedExistingFiles) {
+
+            addedLocalFiles.removeIf(file -> file.equals(new File(mappedExistingFile.getLocalPath())));
+        }
+        return addedLocalFiles;
+    }
+
+    private void getRemoteAddeds(AddedFiles addedFiles, Map<String, Collection<ServerEntry>> remoteFileLists, ManagedMappings managedMappings) {
+        final Collection<FileEntity> mappedExistingFiles = new ArrayList<>(managedMappings.getIdenticals());
+        mappedExistingFiles.addAll(managedMappings.getUpdateds());
+        for (Map.Entry<String, Collection<ServerEntry>> remoteFiles : remoteFileLists.entrySet()) {
+            final Collection<ServerEntry> addedRemoteFiles = new ArrayList<>(remoteFiles.getValue());
+            final Iterator<ServerEntry> iterator = addedRemoteFiles.iterator();
+            while (iterator.hasNext()) {
+                ServerEntry serverEntry = iterator.next();
+                for (FileEntity mappedExistingFile : mappedExistingFiles) {
+                    if (mappedExistingFile.getAccountName().equals(serverEntry.getAccount()) && serverEntry.getPath().equals(Paths.get(mappedExistingFile.getRemotePath()))) {
+                        iterator.remove();
+                    }
+                }
+            }
+            addedFiles.addRemote(remoteFiles.getKey(), addedRemoteFiles);
+        }
+    }
+
+    private boolean isSameRevision(FileEntity mappedRemoteFile, ServerEntry serverEntry) {
+        return serverEntry.getRevision().equals(mappedRemoteFile.getRevision());
     }
 
     private void deleteLocalFile(File mappedLocalFile) {

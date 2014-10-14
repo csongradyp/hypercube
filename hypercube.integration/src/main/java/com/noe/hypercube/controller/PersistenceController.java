@@ -36,33 +36,33 @@ public class PersistenceController implements IPersistenceController {
     }
 
     @Override
-    public FileEntity get(String id, Class<? extends FileEntity> entityClass) {
+    public FileEntity get(final String id, final Class<? extends FileEntity> entityClass) {
         Dao<String, FileEntity> dao = daoMap.get(entityClass);
         return dao.findById(id);
     }
 
     @Override
-    public FileEntity get(FileEntity entity) {
+    public FileEntity get(final FileEntity entity) {
         Dao<String, FileEntity> dao = daoMap.get(entity.getClass());
         return dao.findById(entity.getId());
     }
 
     @Override
-    public Collection<FileEntity> getAll(Class<? extends FileEntity> entityClass) {
+    public Collection<FileEntity> getAll(final Class<? extends FileEntity> entityClass) {
         Dao dao = daoMap.get(entityClass);
         return dao.getAll();
     }
 
     @Override
-    public void save(FileEntity entity) {
-        Class<? extends FileEntity> entityClass = entity.getClass();
+    public void save(final FileEntity entity) {
+        final Class<? extends FileEntity> entityClass = entity.getClass();
         Dao dao = daoMap.get(entityClass);
         dao.persist(entity);
     }
 
     @Override
-    public void delete(FileEntity entity) {
-        Class<? extends FileEntity> entityClass = entity.getClass();
+    public void delete(final FileEntity entity) {
+        final Class<? extends FileEntity> entityClass = entity.getClass();
         Dao dao = daoMap.get(entityClass);
         dao.remove(entity);
     }
@@ -70,7 +70,7 @@ public class PersistenceController implements IPersistenceController {
     @Override
     public boolean delete(String id, Class<? extends FileEntity> entityClass) {
         Dao dao = daoMap.get(entityClass);
-        boolean deleted = dao.remove(id);
+        final boolean deleted = dao.remove(id);
         if (deleted) {
             LOG.debug("Successfully deleted {} from database", id);
         }
@@ -79,14 +79,14 @@ public class PersistenceController implements IPersistenceController {
 
     @Override
     public Collection<MappingEntity> getMappings(Class<? extends MappingEntity> mappingClass) {
-        Dao dao = daoMap.get(mappingClass);
+        final Dao dao = daoMap.get(mappingClass);
         return dao.getAll();
     }
 
     @Override
     public Collection<MappingEntity> getAllMappings() {
-        Collection<MappingEntity> allMappings = new LinkedList<>();
-        Collection<Dao> daos = daoMap.values();
+        final Collection<MappingEntity> allMappings = new ArrayList<>();
+        final Collection<Dao> daos = daoMap.values();
         for (Dao dao : daos) {
             if (isMappingDao(dao)) {
                 allMappings.addAll(dao.getAll());
@@ -97,15 +97,16 @@ public class PersistenceController implements IPersistenceController {
 
     @Override
     public void addMapping(MappingEntity mapping) {
-        Class<? extends MappingEntity> entityClass = mapping.getClass();
-        Dao dao = daoMap.get(entityClass);
+        final Class<? extends MappingEntity> entityClass = mapping.getClass();
+        final Dao dao = daoMap.get(entityClass);
         dao.persist(mapping);
+        LOG.info("New mapping was persisted to as {}", dao.getEntityClass());
     }
 
     @Override
     public void removeMapping(MappingEntity mapping) {
-        Class<? extends MappingEntity> entityClass = mapping.getClass();
-        Dao dao = daoMap.get(entityClass);
+        final Class<? extends MappingEntity> entityClass = mapping.getClass();
+        final Dao dao = daoMap.get(entityClass);
         dao.remove(mapping);
     }
 
@@ -121,8 +122,8 @@ public class PersistenceController implements IPersistenceController {
     }
 
     @Override
-    public Set<Class<IEntity>> getEntitiesMapping(String folder) {
-        Set<Class<IEntity>> results = new HashSet<>();
+    public Set<Class<IEntity>> getEntitiesMapping(final String folder) {
+        final Set<Class<IEntity>> results = new HashSet<>();
         for (Dao<String, IEntity> dao : daos) {
             final IEntity entity = dao.findById(folder);
             if(entity != null) {
@@ -134,8 +135,8 @@ public class PersistenceController implements IPersistenceController {
 
     @Override
     public Collection<String> getLocalMappings() {
-        Set<String> mappedLocalFolders = new HashSet<>();
-        Collection<Dao> daos = daoMap.values();
+        final Set<String> mappedLocalFolders = new HashSet<>();
+        final Collection<Dao> daos = daoMap.values();
         for (Dao dao : daos) {
             if(isMappingDao(dao)) {
                 final Collection<MappingEntity> daoMappings = dao.getAll();
@@ -172,7 +173,24 @@ public class PersistenceController implements IPersistenceController {
         return fileEntities;
     }
 
-    private boolean isFileEntityDao(Dao dao) {
+    @Override
+    public List<MappingEntity> getMappings(final String folder) {
+        final List<MappingEntity> allMappings = new ArrayList<>();
+        final Collection<Dao> daos = daoMap.values();
+        for (Dao dao : daos) {
+            if (isMappingDao(dao)) {
+                final Collection<MappingEntity> all = dao.getAll();
+                for (MappingEntity mapping : all) {
+                    if(mapping.getLocalDir().equals(folder)) {
+                        allMappings.add(mapping);
+                    }
+                }
+            }
+        }
+        return allMappings;
+    }
+
+    private boolean isFileEntityDao(final Dao dao) {
         return FileEntity.class.isAssignableFrom(dao.getEntityClass());
     }
 
@@ -183,7 +201,6 @@ public class PersistenceController implements IPersistenceController {
 
     @Override
     public LocalFileEntity getLocalFileEntity(final Path localFilePath) {
-        final LocalFileEntity byId = localFileEntityDao.findById(localFilePath.toString());
-        return byId;
+        return localFileEntityDao.findById(localFilePath.toString());
     }
 }

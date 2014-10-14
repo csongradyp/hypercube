@@ -4,40 +4,39 @@ import com.noe.hypercube.domain.FileEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class ManagedMappings {
 
-    private final Collection<FileEntity> updated;
-    private final Collection<FileEntity> deleted;
-    private final Collection<FileEntity> identical;
+    private final Collection<FileEntity> updateds;
+    private final Collection<FileEntity> deleteds;
+    private final Collection<FileEntity> identicals;
 
-    public ManagedMappings() {
-        updated = new ArrayList<>();
-        deleted = new ArrayList<>();
-        identical = new ArrayList<>();
+    public ManagedMappings(final List<FileEntity> mappedRemoteFiles) {
+        identicals = new ArrayList<>();
+        updateds = new ArrayList<>();
+        deleteds = new ArrayList<>(mappedRemoteFiles);
     }
 
-    public void addUpdated(FileEntity fileEntity) {
-        updated.add(fileEntity);
+    public void addUpdated(final FileEntity fileEntity) {
+        updateds.add(fileEntity);
+        deleteds.remove(fileEntity);
     }
 
-    public void addDeleted(FileEntity fileEntity) {
-        updated.add(fileEntity);
+    public void addIdentical(final FileEntity fileEntity) {
+        identicals.add(fileEntity);
+        deleteds.remove(fileEntity);
     }
 
-    public void addIdentical(FileEntity fileEntity) {
-        updated.add(fileEntity);
+    public Collection<FileEntity> getUpdateds() {
+        return updateds;
     }
 
-    public Collection<FileEntity> getUpdated() {
-        return updated;
+    public Collection<FileEntity> getDeleteds() {
+        return deleteds;
     }
 
-    public Collection<FileEntity> getDeleted() {
-        return deleted;
-    }
-
-    public Collection<FileEntity> getIdentical() {
-        return identical;
+    public Collection<FileEntity> getIdenticals() {
+        return identicals;
     }
 }

@@ -1,28 +1,28 @@
 package com.noe.hypercube.event.domain;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MappingRequest implements IEvent {
 
+    private final String account;
     private final Path localFolder;
-    private final Map<String, Path> remotePaths;
+    private final Path remoteFolder;
 
-    public MappingRequest(final Path localFolder) {
+    public MappingRequest(final String account, final Path localFolder, final Path remoteFolder) {
+        this.account = account;
         this.localFolder = localFolder;
-        remotePaths = new HashMap<>();
-    }
-
-    public void add(final String account, final Path path) {
-        remotePaths.put(account, path);
+        this.remoteFolder = remoteFolder;
     }
 
     public Path getLocalFolder() {
         return localFolder;
     }
 
-    public Map<String, Path> getRemotePaths() {
-        return remotePaths;
+    public Path getRemoteFolder() {
+        return remoteFolder;
+    }
+
+    public String getAccount() {
+        return account;
     }
 }

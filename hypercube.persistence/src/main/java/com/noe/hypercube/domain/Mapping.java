@@ -38,6 +38,7 @@ public abstract class Mapping implements MappingEntity {
         return localDir;
     }
 
+    @Override
     public void setLocalDir(String localDir) {
         this.localDir = localDir;
     }
@@ -47,6 +48,7 @@ public abstract class Mapping implements MappingEntity {
         return remoteDir;
     }
 
+    @Override
     public void setRemoteDir(String remoteDir) {
         this.remoteDir = remoteDir;
     }
