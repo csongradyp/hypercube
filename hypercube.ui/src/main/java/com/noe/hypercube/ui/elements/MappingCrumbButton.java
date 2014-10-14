@@ -39,7 +39,6 @@ public class MappingCrumbButton extends Label implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         messageBundle = resourceBundle;
-        getStylesheets().add("style/labelbutton.css");
         setAddMappingStyle();
         setStyle();
         adderProperty().addListener((observable, oldValue, newValue) -> setStyle());

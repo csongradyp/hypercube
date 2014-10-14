@@ -1,6 +1,8 @@
 package com.noe.hypercube.ui.bundle;
 
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.ini4j.Ini;
@@ -19,10 +21,11 @@ public class ConfigurationBundle {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigurationBundle.class);
 
-    private static final BidiMap<String, String> languages = new DualHashBidiMap<>();
+    private static final SimpleStringProperty activeLanguage = new SimpleStringProperty();
     private static final ConfigurationBundle instance = new ConfigurationBundle();
     private static final String LOCATION_SECTION = "location";
-    public static final String LANGUAGE = "language";
+    private static final String LANGUAGE = "language";
+    private final BidiMap<String, String> languages = new DualHashBidiMap<>();
     private final Ini ini;
 
     private ConfigurationBundle() {
@@ -42,7 +45,7 @@ public class ConfigurationBundle {
         });
     }
 
-    public static Path getStartLocation(String side) {
+    public static Path getStartLocation(final String side) {
         String location = instance.ini.get(LOCATION_SECTION).get(side);
         return Paths.get(location);
     }
@@ -51,21 +54,27 @@ public class ConfigurationBundle {
         return instance.ini.get(LANGUAGE).get(LANGUAGE);
     }
 
+    public static String getLanguageLongName() {
+        return instance.languages.getKey(getLanguage());
+    }
+
     public static Locale getLocale() {
         return new Locale(instance.ini.get(LANGUAGE).get(LANGUAGE));
     }
 
-    public static String setLanguage(Locale locale) {
+    public static void setLanguage(final Locale locale) {
         final String country = locale.getLanguage();
-        return instance.ini.get(LANGUAGE).replace(LANGUAGE, country);
+        instance.ini.get(LANGUAGE).replace(LANGUAGE, country);
+        activeLanguage.set(country);
     }
 
-    public static String setLanguage(String locale) {
-        final String country = (String) languages.get(locale);
-        return instance.ini.get(LANGUAGE).replace(LANGUAGE, country);
+    public static void setLanguage(final String locale) {
+        final String country = instance.languages.get(locale);
+        instance.ini.get(LANGUAGE).replace(LANGUAGE, country);
+        activeLanguage.set(country);
     }
 
-    public static void setStartLocation(String side, Path newLocation) {
+    public static void setStartLocation(final String side, final Path newLocation) {
         instance.ini.get(LOCATION_SECTION).replace(side, newLocation.toString());
     }
 
@@ -76,5 +85,13 @@ public class ConfigurationBundle {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String getActiveLanguage() {
+        return activeLanguage.get();
+    }
+
+    public static StringProperty activeLanguageProperty() {
+        return activeLanguage;
     }
 }

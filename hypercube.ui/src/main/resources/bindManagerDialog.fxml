@@ -14,14 +14,14 @@
                 </HBox>
                 <SplitPane dividerPositions="0.4" prefHeight="350.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                        <ListView fx:id="sourceFolderList" layoutY="58.0" prefHeight="398.0" prefWidth="236.0" stylesheets="style/HyperCubeListView.css"
+                        <ListView fx:id="sourceFolderList" layoutY="58.0" prefHeight="398.0" prefWidth="236.0" stylesheets="style/HyperCubeListView.css" focusTraversable="true"
                                   AnchorPane.bottomAnchor="0.0"
                                   AnchorPane.leftAnchor="0.0"
                                   AnchorPane.rightAnchor="0.0"
                                   AnchorPane.topAnchor="0.0"/>
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                        <ListView fx:id="mappingFolderList" prefHeight="398.0" prefWidth="356.0" stylesheets="style/HyperCubeListView.css"
+                        <ListView fx:id="mappingFolderList" prefHeight="398.0" prefWidth="356.0" stylesheets="style/HyperCubeListView.css" focusTraversable="true"
                                   AnchorPane.bottomAnchor="0.0"
                                   AnchorPane.leftAnchor="0.0"
                                   AnchorPane.rightAnchor="0.0"

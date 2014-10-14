@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import java.lang.*?>
 <?import javafx.scene.layout.*?>
-
 <fx:root type="org.controlsfx.dialog.Dialog" resizable="true" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <content>
         <VBox alignment="TOP_CENTER" minHeight="150.0" minWidth="350.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
             <Label text="%dialog.mapping.folder.local"/>
             <HBox>
-                <TextField fx:id="localFolder" prefHeight="25.0" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="localFolder" editable="false" focusTraversable="false" prefHeight="25.0" HBox.hgrow="ALWAYS"/>
                 <Button fx:id="localFolderChooser"/>
             </HBox>
             <Separator prefWidth="200.0">

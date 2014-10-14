@@ -1,6 +1,7 @@
 package com.noe.hypercube.ui.elements;
 
 import com.noe.hypercube.ui.factory.IconFactory;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -15,10 +16,16 @@ import java.util.List;
 
 public class LocalDriveSegmentedButton extends SegmentedButton {
 
+    private SimpleBooleanProperty active = new SimpleBooleanProperty(false);
+
     public LocalDriveSegmentedButton() {
         List<ToggleButton> drives = collectLocalDrives();
         getButtons().addAll(drives);
-        getButtons().get(0).setSelected(true);
+        active.addListener((observable, oldValue, newValue) -> {
+            if(!newValue) {
+                deselectButtons();
+            }
+        });
     }
 
     private List<ToggleButton> collectLocalDrives() {
@@ -30,25 +37,44 @@ public class LocalDriveSegmentedButton extends SegmentedButton {
         return drives;
     }
 
-    private ToggleButton createLocalStorageButton(Path root) {
+    private ToggleButton createLocalStorageButton(final Path root) {
         ToggleButton button = new ToggleButton(root.toString(), new ImageView(IconFactory.getStorageIcon(root)));
         button.setFocusTraversable(false);
+        button.setId(root.toString());
         return button;
     }
 
-    public void setOnAction(EventHandler<ActionEvent> eventHandler) {
-        final ObservableList<ToggleButton> buttons = getButtons();
-        for (ToggleButton button : buttons) {
-            button.setOnAction(eventHandler);
-        }
-    }
-
-    public void deselectButtons() {
+    private void deselectButtons() {
         final ObservableList<ToggleButton> buttons = getButtons();
         for (ToggleButton button : buttons) {
             if (button.isSelected()) {
                 button.setSelected(false);
             }
         }
+    }
+
+    public void setOnAction(final EventHandler<ActionEvent> eventHandler) {
+        final ObservableList<ToggleButton> buttons = getButtons();
+        for (ToggleButton button : buttons) {
+            button.setOnAction(event -> {
+                active.set(true);
+                button.setSelected(true);
+                if (eventHandler != null) {
+                    eventHandler.handle(event);
+                }
+            });
+        }
+    }
+
+    public boolean isActive() {
+        return active.get();
+    }
+
+    public SimpleBooleanProperty activeProperty() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active.set(active);
     }
 }
