@@ -5,6 +5,7 @@ import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.*;
 import com.noe.hypercube.service.TestAccount;
 import com.noe.hypercube.synchronization.SynchronizationException;
+import com.noe.hypercube.synchronization.presynchronization.util.PreSynchronizationSubmitManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +32,8 @@ public class ManagedFolderPreSynchronizerTest {
     private IPersistenceController mockPersistenceController;
     @Mock
     private IAccountController mockAccountController;
+    @Mock
+    private PreSynchronizationSubmitManager mockSubmitManager;
 
     private AccountBox<TestAccount, TestEntity, TestMapping> accountBox;
     private ManagedFolderPreSynchronizer underTest;
@@ -38,7 +41,7 @@ public class ManagedFolderPreSynchronizerTest {
     @Before
     public void setUp() throws Exception {
         accountBox = mock(AccountBox.class, RETURNS_DEEP_STUBS);
-        underTest = new ManagedFolderPreSynchronizer(TARGET_FOLDER, mockPersistenceController, mockAccountController);
+        underTest = new ManagedFolderPreSynchronizer(TARGET_FOLDER, mockPersistenceController, mockAccountController, mockSubmitManager);
         given(mockPersistenceController.getLocalFileEntity(any())).willReturn(new LocalFileEntity(Paths.get("c:\\Temp\\loc1.txt").toFile()));
     }
 

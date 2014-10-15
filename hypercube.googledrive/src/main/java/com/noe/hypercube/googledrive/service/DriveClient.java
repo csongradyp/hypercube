@@ -9,6 +9,7 @@ import com.google.api.services.drive.model.ChangeList;
 import com.google.api.services.drive.model.ParentReference;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.AccountQuota;
+import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.googledrive.domain.DriveFileEntity;
@@ -254,6 +255,23 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping
     public AccountQuota getQuota() throws SynchronizationException {
         // TODO implement
         return null;
+    }
+
+    @Override
+    public FileEntity rename(FileEntity remoteFile, String newName) throws SynchronizationException {
+        try {
+            com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
+            file.setTitle(newName);
+
+            Drive.Files.Patch patchRequest = client.files().patch(remoteFile.getId(), file);
+            patchRequest.setFields("title");
+
+            com.google.api.services.drive.model.File updatedFile = patchRequest.execute();
+            return new DriveFileEntity(remoteFile.getLocalPath(), remoteFile.getRemotePath(), updatedFile.getHeadRevisionId(), new Date(updatedFile.getModifiedDate().getValue()));
+        } catch (IOException e) {
+            System.out.println("An error occurred: " + e);
+            return null;
+        }
     }
 
     private com.google.api.services.drive.model.File getDriveFile(String driveFileId) throws SynchronizationException {

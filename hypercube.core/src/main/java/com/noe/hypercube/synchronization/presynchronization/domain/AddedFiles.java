@@ -1,4 +1,4 @@
-package com.noe.hypercube.synchronization.presynchronization;
+package com.noe.hypercube.synchronization.presynchronization.domain;
 
 import com.noe.hypercube.domain.ServerEntry;
 

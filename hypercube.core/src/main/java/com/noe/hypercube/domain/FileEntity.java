@@ -21,4 +21,6 @@ public interface FileEntity extends IEntity<String>, Comparable<FileEntity> {
     String getAccountName();
 
     FileEntity duplicate();
+
+    void setLocalPath(String localPath);
 }

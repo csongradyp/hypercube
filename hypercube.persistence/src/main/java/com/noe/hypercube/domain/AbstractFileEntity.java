@@ -19,19 +19,24 @@ public abstract class AbstractFileEntity implements FileEntity {
     public AbstractFileEntity() {
     }
 
-    protected AbstractFileEntity(String localPath, String remotePath, String revision, Date lastModifiedDate) {
+    protected AbstractFileEntity(final String localPath, final String remotePath, final String revision, final Date lastModifiedDate) {
         this.localPath = localPath;
         this.remotePath = remotePath;
         this.revision = revision;
         this.lastModifiedDate = lastModifiedDate;
     }
 
-    protected AbstractFileEntity(String localPath, String remotePath, String revision) {
+    protected AbstractFileEntity(final String localPath, final String remotePath, final String revision) {
         this(localPath, remotePath, revision, new Date());
     }
 
     public AbstractFileEntity(final AbstractFileEntity fileEntity) {
         this(fileEntity.getLocalPath(), fileEntity.getRemotePath(), fileEntity.getRevision(), fileEntity.lastModified());
+    }
+
+    @Override
+    public void setLocalPath(final String localPath) {
+        this.localPath = localPath;
     }
 
     @Override

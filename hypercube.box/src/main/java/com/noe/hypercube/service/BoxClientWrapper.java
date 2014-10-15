@@ -6,6 +6,7 @@ import com.box.boxjavalibv2.dao.*;
 import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
 import com.box.boxjavalibv2.exceptions.BoxJSONException;
 import com.box.boxjavalibv2.exceptions.BoxServerException;
+import com.box.boxjavalibv2.requests.requestobjects.BoxFileRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
 import com.box.boxjavalibv2.utils.ISO8601DateParser;
 import com.box.restclientv2.exceptions.BoxRestException;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -219,6 +221,19 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity, BoxMapping> {
             e.printStackTrace();
         }
         return new BoxServerEntry(directoryUtil.getFilePath(boxFile), boxFile.getId(), boxFile.getSize().longValue(), boxFile.getSequenceId(), getLastModified(boxFile), false);
+    }
+
+    @Override
+    public FileEntity rename(FileEntity remoteFile, String newName) throws SynchronizationException {
+        try {
+            final BoxFileRequestObject requestObject = BoxFileRequestObject.getRequestObject();
+            requestObject.setName(newName);
+            final BoxFile boxFile = client.getFilesManager().updateFileInfo(remoteFile.getId(), requestObject);
+            return new BoxFileEntity(remoteFile.getLocalPath(), remoteFile.getRemotePath(), boxFile.getSha1());
+        } catch (BoxRestException | BoxServerException | AuthFatalFailureException | UnsupportedEncodingException e) {
+            LOG.error(String.format("%s file rename failed", getAccountName()), e);
+            throw new SynchronizationException(String.format("%s file rename failed", getAccountName()), e);
+        }
     }
 
     private Date getLastModified(final BoxItem boxItem) {

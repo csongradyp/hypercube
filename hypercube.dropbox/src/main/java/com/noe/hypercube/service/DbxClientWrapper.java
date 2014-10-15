@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -166,6 +167,16 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
         return serverEntry;
     }
 
+    @Override
+    public FileEntity rename(FileEntity remoteFile, String newName) throws SynchronizationException {
+        final Path remoteFolder = Paths.get(remoteFile.getRemotePath()).getParent();
+        try {
+            final DbxEntry renamedFile = client.move(remoteFile.getRemotePath(), remoteFolder + newName);
+            return new DbxFileEntity(remoteFile.getLocalPath(), renamedFile.path, renamedFile.asFile().rev);
+        } catch (DbxException e) {
+            throw new SynchronizationException(e.getMessage());
+        }
+    }
 
     @Override
     public List<ServerEntry> getFileList(final Path remoteFolder) throws SynchronizationException {

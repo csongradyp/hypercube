@@ -7,7 +7,7 @@ public class TestEntity implements FileEntity {
     private String rev;
     private Date lastModified;
     private String remotePath;
-    private final String localPath;
+    private String localPath;
 
     public TestEntity(String localPath, String remotePath, Date lastModified, String rev) {
         this.localPath = localPath;
@@ -59,6 +59,11 @@ public class TestEntity implements FileEntity {
     @Override
     public FileEntity duplicate() {
         return this;
+    }
+
+    @Override
+    public void setLocalPath(String localPath) {
+        this.localPath = localPath;
     }
 
     @Override
