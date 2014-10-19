@@ -53,11 +53,13 @@ public class ManagedFolderPreSynchronizerTest {
         given(accountBox.getClient().getAccountName()).willReturn("test");
         given(accountBox.getAccountType()).willReturn(TestAccount.class);
         given(accountBox.getClient().getMappingType()).willReturn(TestMapping.class);
-        given(mockPersistenceController.getRemoteFolder(TestMapping.class, TARGET_FOLDER)).willReturn(REMOTE_FOLDER);
+        final ArrayList<Path> remoteFolders = new ArrayList<>();
+        remoteFolders.add(REMOTE_FOLDER);
+        given(mockPersistenceController.getRemoteFolder(TestMapping.class, TARGET_FOLDER)).willReturn(remoteFolders);
         givenLocalFiles();
         givenRemoteFileList();
 
-        underTest.run();
+        underTest.call();
     }
 
     private void givenMappedFile(final Map<String, List<FileEntity>> mappedFiles, final String localPath, final String remotePath, final Boolean changed) {

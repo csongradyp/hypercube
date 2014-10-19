@@ -1,26 +1,20 @@
 package com.noe.hypercube.ui.dialog;
 
-import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.MappingRequest;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
-import org.controlsfx.control.action.ActionUtils;
-import org.controlsfx.dialog.Dialog;
+import javafx.util.Callback;
 import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
@@ -33,7 +27,7 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class AddMappingDialog extends Dialog implements Initializable {
+public class AddMappingDialog extends Dialog<MappingRequest> implements Initializable {
 
     @FXML
     private TextField localFolder;
@@ -50,10 +44,9 @@ public class AddMappingDialog extends Dialog implements Initializable {
     private ValidationSupport validationSupport;
 
     public AddMappingDialog() {
-        super(null, "", false);
         validationSupport = new ValidationSupport();
         bundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("mappingdialog.fxml"), bundle);
+        FXMLLoader fxmlLoader = new FXMLLoader(AddMappingDialog.class.getClassLoader().getResource("mappingdialog.fxml"), bundle);
         fxmlLoader.setResources(bundle);
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -62,37 +55,65 @@ public class AddMappingDialog extends Dialog implements Initializable {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+        setTitle(bundle.getString("dialog.mapping.add.title"));
+        setResizable(true);
+        setResultConverter(new Callback<ButtonType, MappingRequest>() {
+            @Override
+            public MappingRequest call(ButtonType param) {
+                if(ButtonBar.ButtonData.OK_DONE == param.getButtonData()) {
+                    return createMappingRequest();
+                }
+                return null;
+            }
+        });
     }
 
-    public static void showAddDialog() {
+    public static java.util.Optional<MappingRequest> showAddDialog() {
         final AddMappingDialog addMappingDialog = new AddMappingDialog();
-        addMappingDialog.show();
+        return addMappingDialog.showAndWait();
     }
 
-    public static void showMapLocalDialog(final Path localFolderPath) {
+    public static java.util.Optional<MappingRequest> showMapLocalDialog(final Path localFolderPath) {
         final AddMappingDialog addMappingDialog = new AddMappingDialog();
         addMappingDialog.setLocalFolder(localFolderPath);
-        addMappingDialog.show();
+        return addMappingDialog.showAndWait();
     }
 
-    public static void showMapRemoteDialog(final String account, final Path remoteFolder) {
+    public static java.util.Optional<MappingRequest> showMapRemoteDialog(final String account, final Path remoteFolder) {
         final AddMappingDialog addMappingDialog = new AddMappingDialog();
         addMappingDialog.setInitialRemoteFolder(account, remoteFolder);
-        addMappingDialog.show();
+        return addMappingDialog.showAndWait();
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setTitle(bundle.getString("dialog.mapping.add.title"));
-        setIconifiable(false);
-        setResizable(true);
         setupFolderChooser();
         setupAddMappingChooserButton();
-        validationSupport.registerValidator(localFolder, Validator.createEmptyValidator("Text is required", Severity.WARNING));
-//        final Button bindAction = createBindAction();
-        getActions().addAll(ACTION_OK, ACTION_CANCEL);
+        validationSupport.registerValidator(localFolder, true, Validator.createEmptyValidator("Text is required", Severity.ERROR));
+//        ValidationSupport.setRequired(localFolder, true);
+//        validationSupport.validationResultProperty().addListener( (o, oldValue, newValue) ->  messageList.getItems().setAll(newValue.getMessages()));
+        addValidationListener();
+        getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
         initialRemoteMappingChooser = new FolderMappingChooser(validationSupport);
         remoteMappings.getChildren().add(initialRemoteMappingChooser);
+    }
+
+    private void addValidationListener() {
+        final ButtonType buttonType = new ButtonType(bundle.getString("dialog.mapping.action.add"), ButtonBar.ButtonData.OK_DONE);
+        getDialogPane().getButtonTypes().add(buttonType);
+        final ObservableList<Node> children = getDialogPane().getChildren();
+        final FilteredList<Node> filtered = children.filtered(node -> ButtonBar.class.isAssignableFrom(node.getClass()));
+        final ButtonBar buttonBar = (ButtonBar) filtered.get(0);
+        final Node bindButton = buttonBar.getButtons().get(0);
+        bindButton.setDisable(true);
+        validationSupport.validationResultProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue.getErrors().isEmpty() && newValue.getWarnings().isEmpty()) {
+                bindButton.setDisable(false);
+            } else {
+                bindButton.setDisable(true);
+            }
+            validationSupport.redecorate();
+        });
     }
 
     private void setupAddMappingChooserButton() {
@@ -105,6 +126,7 @@ public class AddMappingDialog extends Dialog implements Initializable {
         final FolderMappingChooser folderMappingChooser = new FolderMappingChooser(validationSupport);
         createRemoveButtonFor(folderMappingChooser);
         remoteMappings.getChildren().add(folderMappingChooser);
+        setHeight(getHeight() + 33.0d);
     }
 
     private void createRemoveButtonFor(FolderMappingChooser folderMappingChooser) {
@@ -114,33 +136,18 @@ public class AddMappingDialog extends Dialog implements Initializable {
         folderMappingChooser.getChildren().add(remove);
     }
 
-    private Button createBindAction() {
-        final Button bindActionButton = ActionUtils.createButton(ACTION_OK, ActionUtils.ActionTextBehavior.HIDE);
-        bindActionButton.setText(bundle.getString("dialog.mapping.action.add"));
-        bindActionButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                Dialog dialog = (Dialog) actionEvent.getSource();
-                if (validationSupport.getValidationResult().getWarnings().isEmpty()) {
-                    publishMappingRequests();
-                    dialog.hide();
-                } else {
-                    validationSupport.redecorate();
-                }
-            }
-        });
-        return bindActionButton;
-    }
-
-    private void publishMappingRequests() {
+    private MappingRequest createMappingRequest() {
+        final MappingRequest mappingRequest = new MappingRequest(Paths.get(localFolder.getText()));
         final ObservableList<Node> remoteMappingChoosers = remoteMappings.getChildren();
         for (Node remoteMappingChooser : remoteMappingChoosers) {
-            FolderMappingChooser mappingChooser = (FolderMappingChooser) remoteMappingChooser;
-            final String account = mappingChooser.getAccount();
-            final String remoteFolder = mappingChooser.getFolder();
-            final MappingRequest mappingRequest = new MappingRequest(account, Paths.get(localFolder.getText()), Paths.get(remoteFolder));
-            EventBus.publish(mappingRequest);
+            if(FolderMappingChooser.class.isAssignableFrom(remoteMappingChooser.getClass())) {
+                FolderMappingChooser mappingChooser = (FolderMappingChooser) remoteMappingChooser;
+                final String account = mappingChooser.getAccount();
+                final String remoteFolder = mappingChooser.getFolder();
+                mappingRequest.addRemoteFolder(account, Paths.get(remoteFolder));
+            }
         }
+        return mappingRequest;
     }
 
     private void setupFolderChooser() {

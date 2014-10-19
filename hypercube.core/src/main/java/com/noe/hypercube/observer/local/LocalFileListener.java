@@ -39,13 +39,13 @@ public class LocalFileListener implements FileAlterationListener {
     @Override
     public void onDirectoryCreate(final File directory) {
         Path directoryPath = directory.toPath();
-        LOG.debug("Directory creation detected: {}", directoryPath);
+        LOG.info("Directory creation detected: {}", directoryPath);
     }
 
     @Override
     public void onDirectoryChange(final File directory) {
         Path directoryPath = directory.toPath();
-        LOG.debug("Directory content change detected: {}", directoryPath);
+        LOG.info("Directory content change detected: {}", directoryPath);
     }
 
     @Override
@@ -56,21 +56,21 @@ public class LocalFileListener implements FileAlterationListener {
     @Override
     public void onFileCreate(final File file) {
         Path filePath = file.toPath();
-        LOG.debug("File creation detected: {}", filePath);
+        LOG.info("File creation detected: {}", filePath);
         upload(file);
     }
 
     @Override
     public void onFileChange(final File file) {
         Path filePath = file.toPath();
-        LOG.debug("File update detected: {}", filePath);
+        LOG.info("File update detected: {}", filePath);
         update(file);
     }
 
     @Override
     public void onFileDelete(final File file) {
         Path filePath = file.toPath();
-        LOG.debug("File delete detected: {}", filePath);
+        LOG.info("File delete detected: {}", filePath);
         delete(file);
     }
 

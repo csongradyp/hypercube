@@ -9,6 +9,7 @@ import com.noe.hypercube.ui.domain.file.IFile;
 import com.noe.hypercube.ui.domain.file.LocalFile;
 import com.noe.hypercube.ui.elements.AccountSegmentedButton;
 import com.noe.hypercube.ui.elements.LocalDriveSegmentedButton;
+import com.noe.hypercube.ui.util.StyleUtil;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -325,6 +326,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
                 } else {
                     multiBreadCrumbBar.setRemoteBreadCrumbs(event.getAccount(), event.getFolder());
                 }
+                StyleUtil.changeStyle(table, event.getAccount());
                 setRemoteFileList(event);
                 driveSpaceBar.update(event.getQuotaInfo());
             });

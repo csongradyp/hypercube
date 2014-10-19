@@ -72,6 +72,11 @@ public class BoxServerEntry implements ServerEntry {
         return !isFolder;
     }
 
+    @Override
+    public boolean isShared() {
+        return false;
+    }
+
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
     }

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class TrayMenu extends AnchorPane implements Initializable {
@@ -54,7 +55,10 @@ public class TrayMenu extends AnchorPane implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        createAccountButtons();
         show.setOnAction(actionEvent -> stage.show());
+        final Map<String, ObservableList<FileEvent>> lastSyncedFiles = HistoryBundle.getLastSyncedFiles();
+        fileListView.clearAndSet(lastSyncedFiles.get(accounts.getButtons().get(0).getText()));
         addListenerForAccountChanges();
     }
 
@@ -77,6 +81,23 @@ public class TrayMenu extends AnchorPane implements Initializable {
                 }
             }
         });
+    }
+
+    private void createAccountButtons() {
+        final List<String> accountNames = AccountBundle.getAccountNames();
+        for (String account : accountNames) {
+            final ToggleButton accountButton = new ToggleButton(account);
+            accountButton.setFocusTraversable(false);
+            accountButton.setPrefHeight(accounts.getPrefHeight());
+            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(account);
+            accountButton.setOnAction(e -> {
+                fileListView.clearAndSet(fileEvents);
+                accountButton.setSelected(true);
+            });
+            addHistoryChangeListener(account);
+            accounts.getButtons().add(accountButton);
+        }
+        accounts.getButtons().get(0).setSelected(true);
     }
 
     private ToggleButton createAccountButton(final String account) {

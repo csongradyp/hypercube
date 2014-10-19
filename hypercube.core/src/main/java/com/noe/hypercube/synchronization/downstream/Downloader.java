@@ -12,6 +12,7 @@ import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
+import com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +51,28 @@ public class Downloader implements IDownloader {
     }
 
     @Override
+    public void run() {
+        while (!stop.get()) {
+            final ServerEntry entry = getNext();
+            LOG.info("{} downloader: {} was taken from queue", entry.getAccount(), entry.getPath() == null ? entry.getId() : entry.getPath());
+            LOG.debug(entry.toString());
+            try {
+                if (client.exist(entry)) {
+                    downloadFromServer(entry);
+                } else {
+                    deleteLocalFile(entry);
+                }
+            } catch (SynchronizationException e) {
+                EventBus.publishDownloadFinished(new FileEvent(client.getAccountName(), e.getRelatedFile(), entry.getPath(), FileActionType.FAIL));
+            }
+            logQueueEmpty();
+        }
+    }
+
+    @Override
     public void download(final ServerEntry entry) {
         downloadQ.add(entry);
+        LOG.info("{} file: {} has been added to the download queue", entry.getAccount(), entry.getPath() == null ? entry.getId() : entry.getPath());
     }
 
     @Override
@@ -69,23 +90,6 @@ public class Downloader implements IDownloader {
             e.setRelatedFile(newLocalFile.toPath());
             LOG.error(e.getMessage(), e);
             throw e;
-        }
-    }
-
-    @Override
-    public void run() {
-        while (!stop.get()) {
-            final ServerEntry entry = getNext();
-            try {
-                if (client.exist(entry)) {
-                    downloadFromServer(entry);
-                } else {
-                    deleteLocalFile(entry);
-                }
-            } catch (SynchronizationException e) {
-                EventBus.publishDownloadFinished(new FileEvent(client.getAccountName(), e.getRelatedFile(), entry.getPath(), FileActionType.FAIL));
-            }
-            logQueueEmpty();
         }
     }
 
@@ -133,7 +137,7 @@ public class Downloader implements IDownloader {
         File newLocalFile = new File(localPath.toString(), entry.getPath().getFileName().toString());
         if (isConflicted(newLocalFile)) {
             LOG.warn("{} Conflict {}", client.getAccountName(), newLocalFile);
-            final String conflictedFileName = String.format("%s (%s)", entry.getPath().getFileName().toString(), client.getAccountName());
+            final String conflictedFileName = FileConflictNamingUtil.resolveFileName(entry.getPath(), entry.getAccount());
             LOG.info("{} already exists! File name updated to: {}", newLocalFile.toPath(), conflictedFileName);
             newLocalFile = new File(localPath.toString(), conflictedFileName);
         }

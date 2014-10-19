@@ -1,59 +1,31 @@
 package com.noe.hypercube.synchronization.presynchronization.util;
 
 import com.noe.hypercube.controller.IAccountController;
-import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.domain.AccountBox;
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.UploadEntity;
+import com.noe.hypercube.domain.*;
+import com.noe.hypercube.service.Account;
 import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
-import static com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil.resolveFileName;
-
+@Named
 public class PreSynchronizationSubmitManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(PreSynchronizationSubmitManager.class);
 
     @Inject
-    private IPersistenceController persistenceController;
-    @Inject
     private IAccountController accountController;
-
-    public PreSynchronizationSubmitManager() {
-    }
-
-    public List<FileEntity> getAsResolved(final Collection<FileEntity> updateds) {
-        List<FileEntity> resolvedRemoteFiles = new ArrayList<FileEntity>(updateds.size());
-        for (FileEntity updated : updateds) {
-            final FileEntity duplicated = updated.duplicate();
-            resolveFileName(duplicated);
-            resolvedRemoteFiles.add(duplicated);
-        }
-        return resolvedRemoteFiles;
-    }
-
-
-    public void deleteLocalFile(final File mappedLocalFile) {
-        try {
-            FileUtils.forceDelete(mappedLocalFile);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
 
     public void updateFor(final File mappedLocalFile, final Collection<FileEntity> fileEntities, final Collection<AccountBox> accountBoxes) {
         for (FileEntity fileEntity : fileEntities) {
@@ -61,10 +33,11 @@ public class PreSynchronizationSubmitManager {
         }
     }
 
-    public void updateFor(final File mappedLocalFile, final FileEntity fileEntity, final Collection<AccountBox> accountBoxes) {
+    public void updateFor(final File mappedLocalFile, final FileEntity remoteFile, final Collection<AccountBox> accountBoxes) {
         try {
-            final UploadEntity uploadEntity = new UploadEntity(mappedLocalFile, Paths.get(fileEntity.getRemotePath()), Action.CHANGED);
+            final UploadEntity uploadEntity = new UploadEntity(mappedLocalFile, Paths.get(remoteFile.getRemotePath()), Action.CHANGED);
             for (AccountBox accountBox : accountBoxes) {
+                LOG.debug("Update {} file: {}", remoteFile.getLocalPath(), remoteFile.getRemotePath(), accountBox.getClient().getAccountName());
                 accountBox.getUploader().uploadUpdated(uploadEntity);
             }
         } catch (SynchronizationException e) {
@@ -75,12 +48,6 @@ public class PreSynchronizationSubmitManager {
     public void uploadAsNew(final File mappedLocalFile, final Collection<FileEntity> remoteFiles) {
         for (FileEntity remoteFile : remoteFiles) {
             uploadAsNew(mappedLocalFile, remoteFile);
-        }
-    }
-
-    public void uploadAsNew(final Collection<FileEntity> remoteFiles) {
-        for (FileEntity remoteFile : remoteFiles) {
-            uploadAsNew(Paths.get(remoteFile.getLocalPath()).toFile(), remoteFile);
         }
     }
 
@@ -95,39 +62,31 @@ public class PreSynchronizationSubmitManager {
         }
     }
 
-    public void uploadAllAccountsAsNew(final File mappedLocalFile, final Collection<FileEntity> remoteFiles, final Collection<AccountBox> accountBoxes) {
-        for (FileEntity remoteFile : remoteFiles) {
-            uploadAllAccountsAsNew(mappedLocalFile, remoteFile, accountBoxes);
+    public void uploadAllAccountsAsNew(final Collection<File> locals, final Map<Class<? extends Account>, Collection<Path>> accountRemoteFolders, final Collection<AccountBox> accountBoxes) {
+        for (File localFile : locals) {
+            uploadAllAccountsAsNew(localFile, accountRemoteFolders, accountBoxes);
         }
     }
 
-    public void uploadAllAccountsAsNew(final File mappedLocalFile, final FileEntity remoteFile, final Collection<AccountBox> accountBoxes) {
-        try {
-            final UploadEntity uploadEntity = new UploadEntity(mappedLocalFile, Paths.get(remoteFile.getRemotePath()), Action.ADDED);
-            for (AccountBox accountBox : accountBoxes) {
-                accountBox.getUploader().uploadNew(uploadEntity);
+    public void uploadAllAccountsAsNew(final File localFile, final Map<Class<? extends Account>, Collection<Path>> accountRemoteFolders, final Collection<AccountBox> accountBoxes) {
+        for (AccountBox accountBox : accountBoxes) {
+            final Collection<Path> remoteFolders = accountRemoteFolders.get(accountBox.getAccountType());
+            for (Path remoteFolder : remoteFolders) {
+                uploadAsNew(localFile, remoteFolder, accountBox);
             }
-        } catch (SynchronizationException e) {
-            LOG.error(e.getMessage(), e);
         }
     }
 
-//    public void moveDown(final Collection<FileEntity> remoteFiles) {
-//        for (FileEntity remoteFile : remoteFiles) {
-//            moveDown(remoteFile);
-//        }
-//    }
-//
-//    private void moveDown(final FileEntity remoteFile) {
-//        final AccountBox accountBox = accountController.getAccountBox(remoteFile.getAccountName());
-//        try {
-//            final Path remoteFilePath = Paths.get(remoteFile.getRemotePath());
-//            final Path localFilePath = Paths.get(remoteFile.getLocalPath());
-//            accountBox.getDownloader().move(remoteFilePath, localFilePath);
-//        } catch (SynchronizationException e) {
-//            //            LOG.error(e.getMessage(), e);
-//        }
-//    }
+    private void uploadAsNew(final File localFile, final Path remoteFolder, final AccountBox accountBox) {
+        LOG.debug("Upload file {} as new to {} to account {}", localFile.toPath(), remoteFolder, accountBox.getClient().getAccountName());
+        final UploadEntity uploadEntity = new UploadEntity(localFile, remoteFolder, Action.ADDED);
+        try {
+            uploadEntity.setDependent(true);
+            accountBox.getUploader().uploadNew(uploadEntity);
+        } catch (SynchronizationException e) {
+                    LOG.error(e.getMessage(), e);
+        }
+    }
 
     public void download(final Collection<FileEntity> remoteFiles) {
         for (FileEntity remoteFile : remoteFiles) {
@@ -135,16 +94,10 @@ public class PreSynchronizationSubmitManager {
         }
     }
 
-
     public void download(final FileEntity remoteFile) {
         final AccountBox accountBox = accountController.getAccountBox(remoteFile.getAccountName());
-        try {
-            final Path remotePath = Paths.get(remoteFile.getRemotePath());
-            final Path localFolder = Paths.get(remoteFile.getLocalPath()).getParent();
-            accountBox.getDownloader().download(remotePath, localFolder);
-        } catch (SynchronizationException e) {
-            LOG.error(e.getMessage(), e);
-        }
+        final Path remotePath = Paths.get(remoteFile.getRemotePath());
+        accountBox.getDownloader().download(new DefaultFileServerEntry(accountBox.getClient().getAccountName(), remotePath));
     }
 
     public void uploadUpdated(final File mappedLocalFile, final Collection<FileEntity> remoteFiles) {
@@ -154,6 +107,7 @@ public class PreSynchronizationSubmitManager {
     }
 
     public void uploadUpdated(final File mappedLocalFile, final FileEntity remoteFile) {
+        LOG.debug("Update file {} as {} to account {}", remoteFile.getLocalPath(), remoteFile.getRemotePath(), remoteFile.getAccountName());
         final AccountBox accountBox = accountController.getAccountBox(remoteFile.getAccountName());
         try {
             final UploadEntity uploadEntity = new UploadEntity(mappedLocalFile, Paths.get(remoteFile.getRemotePath()), Action.CHANGED);
@@ -170,6 +124,7 @@ public class PreSynchronizationSubmitManager {
     }
 
     public void delete(final FileEntity remoteFile) {
+        LOG.debug("Delete {} file {}", remoteFile.getAccountName(), remoteFile.getRemotePath());
         final AccountBox accountBox = accountController.getAccountBox(remoteFile.getAccountName());
         try {
             final UploadEntity uploadEntity = new UploadEntity(new File(remoteFile.getLocalPath()), Paths.get(remoteFile.getRemotePath()), Action.REMOVED);
@@ -194,31 +149,38 @@ public class PreSynchronizationSubmitManager {
         return accountBox.getClient().rename(remoteFile, newName);
     }
 
-    public void uploadAsNewTo(final Collection<FileEntity> remoteFiles, final FileEntity destination) {
+    public void uploadAsNewResolvedTo(final Collection<FileEntity> remoteFiles, final Path remoteFolder, final AccountBox accountBox) {
         for (FileEntity remoteFile : remoteFiles) {
-            uploadAsNewTo(remoteFile, destination);
+            final Path localFolder = Paths.get(remoteFile.getLocalPath()).getParent();
+            remoteFile.setLocalPath(localFolder + FilenameUtils.getName(remoteFile.getRemotePath()));
+            uploadAsNewTo(remoteFile, remoteFolder, accountBox);
         }
     }
 
-    public void uploadAsNewTo(final FileEntity remoteFile, final FileEntity destination) {
-        final AccountBox accountBox = accountController.getAccountBox(destination.getAccountName());
+
+    public void uploadAsNewTo(final FileEntity remoteFile, final Path remoteFolder, final AccountBox accountBox) {
+        LOG.debug("Upload file {} as new as {} to account {}", remoteFile.getLocalPath(), remoteFile.getRemotePath(), remoteFile.getAccountName());
         final File localFile = new File(remoteFile.getLocalPath());
-        final Path remoteFolder = Paths.get(destination.getRemotePath()).getParent();
         try {
             final UploadEntity uploadEntity = new UploadEntity(localFile, remoteFolder, Action.ADDED);
             uploadEntity.setDependent(true);
             accountBox.getUploader().uploadNew(uploadEntity);
         } catch (SynchronizationException e) {
-            LOG.error(e.getMessage(), e);
+            e.printStackTrace();
         }
-
     }
 
-    public void uploadAsNewResolvedTo(final Collection<FileEntity> remoteFiles, final FileEntity destination) {
-        for (FileEntity remoteFile : remoteFiles) {
-            final Path localFolder = Paths.get(remoteFile.getLocalPath()).getParent();
-            remoteFile.setLocalPath(localFolder + FilenameUtils.getName(remoteFile.getRemotePath()));
-            uploadAsNewTo(remoteFile, destination);
+    public void download(final Map<String, Collection<ServerEntry>> serverEntries, final Map<String, AccountBox> accountBoxes) {
+        for (String account : serverEntries.keySet()) {
+            final AccountBox accountBox = accountBoxes.get(account);
+            final Collection<ServerEntry> accountEntries = serverEntries.get(account);
+            download(accountEntries, accountBox);
+        }
+    }
+
+    public void download(final Collection<ServerEntry> serverEntries, final AccountBox accountBox) {
+        for (ServerEntry serverEntry : serverEntries) {
+            accountBox.getDownloader().download(serverEntry);
         }
     }
 }

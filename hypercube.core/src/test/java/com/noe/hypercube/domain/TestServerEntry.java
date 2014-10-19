@@ -48,6 +48,11 @@ public class TestServerEntry implements ServerEntry {
     }
 
     @Override
+    public boolean isShared() {
+        return false;
+    }
+
+    @Override
     public Date lastModified() {
         return lastModified;
     }

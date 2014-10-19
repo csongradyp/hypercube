@@ -1,9 +1,12 @@
 package com.noe.hypercube.synchronization;
 
 import com.noe.hypercube.controller.IAccountController;
+import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.AccountBox;
+import com.noe.hypercube.domain.MappingEntity;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.MappingRequest;
 import com.noe.hypercube.event.domain.MappingResponse;
 import com.noe.hypercube.observer.local.LocalFileMonitor;
 import com.noe.hypercube.observer.local.LocalFileObserver;
@@ -18,13 +21,17 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Named
-public class Synchronizer implements EventHandler<MappingResponse> {
+public class Synchronizer implements EventHandler<MappingRequest> {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(Synchronizer.class);
 
@@ -37,32 +44,32 @@ public class Synchronizer implements EventHandler<MappingResponse> {
     @Inject
     private CloudObserverFactory cloudObserverFactory;
     @Inject
-    PreSynchronizerFactory preSynchronizerFactory;
+    private PreSynchronizerFactory preSynchronizerFactory;
     @Inject
     private IAccountController accountController;
+    @Inject
+    private IPersistenceController persistenceController;
 
     private ExecutorService executorService;
+    private ExecutorService presynchronizationExecutorService;
 
     private List<LocalFileObserver> localObservers;
     private Collection<CloudObserver> cloudObservers;
     private Collection<IPreSynchronizer> preSynchronizers;
 
-    public Synchronizer() {
-        localObservers = localObserverFactory.create();
-        cloudObservers = cloudObserverFactory.create();
-        preSynchronizers = preSynchronizerFactory.create(localObservers);
-        executorService = Executors.newFixedThreadPool(16);
-    }
-
     @PostConstruct
     public void subscribeToEvent() {
-        EventBus.subscribeToMappingResponse(this);
+        cloudObservers = cloudObserverFactory.create();
+        localObservers = localObserverFactory.create();
+        preSynchronizers = preSynchronizerFactory.create(localObservers);
+        executorService = Executors.newFixedThreadPool(10);
+        EventBus.subscribeToMappingRequest(this);
     }
 
     public void start() {
         submitDownloaders();
         submitUploaders();
-        presynchronize();
+        preSynchronize();
         fileMonitor.addObservers(localObservers);
         cloudMonitor.addObservers(cloudObservers);
         cloudMonitor.start();
@@ -70,12 +77,22 @@ public class Synchronizer implements EventHandler<MappingResponse> {
         LOG.info("Synchronization has been fully started");
     }
 
-    private void presynchronize() {
+    private void preSynchronize() {
         LOG.info("PreSynchronization has been started");
+        presynchronizationExecutorService = Executors.newFixedThreadPool(preSynchronizers.size() + 1);
         for (IPreSynchronizer preSynchronizer : preSynchronizers) {
-            executorService.submit(preSynchronizer);
+            presynchronizationExecutorService.submit(preSynchronizer);
             LOG.info("PreSynchronizer submitted for folder {}", preSynchronizer.getTargetFolder());
         }
+        try {
+            final List<Future<Boolean>> futures = presynchronizationExecutorService.invokeAll(preSynchronizers);
+            for (Future<Boolean> future : futures) {
+                future.get();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        LOG.info("PreSynchronization has been finished");
     }
 
     private void submitDownloaders() {
@@ -109,10 +126,41 @@ public class Synchronizer implements EventHandler<MappingResponse> {
 
     @Override
     @Handler(rejectSubtypes = true)
-    public void onEvent(final MappingResponse event) {
-        final AccountBox accountBox = accountController.getAccountBox(event.getAccount());
-        if (event.getAccount().equals(accountBox.getClient().getAccountName())) {
-            // TODO presynchronize and submit observer ...
+    public void onEvent(final MappingRequest event) {
+        final Path localFolder = event.getLocalFolder();
+        final MappingResponse mappingResponse = new MappingResponse(localFolder);
+        final Map<String, Path> remoteFolders = event.getRemoteFolders();
+        for (Map.Entry<String, Path> remoteMapping : remoteFolders.entrySet()) {
+            final AccountBox accountBox = accountController.getAccountBox(remoteMapping.getKey());
+            final MappingEntity mapping = accountBox.getMapper().createMapping();
+            final String account = remoteMapping.getKey();
+            final Path remoteFolder = remoteMapping.getValue();
+            mapping.setLocalDir(localFolder.toString());
+            mapping.setRemoteDir(remoteFolder.toString());
+            persistenceController.addMapping(mapping);
+            mappingResponse.addRemoteFolder(account, remoteFolder);
+        }
+        final Future<Boolean> submit = presynchronizationExecutorService.submit(preSynchronizerFactory.create(localFolder));
+        try {
+            submit.get();
+            submitMapping(localFolder, remoteFolders);
+            EventBus.publish(mappingResponse);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void submitMapping(Path localFolder, Map<String, Path> remoteFolders) {
+        final LocalFileObserver fileObserver = localObserverFactory.createFileObserver(localFolder);
+        fileMonitor.addObserver(fileObserver);
+        addToCloudObserver(remoteFolders);
+    }
+
+    private void addToCloudObserver(final Map<String, Path> remoteFolders) {
+        for (Map.Entry<String, Path> remoteMapping : remoteFolders.entrySet()) {
+            final AccountBox accountBox = accountController.getAccountBox(remoteMapping.getKey());
+            final Path remoteFolder = remoteMapping.getValue();
+            cloudMonitor.addTargetFolder(accountBox.getAccountType(), remoteFolder);
         }
     }
 }

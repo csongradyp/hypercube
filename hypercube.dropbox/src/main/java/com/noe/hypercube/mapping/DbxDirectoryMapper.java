@@ -16,7 +16,7 @@ public class DbxDirectoryMapper extends DirectoryMapper<Dropbox, DbxMapping> {
     }
 
     @Override
-    protected DbxMapping createMapping() {
+    public DbxMapping createMapping() {
         return new DbxMapping();
     }
 

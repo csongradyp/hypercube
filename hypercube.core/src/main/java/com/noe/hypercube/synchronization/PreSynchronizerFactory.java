@@ -27,9 +27,18 @@ public class PreSynchronizerFactory {
     public Collection<IPreSynchronizer> create(final List<LocalFileObserver> localObservers) {
         final Collection<IPreSynchronizer> preSynchronizers = new ArrayList<>();
         for (LocalFileObserver localObserver : localObservers) {
-            final Path localFolder = localObserver.getTargetDir();
-            preSynchronizers.add(new ManagedFolderPreSynchronizer(localFolder, persistenceController, accountController, submitManager));
+            preSynchronizers.add(create(localObserver));
         }
         return preSynchronizers;
     }
+
+    public IPreSynchronizer create(final LocalFileObserver localObserver) {
+        final Path localFolder = localObserver.getTargetDir();
+        return create(localFolder);
+    }
+
+    public IPreSynchronizer create(final Path localFolder) {
+        return new ManagedFolderPreSynchronizer(localFolder, persistenceController, accountController, submitManager);
+    }
+
 }

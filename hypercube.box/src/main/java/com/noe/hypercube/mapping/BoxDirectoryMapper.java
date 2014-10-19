@@ -16,7 +16,7 @@ public class BoxDirectoryMapper extends DirectoryMapper<Box, BoxMapping> {
     }
 
     @Override
-    protected BoxMapping createMapping() {
+    public BoxMapping createMapping() {
         return new BoxMapping();
     }
 

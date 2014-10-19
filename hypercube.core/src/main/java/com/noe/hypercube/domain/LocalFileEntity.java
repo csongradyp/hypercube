@@ -2,6 +2,7 @@ package com.noe.hypercube.domain;
 
 import org.apache.commons.io.FileUtils;
 
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+@Entity
 public class LocalFileEntity implements IEntity<String> {
 
     @Id
@@ -21,6 +23,9 @@ public class LocalFileEntity implements IEntity<String> {
         localPath = file.toPath().toString();
         lastModifiedDate = new Date(file.lastModified());
         getCrc(file);
+    }
+
+    public LocalFileEntity() {
     }
 
     private void getCrc(File file) {

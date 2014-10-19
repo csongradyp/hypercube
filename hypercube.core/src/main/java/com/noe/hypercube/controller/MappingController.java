@@ -13,13 +13,15 @@ public interface MappingController {
 
     Collection<MappingEntity> getMappings(Class<? extends MappingEntity> mappingClass);
 
+    Collection<Path> getMappedRemotes(Class<? extends MappingEntity> mappingClass);
+
     Collection<MappingEntity> getAllMappings();
 
     void addMapping(MappingEntity mapping);
 
     void removeMapping(MappingEntity mapping);
 
-    Path getRemoteFolder(Class<? extends MappingEntity> mappingType, Path targetFolder);
+    Collection<Path> getRemoteFolder(Class<? extends MappingEntity> mappingType, Path targetFolder);
 
     Map<String, List<FileEntity>> getMappedEntities(String folder);
 

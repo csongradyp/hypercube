@@ -37,10 +37,10 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
     @Override
     public void run() {
         while (!stop) {
-            LOG.info("AAAAAA: "  + this);
             try {
                 final UploadEntity uploadEntity = uploadQ.take();
                 final Action action = uploadEntity.getAction();
+                LOG.info("{} uploader: {} was taken from queue to upload to {} with action", getAccountType(), uploadEntity.getFile().toPath(), uploadEntity.getRemoteFilePath(), uploadEntity.getAction());
                 if (ADDED == action) {
                     super.uploadNew(uploadEntity);
                 } else if (CHANGED == action) {
@@ -53,7 +53,6 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
             } catch (InterruptedException e) {
                 LOG.error(String.format("%s upload queue reading  has been interrupted", client.getAccountName()));
             }
-            LOG.info("BBBBBB: "  + this);
         }
     }
 
@@ -73,6 +72,11 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
 
     @Override
     public void uploadNew(final UploadEntity uploadEntity) throws SynchronizationException {
+        uploadQ.add(uploadEntity);
+    }
+
+    @Override
+    public void delete(final UploadEntity uploadEntity) throws SynchronizationException {
         uploadQ.add(uploadEntity);
     }
 

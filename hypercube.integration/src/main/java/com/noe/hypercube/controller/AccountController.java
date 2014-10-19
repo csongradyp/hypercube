@@ -67,9 +67,9 @@ public class AccountController implements IAccountController {
 
     @Override
     public AccountBox getAccountBox(final String accountName) {
-        for (Class<? extends Account> accountType : accountBoxes.keySet()) {
-            if (accountType.getName().equals(accountName)) {
-                return accountBoxes.get(accountType);
+        for (AccountBox accountBox : accountBoxes.values()) {
+            if(accountBox.getClient().getAccountName().equals(accountName)) {
+                return accountBox;
             }
         }
         throw new IllegalStateException(String.format("%s was not found in registered accounts", accountName));

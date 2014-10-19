@@ -16,7 +16,7 @@ public class TestMapper extends DirectoryMapper<TestAccount, TestMapping> {
     }
 
     @Override
-    protected TestMapping createMapping() {
+    public TestMapping createMapping() {
         return null;
     }
 

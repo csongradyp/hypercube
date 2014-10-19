@@ -36,19 +36,20 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity, BoxMapping> {
 
     public BoxClientWrapper() {
         client = BoxAuthentication.create();
+        client.setAutoRefreshOAuth(true);
         directoryUtil = new BoxDirectoryUtil(client);
-        client.addOAuthRefreshListener(newAuthData -> {
-            final String accessToken = newAuthData.getAccessToken();
-            final String refreshToken = newAuthData.getRefreshToken();
-        });
+//        client.addOAuthRefreshListener(newAuthData -> {
+//            final String accessToken = newAuthData.getAccessToken();
+//            final String refreshToken = newAuthData.getRefreshToken();
+//        });
     }
 
     @Override
     protected boolean testConnectionActive() {
         try {
-            final List<ServerEntry> rootFileList = getRootFileList();
-            return !rootFileList.isEmpty();
-        } catch (SynchronizationException e) {
+            client.getAuthData().getExpiresIn();
+            return true;
+        } catch (AuthFatalFailureException e) {
             return false;
         }
     }

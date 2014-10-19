@@ -8,4 +8,6 @@
 
     <bean class="com.noe.hypercube.synchronization.PreSynchronizerFactory" />
 
+    <bean class="com.noe.hypercube.synchronization.presynchronization.util.PreSynchronizationSubmitManager" />
+
 </beans>

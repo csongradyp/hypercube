@@ -9,10 +9,14 @@ public final class FileNameConvensionUtil {
     public static final String ACCOUNT_ICON_POSTFIX = "-icon.png";
 
     public static String getIconFileName(String account) {
-        return account.replace(" ", "").toLowerCase() + ACCOUNT_ICON_POSTFIX;
+        return String.format("%s%s", getAccountFilePrefix(account), ACCOUNT_ICON_POSTFIX);
     }
 
     public static String getStyleSheetFileName(String account) {
-        return account.replace(" ", "").toLowerCase() + ".css";
+        return String.format("%s.css", getAccountFilePrefix(account));
+    }
+
+    private static String getAccountFilePrefix(String account) {
+        return account.replace(" ", "").toLowerCase();
     }
 }

@@ -1,6 +1,7 @@
 package com.noe.hypercube.ui.dialog;
 
-import com.noe.hypercube.event.domain.MappingResponse;
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.domain.MappingRequest;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.PathBundle;
 import com.noe.hypercube.ui.elements.AccountSegmentedButton;
@@ -14,21 +15,15 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.util.Callback;
 import org.apache.commons.collections4.keyvalue.DefaultMapEntry;
-import org.controlsfx.control.action.Action;
-import org.controlsfx.dialog.Dialog;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.function.Consumer;
 
-public class BindManagerDialog extends Dialog implements Initializable, com.noe.hypercube.event.EventHandler<MappingResponse> {
+public class BindManagerDialog extends Dialog<String> implements Initializable {
 
     @FXML
     private LocalDriveSegmentedButton localDrives;
@@ -40,7 +35,6 @@ public class BindManagerDialog extends Dialog implements Initializable, com.noe.
     private ListView<Map.Entry<String, String>> mappingFolderList;
 
     public BindManagerDialog() {
-        super(null, "", false);
         ResourceBundle bundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("bindManagerDialog.fxml"), bundle);
         fxmlLoader.setResources(bundle);
@@ -51,21 +45,18 @@ public class BindManagerDialog extends Dialog implements Initializable, com.noe.
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
-        final Action addBindAction = createAddBindAction(bundle);
-        getActions().addAll(addBindAction, ACTION_CLOSE);
-    }
-
-    private Action createAddBindAction(ResourceBundle bundle) {
-        return new Action(bundle.getString("tooltip.mapping.add"), new Consumer<ActionEvent>() {
-            @Override
-            public void accept(ActionEvent actionEvent) {
+        setResultConverter(param -> {
+            if (param.getButtonData() == ButtonBar.ButtonData.APPLY) {
                 onAdd();
             }
+            return null;
         });
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        final ButtonType buttonType = new ButtonType(resources.getString("tooltip.mapping.add"), ButtonBar.ButtonData.APPLY);
+        getDialogPane().getButtonTypes().addAll(buttonType, ButtonType.CLOSE);
         mappingFolderList.setCellFactory(new MappingListCellFactory(remoteDrives));
         sourceFolderList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -103,7 +94,7 @@ public class BindManagerDialog extends Dialog implements Initializable, com.noe.
             final String listRoot = driveButton.getId();
             final Set<String> folders = mappingListCallback.call(listRoot);
             sourceFolderList.setItems(FXCollections.observableArrayList(folders));
-            if(folders.isEmpty()) {
+            if (folders.isEmpty()) {
                 mappingFolderList.setItems(null);
             } else {
                 sourceFolderList.getSelectionModel().selectFirst();
@@ -119,17 +110,9 @@ public class BindManagerDialog extends Dialog implements Initializable, com.noe.
     }
 
     public void onAdd() {
-        final AddMappingDialog addMappingDialog = new AddMappingDialog();
-        addMappingDialog.show();
-    }
-
-    @FXML
-    public void onRemove() {
-
-    }
-
-    @Override
-    public void onEvent(final MappingResponse event) {
-        // TODO add persisted mapping o the list
+        final Optional<MappingRequest> requests = new AddMappingDialog().showAndWait();
+        if (requests.isPresent()) {
+            EventBus.publish(requests.get());
+        }
     }
 }

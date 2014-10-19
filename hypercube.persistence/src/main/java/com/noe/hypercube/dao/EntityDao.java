@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Repository
@@ -15,7 +16,7 @@ public abstract class EntityDao<ENTITY_TYPE extends IEntity> implements Dao<Stri
 
     private static final Logger LOG = Logger.getLogger(EntityDao.class);
 
-    @PersistenceContext
+    @PersistenceContext(unitName = "hyperPersistenceUnit")
     protected EntityManager entityManager;
 
     @Override
@@ -53,18 +54,33 @@ public abstract class EntityDao<ENTITY_TYPE extends IEntity> implements Dao<Stri
 
     @Override
     public ENTITY_TYPE find(ENTITY_TYPE entity) {
+        try {
         return entityManager.find(getEntityClass(), entity);
+        } catch (Exception e) {
+            LOG.error(e);
+        }
+        return null;
     }
 
     @Override
     public ENTITY_TYPE findById(String id) {
-        return entityManager.find(getEntityClass(), id);
+        try {
+            return entityManager.find(getEntityClass(), id);
+        } catch (Exception e) {
+            LOG.error(e);
+        }
+        return null;
     }
 
     @Override
     public Collection<ENTITY_TYPE> getAll() {
-        Query query = entityManager.createQuery("SELECT e FROM " + getEntityClass().getSimpleName() + " e");
-        return (Collection<ENTITY_TYPE>) query.getResultList();
+        try {
+            Query query = entityManager.createQuery("SELECT e FROM " + getEntityClass().getSimpleName() + " e");
+            return (Collection<ENTITY_TYPE>) query.getResultList();
+        } catch (Exception e) {
+            LOG.error(e);
+        }
+        return new ArrayList<>();
     }
 
 }

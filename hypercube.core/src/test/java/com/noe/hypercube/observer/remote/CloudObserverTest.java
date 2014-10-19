@@ -13,6 +13,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static org.mockito.BDDMockito.given;
@@ -48,7 +50,7 @@ public class CloudObserverTest {
         given(mockAccountBox.getMapper()).willReturn(mockMapper);
         given(mockAccountBox.getAccountType()).willReturn(TestAccount.class);
         given(mockMapper.getMappingClass()).willReturn(TestMapping.class);
-        underTest = new CloudObserver<>(mockAccountBox, mockPersistence);
+        underTest = new CloudObserver<>(mockAccountBox, givenTargetRemoteFolders());
     }
 
     @Test
@@ -78,4 +80,11 @@ public class CloudObserverTest {
         testMappings.add(new TestMapping("A/B/", "X/Y"));
         return testMappings;
     }
+
+    private Collection<Path> givenTargetRemoteFolders() {
+        final Collection<Path> testMappings = new ArrayList<>();
+        testMappings.add(Paths.get("X/Y"));
+        return testMappings;
+    }
+
 }

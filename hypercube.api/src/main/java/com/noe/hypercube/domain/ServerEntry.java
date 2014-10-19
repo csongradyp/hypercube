@@ -15,6 +15,8 @@ public interface ServerEntry {
 
     boolean isFile();
 
+    boolean isShared();
+
     Date lastModified();
 
     /**

@@ -25,4 +25,12 @@ public class AddedFiles {
     public void addLocals(Collection<File> addedLocalFiles) {
         locals.addAll(addedLocalFiles);
     }
+
+    public Collection<File> getLocals() {
+        return locals;
+    }
+
+    public Map<String, Collection<ServerEntry>> getRemotes() {
+        return remotes;
+    }
 }

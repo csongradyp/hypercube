@@ -111,14 +111,26 @@ public class PersistenceController implements IPersistenceController {
     }
 
     @Override
-    public Path getRemoteFolder(final Class<? extends MappingEntity> mappingType, final Path targetFolder) {
+    public Collection<Path> getMappedRemotes(Class<? extends MappingEntity> mappingClass) {
+        final Collection<Path> mappedRemoteFolders = new ArrayList<>();
+        final Collection<MappingEntity> mappings = getMappings(mappingClass);
+        for (MappingEntity mapping : mappings) {
+            mappedRemoteFolders.add(Paths.get(mapping.getRemoteDir()));
+        }
+        return mappedRemoteFolders;
+    }
+
+    @Override
+    public Collection<Path> getRemoteFolder(final Class<? extends MappingEntity> mappingType, final Path targetFolder) {
+        final Collection<Path> mappedRemoteFolders = new ArrayList<>();
         final Collection<MappingEntity> mappings = getMappings(mappingType);
         for (MappingEntity mapping : mappings) {
-            if(targetFolder.equals(mapping.getLocalDir())) {
-                return Paths.get(mapping.getRemoteDir());
+            final Path localPath = Paths.get(mapping.getLocalDir());
+            if (targetFolder.equals(localPath)) {
+                mappedRemoteFolders.add(Paths.get(mapping.getRemoteDir()));
             }
         }
-        return null;
+        return mappedRemoteFolders;
     }
 
     @Override
@@ -126,7 +138,7 @@ public class PersistenceController implements IPersistenceController {
         final Set<Class<IEntity>> results = new HashSet<>();
         for (Dao<String, IEntity> dao : daos) {
             final IEntity entity = dao.findById(folder);
-            if(entity != null) {
+            if (entity != null) {
                 results.add(dao.getEntityClass());
             }
         }
@@ -138,7 +150,7 @@ public class PersistenceController implements IPersistenceController {
         final Set<String> mappedLocalFolders = new HashSet<>();
         final Collection<Dao> daos = daoMap.values();
         for (Dao dao : daos) {
-            if(isMappingDao(dao)) {
+            if (isMappingDao(dao)) {
                 final Collection<MappingEntity> daoMappings = dao.getAll();
                 for (MappingEntity mapping : daoMappings) {
                     mappedLocalFolders.add(mapping.getLocalDir());
@@ -153,16 +165,16 @@ public class PersistenceController implements IPersistenceController {
     }
 
     @Override
-    public Map<String, List<FileEntity>> getMappedEntities(final String folder){
+    public Map<String, List<FileEntity>> getMappedEntities(final String folder) {
         final Map<String, List<FileEntity>> fileEntities = new HashMap<>();
         final Collection<Dao> daos = daoMap.values();
         for (Dao dao : daos) {
-            if(isFileEntityDao(dao)) {
+            if (isFileEntityDao(dao)) {
                 final Collection<? extends FileEntity> mappings = dao.getAll();
                 for (FileEntity fileEntity : mappings) {
                     final String localPath = fileEntity.getLocalPath();
-                    if(localPath.startsWith(folder)) {
-                        if(!fileEntities.containsKey(localPath)) {
+                    if (localPath.startsWith(folder)) {
+                        if (!fileEntities.containsKey(localPath)) {
                             fileEntities.put(localPath, new ArrayList<>());
                         }
                         fileEntities.get(localPath).add(fileEntity);
@@ -181,7 +193,7 @@ public class PersistenceController implements IPersistenceController {
             if (isMappingDao(dao)) {
                 final Collection<MappingEntity> all = dao.getAll();
                 for (MappingEntity mapping : all) {
-                    if(mapping.getLocalDir().equals(folder)) {
+                    if (mapping.getLocalDir().equals(folder)) {
                         allMappings.add(mapping);
                     }
                 }

@@ -1,0 +1,62 @@
+.background {
+    -fx-background-color: aliceblue;
+}
+
+.table-view {
+    -fx-base: aliceblue;
+    -fx-control-inner-background: white;
+    -fx-background-color: aliceblue;
+    -fx-table-cell-border-color: transparent;
+    -fx-table-header-border-color: transparent;
+}
+
+.table-view .table-row-cell {
+    -fx-border-width: 1;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-size: 20;
+    -fx-border-color: transparent transparent derive(-fx-base, 80%) transparent;
+}
+
+.table-view .column-header .label {
+    -fx-font-size: 12;
+    -fx-font-family: "Franklin Gothic Condensed Demi Bold";
+    -fx-text-fill: #000000;
+    -fx-alignment: center-left;
+}
+
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: -fx-focus-color;
+    -fx-border-color: #000000;
+    -fx-border-width: 1;
+}
+
+.table-row-cell:odd:filled {
+    -fx-background-color: white;
+}
+
+.table-row-cell:odd:filled:hover {
+    -fx-background-color: aliceblue;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: aliceblue;
+    -fx-alternative-column-fill-visible: false;
+}
+
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: #E3F2FF;
+    -fx-border-color: transparent;
+    -fx-alternative-column-fill-visible: false;
+    -fx-alternative-row-fill-visible: false;
+    -fx-selection-bar: #E3F2FF;
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: #010101 ;
+}

@@ -6,6 +6,7 @@ import com.noe.hypercube.domain.AccountBox;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +23,10 @@ public class CloudObserverFactory {
         LinkedList<CloudObserver> observers = new LinkedList<>();
         Collection<AccountBox> accountBoxes = accountController.getAll();
         for (AccountBox accountBox : accountBoxes) {
-            observers.add(new CloudObserver(accountBox, persistenceController));
+            if (accountBox.getClient().isConnected()) {
+                final Collection<Path> mappedRemotes = persistenceController.getMappedRemotes(accountBox.getMapper().getMappingClass());
+                observers.add(new CloudObserver(accountBox, mappedRemotes));
+            }
         }
         return observers;
     }

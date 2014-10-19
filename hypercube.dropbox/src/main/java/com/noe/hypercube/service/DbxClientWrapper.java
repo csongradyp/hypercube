@@ -72,9 +72,8 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
         try {
             exists = client.getMetadata(dropboxFilePath) != null;
         } catch (DbxException e) {
-            LOG.error("Failed to get file information from Dropbox: {}", dropboxFilePath);
+            LOG.error("Failed to get file information from Dropbox: {}", dropboxFilePath, e);
         }
-        LOG.debug(dropboxFilePath + " exists = " + exists);
         return exists;
     }
 
@@ -189,7 +188,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
                 fileList.add(getDbxFileInfo(file));
             }
         } catch (DbxException e) {
-            throw new SynchronizationException(e.getMessage());
+            throw new SynchronizationException(e.getMessage(), e);
         }
         return fileList;
     }

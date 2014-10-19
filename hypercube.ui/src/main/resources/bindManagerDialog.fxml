@@ -4,31 +4,38 @@
 <?import javafx.scene.layout.*?>
 <?import com.noe.hypercube.ui.elements.LocalDriveSegmentedButton?>
 <?import com.noe.hypercube.ui.elements.AccountSegmentedButton?>
-<fx:root type="org.controlsfx.dialog.Dialog" title="%dialog.mapping.add.title" resizable="false" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-    <content>
-        <AnchorPane prefHeight="400.0" prefWidth="600.0">
-            <VBox alignment="BOTTOM_LEFT" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                <HBox spacing="10">
-                    <LocalDriveSegmentedButton fx:id="localDrives"/>
-                    <AccountSegmentedButton fx:id="remoteDrives"/>
-                </HBox>
-                <SplitPane dividerPositions="0.4" prefHeight="350.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                        <ListView fx:id="sourceFolderList" layoutY="58.0" prefHeight="398.0" prefWidth="236.0" stylesheets="style/HyperCubeListView.css" focusTraversable="true"
-                                  AnchorPane.bottomAnchor="0.0"
-                                  AnchorPane.leftAnchor="0.0"
-                                  AnchorPane.rightAnchor="0.0"
-                                  AnchorPane.topAnchor="0.0"/>
-                    </AnchorPane>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                        <ListView fx:id="mappingFolderList" prefHeight="398.0" prefWidth="356.0" stylesheets="style/HyperCubeListView.css" focusTraversable="true"
-                                  AnchorPane.bottomAnchor="0.0"
-                                  AnchorPane.leftAnchor="0.0"
-                                  AnchorPane.rightAnchor="0.0"
-                                  AnchorPane.topAnchor="0.0"/>
-                    </AnchorPane>
-                </SplitPane>
-            </VBox>
-        </AnchorPane>
-    </content>
+<fx:root type="javafx.scene.control.Dialog" title="%dialog.mapping.add.title" resizable="false" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <dialogPane>
+        <DialogPane minWidth="300.0" minHeight="250.0">
+            <content>
+                <AnchorPane prefHeight="400.0" prefWidth="600.0">
+                    <VBox alignment="BOTTOM_LEFT" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <HBox spacing="10">
+                            <LocalDriveSegmentedButton fx:id="localDrives"/>
+                            <AccountSegmentedButton fx:id="remoteDrives"/>
+                        </HBox>
+                        <SplitPane dividerPositions="0.4" prefHeight="350.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                <ListView fx:id="sourceFolderList" layoutY="58.0" prefHeight="398.0" prefWidth="236.0" stylesheets="style/HyperCubeListView.css" focusTraversable="true"
+                                          AnchorPane.bottomAnchor="0.0"
+                                          AnchorPane.leftAnchor="0.0"
+                                          AnchorPane.rightAnchor="0.0"
+                                          AnchorPane.topAnchor="0.0"/>
+                            </AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                <ListView fx:id="mappingFolderList" prefHeight="398.0" prefWidth="356.0" stylesheets="style/HyperCubeListView.css" focusTraversable="true"
+                                          AnchorPane.bottomAnchor="0.0"
+                                          AnchorPane.leftAnchor="0.0"
+                                          AnchorPane.rightAnchor="0.0"
+                                          AnchorPane.topAnchor="0.0"/>
+                            </AnchorPane>
+                        </SplitPane>
+                    </VBox>
+                </AnchorPane>
+            </content>
+            <!--<buttons>-->
+                <!--<ButtonType text="%tooltip.mapping.add"/>-->
+            <!--</buttons>-->
+        </DialogPane>
+    </dialogPane>
 </fx:root>

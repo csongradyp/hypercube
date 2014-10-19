@@ -17,7 +17,7 @@ public class DriveDirectoryMapper extends DirectoryMapper<GoogleDrive, DriveMapp
     }
 
     @Override
-    protected DriveMapping createMapping() {
+    public DriveMapping createMapping() {
         return new DriveMapping();
     }
 

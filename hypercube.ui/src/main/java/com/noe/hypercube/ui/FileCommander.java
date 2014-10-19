@@ -36,7 +36,7 @@ public class FileCommander extends Application {
         scene = new Scene(fileCommander, 1024, 768);
         stage.setScene(scene);
         stage.setTitle("HyperCube - Cloud connected");
-        stage.getIcons().add(ImageBundle.getImage("tray.default"));
+        stage.getIcons().add(ImageBundle.getImage("icon.main"));
         stage.setOnCloseRequest(t -> hide(stage));
         Platform.setImplicitExit(false);
         ConfigurationBundle.activeLanguageProperty().addListener((observable, oldValue, newValue) -> changLanguage());

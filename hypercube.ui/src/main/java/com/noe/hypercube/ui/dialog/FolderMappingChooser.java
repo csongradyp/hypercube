@@ -30,8 +30,8 @@ public class FolderMappingChooser extends HBox {
         folderChooserButton = AwesomeDude.createIconButton(AwesomeIcon.FOLDER_OPEN);
         getChildren().addAll(accountChoice, folderPath, folderChooserButton);
 
-        validationSupport.registerValidator(folderPath, Validator.createEmptyValidator("Text is required", Severity.WARNING));
-        validationSupport.registerValidator(accountChoice, Validator.createEmptyValidator("Text is required", Severity.WARNING));
+        validationSupport.registerValidator(folderPath, Validator.createEmptyValidator("Text is required", Severity.ERROR));
+        validationSupport.registerValidator(accountChoice, Validator.createEmptyValidator("Text is required", Severity.ERROR));
     }
 
     public void setFolderPath(final Path remoteFolder) {

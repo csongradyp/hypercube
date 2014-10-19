@@ -1,5 +1,7 @@
 package com.noe.hypercube.ui;
 
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.domain.MappingRequest;
 import com.noe.hypercube.ui.bundle.AccountBundle;
 import com.noe.hypercube.ui.bundle.PathBundle;
 import com.noe.hypercube.ui.dialog.AddMappingDialog;
@@ -50,7 +52,12 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         remotebreadcrumbs = new HashMap<>();
         localBreadcrumb = new FileBreadCrumbBar();
         localBreadcrumb.setActive(true);
-        localBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapLocalDialog(localBreadcrumb.getLocation()));
+        localBreadcrumb.setOnAddMapping(mouseEvent -> {
+            final Optional<MappingRequest> request = AddMappingDialog.showMapLocalDialog(localBreadcrumb.getLocation());
+            if(request.isPresent()) {
+                EventBus.publish(request.get());
+            }
+        });
         getChildren().add(localBreadcrumb);
         setLocalCrumbActionHandler();
 //        final Collection<String> accounts = AccountBundle.getAccountNames();
@@ -72,7 +79,12 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
                 for (AccountInfo account : addedAccount) {
                     final RemoteFileBreadCrumbBar remoteBreadcrumb = new RemoteFileBreadCrumbBar(account.getName());
                     addRemoteCrumbEventHandler(remoteBreadcrumb);
-                    remoteBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapRemoteDialog( remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation()));
+                    remoteBreadcrumb.setOnAddMapping(event -> {
+                        final Optional<MappingRequest> request = AddMappingDialog.showMapRemoteDialog(remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation());
+                        if(request.isPresent()) {
+                            EventBus.publish(request.get());
+                        }
+                    });
                     setOnRemoveRemoteMapping(remoteBreadcrumb);
                     remotebreadcrumbs.put(account.getName(), remoteBreadcrumb);
                 }
