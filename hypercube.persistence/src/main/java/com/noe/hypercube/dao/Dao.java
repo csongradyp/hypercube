@@ -1,22 +1,40 @@
 package com.noe.hypercube.dao;
 
 import com.noe.hypercube.domain.IEntity;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.jpa.repository.JpaRepository;
 
+import javax.inject.Inject;
 import java.util.Collection;
 
-public interface Dao<KEY, ENTITY_TYPE extends IEntity> {
+public abstract class Dao<ENTITY extends IEntity> implements IDao<String, ENTITY> {
 
-    Class<ENTITY_TYPE> getEntityClass();
+    @Inject
+    @Lazy
+    private JpaRepository<ENTITY, String> repository;
 
-    void persist(ENTITY_TYPE entity);
+    protected Dao() {
+    }
 
-    boolean remove(ENTITY_TYPE entity);
+    public abstract Class<ENTITY> getEntityClass();
 
-    boolean remove(KEY id);
+    public void persist(ENTITY entity) {
+        repository.saveAndFlush(entity);
+    }
 
-    ENTITY_TYPE findById(KEY id);
+    public void remove(ENTITY entity) {
+        repository.delete(entity);
+    }
 
-    ENTITY_TYPE find(ENTITY_TYPE entity);
+    public void remove(String id) {
+        repository.delete(id);
+    }
 
-    public Collection<ENTITY_TYPE> getAll();
+    public ENTITY findById(String id) {
+        return repository.findOne(id);
+    }
+
+    public Collection<ENTITY> getAll() {
+        return repository.findAll();
+    }
 }

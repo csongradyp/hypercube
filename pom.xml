@@ -22,7 +22,8 @@
     </modules>
 
     <properties>
-        <springVersion>4.0.3.RELEASE</springVersion>
+        <spring.version>4.0.3.RELEASE</spring.version>
+        <spring.data.version>1.7.0.RELEASE</spring.data.version>
     </properties>
 
     <repositories>
@@ -38,32 +39,32 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
-                <version>${springVersion}</version>
+                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-beans</artifactId>
-                <version>${springVersion}</version>
+                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-jpa</artifactId>
-                <version>1.5.1.RELEASE</version>
+                <version>${spring.data.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-orm</artifactId>
-                <version>${springVersion}</version>
+                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-tx</artifactId>
-                <version>${springVersion}</version>
+                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-jdbc</artifactId>
-                <version>${springVersion}</version>
+                <version>${spring.version}</version>
             </dependency>
 
             <dependency>
@@ -126,11 +127,6 @@
             </dependency>
 
             <dependency>
-                <groupId>javax.persistence</groupId>
-                <artifactId>persistence-api</artifactId>
-                <version>1.0.2</version>
-            </dependency>
-            <dependency>
                 <groupId>com.objectdb</groupId>
                 <artifactId>objectdb</artifactId>
                 <version>2.5.7</version>
@@ -160,7 +156,33 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <compilerArgument>-proc:none</compilerArgument>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>2.2.4</version>
+                <executions>
+                    <execution>
+                        <id>process</id>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <!-- Without this, the annotation processor complains about persistence.xml not being present and fail -->
+                            <compilerArguments>-Aeclipselink.persistencexml=src/main/resources/META-INF/persistence.xml</compilerArguments>
+                            <!-- For an unknown reason, the annotation processor is not discovered, have to list it explicitly -->
+                            <processors>
+                                <processor>org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor</processor>
+                            </processors>
+                            <!-- source output directory -->
+                            <outputDirectory>${project.build.directory}/generated-sources/meta-model</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

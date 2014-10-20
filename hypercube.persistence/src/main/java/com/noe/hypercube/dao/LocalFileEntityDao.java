@@ -5,7 +5,7 @@ import com.noe.hypercube.domain.LocalFileEntity;
 import javax.inject.Named;
 
 @Named
-public class LocalFileEntityDao extends EntityDao<LocalFileEntity> {
+public class LocalFileEntityDao extends Dao<LocalFileEntity> {
 
     @Override
     public Class<LocalFileEntity> getEntityClass() {

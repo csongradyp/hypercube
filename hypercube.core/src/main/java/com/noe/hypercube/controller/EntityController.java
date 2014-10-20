@@ -1,6 +1,5 @@
 package com.noe.hypercube.controller;
 
-
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.LocalFileEntity;
 
@@ -14,7 +13,7 @@ public interface EntityController {
 
     void delete(FileEntity entity);
 
-    boolean delete(String id, Class<? extends FileEntity> entityClass);
+    void delete(String id, Class<? extends FileEntity> entityClass);
 
     FileEntity get(FileEntity entity);
 

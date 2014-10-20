@@ -21,9 +21,7 @@
     <bean id="app" class="com.noe.hypercube.HyperCubeApp" destroy-method="stop"/>
 
     <bean id="accountController" class="com.noe.hypercube.controller.AccountController">
-        <constructor-arg index="0" ref="clients"/>
-        <constructor-arg index="1" ref="mappers"/>
-        <constructor-arg index="2" ref="entityFactories"/>
+        <constructor-arg ref="accountBoxList"/>
     </bean>
 
     <bean id="propertyPlaceholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -37,16 +35,13 @@
     </bean>
 
     <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer" destroy-method="shutdown"/>
-
-    <bean id="daos" class="com.noe.hypercube.collector.DaoCollector"/>
-    <bean id="entityFactories" class="com.noe.hypercube.collector.EntityFactoryCollector"/>
-    <bean id="clients" class="com.noe.hypercube.collector.ClientCollector"/>
-    <bean id="mappers" class="com.noe.hypercube.collector.MapperCollector"/>
+    <bean id="accountBoxList" class="com.noe.hypercube.collector.AccountBoxCollector"/>
     <bean id="accountProperties" class="com.noe.hypercube.collector.AccountPropertiesCollector"/>
 
     <bean id="persistenceController" class="com.noe.hypercube.controller.PersistenceController">
         <constructor-arg ref="daos"/>
     </bean>
+    <bean id="daos" class="com.noe.hypercube.collector.DaoCollector" depends-on="accountBoxList"/>
 
     <bean id="fileMonitor" class="com.noe.hypercube.observer.local.LocalFileMonitor" destroy-method="stop">
         <constructor-arg value="${poll.delay.in.milisec}"/>
