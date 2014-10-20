@@ -22,7 +22,7 @@ public class AccountBoxCollector implements FactoryBean<List<AccountBox<?,?,?>>>
     }
 
     @Override
-    public List<AccountBox<?,?,?>> getObject() {
+    public List getObject() {
         return list;
     }
 

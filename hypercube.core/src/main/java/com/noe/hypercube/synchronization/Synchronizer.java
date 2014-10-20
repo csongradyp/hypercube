@@ -58,7 +58,7 @@ public class Synchronizer implements EventHandler<MappingRequest> {
     private Collection<IPreSynchronizer> preSynchronizers;
 
     @PostConstruct
-    public void subscribeToEvent() {
+    public void init() {
         cloudObservers = cloudObserverFactory.create();
         localObservers = localObserverFactory.create();
         preSynchronizers = preSynchronizerFactory.create(localObservers);

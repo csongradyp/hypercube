@@ -13,6 +13,14 @@
         </constructor-arg>
     </bean>
 
+    <bean parent="accountBoxCollection" class="com.noe.hypercube.collector.AccountBoxCollector">
+        <constructor-arg>
+            <list merge="true">
+                <ref bean="box.AccountBox"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="box.AccountBox" class="com.noe.hypercube.domain.AccountBox">
         <constructor-arg ref="boxClient"/>
         <constructor-arg ref="boxDirectoryMapper"/>

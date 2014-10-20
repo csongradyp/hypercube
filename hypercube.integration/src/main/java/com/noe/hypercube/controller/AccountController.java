@@ -20,12 +20,8 @@ public class AccountController implements IAccountController {
 
     private final Map<Class<? extends Account>, AccountBox> accountBoxes;
 
-    public AccountController() {
-        accountBoxes = new LinkedHashMap<>();
-    }
-
     public AccountController(final Collection<AccountBox> accountBoxList) {
-        this();
+        accountBoxes = new LinkedHashMap<>();
         this.accountBoxList = accountBoxList;
     }
 

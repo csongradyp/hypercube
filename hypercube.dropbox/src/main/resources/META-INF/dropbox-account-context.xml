@@ -22,7 +22,15 @@
         </constructor-arg>
     </bean>
 
-    <bean id="dropbox.AccoutBox" class="com.noe.hypercube.domain.AccountBox">
+    <bean parent="accountBoxCollection" class="com.noe.hypercube.collector.AccountBoxCollector">
+        <constructor-arg>
+            <list merge="true">
+                <ref bean="dropbox.AccountBox"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="dropbox.AccountBox" class="com.noe.hypercube.domain.AccountBox">
         <constructor-arg ref="dbxClient"/>
         <constructor-arg ref="dbxDirectoryMapper"/>
         <constructor-arg ref="dbxFileEntityFactory"/>
