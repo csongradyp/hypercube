@@ -8,7 +8,10 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -59,7 +62,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
 
     @Override
     public boolean exist(final UploadEntity uploadEntity) {
-        return exist(uploadEntity.getRemoteFilePath().toString());
+        return exist(getDropboxPath(uploadEntity.getRemoteFilePath().toString()));
     }
 
     @Override
@@ -70,7 +73,8 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     private boolean exist(final String dropboxFilePath) {
         boolean exists = false;
         try {
-            exists = client.getMetadata(dropboxFilePath) != null;
+            final DbxEntry.WithChildren metadata = client.getMetadataWithChildren(dropboxFilePath);
+            exists = metadata != null;
         } catch (DbxException e) {
             LOG.error("Failed to get file information from Dropbox: {}", dropboxFilePath, e);
         }
@@ -230,10 +234,15 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
 
     private String getDropboxPath(final Path remotePath) {
         String dropboxPath = remotePath.toString();
+        return getDropboxPath(dropboxPath);
+    }
+
+    private String getDropboxPath(String path) {
+        String dropboxPath = path.replace("\\", "/");
         if (!dropboxPath.startsWith("/")) {
             dropboxPath = "/" + dropboxPath;
         }
-        return dropboxPath.replace("\\", "/");
+        return dropboxPath;
     }
 
     @Override

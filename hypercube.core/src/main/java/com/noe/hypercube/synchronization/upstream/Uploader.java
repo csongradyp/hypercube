@@ -46,7 +46,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
 
     @Override
     public void uploadNew(final UploadEntity uploadEntity) throws SynchronizationException {
-        final Path remoteFilePath = uploadEntity.getRemoteFolder();
+        final Path remoteFilePath = uploadEntity.getRemoteFilePath();
         if (client.exist(uploadEntity)) {
             LOG.debug("{} conflict - File already exists on server: {}", client.getAccountName(), remoteFilePath.toString());
             uploadEntity.setConflicted(true);

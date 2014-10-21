@@ -3,8 +3,8 @@ package com.noe.hypercube.synchronization;
 import com.noe.hypercube.controller.IAccountController;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.observer.local.LocalFileObserver;
+import com.noe.hypercube.synchronization.presynchronization.FolderPreSynchronizer;
 import com.noe.hypercube.synchronization.presynchronization.IPreSynchronizer;
-import com.noe.hypercube.synchronization.presynchronization.ManagedFolderPreSynchronizer;
 import com.noe.hypercube.synchronization.presynchronization.util.PreSynchronizationSubmitManager;
 
 import javax.inject.Inject;
@@ -38,7 +38,7 @@ public class PreSynchronizerFactory {
     }
 
     public IPreSynchronizer create(final Path localFolder) {
-        return new ManagedFolderPreSynchronizer(localFolder, persistenceController, accountController, submitManager);
+        return new FolderPreSynchronizer(localFolder, persistenceController, accountController, submitManager);
     }
 
 }

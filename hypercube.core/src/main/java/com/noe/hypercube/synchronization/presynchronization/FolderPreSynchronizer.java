@@ -22,9 +22,9 @@ import java.util.*;
 
 import static com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil.resolveFileName;
 
-public class ManagedFolderPreSynchronizer implements IPreSynchronizer {
+public class FolderPreSynchronizer implements IPreSynchronizer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ManagedFolderPreSynchronizer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FolderPreSynchronizer.class);
 
     private final IPersistenceController persistenceController;
     private final IAccountController accountController;
@@ -33,7 +33,7 @@ public class ManagedFolderPreSynchronizer implements IPreSynchronizer {
     private final Map<Class<? extends Account>, Collection<Path>> remoteFolders;
     private final Path targetFolder;
 
-    public ManagedFolderPreSynchronizer(final Path targetFolder, final IPersistenceController persistenceController, final IAccountController accountController, final PreSynchronizationSubmitManager submitManager) {
+    public FolderPreSynchronizer(final Path targetFolder, final IPersistenceController persistenceController, final IAccountController accountController, final PreSynchronizationSubmitManager submitManager) {
         this.targetFolder = targetFolder;
         this.persistenceController = persistenceController;
         this.accountController = accountController;
@@ -71,10 +71,34 @@ public class ManagedFolderPreSynchronizer implements IPreSynchronizer {
             }
         }
         final AddedFiles addedFiles = getAddedFiles(remoteFileLists, localFiles, mappedFilesByLocalPath);
+        // upload non conflicted local files
         submitManager.uploadAllAccountsAsNew(addedFiles.getLocals(), remoteFolders, accountBoxes.values());
+        // download non conflicted remote  files
         submitManager.download(addedFiles.getRemotes(), accountBoxes);
+        // rename local conflicted new files to resolved name -> upload
+        final Collection<File> localConflicteds = addedFiles.getLocalConflicteds();
+        for (File localConflicted : localConflicteds) {
+            resolveAndUploadToAllAccounts(localConflicted);
+        }
+
+        final Map<String, Collection<ServerEntry>> remoteConflicteds = addedFiles.getRemoteConflicteds();
+        for (Collection<ServerEntry> conflictedRemoteFiles : remoteConflicteds.values()) {
+            // there are updated remote files - rename remote files with new resolved name
+            final Collection<FileEntity> renamedUpdatedsRemotesWithResolvedName = renameWithResolvedName(conflictedRemoteFiles);
+            // download renamed files
+            submitManager.download(renamedUpdatedsRemotesWithResolvedName);
+        }
+
         LOG.info("PreSynchronization finished for folder: {}", targetFolder);
         return true;
+    }
+
+    private void resolveAndUploadToAllAccounts(File localConflicted) {
+        // rename local file with resolved name -> upload
+        final File resolvedLocalFileDestination =  FileConflictNamingUtil.getResolveFilePath(localConflicted.toPath()).toFile();
+        localConflicted.renameTo(resolvedLocalFileDestination);
+        // upload renamed local file to all accounts
+        submitManager.uploadAllAccountsAsNew(resolvedLocalFileDestination, remoteFolders, accountBoxes.values());
     }
 
     private void collectAccountBoxes(final Path targetFolder) {
@@ -85,17 +109,6 @@ public class ManagedFolderPreSynchronizer implements IPreSynchronizer {
             accountBoxes.put(accountBox.getClient().getAccountName(), accountBox);
         }
     }
-
-//    private void collectRemoteFolders(final Path targetFolder) {
-//        final List<MappingEntity> mappings = persistenceController.getMappings(targetFolder.toString());
-//        for (MappingEntity mapping : mappings) {
-//            final Class<? extends Account> accountType = mapping.getAccountType();
-//            if (!remoteFolders.containsKey(accountType)) {
-//                remoteFolders.put(accountType, new ArrayList<>());
-//            }
-//            remoteFolders.get(accountType).add(mapping.getRemoteDir());
-//        }
-//    }
 
     private ManagedMappings getMappingsByAction(final List<FileEntity> mappedRemoteFiles, final Map<String, Collection<ServerEntry>> remoteFileLists) {
         final ManagedMappings managedMappings = new ManagedMappings(mappedRemoteFiles);
@@ -125,6 +138,7 @@ public class ManagedFolderPreSynchronizer implements IPreSynchronizer {
         getRemoteAddeds(addedFiles, remoteFileLists, mappedFilesByLocalPath);
         final Collection<File> localAddeds = getLocalAddeds(localFiles);
         addedFiles.addLocals(localAddeds);
+        addedFiles.checkAndResolveConflicts();
         return addedFiles;
     }
 
@@ -208,10 +222,7 @@ public class ManagedFolderPreSynchronizer implements IPreSynchronizer {
         } else {
             // CONFLICTED CASES - ALL
             // rename local file with resolved name -> upload
-            final File resolvedLocalFileDestination = new File(FileConflictNamingUtil.getResolveFileName(mappedLocalFile));
-            mappedLocalFile.renameTo(resolvedLocalFileDestination);
-            // upload renamed local file to all accounts
-            submitManager.uploadAllAccountsAsNew(resolvedLocalFileDestination, remoteFolders, accountBoxes.values());
+            resolveAndUploadToAllAccounts(mappedLocalFile);
 
             // there are updated remote files - rename remote files with new resolved name
             final Collection<FileEntity> renamedUpdatedsRemotesWithResolvedName = renameRemotesWithResolvedName(updateds);
@@ -357,6 +368,16 @@ public class ManagedFolderPreSynchronizer implements IPreSynchronizer {
         Collection<FileEntity> renamedRemotesWithResolvedName = new ArrayList<>();
         try {
             renamedRemotesWithResolvedName = submitManager.renameRemoteWithResolvedName(updateds);
+        } catch (SynchronizationException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return renamedRemotesWithResolvedName;
+    }
+
+    private Collection<FileEntity> renameWithResolvedName(final Collection<ServerEntry> conflictedRemotes) {
+        Collection<FileEntity> renamedRemotesWithResolvedName = new ArrayList<>();
+        try {
+            renamedRemotesWithResolvedName = submitManager.renameRemotesWithResolvedName(conflictedRemotes);
         } catch (SynchronizationException e) {
             LOG.error(e.getMessage(), e);
         }

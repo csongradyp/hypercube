@@ -68,4 +68,16 @@ public class UploadEntity {
     public void setDependent(Boolean dependent) {
         this.dependent = dependent;
     }
+
+    @Override
+    public String toString() {
+        return "UploadEntity{" +
+                "file=" + file +
+                ", remoteFolder=" + remoteFolder +
+                ", action=" + action +
+                ", origin='" + origin + '\'' +
+                ", conflicted=" + conflicted +
+                ", dependent=" + dependent +
+                '}';
+    }
 }

@@ -40,7 +40,8 @@ public class QueueUploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
             try {
                 final UploadEntity uploadEntity = uploadQ.take();
                 final Action action = uploadEntity.getAction();
-                LOG.info("{} uploader: {} was taken from queue to upload to {} with action", getAccountType(), uploadEntity.getFile().toPath(), uploadEntity.getRemoteFilePath(), uploadEntity.getAction());
+                LOG.info("{} uploader: {} was taken from queue to upload to {} with action {}", getAccountType(), uploadEntity.getFile().toPath(), uploadEntity.getRemoteFilePath(), uploadEntity.getAction());
+                LOG.info(uploadQ.toString());
                 if (ADDED == action) {
                     super.uploadNew(uploadEntity);
                 } else if (CHANGED == action) {

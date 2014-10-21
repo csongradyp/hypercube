@@ -137,7 +137,7 @@ public class PreSynchronizationSubmitManager {
     public Collection<FileEntity> renameRemoteWithResolvedName(final Collection<FileEntity> remoteFiles) throws SynchronizationException {
         Collection<FileEntity> renamedRemotes = new ArrayList<>(remoteFiles.size());
         for (FileEntity remoteFile : remoteFiles) {
-            final String resolvedRemoteFileName = FileConflictNamingUtil.getResolveFileName(remoteFile);
+            final String resolvedRemoteFileName = FileConflictNamingUtil.getResolvedFileName(remoteFile);
             final FileEntity renamedRemoteWithResolvedName = renameRemoteWithResolvedName(remoteFile, resolvedRemoteFileName);
             renamedRemotes.add(renamedRemoteWithResolvedName);
         }
@@ -146,6 +146,21 @@ public class PreSynchronizationSubmitManager {
 
     public FileEntity renameRemoteWithResolvedName(final FileEntity remoteFile, final String newName) throws SynchronizationException {
         final AccountBox accountBox = accountController.getAccountBox(remoteFile.getAccountName());
+        return accountBox.getClient().rename(remoteFile, newName);
+    }
+
+    public Collection<FileEntity> renameRemotesWithResolvedName(final Collection<ServerEntry> remoteFiles) throws SynchronizationException {
+        Collection<FileEntity> renamedRemotes = new ArrayList<>(remoteFiles.size());
+        for (ServerEntry remoteFile : remoteFiles) {
+            final String resolvedRemoteFileName = FileConflictNamingUtil.getResolvedFileName(remoteFile.getPath());
+            final FileEntity renamedRemoteWithResolvedName = renameRemoteWithResolvedName(remoteFile, resolvedRemoteFileName);
+            renamedRemotes.add(renamedRemoteWithResolvedName);
+        }
+        return renamedRemotes;
+    }
+
+    public FileEntity renameRemoteWithResolvedName(final ServerEntry remoteFile, final String newName) throws SynchronizationException {
+        final AccountBox accountBox = accountController.getAccountBox(remoteFile.getAccount());
         return accountBox.getClient().rename(remoteFile, newName);
     }
 

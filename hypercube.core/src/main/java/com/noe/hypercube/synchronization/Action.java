@@ -14,4 +14,9 @@ public enum Action {
     public String getAction() {
         return action;
     }
+
+    @Override
+    public String toString() {
+        return String.format("<%s>", action);
+    }
 }

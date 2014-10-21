@@ -73,4 +73,6 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
      * @return
      */
     FileEntity rename(FileEntity remoteFile, String newName) throws SynchronizationException;
+
+    FileEntity rename(ServerEntry remoteFile, String newName) throws SynchronizationException;
 }

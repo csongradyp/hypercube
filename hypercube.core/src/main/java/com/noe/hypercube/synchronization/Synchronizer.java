@@ -140,7 +140,8 @@ public class Synchronizer implements EventHandler<MappingRequest> {
             persistenceController.addMapping(mapping);
             mappingResponse.addRemoteFolder(account, remoteFolder);
         }
-        final Future<Boolean> submit = presynchronizationExecutorService.submit(preSynchronizerFactory.create(localFolder));
+        final IPreSynchronizer preSynchronizer = preSynchronizerFactory.create(localFolder);
+        final Future<Boolean> submit = presynchronizationExecutorService.submit(preSynchronizer);
         try {
             submit.get();
             submitMapping(localFolder, remoteFolders);

@@ -24,7 +24,7 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ManagedFolderPreSynchronizerTest {
+public class FolderPreSynchronizerTest {
 
     private static final Path REMOTE_FOLDER = Paths.get("remote");
     private static final Path TARGET_FOLDER = Paths.get("d:\\test");
@@ -36,12 +36,12 @@ public class ManagedFolderPreSynchronizerTest {
     private PreSynchronizationSubmitManager mockSubmitManager;
 
     private AccountBox<TestAccount, TestEntity, TestMapping> accountBox;
-    private ManagedFolderPreSynchronizer underTest;
+    private FolderPreSynchronizer underTest;
 
     @Before
     public void setUp() throws Exception {
         accountBox = mock(AccountBox.class, RETURNS_DEEP_STUBS);
-        underTest = new ManagedFolderPreSynchronizer(TARGET_FOLDER, mockPersistenceController, mockAccountController, mockSubmitManager);
+        underTest = new FolderPreSynchronizer(TARGET_FOLDER, mockPersistenceController, mockAccountController, mockSubmitManager);
         given(mockPersistenceController.getLocalFileEntity(any())).willReturn(new LocalFileEntity(Paths.get("c:\\Temp\\loc1.txt").toFile()));
     }
 
