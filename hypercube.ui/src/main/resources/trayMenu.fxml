@@ -2,6 +2,7 @@
 
 <?import com.noe.hypercube.ui.elements.StateInfoLabel?>
 <?import com.noe.hypercube.ui.tray.menu.FileListView?>
+<?import de.jensd.fx.fontawesome.Icon?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -12,20 +13,43 @@
         <SegmentedButton fx:id="accounts" nodeOrientation="LEFT_TO_RIGHT" prefHeight="50.0" prefWidth="300.0"/>
         <FileListView fx:id="fileListView" fixedCellSize="37.0" focusTraversable="false" prefHeight="250.0" prefWidth="300.0" VBox.vgrow="ALWAYS"/>
         <HBox alignment="CENTER" prefHeight="25.0" prefWidth="300.0" VBox.vgrow="NEVER">
-            <Button fx:id="exit" contentDisplay="CENTER" textAlignment="CENTER"/>
+            <Button fx:id="exit" contentDisplay="CENTER" textAlignment="CENTER" focusTraversable="false" onAction="#onPowerOff">
+                <graphic>
+                    <Icon awesomeIcon="POWER_OFF" size="15" styleClass="graphic"/>
+                </graphic>
+            </Button>
             <StateInfoLabel fx:id="info" prefHeight="20.0" prefWidth="240.0" graphicTextGap="5" stylesheets="style/status.css">
                 <padding>
                     <Insets left="5" right="5"/>
                 </padding>
             </StateInfoLabel>
-            <Button fx:id="show" contentDisplay="CENTER" textAlignment="CENTER" defaultButton="true"/>
-            <Button fx:id="settings" contentDisplay="CENTER" textAlignment="CENTER">
+            <Button fx:id="show" contentDisplay="CENTER" textAlignment="CENTER" defaultButton="true" focusTraversable="false">
+                <graphic>
+                    <Icon awesomeIcon="COLUMNS" size="15" styleClass="graphic" />
+                </graphic>
+            </Button>
+            <Button fx:id="settings" contentDisplay="CENTER" textAlignment="CENTER" focusTraversable="false">
+                <graphic>
+                    <Icon awesomeIcon="GEAR" size="15" styleClass="graphic" />
+                </graphic>
                 <contextMenu>
                     <ContextMenu>
                         <items>
                             <!--<MenuItem text="Import" onAction="#ImportDB"/>-->
-                            <MenuItem text="%menu.about"/>
+                            <MenuItem text="%menu.about">
+                                <graphic>
+                                    <Icon awesomeIcon="INFO" size="15" />
+                                </graphic>
+                            </MenuItem>
+                            <MenuItem fx:id="bind" text="%menu.bind.manage" onAction="#onManageBindings">
+                                <graphic>
+                                    <Icon awesomeIcon="CHAIN" size="15" />
+                                </graphic>
+                            </MenuItem>
                             <Menu fx:id="languages" text="%menu.language">
+                                <graphic>
+                                    <Icon awesomeIcon="FLAG" size="15" />
+                                </graphic>
                                 <CheckMenuItem text="English" onAction="#onLanguageChange"/>
                                 <CheckMenuItem text="Magyar" onAction="#onLanguageChange"/>
                             </Menu>

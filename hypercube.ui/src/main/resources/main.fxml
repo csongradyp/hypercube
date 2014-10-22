@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.noe.hypercube.ui.FileManager?>
+<?import de.jensd.fx.fontawesome.Icon?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
@@ -9,60 +10,112 @@
         <FileManager fx:id="fileManager"/>
     </VBox>
     <ToolBar id="buttonBox" focusTraversable="false" prefHeight="25.0" prefWidth="800.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
-        <Button fx:id="refresh" mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
+        <Button fx:id="refresh" mnemonicParsing="false" prefHeight="20.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false">
+            <graphic>
+                <Icon awesomeIcon="REFRESH" size="15"/>
+            </graphic>
+        </Button>
         <Separator orientation="VERTICAL" prefHeight="20.0"/>
         <Button fx:id="queue" onAction="#onShowSyncView" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
-        <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
+        <Button onAction="#onManageBindings" mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false">
+            <graphic>
+                <Icon awesomeIcon="CHAIN" size="15"/>
+            </graphic>
+            <tooltip>
+                <Tooltip text="%menu.bind.manage" />
+            </tooltip>
+        </Button>
         <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
     </ToolBar>
     <MenuBar maxHeight="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" stylesheets="style/HyperCubeMenu.css">
         <Menu mnemonicParsing="false" text="%menu.file">
+            <graphic>
+                <Icon awesomeIcon="BARS" size="15"/>
+            </graphic>
             <MenuItem onAction="#onClose" mnemonicParsing="false" text="%menu.file.close">
+                <graphic>
+                    <Icon awesomeIcon="SIGN_OUT" size="15"/>
+                </graphic>
                 <accelerator>
                     <KeyCodeCombination alt="DOWN" code="F4" control="UP" meta="UP" shift="UP" shortcut="UP"/>
                 </accelerator>
             </MenuItem>
         </Menu>
-        <Menu mnemonicParsing="false" text="%menu.edit">
-            <MenuItem fx:id="delete" mnemonicParsing="false" text="%menu.edit.delete">
-                <accelerator>
-                    <KeyCodeCombination code="F8" alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP"/>
-                </accelerator>
-            </MenuItem>
-        </Menu>
         <Menu mnemonicParsing="false" text="%menu.bind">
-            <MenuItem mnemonicParsing="false" text="%menu.bind.manage" onAction="#onManageBindings"/>
-        </Menu>
-        <Menu mnemonicParsing="false" text="%menu.settings">
-            <Menu fx:id="languages" text="%menu.language">
-                <CheckMenuItem text="English" onAction="#onLanguageChange"/>
-                <CheckMenuItem text="Magyar" onAction="#onLanguageChange"/>
-            </Menu>
-            <MenuItem fx:id="preferences" mnemonicParsing="false" text="%menu.settings.preferences">
-                <accelerator>
-                    <KeyCodeCombination code="S" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                </accelerator>
+            <graphic>
+                <Icon awesomeIcon="CHAIN" size="15"/>
+            </graphic>
+            <MenuItem mnemonicParsing="false" text="%menu.bind.manage" onAction="#onManageBindings">
+                <graphic>
+                    <Icon awesomeIcon="CHAIN" size="15"/>
+                </graphic>
             </MenuItem>
         </Menu>
         <Menu mnemonicParsing="false" text="%menu.cloud">
+            <graphic>
+                <Icon awesomeIcon="CLOUD" size="15"/>
+            </graphic>
             <MenuItem fx:id="manageCloud" mnemonicParsing="false" text="%menu.cloud.manage">
                 <accelerator>
                     <KeyCodeCombination code="M" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
                 </accelerator>
             </MenuItem>
             <MenuItem fx:id="addConnection" mnemonicParsing="false" text="%menu.cloud.add">
+                <graphic>
+                    <StackPane alignment="BOTTOM_LEFT">
+                        <children>
+                            <Icon awesomeIcon="CLOUD" style="-fx-text-fill: lightsteelblue" styleClass="" size="15"/>
+                            <Icon awesomeIcon="PLUS" size="10"/>
+                        </children>
+                    </StackPane>
+                </graphic>
                 <accelerator>
                     <KeyCodeCombination code="PLUS" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
                 </accelerator>
             </MenuItem>
             <MenuItem fx:id="removeConnection" mnemonicParsing="false" text="%menu.cloud.remove">
+                <graphic>
+                    <StackPane alignment="BOTTOM_LEFT">
+                        <children>
+                            <Icon awesomeIcon="CLOUD" style="-fx-text-fill: lightsteelblue" styleClass="" size="15"/>
+                            <Icon awesomeIcon="MINUS" size="10"/>
+                        </children>
+                    </StackPane>
+                </graphic>
                 <accelerator>
                     <KeyCodeCombination code="MINUS" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
                 </accelerator>
             </MenuItem>
         </Menu>
+        <Menu mnemonicParsing="false" text="%menu.settings">
+            <graphic>
+                <Icon awesomeIcon="GEAR" size="15"/>
+            </graphic>
+            <Menu fx:id="languages" text="%menu.language">
+                <graphic>
+                    <Icon awesomeIcon="FLAG" size="15"/>
+                </graphic>
+                <CheckMenuItem text="English" onAction="#onLanguageChange"/>
+                <CheckMenuItem text="Magyar" onAction="#onLanguageChange"/>
+            </Menu>
+            <MenuItem fx:id="preferences" mnemonicParsing="false" text="%menu.settings.preferences">
+                <graphic>
+                    <Icon awesomeIcon="WRENCH" size="15"/>
+                </graphic>
+                <accelerator>
+                    <KeyCodeCombination code="S" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                </accelerator>
+            </MenuItem>
+        </Menu>
         <Menu mnemonicParsing="false" text="%menu.about">
-            <MenuItem fx:id="about" mnemonicParsing="false" text="%menu.about"/>
+            <graphic>
+                <Icon awesomeIcon="INFO" size="15"/>
+            </graphic>
+            <MenuItem fx:id="about" mnemonicParsing="false" text="%menu.about">
+                <graphic>
+                    <Icon awesomeIcon="INFO_CIRCLE" size="15"/>
+                </graphic>
+            </MenuItem>
         </Menu>
     </MenuBar>
 </AnchorPane>

@@ -7,8 +7,6 @@ import com.noe.hypercube.ui.bundle.HistoryBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.domain.account.AccountInfo;
 import com.noe.hypercube.ui.elements.StateInfoLabel;
-import de.jensd.fx.fontawesome.AwesomeDude;
-import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -117,9 +115,6 @@ public class TrayMenu extends AnchorPane implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         fileListView.setMessageBundle(resourceBundle);
-        initShowButton();
-        initSettingsButton();
-        initExitButton();
         selectActiveLanguage();
         settings.setOnMouseClicked(mouseEvent -> settings.getContextMenu().show(getScene().getWindow(), mouseEvent.getScreenX(), mouseEvent.getScreenY()));
     }
@@ -132,22 +127,6 @@ public class TrayMenu extends AnchorPane implements Initializable {
                 ((CheckMenuItem) languageMenuItem).setSelected(true);
             }
         }
-    }
-
-    private void initExitButton() {
-        exit.setFocusTraversable(false);
-        AwesomeDude.setIcon(exit, AwesomeIcon.POWER_OFF);
-        exit.setOnAction(actionEvent -> System.exit(0));
-    }
-
-    private void initSettingsButton() {
-        settings.setFocusTraversable(false);
-        AwesomeDude.setIcon(settings, AwesomeIcon.GEAR);
-    }
-
-    private void initShowButton() {
-        show.setFocusTraversable(false);
-        AwesomeDude.setIcon(show, AwesomeIcon.COLUMNS);
     }
 
     private void addHistoryChangeListener(final String account) {
@@ -178,6 +157,22 @@ public class TrayMenu extends AnchorPane implements Initializable {
     public void onLanguageChange(final ActionEvent event) {
         final MenuItem menuItem = (MenuItem) event.getSource();
         ConfigurationBundle.setLanguage(menuItem.getText());
+    }
+
+    @FXML
+    public void onPowerOff(final ActionEvent event) {
+        System.exit(0);
+    }
+
+    @FXML
+    public void onManageBindings(final ActionEvent event) {
+//        new BindManagerDialog().showAndWait().ifPresent(new Consumer<String>() {
+//            @Override
+//            public void accept(String s) {
+//                // send event
+//                System.out.println(s);
+//            }
+//        });
     }
 
 }

@@ -151,7 +151,7 @@ public class AddMappingDialog extends Dialog<MappingRequest> implements Initiali
     }
 
     private void setupFolderChooser() {
-        AwesomeDude.setIcon(localFolderChooser, AwesomeIcon.FOLDER_OPEN);
+        AwesomeDude.setIcon(localFolderChooser, AwesomeIcon.FOLDER_ALTPEN);
         localFolderChooser.setOnAction(event -> {
             final DirectoryChooser fileChooser = new DirectoryChooser();
             final File folder = fileChooser.showDialog(null);
