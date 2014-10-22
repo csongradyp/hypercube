@@ -27,7 +27,7 @@ public class FolderMappingChooser extends HBox {
         accountChoice.setMinWidth(100.0d);
         folderPath = new TextField();
         folderPath.prefWidthProperty().bind(widthProperty());
-        folderChooserButton = AwesomeDude.createIconButton(AwesomeIcon.FOLDER_OPEN);
+        folderChooserButton = AwesomeDude.createIconButton(AwesomeIcon.FOLDER_ALTPEN);
         getChildren().addAll(accountChoice, folderPath, folderChooserButton);
 
         validationSupport.registerValidator(folderPath, Validator.createEmptyValidator("Text is required", Severity.WARNING));
