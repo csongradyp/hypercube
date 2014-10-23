@@ -33,10 +33,6 @@
             <artifactId>spring-data-jpa</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.objectdb</groupId>
             <artifactId>objectdb</artifactId>
         </dependency>

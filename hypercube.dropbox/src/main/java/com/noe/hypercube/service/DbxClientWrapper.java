@@ -174,10 +174,23 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     public FileEntity rename(FileEntity remoteFile, String newName) throws SynchronizationException {
         final Path remoteFolder = Paths.get(remoteFile.getRemotePath()).getParent();
         try {
-            final DbxEntry renamedFile = client.move(remoteFile.getRemotePath(), remoteFolder + newName);
+            final DbxEntry renamedFile = client.move(getDropboxPath(remoteFile.getRemotePath()), getDropboxPath(remoteFolder + newName));
             return new DbxFileEntity(remoteFile.getLocalPath(), renamedFile.path, renamedFile.asFile().rev);
         } catch (DbxException e) {
-            throw new SynchronizationException(e.getMessage());
+            LOG.error(String.format("%s file rename failed", getAccountName()), e);
+            throw new SynchronizationException(String.format("An error occurred while rename file %s", remoteFile.getRemotePath()), e);
+        }
+    }
+
+    @Override
+    public FileEntity rename(ServerEntry remoteFile, String newName) throws SynchronizationException {
+        final Path remoteFolder = remoteFile.getPath().getParent();
+        try {
+            final DbxEntry renamedFile = client.move(getDropboxPath(remoteFile.getPath()), getDropboxPath(remoteFolder + newName));
+            return new DbxFileEntity(null, renamedFile.path, renamedFile.asFile().rev);
+        } catch (DbxException e) {
+            LOG.error(String.format("%s file rename failed", getAccountName()), e);
+            throw new SynchronizationException(String.format("An error occurred while rename file %s", remoteFile.getPath()), e);
         }
     }
 

@@ -233,7 +233,22 @@ public class BoxClientWrapper extends Client<Box, BoxFileEntity, BoxMapping> {
             return new BoxFileEntity(remoteFile.getLocalPath(), remoteFile.getRemotePath(), boxFile.getSha1());
         } catch (BoxRestException | BoxServerException | AuthFatalFailureException | UnsupportedEncodingException e) {
             LOG.error(String.format("%s file rename failed", getAccountName()), e);
-            throw new SynchronizationException(String.format("%s file rename failed", getAccountName()), e);
+            LOG.error(String.format("%s file rename failed", getAccountName()), e);
+            throw new SynchronizationException(String.format("An error occurred while rename file %s", remoteFile.getRemotePath()), e);
+        }
+    }
+
+    @Override
+    public FileEntity rename(ServerEntry remoteFile, String newName) throws SynchronizationException {
+        try {
+            final BoxFileRequestObject requestObject = BoxFileRequestObject.getRequestObject();
+            requestObject.setName(newName);
+            final BoxFile boxFile = client.getFilesManager().updateFileInfo(remoteFile.getId(), requestObject);
+            return new BoxFileEntity(null, remoteFile.getPath().toString(), boxFile.getSha1());
+        } catch (BoxRestException | BoxServerException | AuthFatalFailureException | UnsupportedEncodingException e) {
+            LOG.error(String.format("%s file rename failed", getAccountName()), e);
+            LOG.error(String.format("%s file rename failed", getAccountName()), e);
+            throw new SynchronizationException(String.format("An error occurred while rename file %s", remoteFile.getPath()), e);
         }
     }
 

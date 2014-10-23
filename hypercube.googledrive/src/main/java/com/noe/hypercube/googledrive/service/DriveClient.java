@@ -269,8 +269,25 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping
             com.google.api.services.drive.model.File updatedFile = patchRequest.execute();
             return new DriveFileEntity(remoteFile.getLocalPath(), remoteFile.getRemotePath(), updatedFile.getHeadRevisionId(), new Date(updatedFile.getModifiedDate().getValue()));
         } catch (IOException e) {
-            System.out.println("An error occurred: " + e);
-            return null;
+            LOG.error(String.format("%s file rename failed", getAccountName()), e);
+            throw new SynchronizationException(String.format("An error occurred while rename file %s", remoteFile.getRemotePath()), e);
+        }
+    }
+
+    @Override
+    public FileEntity rename(ServerEntry remoteFile, String newName) throws SynchronizationException {
+        try {
+            com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
+            file.setTitle(newName);
+
+            Drive.Files.Patch patchRequest = client.files().patch(remoteFile.getId(), file);
+            patchRequest.setFields("title");
+
+            com.google.api.services.drive.model.File updatedFile = patchRequest.execute();
+            return new DriveFileEntity(null, remoteFile.getPath().toString(), updatedFile.getHeadRevisionId(), new Date(updatedFile.getModifiedDate().getValue()));
+        } catch (IOException e) {
+            LOG.error(String.format("%s file rename failed", getAccountName()), e);
+            throw new SynchronizationException(String.format("An error occurred while rename file %s", remoteFile.getPath()), e);
         }
     }
 
