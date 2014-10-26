@@ -1,11 +1,11 @@
-package com.noe.hypercube.cache;
+package com.noe.hypercube;
 
 
 public enum Action {
 
-    ADDED("Added"), REMOVED("Removed"), CHANGED("Changed");
+    ADDED("Added"), REMOVED("Removed"), CHANGED("Changed"), IDENTICAL("No change");
 
-    private String action;
+    private final String action;
 
     private Action(String action) {
         this.action = action;

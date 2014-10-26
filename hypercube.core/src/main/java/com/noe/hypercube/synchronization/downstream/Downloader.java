@@ -1,5 +1,6 @@
 package com.noe.hypercube.synchronization.downstream;
 
+import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.FileEntityFactory;
@@ -10,13 +11,8 @@ import com.noe.hypercube.event.domain.FileEvent;
 import com.noe.hypercube.event.domain.type.FileActionType;
 import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.IClient;
-import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -27,8 +23,12 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static com.noe.hypercube.synchronization.Action.*;
+import static com.noe.hypercube.Action.*;
+
 
 public class Downloader implements IDownloader {
 

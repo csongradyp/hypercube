@@ -1,19 +1,18 @@
 package com.noe.hypercube.domain;
 
 
-import com.noe.hypercube.synchronization.Action;
-
+import com.noe.hypercube.Action;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil.createResolvedFileName;
 
-public class UploadEntity {
+public class UploadEntity implements IStreamEntry<File> {
 
     private final File file;
     private final Path remoteFolder;
-    private final Action action;
+    private Action action;
     private final String origin;
     private boolean conflicted;
     private boolean dependent;
@@ -57,6 +56,11 @@ public class UploadEntity {
         return action;
     }
 
+    @Override
+    public void setAction(Action action) {
+        this.action = action;
+    }
+
     public String getOrigin() {
         return origin;
     }
@@ -65,19 +69,38 @@ public class UploadEntity {
         return dependent;
     }
 
+    @Override
+    public File getDependency() {
+        return file;
+    }
+
     public void setDependent(Boolean dependent) {
         this.dependent = dependent;
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UploadEntity that = (UploadEntity) o;
+
+        if (!file.equals(that.file)) return false;
+        if (origin != null ? !origin.equals(that.origin) : that.origin != null) return false;
+        return remoteFolder.equals(that.remoteFolder);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = file.hashCode();
+        result = 31 * result + remoteFolder.hashCode();
+        result = 31 * result + (origin != null ? origin.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
-        return "UploadEntity{" +
-                "file=" + file +
-                ", remoteFolder=" + remoteFolder +
-                ", action=" + action +
-                ", origin='" + origin + '\'' +
-                ", conflicted=" + conflicted +
-                ", dependent=" + dependent +
-                '}';
+        return String.format("UploadEntity{file=%s, remoteFolder=%s, action=%s, origin='%s}", file, remoteFolder, action, origin);
     }
 }

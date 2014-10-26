@@ -1,21 +1,20 @@
 package com.noe.hypercube.observer.local;
 
+import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.domain.IEntity;
 import com.noe.hypercube.domain.UploadEntity;
-import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
-import org.apache.commons.io.monitor.FileAlterationListener;
-import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.io.monitor.FileAlterationListener;
+import org.apache.commons.io.monitor.FileAlterationObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LocalFileListener implements FileAlterationListener {
 

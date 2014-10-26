@@ -1,5 +1,6 @@
 package com.noe.hypercube.domain;
 
+import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.FileEventHandler;
@@ -9,17 +10,15 @@ import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.Client;
 import com.noe.hypercube.service.IClient;
-import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.downstream.Downloader;
 import com.noe.hypercube.synchronization.downstream.IDownloader;
 import com.noe.hypercube.synchronization.upstream.IUploader;
 import com.noe.hypercube.synchronization.upstream.QueueUploader;
-import net.engio.mbassy.listener.Handler;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import net.engio.mbassy.listener.Handler;
 
 public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_TYPE extends MappingEntity> implements FileEventHandler {
 

@@ -23,6 +23,7 @@ public final class EventBus {
     private final MBassador<DeleteRequest> deleteRequestBus;
     private final MBassador<MappingRequest> mappingRequestBus;
     private final MBassador<MappingResponse> mappingResponseBus;
+    private final MBassador<JumpToFileEvent> jumpToFileBus;
 
     private EventBus() {
         storageEventBus = new MBassador<>(BusConfiguration.Default());
@@ -36,10 +37,11 @@ public final class EventBus {
         deleteRequestBus = new MBassador<>(BusConfiguration.Default());
         mappingResponseBus = new MBassador<>(BusConfiguration.Default());
         mappingRequestBus = new MBassador<>(BusConfiguration.Default());
+        jumpToFileBus = new MBassador<>(BusConfiguration.Default());
         registerShutdownHook(storageEventBus, fileEventBus, stateEventBus,
                 fileListRequestBus, fileListResponseBus, uploadRequestBus,
                 downloadRequestBus, createFolderRequestBus, deleteRequestBus,
-                mappingRequestBus, mappingResponseBus);
+                mappingRequestBus, mappingResponseBus, jumpToFileBus);
     }
 
     private void registerShutdownHook(final MBassador<?>... mBassadors) {
@@ -120,12 +122,20 @@ public final class EventBus {
         instance.mappingRequestBus.publish(mappingRequest);
     }
 
-    public static void subscribeToMappingRequest(EventHandler<MappingRequest> handler) {
+    public static void subscribeToMappingRequest(final EventHandler<MappingRequest> handler) {
         instance.mappingRequestBus.subscribe(handler);
     }
 
     public static void publish(final MappingResponse mappingResponse) {
         instance.mappingResponseBus.publish(mappingResponse);
+    }
+
+    public static void subscribeToJumpToFileEvent(final EventHandler<JumpToFileEvent> handler) {
+        instance.jumpToFileBus.subscribe(handler);
+    }
+
+    public static void publish(final JumpToFileEvent jumpToFileEvent) {
+        instance.jumpToFileBus.publish(jumpToFileEvent);
     }
 
     public static void subscribeToMappingResponse(final EventHandler<MappingResponse> handler) {

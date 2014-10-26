@@ -5,8 +5,14 @@ import com.noe.hypercube.ui.bundle.AccountBundle;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.HistoryBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
+import com.noe.hypercube.ui.dialog.BindManagerDialog;
 import com.noe.hypercube.ui.domain.account.AccountInfo;
 import com.noe.hypercube.ui.elements.StateInfoLabel;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -17,13 +23,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.controlsfx.control.SegmentedButton;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
 
 public class TrayMenu extends AnchorPane implements Initializable {
 
@@ -55,8 +54,6 @@ public class TrayMenu extends AnchorPane implements Initializable {
         }
         createAccountButtons();
         show.setOnAction(actionEvent -> stage.show());
-        final Map<String, ObservableList<FileEvent>> lastSyncedFiles = HistoryBundle.getLastSyncedFiles();
-        fileListView.clearAndSet(lastSyncedFiles.get(accounts.getButtons().get(0).getText()));
         addListenerForAccountChanges();
     }
 
@@ -64,17 +61,18 @@ public class TrayMenu extends AnchorPane implements Initializable {
         AccountBundle.getAccounts().addListener((ListChangeListener<AccountInfo>) change -> {
             while (change.next()) {
                 final List<? extends AccountInfo> addedAccount = change.getAddedSubList();
+                final ObservableList<ToggleButton> accountsButtons = accounts.getButtons();
                 for (AccountInfo account : addedAccount) {
                     if (account.isActive()) {
-                        accounts.getButtons().add(createAccountButton(account.getName()));
-                        accounts.getButtons().get(0).fire();
+                        accountsButtons.add(createAccountButton(account.getName()));
+                        accountsButtons.get(0).fire();
                     }
                 }
                 final List<? extends AccountInfo> removedAccount = change.getRemoved();
                 for (AccountInfo account : removedAccount) {
-                    accounts.getButtons().removeIf(toggleButton -> toggleButton.getText().equals(account.getName()));
-                    if (!accounts.getButtons().isEmpty()) {
-                        accounts.getButtons().get(0).fire();
+                    accountsButtons.removeIf(toggleButton -> toggleButton.getText().equals(account.getName()));
+                    if (!accountsButtons.isEmpty()) {
+                        accountsButtons.get(0).fire();
                     }
                 }
             }
@@ -83,19 +81,14 @@ public class TrayMenu extends AnchorPane implements Initializable {
 
     private void createAccountButtons() {
         final List<String> accountNames = AccountBundle.getAccountNames();
+        final ObservableList<ToggleButton> accountsButtons = accounts.getButtons();
         for (String account : accountNames) {
-            final ToggleButton accountButton = new ToggleButton(account);
-            accountButton.setFocusTraversable(false);
-            accountButton.setPrefHeight(accounts.getPrefHeight());
-            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(account);
-            accountButton.setOnAction(e -> {
-                fileListView.clearAndSet(fileEvents);
-                accountButton.setSelected(true);
-            });
-            addHistoryChangeListener(account);
-            accounts.getButtons().add(accountButton);
+            final ToggleButton accountButton = createAccountButton(account);
+            accountsButtons.add(accountButton);
         }
-        accounts.getButtons().get(0).setSelected(true);
+        if(!accountsButtons.isEmpty()) {
+            accountsButtons.get(0).fire();
+        }
     }
 
     private ToggleButton createAccountButton(final String account) {
@@ -160,19 +153,13 @@ public class TrayMenu extends AnchorPane implements Initializable {
     }
 
     @FXML
-    public void onPowerOff(final ActionEvent event) {
+    public void onPowerOff() {
         System.exit(0);
     }
 
     @FXML
-    public void onManageBindings(final ActionEvent event) {
-//        new BindManagerDialog().showAndWait().ifPresent(new Consumer<String>() {
-//            @Override
-//            public void accept(String s) {
-//                // send event
-//                System.out.println(s);
-//            }
-//        });
+    public void onManageBindings() {
+        new BindManagerDialog().show();
     }
 
 }

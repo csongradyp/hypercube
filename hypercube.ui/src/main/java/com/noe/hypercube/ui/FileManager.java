@@ -1,10 +1,8 @@
 package com.noe.hypercube.ui;
 
 import com.noe.hypercube.event.EventBus;
-import com.noe.hypercube.event.domain.CreateFolderRequest;
-import com.noe.hypercube.event.domain.DeleteRequest;
-import com.noe.hypercube.event.domain.DownloadRequest;
-import com.noe.hypercube.event.domain.UploadRequest;
+import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.*;
 import com.noe.hypercube.ui.action.FileAction;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.dialog.FileActionConfirmDialog;
@@ -15,6 +13,19 @@ import com.noe.hypercube.ui.elements.FileActionButton;
 import com.noe.hypercube.ui.util.ProgressAwareInputStream;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Collection;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -33,26 +44,12 @@ import org.controlsfx.control.HiddenSidesPane;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialogs;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
 import static com.noe.hypercube.ui.action.FileAction.*;
 import static com.noe.hypercube.ui.util.PathConverterUtil.getAccount;
 import static com.noe.hypercube.ui.util.PathConverterUtil.getEventPath;
 import static org.controlsfx.dialog.Dialog.ACTION_YES;
 
-public class FileManager extends VBox implements Initializable {
+public class FileManager extends VBox implements Initializable, EventHandler<JumpToFileEvent> {
 
     @FXML
     private FileView leftFileView;
@@ -105,6 +102,7 @@ public class FileManager extends VBox implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        EventBus.subscribeToJumpToFileEvent(this);
         leftFileView.initStartLocation();
         rightFileView.initStartLocation();
         setupCloudCondition();
@@ -406,4 +404,11 @@ public class FileManager extends VBox implements Initializable {
         return rightFileView;
     }
 
+    @Override
+    public void onEvent(JumpToFileEvent event) {
+        Platform.runLater(() -> {
+            leftFileView.jumpToFile(event.getFilePath());
+            ((Stage) getScene().getWindow()).show();
+        });
+    }
 }

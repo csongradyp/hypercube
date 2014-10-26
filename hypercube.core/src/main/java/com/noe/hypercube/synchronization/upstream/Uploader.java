@@ -1,5 +1,6 @@
 package com.noe.hypercube.synchronization.upstream;
 
+import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.*;
 import com.noe.hypercube.event.EventBus;
@@ -7,17 +8,15 @@ import com.noe.hypercube.event.domain.FileEvent;
 import com.noe.hypercube.event.domain.type.FileActionType;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
-import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static com.noe.hypercube.synchronization.Action.*;
+import static com.noe.hypercube.Action.*;
 import static java.lang.String.format;
 
 public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity> implements IUploader<ACCOUNT_TYPE, ENTITY_TYPE> {

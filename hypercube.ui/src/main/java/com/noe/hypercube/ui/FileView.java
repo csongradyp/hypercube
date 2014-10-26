@@ -10,6 +10,13 @@ import com.noe.hypercube.ui.domain.file.LocalFile;
 import com.noe.hypercube.ui.elements.AccountSegmentedButton;
 import com.noe.hypercube.ui.elements.LocalDriveSegmentedButton;
 import com.noe.hypercube.ui.util.StyleUtil;
+import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -26,17 +33,6 @@ import javafx.scene.layout.VBox;
 import net.engio.mbassy.listener.Handler;
 import org.controlsfx.control.BreadCrumbBar;
 import org.controlsfx.control.SegmentedButton;
-
-import java.awt.*;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import static com.noe.hypercube.ui.util.PathConverterUtil.getEventPath;
 import static javafx.scene.input.KeyCombination.ModifierValue.DOWN;
@@ -312,6 +308,16 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
             if (button.isSelected()) {
                 button.setSelected(false);
             }
+        }
+    }
+
+    public void jumpToFile(final Path filePath) {
+        table.setLocation(filePath.getParent());
+        final Optional<IFile> destinationFile = table.getItems().parallelStream().filter(file -> file.getName().equals(filePath.getFileName().toString())).findFirst();
+        if (destinationFile.isPresent()) {
+            final IFile iFile = destinationFile.get();
+            table.getSelectionModel().select(iFile);
+            table.scrollTo(iFile);
         }
     }
 

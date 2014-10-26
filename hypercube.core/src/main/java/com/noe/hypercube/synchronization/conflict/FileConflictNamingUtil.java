@@ -21,7 +21,7 @@ public final class FileConflictNamingUtil {
         final Path remotePath = Paths.get(conflictedFile.getRemotePath());
         final String baseName = FilenameUtils.getBaseName(remotePath.toString());
         final String ext = FilenameUtils.getExtension(remotePath.toString());
-        final String currentDate = DateUtil.format(new Date());
+        final String currentDate = DateUtil.fileNameCompatibleFormat(new Date());
         final String resolvedFileName = String.format("%s (%s %s).%s", baseName, conflictedFile.getAccountName(), currentDate, ext);
         conflictedFile.setRemotePath(Paths.get(remotePath.getParent().toString(), resolvedFileName).toString());
     }
@@ -30,14 +30,14 @@ public final class FileConflictNamingUtil {
         final Path remotePath = Paths.get(conflictedFile.getRemotePath());
         final String baseName = FilenameUtils.getBaseName(remotePath.toString());
         final String ext = FilenameUtils.getExtension(remotePath.toString());
-        final String currentDate = DateUtil.format(new Date());
+        final String currentDate = DateUtil.fileNameCompatibleFormat(new Date());
         return String.format("%s (%s %s).%s", baseName, conflictedFile.getAccountName(), currentDate, ext);
     }
 
     public static String getResolvedFileName(final Path conflictedFile) {
         final String baseName = FilenameUtils.getBaseName(conflictedFile.toString());
         final String ext = FilenameUtils.getExtension(conflictedFile.toString());
-        final String currentDate = DateUtil.format(new Date());
+        final String currentDate = DateUtil.fileNameCompatibleFormat(new Date());
         return String.format("%s (%s).%s", baseName, currentDate, ext);
     }
 
@@ -50,7 +50,7 @@ public final class FileConflictNamingUtil {
         final Path remotePath = Paths.get(conflictedFile.getRemotePath());
         final String baseName = FilenameUtils.getBaseName(remotePath.toString());
         final String ext = FilenameUtils.getExtension(remotePath.toString());
-        final String currentDate = DateUtil.format(new Date());
+        final String currentDate = DateUtil.fileNameCompatibleFormat(new Date());
         final String resolvedFileName = String.format("%s (%s %s).%s", baseName, conflictedFile.getAccountName(), currentDate, ext);
         final FileEntity resolved = conflictedFile.duplicate();
         resolved.setRemotePath(Paths.get(remotePath.getParent().toString(), resolvedFileName).toString());
@@ -64,7 +64,7 @@ public final class FileConflictNamingUtil {
     public static String resolveFileName(final Path remotePath, final String accountName) {
         final String baseName = FilenameUtils.getBaseName(remotePath.toString());
         final String ext = FilenameUtils.getExtension(remotePath.toString());
-        final String currentDate = DateUtil.format(new Date());
+        final String currentDate = DateUtil.fileNameCompatibleFormat(new Date());
         return String.format("%s (%s %s).%s", baseName, accountName, currentDate, ext);
     }
 
@@ -72,7 +72,7 @@ public final class FileConflictNamingUtil {
         final File file = uploadEntity.getFile();
         final String ext = FilenameUtils.getExtension(file.toString());
         final String baseName = FilenameUtils.getBaseName(file.toString());
-        final String currentDate = DateUtil.format(new Date());
+        final String currentDate = DateUtil.fileNameCompatibleFormat(new Date());
         return String.format("%s (%s %s).%s", baseName, uploadEntity.getOrigin(), currentDate, ext);
     }
 

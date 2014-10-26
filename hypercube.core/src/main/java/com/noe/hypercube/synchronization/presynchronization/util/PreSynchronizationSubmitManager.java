@@ -1,23 +1,22 @@
 package com.noe.hypercube.synchronization.presynchronization.util;
 
+import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IAccountController;
 import com.noe.hypercube.domain.*;
 import com.noe.hypercube.service.Account;
-import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil;
-import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Named
 public class PreSynchronizationSubmitManager {
