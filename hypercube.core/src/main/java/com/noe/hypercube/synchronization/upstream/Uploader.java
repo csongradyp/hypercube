@@ -47,10 +47,18 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
     public void uploadNew(final UploadEntity uploadEntity) throws SynchronizationException {
         final Path remoteFilePath = uploadEntity.getRemoteFilePath();
         if (client.exist(uploadEntity)) {
-            LOG.debug("{} conflict - File already exists on server: {}", client.getAccountName(), remoteFilePath.toString());
+            LOG.error("{} conflict - File already exists on server: {}", client.getAccountName(), remoteFilePath.toString());
             uploadEntity.setConflicted(true);
         }
-        upload(uploadEntity, ADDED);
+        if (isMapped(uploadEntity.getFile())) {
+            LOG.info("file {} already mapped - cannot be new. Upload cancelled", uploadEntity.getFile());
+        } else {
+            upload(uploadEntity, ADDED);
+        }
+    }
+
+    private boolean isMapped(final File file) {
+        return persistenceController.get(file.toPath().toString(), getEntityType()) != null;
     }
 
     @Override

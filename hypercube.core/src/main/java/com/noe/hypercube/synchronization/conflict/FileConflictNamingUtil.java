@@ -1,6 +1,7 @@
 package com.noe.hypercube.synchronization.conflict;
 
 import com.noe.hypercube.domain.FileEntity;
+import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.util.DateUtil;
 import org.apache.commons.io.FilenameUtils;
@@ -24,6 +25,14 @@ public final class FileConflictNamingUtil {
         final String currentDate = DateUtil.fileNameCompatibleFormat(new Date());
         final String resolvedFileName = String.format("%s (%s %s).%s", baseName, conflictedFile.getAccountName(), currentDate, ext);
         conflictedFile.setRemotePath(Paths.get(remotePath.getParent().toString(), resolvedFileName).toString());
+    }
+
+    public static String getResolvedFileName(final ServerEntry conflictedFile) {
+        final Path remotePath = conflictedFile.getPath();
+        final String baseName = FilenameUtils.getBaseName(remotePath.toString());
+        final String ext = FilenameUtils.getExtension(remotePath.toString());
+        final String currentDate = DateUtil.fileNameCompatibleFormat(new Date());
+        return String.format("%s (%s %s).%s", baseName, conflictedFile.getAccount(), currentDate, ext);
     }
 
     public static String getResolvedFileName(final FileEntity conflictedFile) {

@@ -31,7 +31,7 @@ public class CloudMonitor {
         }
     }
 
-    public CloudMonitor(Long pollInterval) {
+    public CloudMonitor(final Long pollInterval) {
         this.pollInterval = pollInterval;
         cloudObservers = new HashMap<>();
     }
@@ -49,7 +49,7 @@ public class CloudMonitor {
         }
     }
 
-    public void submit(ICloudObserver observer) {
+    public void submit(final ICloudObserver observer) {
         executorService.schedule(observer, pollInterval, TimeUnit.MILLISECONDS);
     }
 
@@ -61,13 +61,13 @@ public class CloudMonitor {
         LOG.info("Cloud monitoring has been stopped");
     }
 
-    public void addObservers(Collection<CloudObserver> observers) {
+    public void addObservers(final Collection<CloudObserver> observers) {
         for (CloudObserver observer : observers) {
             addObserver(observer);
         }
     }
 
-    public void addObserver(CloudObserver observer) {
+    public void addObserver(final CloudObserver observer) {
         final Class accountType = observer.getAccountType();
         if(!cloudObservers.containsKey(accountType)) {
             cloudObservers.put(accountType, observer);
@@ -79,9 +79,10 @@ public class CloudMonitor {
 
     public void addTargetFolder(final Class<? extends Account> accountType, final Path targetFolder) {
         cloudObservers.get(accountType).addTargetFolder(targetFolder);
+        LOG.debug("New folder added for observation to {} - targetfolder: {}", accountType.getName(), targetFolder);
     }
 
-    public CloudObserver getCloudObserver(Class<? extends Account> accountType) {
+    public CloudObserver getCloudObserver(final Class<? extends Account> accountType) {
         return cloudObservers.get(accountType);
     }
 

@@ -1,14 +1,19 @@
 package com.noe.hypercube.ui.bundle;
 
 
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.MappingResponse;
 import com.noe.hypercube.ui.domain.account.AccountInfo;
 import com.noe.hypercube.ui.domain.file.LocalFile;
+import java.nio.file.Path;
 import javafx.collections.ListChangeListener;
+import net.engio.mbassy.listener.Handler;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 import java.util.*;
 
-public class PathBundle {
+public class PathBundle implements EventHandler<MappingResponse> {
 
     private static final PathBundle instance = new PathBundle();
     private Map<String, DualHashBidiMap<String, String>> mappings;
@@ -23,6 +28,7 @@ public class PathBundle {
 //        mappings.get("Dropbox").put("D:\\test", "/newtest");
 //        mappings.get("Dropbox").put("D:\\install", "/other");
         addListenerForAccountChanges();
+        EventBus.subscribeToMappingResponse(this);
     }
 
     private void addListenerForAccountChanges() {
@@ -136,5 +142,14 @@ public class PathBundle {
 
     public static Collection<String> getAccounts() {
         return instance.mappings.keySet();
+    }
+
+    @Override
+    @Handler(rejectSubtypes = true)
+    public void onEvent(final MappingResponse event) {
+        final Map<String, Path> remoteFolders = event.getRemoteFolders();
+        for (Map.Entry<String, Path> remoteMapping : remoteFolders.entrySet()) {
+            add(remoteMapping.getKey(), event.getLocalFolder().toString(), remoteMapping.getValue().toString());
+        }
     }
 }

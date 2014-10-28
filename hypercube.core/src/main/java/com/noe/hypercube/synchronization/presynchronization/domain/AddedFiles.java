@@ -37,7 +37,7 @@ public class AddedFiles {
                     final Path localPath = localFile.toPath();
                     final Path remotePath = accountFile.getPath();
                     if (FilenameUtils.equalsNormalized(localPath.getFileName().toString(), remotePath.getFileName().toString())) {
-                        LOG.error("PreSynchronization - Added file conflict founded: {} with account {} file {}", localPath, account, remotePath);
+                        LOG.info("PreSynchronization - Added file conflict founded: {} with account {} file {}", localPath, account, remotePath);
                         localConflicteds.add(localFile);
                         remoteConflicted.add(accountFile);
                     }

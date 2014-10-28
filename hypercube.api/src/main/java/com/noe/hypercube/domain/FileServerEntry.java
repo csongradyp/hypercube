@@ -4,7 +4,7 @@ package com.noe.hypercube.domain;
 import java.nio.file.Path;
 import java.util.Date;
 
-public class DefaultFileServerEntry implements ServerEntry {
+public class FileServerEntry implements ServerEntry {
 
     private final String account;
     private String id;
@@ -12,12 +12,12 @@ public class DefaultFileServerEntry implements ServerEntry {
     private String revision;
     private Date lastModified;
 
-    public DefaultFileServerEntry(String account, Path remoteFile) {
+    public FileServerEntry(final String account, final Path remoteFile) {
         this.account = account;
         this.remoteFile = remoteFile;
     }
 
-    public DefaultFileServerEntry(String account, String id) {
+    public FileServerEntry(final String account, final String id) {
         this.account = account;
         this.id = id;
     }
@@ -56,7 +56,7 @@ public class DefaultFileServerEntry implements ServerEntry {
         return false;
     }
 
-    public void setLastModified(Date lastModified) {
+    public void setLastModified(final Date lastModified) {
         this.lastModified = lastModified;
     }
 
@@ -77,10 +77,6 @@ public class DefaultFileServerEntry implements ServerEntry {
 
     @Override
     public String toString() {
-        return "Dropbox File [ "
-                + remoteFile
-                + ", rev: " + revision
-                + ", lastModDate: " + lastModified
-                + " ]";
+        return String.format("FileServerEntry{ account='%s', id='%s', remoteFile=%s, revision='%s', lastModified=%s }", account, id, remoteFile, revision, lastModified);
     }
 }

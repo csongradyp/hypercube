@@ -186,7 +186,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     public FileEntity rename(ServerEntry remoteFile, String newName) throws SynchronizationException {
         final Path remoteFolder = remoteFile.getPath().getParent();
         try {
-            final DbxEntry renamedFile = client.move(getDropboxPath(remoteFile.getPath()), getDropboxPath(remoteFolder + newName));
+            final DbxEntry renamedFile = client.move(getDropboxPath(remoteFile.getPath()), getDropboxPath(remoteFolder + "/" + newName));
             return new DbxFileEntity(null, renamedFile.path, renamedFile.asFile().rev);
         } catch (DbxException e) {
             LOG.error(String.format("%s file rename failed", getAccountName()), e);

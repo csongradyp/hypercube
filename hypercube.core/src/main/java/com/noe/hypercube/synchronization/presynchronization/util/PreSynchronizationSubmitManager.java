@@ -96,7 +96,7 @@ public class PreSynchronizationSubmitManager {
     public void download(final FileEntity remoteFile) {
         final AccountBox accountBox = accountController.getAccountBox(remoteFile.getAccountName());
         final Path remotePath = Paths.get(remoteFile.getRemotePath());
-        accountBox.getDownloader().download(new DefaultFileServerEntry(accountBox.getClient().getAccountName(), remotePath));
+        accountBox.getDownloader().download(new FileServerEntry(accountBox.getClient().getAccountName(), remotePath));
     }
 
     public void uploadUpdated(final File mappedLocalFile, final Collection<FileEntity> remoteFiles) {
@@ -151,14 +151,14 @@ public class PreSynchronizationSubmitManager {
     public Collection<FileEntity> renameRemotesWithResolvedName(final Collection<ServerEntry> remoteFiles) throws SynchronizationException {
         Collection<FileEntity> renamedRemotes = new ArrayList<>(remoteFiles.size());
         for (ServerEntry remoteFile : remoteFiles) {
-            final String resolvedRemoteFileName = FileConflictNamingUtil.getResolvedFileName(remoteFile.getPath());
-            final FileEntity renamedRemoteWithResolvedName = renameRemoteWithResolvedName(remoteFile, resolvedRemoteFileName);
+            final String resolvedRemoteFileName = FileConflictNamingUtil.getResolvedFileName(remoteFile);
+            final FileEntity renamedRemoteWithResolvedName = renameRemote(remoteFile, resolvedRemoteFileName);
             renamedRemotes.add(renamedRemoteWithResolvedName);
         }
         return renamedRemotes;
     }
 
-    public FileEntity renameRemoteWithResolvedName(final ServerEntry remoteFile, final String newName) throws SynchronizationException {
+    public FileEntity renameRemote(final ServerEntry remoteFile, final String newName) throws SynchronizationException {
         final AccountBox accountBox = accountController.getAccountBox(remoteFile.getAccount());
         return accountBox.getClient().rename(remoteFile, newName);
     }

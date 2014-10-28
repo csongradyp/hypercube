@@ -75,6 +75,7 @@ public class FolderPreSynchronizer implements IPreSynchronizer {
         submitManager.uploadAllAccountsAsNew(addedFiles.getLocals(), remoteFolders, accountBoxes.values());
         // download non conflicted remote  files
         submitManager.download(addedFiles.getRemotes(), accountBoxes);
+
         // rename local conflicted new files to resolved name -> upload
         final Collection<File> localConflicteds = addedFiles.getLocalConflicteds();
         for (File localConflicted : localConflicteds) {
@@ -84,18 +85,19 @@ public class FolderPreSynchronizer implements IPreSynchronizer {
         final Map<String, Collection<ServerEntry>> remoteConflicteds = addedFiles.getRemoteConflicteds();
         for (Collection<ServerEntry> conflictedRemoteFiles : remoteConflicteds.values()) {
             // there are updated remote files - rename remote files with new resolved name
-            final Collection<FileEntity> renamedUpdatedsRemotesWithResolvedName = renameWithResolvedName(conflictedRemoteFiles);
+            final Collection<FileEntity> renamedAddedRemotesWithResolvedName = renameWithResolvedName(conflictedRemoteFiles);
             // download renamed files
-            submitManager.download(renamedUpdatedsRemotesWithResolvedName);
+            submitManager.download(renamedAddedRemotesWithResolvedName);
         }
 
         LOG.info("PreSynchronization finished for folder: {}", targetFolder);
         return true;
     }
 
-    private void resolveAndUploadToAllAccounts(File localConflicted) {
+    private void resolveAndUploadToAllAccounts(final File localConflicted) {
         // rename local file with resolved name -> upload
         final File resolvedLocalFileDestination =  FileConflictNamingUtil.getResolveFilePath(localConflicted.toPath()).toFile();
+        LOG.debug("local conflicted file {} renamed to: {}", localConflicted, resolvedLocalFileDestination);
         localConflicted.renameTo(resolvedLocalFileDestination);
         // upload renamed local file to all accounts
         submitManager.uploadAllAccountsAsNew(resolvedLocalFileDestination, remoteFolders, accountBoxes.values());

@@ -5,8 +5,7 @@ import com.noe.hypercube.domain.IStreamEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +17,8 @@ public abstract class ManagedQueue<ENTRY extends IStreamEntry<DEPENDENCY>, DEPEN
     private final Collection<ENTRY> waitList;
     private final Collection<ENTRY> failList;
     private final BlockingQueue<ENTRY> mainQ;
+
+    private ScheduledExecutorService executor;
 
     public ManagedQueue() {
         failList = new ArrayList<>();
@@ -89,15 +90,30 @@ public abstract class ManagedQueue<ENTRY extends IStreamEntry<DEPENDENCY>, DEPEN
     }
 
     public ENTRY take() throws InterruptedException {
+        final ENTRY entry = mainQ.take();
+        LOG.debug("TAKE UNBLOCKED with {}", entry);
         checkForDependencyFinished();
-        // TODO observation of waiting finished dependencies before queue gets blocked
-        return mainQ.take();
+        if(mainQ.isEmpty() && !waitList.isEmpty()) {
+            if(executor.isTerminated()) {
+                LOG.debug("Service started to check waiting entries dependencies");
+                executor = Executors.newSingleThreadScheduledExecutor();
+            }
+            LOG.debug("Main queue is empty check for finished dependencies");
+            executor.scheduleWithFixedDelay(this::checkForDependencyFinished, 0, 1, TimeUnit.SECONDS);
+            if(waitList.isEmpty()) {
+                LOG.debug("Waiting queue us empty - checking service terminated");
+                executor.shutdown();
+            }
+        }
+        LOG.debug("TAKE FINISHED with {}", entry);
+        return entry;
     }
 
     private void checkForDependencyFinished() {
         final List<ENTRY> readyEntries = waitList.parallelStream().filter(waiting -> exists(waiting.getDependency())).collect(Collectors.toList());
         mainQ.addAll(readyEntries);
         waitList.removeAll(readyEntries);
+        LOG.debug("Dependencies has been finished for: {}", readyEntries);
     }
 
     public void checkWaitings() {

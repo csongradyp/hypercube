@@ -55,8 +55,7 @@ public class Downloader implements IDownloader {
         while (!stop.get()) {
             final ServerEntry entry = getNext();
             LOG.info("{} downloader: {} was taken from queue", entry.getAccount(), entry.getPath() == null ? entry.getId() : entry.getPath());
-            LOG.debug(entry.toString());
-            LOG.debug(downloadQ.toString());
+            LOG.debug("Download queue: {}", downloadQ);
             try {
                 if (client.exist(entry)) {
                     downloadFromServer(entry);

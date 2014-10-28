@@ -134,7 +134,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     @Handler(rejectSubtypes = true)
     public void onDownloadRequest(final DownloadRequest event) {
         if (event.getAccount().equals(client.getAccountName())) {
-            downloader.download(new DefaultFileServerEntry(event.getAccount(), event.getRemoteFile().toString()));
+            downloader.download(new FileServerEntry(event.getAccount(), event.getRemoteFile().toString()));
         }
     }
 
