@@ -2,11 +2,10 @@ package com.noe.hypercube.ui.util;
 
 import com.noe.hypercube.ui.bundle.AccountBundle;
 import com.noe.hypercube.ui.domain.account.AccountInfo;
-import javafx.collections.ObservableList;
-import javafx.scene.Parent;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import javafx.collections.ObservableList;
+import javafx.scene.Parent;
 
 import static com.noe.hypercube.ui.util.FileNameConvensionUtil.getStyleSheetFileName;
 
@@ -29,7 +28,8 @@ public final class StyleUtil {
 
     private static void clearViewFromStyles(Parent view, ObservableList<AccountInfo> accounts) {
         for (AccountInfo account : accounts) {
-            view.getStylesheets().remove(STYLESHEETS_LOCATION + getStyleSheetFileName(account.getName()));
+            final String styleURL = getFileURL(Paths.get(STYLESHEETS_LOCATION, getStyleSheetFileName(account.getName())));
+            view.getStylesheets().remove(styleURL);
         }
     }
 

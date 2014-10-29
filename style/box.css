@@ -1,17 +1,13 @@
 .background {
-    -fx-background-color: aliceblue;
+    -fx-background-color: white;
 }
 
 .table-view {
-    -fx-base: aliceblue;
+    -fx-base: #ededed;
     -fx-control-inner-background: white;
-    -fx-background-color: aliceblue;
+    -fx-background-color: #ededed;
     -fx-table-cell-border-color: transparent;
     -fx-table-header-border-color: transparent;
-}
-
-.table-view .table-row-cell {
-    -fx-border-width: 1;
 }
 
 .table-view .column-header-background {
@@ -23,17 +19,14 @@
     -fx-border-color: transparent transparent derive(-fx-base, 80%) transparent;
 }
 
-.table-view .column-header .label {
-    -fx-font-size: 12;
-    -fx-font-family: "Franklin Gothic Condensed Demi Bold";
-    -fx-text-fill: #000000;
-    -fx-alignment: center-left;
-}
-
 .table-view:focused .table-row-cell:filled:focused:selected {
     -fx-background-color: -fx-focus-color;
     -fx-border-color: #000000;
     -fx-border-width: 1;
+}
+
+.table-row-cell:filled {
+    -fx-font-family: "Arial";
 }
 
 .table-row-cell:odd:filled {
@@ -41,22 +34,23 @@
 }
 
 .table-row-cell:odd:filled:hover {
-    -fx-background-color: aliceblue;
+    -fx-background-color: #f5f5f5;
 }
 
 .table-row-cell:hover {
-    -fx-background-color: aliceblue;
+    -fx-background-color: #f5f5f5;
     -fx-alternative-column-fill-visible: false;
 }
 
 .table-view:focused .table-row-cell:filled:focused:selected {
-    -fx-background-color: #E3F2FF;
+    -fx-background-color: #267cb7;
     -fx-border-color: transparent;
     -fx-alternative-column-fill-visible: false;
     -fx-alternative-row-fill-visible: false;
-    -fx-selection-bar: #E3F2FF;
+    -fx-selection-bar: #267cb7;
 }
 
-.table-row-cell:selected .text {
-    -fx-fill: #010101 ;
+.folder {
+    -fx-text-fill: #ead7a5;
+    -fx-effect: dropshadow(one-pass-box, black, 3, 0, 0, 0);
 }
