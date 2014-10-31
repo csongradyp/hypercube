@@ -14,4 +14,14 @@ public class TestMapper extends DirectoryMapper<TestAccount, TestMapping> {
     public Class<TestAccount> getAccountType() {
         return TestAccount.class;
     }
+
+    @Override
+    public TestMapping createMapping() {
+        return null;
+    }
+
+    @Override
+    protected String getAccountName() {
+        return "test";
+    }
 }

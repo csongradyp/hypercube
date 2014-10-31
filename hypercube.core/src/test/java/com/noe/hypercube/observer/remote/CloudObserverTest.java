@@ -13,8 +13,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -25,7 +26,7 @@ public class CloudObserverTest {
     @Mock
     private IPersistenceController mockPersistence;
     @Mock
-    private IClient<TestAccount, TestEntity> mockClient;
+    private IClient<TestAccount, TestEntity, TestMapping> mockClient;
     @Mock
     private IMapper<TestAccount, TestMapping> mockMapper;
     @Mock
@@ -49,14 +50,14 @@ public class CloudObserverTest {
         given(mockAccountBox.getMapper()).willReturn(mockMapper);
         given(mockAccountBox.getAccountType()).willReturn(TestAccount.class);
         given(mockMapper.getMappingClass()).willReturn(TestMapping.class);
-        underTest = new CloudObserver<>(mockAccountBox, mockPersistence);
+        underTest = new CloudObserver<>(mockAccountBox, givenTargetRemoteFolders());
     }
 
     @Test
     public void downloadsFileWhenChangedFileOnServerIsInWatchedDirectory() throws SynchronizationException {
         final Collection<ServerEntry> changes = givenChangesOnServer();
         given(mockClient.getChanges()).willReturn(changes);
-        given(mockPersistence.getMappings(any())).willReturn(givenMappings());
+        given(mockPersistence.getMappings(any(Class.class))).willReturn(givenMappings());
 
         underTest.run();
 
@@ -79,4 +80,11 @@ public class CloudObserverTest {
         testMappings.add(new TestMapping("A/B/", "X/Y"));
         return testMappings;
     }
+
+    private Collection<Path> givenTargetRemoteFolders() {
+        final Collection<Path> testMappings = new ArrayList<>();
+        testMappings.add(Paths.get("X/Y"));
+        return testMappings;
+    }
+
 }

@@ -1,0 +1,42 @@
+.list-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.list-cell:empty:hover {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.list-cell:empty .list-cell {
+    -fx-border-width: 0px;
+}
+
+.list-cell:odd:filled:focused:selected {
+    -fx-background-color: -fx-cell-focus-inner-border, derive(-fx-control-inner-background, -5%);
+    -fx-background-insets: 0, 0 0 1 0;
+}
+
+.list-cell:hover:filled:selected {
+    -fx-background-color: #d0d0d0;
+    -fx-text-fill: #000000;
+    -fx-alternative-column-fill-visible: false;
+}
+
+/* Selected row when table focused */
+.list-view:focused .list-cell:filled:focused:selected {
+    -fx-background-color: steelblue;
+    -fx-selection-bar: steelblue;
+    -fx-border-width: 0;
+    -fx-background: -fx-accent;
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
+/* Selected row when table not focused */
+.list-cell:filled:focused:selected {
+    -fx-background-color: transparent;
+    -fx-border-color: inherit;
+    -fx-border-width: 0;
+}

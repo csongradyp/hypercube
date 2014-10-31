@@ -1,11 +1,14 @@
 package com.noe.hypercube.ui.tray.menu;
 
+import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.FileEvent;
+import com.noe.hypercube.event.domain.JumpToFileEvent;
 import com.noe.hypercube.ui.util.FileManagerUtil;
 import com.noe.hypercube.ui.util.IconInjector;
 import com.noe.hypercube.ui.util.LastSyncDisplayUtil;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+import java.util.ResourceBundle;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,8 +16,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.TextAlignment;
-
-import java.util.ResourceBundle;
 
 public class FileListItem extends HBox {
 
@@ -32,8 +33,8 @@ public class FileListItem extends HBox {
         syncTime = createTimeLabel(fileEvent);
         final Label streamDirection = IconInjector.getStreamDirectionIcon(fileEvent);
         final Label filePath = createFileLabel(fileEvent);
-        final Button viewButton = createShareButton(fileEvent);
         setAlignment(Pos.CENTER_LEFT);
+        final Button viewButton = createViewButton(fileEvent);
         setOnMouseEntered(event -> viewButton.setVisible(true));
         setOnMouseExited(event -> viewButton.setVisible(false));
         setOnMouseClicked(event -> {
@@ -64,15 +65,13 @@ public class FileListItem extends HBox {
         return syncTime;
     }
 
-    private Button createShareButton(final FileEvent file) {
+    private Button createViewButton(final FileEvent file) {
         final Button viewButton = new Button();
         viewButton.setPrefSize(15, 15);
         viewButton.setFocusTraversable(false);
-        AwesomeDude.setIcon(viewButton, AwesomeIcon.SHARE_ALT);
+        AwesomeDude.setIcon(viewButton, AwesomeIcon.MAP_MARKER);
         viewButton.setVisible(false);
-        viewButton.setOnAction(event -> {
-            System.out.println(file.getLocalPath());
-        });
+        viewButton.setOnAction(mouseEvent -> EventBus.publish(new JumpToFileEvent(file.getLocalPath())));
         return viewButton;
     }
 

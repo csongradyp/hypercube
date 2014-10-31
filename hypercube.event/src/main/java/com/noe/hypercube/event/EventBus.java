@@ -4,8 +4,11 @@ import com.noe.hypercube.event.domain.*;
 import com.noe.hypercube.event.domain.type.StreamDirection;
 import net.engio.mbassy.bus.MBassador;
 import net.engio.mbassy.bus.config.BusConfiguration;
+import org.slf4j.LoggerFactory;
 
 public final class EventBus {
+
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(EventBus.class);
 
     private static final EventBus instance = new EventBus();
 
@@ -18,6 +21,9 @@ public final class EventBus {
     private final MBassador<DownloadRequest> downloadRequestBus;
     private final MBassador<CreateFolderRequest> createFolderRequestBus;
     private final MBassador<DeleteRequest> deleteRequestBus;
+    private final MBassador<MappingRequest> mappingRequestBus;
+    private final MBassador<MappingResponse> mappingResponseBus;
+    private final MBassador<JumpToFileEvent> jumpToFileBus;
 
     private EventBus() {
         storageEventBus = new MBassador<>(BusConfiguration.Default());
@@ -29,10 +35,16 @@ public final class EventBus {
         downloadRequestBus = new MBassador<>(BusConfiguration.Default());
         createFolderRequestBus = new MBassador<>(BusConfiguration.Default());
         deleteRequestBus = new MBassador<>(BusConfiguration.Default());
-        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, fileListRequestBus, fileListResponseBus, uploadRequestBus, downloadRequestBus, createFolderRequestBus, deleteRequestBus);
+        mappingResponseBus = new MBassador<>(BusConfiguration.Default());
+        mappingRequestBus = new MBassador<>(BusConfiguration.Default());
+        jumpToFileBus = new MBassador<>(BusConfiguration.Default());
+        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus,
+                fileListRequestBus, fileListResponseBus, uploadRequestBus,
+                downloadRequestBus, createFolderRequestBus, deleteRequestBus,
+                mappingRequestBus, mappingResponseBus, jumpToFileBus);
     }
 
-    private void registerShutdownHook(MBassador<?>... mBassadors) {
+    private void registerShutdownHook(final MBassador<?>... mBassadors) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             for (MBassador<?> eventBus : mBassadors) {
                 eventBus.shutdown();
@@ -104,6 +116,31 @@ public final class EventBus {
 
     public static void publish(DeleteRequest deleteRequest) {
         instance.deleteRequestBus.publish(deleteRequest);
+    }
+
+    public static void publish(MappingRequest mappingRequest) {
+        instance.mappingRequestBus.publish(mappingRequest);
+    }
+
+    public static void subscribeToMappingRequest(final EventHandler<MappingRequest> handler) {
+        instance.mappingRequestBus.subscribe(handler);
+    }
+
+    public static void publish(final MappingResponse mappingResponse) {
+        instance.mappingResponseBus.publish(mappingResponse);
+    }
+
+    public static void subscribeToJumpToFileEvent(final EventHandler<JumpToFileEvent> handler) {
+        instance.jumpToFileBus.subscribe(handler);
+    }
+
+    public static void publish(final JumpToFileEvent jumpToFileEvent) {
+        instance.jumpToFileBus.publish(jumpToFileEvent);
+    }
+
+    public static void subscribeToMappingResponse(final EventHandler<MappingResponse> handler) {
+        instance.mappingResponseBus.subscribe(handler);
+        LOG.debug("{} subscribed to Mapping Response", handler);
     }
 
     public static void subscribeToDeleteRequest(FileEventHandler handler) {

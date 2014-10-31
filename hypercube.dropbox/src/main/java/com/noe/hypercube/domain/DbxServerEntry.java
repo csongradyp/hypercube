@@ -14,6 +14,7 @@ public class DbxServerEntry implements ServerEntry {
     private Date lastModified;
     private Long size;
     private boolean isFolder;
+    private boolean shared;
 
     public DbxServerEntry(String path, String revision, Date lastModified, boolean isFolder) {
         this.path = Paths.get(path);
@@ -33,6 +34,11 @@ public class DbxServerEntry implements ServerEntry {
         this.revision = revision;
         this.lastModified = lastModified;
         this.isFolder = isFolder;
+    }
+
+    public DbxServerEntry(String path, Long size, String revision, Date lastModified, boolean isFolder, boolean shared) {
+        this(path, size, revision, lastModified, isFolder);
+        this.shared = shared;
     }
 
     public void setRevision(String revision) {
@@ -68,6 +74,15 @@ public class DbxServerEntry implements ServerEntry {
         return !isFolder;
     }
 
+    public void setShared(boolean shared) {
+        this.shared = shared;
+    }
+
+    @Override
+    public boolean isShared() {
+        return isFolder && shared;
+    }
+
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
     }
@@ -84,15 +99,18 @@ public class DbxServerEntry implements ServerEntry {
 
     @Override
     public String getAccount() {
-        return Dropbox.name;
+        return Dropbox.getName();
     }
 
     @Override
     public String toString() {
-        return "Dropbox File [ "
-                + path
-                + ", rev: " + revision
-                + ", lastModDate: " + lastModified
-                + " ]";
+        return "Dropbox entry{" +
+                "path=" + path +
+                ", revision='" + revision + '\'' +
+                ", lastModified=" + lastModified +
+                ", size=" + size +
+                ", isFolder=" + isFolder +
+                ", shared=" + shared +
+                '}';
     }
 }

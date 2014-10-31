@@ -3,20 +3,17 @@ package com.noe.hypercube;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MergingPersistenceUnitPostProcessor implements PersistenceUnitPostProcessor {
 
-    private final Map<String, List<String>> puiClasses = new HashMap<>();
+    private final Map<String, Set<String>> puiClasses = new HashMap<>();
 
     @Override
     public void postProcessPersistenceUnitInfo(MutablePersistenceUnitInfo pui) {
-        List<String> classes = puiClasses.get(pui.getPersistenceUnitName());
+        Set<String> classes = puiClasses.get(pui.getPersistenceUnitName());
         if (classes == null) {
-            classes = new ArrayList<>();
+            classes = new HashSet<>();
             puiClasses.put(pui.getPersistenceUnitName(), classes);
         }
         pui.getManagedClassNames().addAll(classes);

@@ -2,22 +2,24 @@ package com.noe.hypercube.service;
 
 
 import com.dropbox.core.*;
-import com.noe.hypercube.domain.AccountQuota;
-import com.noe.hypercube.domain.DbxFileEntity;
-import com.noe.hypercube.domain.DbxServerEntry;
-import com.noe.hypercube.domain.ServerEntry;
+import com.noe.hypercube.domain.*;
 import com.noe.hypercube.synchronization.SynchronizationException;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.*;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
-public class DbxClientWrapper extends Client<Dropbox,DbxFileEntity> {
+public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DbxClientWrapper.class);
 
@@ -40,7 +42,7 @@ public class DbxClientWrapper extends Client<Dropbox,DbxFileEntity> {
 
     @Override
     public String getAccountName() {
-        return "Dropbox";
+        return Dropbox.getName();
     }
 
     @Override
@@ -54,23 +56,28 @@ public class DbxClientWrapper extends Client<Dropbox,DbxFileEntity> {
     }
 
     @Override
-    public boolean exist(File fileToUpload, Path remotePath) {
-        return exist(getDropboxPath(remotePath) + "/" + fileToUpload.getName());
+    public Class<DbxMapping> getMappingType() {
+        return DbxMapping.class;
     }
 
     @Override
-    public boolean exist(ServerEntry serverEntry) {
+    public boolean exist(final UploadEntity uploadEntity) {
+        return exist(getDropboxPath(uploadEntity.getRemoteFilePath().toString()));
+    }
+
+    @Override
+    public boolean exist(final ServerEntry serverEntry) {
         return exist(getDropboxPath(serverEntry.getPath()));
     }
 
-    private boolean exist(String dropboxFilePath) {
+    private boolean exist(final String dropboxFilePath) {
         boolean exists = false;
         try {
-            exists = client.getMetadata(dropboxFilePath) != null;
+            final DbxEntry.WithChildren metadata = client.getMetadataWithChildren(dropboxFilePath);
+            exists = metadata != null;
         } catch (DbxException e) {
-            LOG.error("Failed to get file information from Dropbox: {}", dropboxFilePath);
+            LOG.error("Failed to get file information from Dropbox: {}", dropboxFilePath, e);
         }
-        LOG.debug(dropboxFilePath + " exists = " + exists);
         return exists;
     }
 
@@ -132,18 +139,59 @@ public class DbxClientWrapper extends Client<Dropbox,DbxFileEntity> {
     }
 
     @Override
-    public void delete(String remoteFileId) throws SynchronizationException {
+    public void delete(final String remoteFileId) throws SynchronizationException {
         throw new UnsupportedOperationException("Dropbox does not populate file id");
     }
 
     @Override
-    public ServerEntry uploadAsNew(Path remotePath, File fileToUpload, InputStream inputStream) throws SynchronizationException {
-        return upload(remotePath, DbxWriteMode.add(), fileToUpload, inputStream);
+    public ServerEntry uploadAsNew(final UploadEntity uploadEntity) throws SynchronizationException {
+        return upload(uploadEntity, DbxWriteMode.add());
     }
 
     @Override
-    public ServerEntry uploadAsUpdated(Path remotePath, File fileToUpload, InputStream inputStream) throws SynchronizationException {
-        return upload(remotePath, DbxWriteMode.force(), fileToUpload, inputStream);
+    public ServerEntry uploadAsUpdated(final UploadEntity uploadEntity) throws SynchronizationException {
+        return upload(uploadEntity, DbxWriteMode.force());
+    }
+
+    private ServerEntry upload(UploadEntity uploadEntity, DbxWriteMode writeMode) throws SynchronizationException {
+        final Path remoteFilePath = uploadEntity.getRemoteFilePath();
+        final String dropboxFilePath = getDropboxPath(remoteFilePath);
+        final File fileToUpload = uploadEntity.getFile();
+        DbxServerEntry serverEntry = null;
+        try (FileInputStream inputStream = FileUtils.openInputStream(fileToUpload)) {
+            DbxEntry.File uploadedFile = client.uploadFile(dropboxFilePath, writeMode, fileToUpload.length(), inputStream);
+            serverEntry = new DbxServerEntry(uploadedFile.path, uploadedFile.rev, uploadedFile.lastModified, uploadedFile.isFolder());
+        } catch (DbxException e) {
+            LOG.error("File upload failed to Dropbox: {}", remoteFilePath);
+        } catch (IOException e) {
+            LOG.error("Could not read file to upload: {}", fileToUpload.getPath());
+            throw new SynchronizationException(String.format("Upload failed - Cannot read file: %s", fileToUpload.toPath().toString()), e);
+        }
+        return serverEntry;
+    }
+
+    @Override
+    public FileEntity rename(FileEntity remoteFile, String newName) throws SynchronizationException {
+        final Path remoteFolder = Paths.get(remoteFile.getRemotePath()).getParent();
+        try {
+            final DbxEntry renamedFile = client.move(getDropboxPath(remoteFile.getRemotePath()), getDropboxPath(remoteFolder + newName));
+            return new DbxFileEntity(remoteFile.getLocalPath(), renamedFile.path, renamedFile.asFile().rev);
+        } catch (DbxException e) {
+            LOG.error(String.format("%s file rename failed", getAccountName()), e);
+            throw new SynchronizationException(String.format("An error occurred while rename file %s", remoteFile.getRemotePath()), e);
+        }
+    }
+
+    @Override
+    public FileEntity rename(ServerEntry remoteFile, String newName) throws SynchronizationException {
+        final Path remoteFolder = remoteFile.getPath().getParent();
+        try {
+            final DbxEntry renamedFile = client.move(getDropboxPath(remoteFile.getPath()), getDropboxPath(remoteFolder + "/" + newName));
+            return new DbxFileEntity(null, renamedFile.path, renamedFile.asFile().rev);
+        } catch (DbxException e) {
+            LOG.error(String.format("%s file rename failed", getAccountName()), e);
+            throw new SynchronizationException(String.format("An error occurred while rename file %s", remoteFile.getPath()), e);
+        }
     }
 
     @Override
@@ -157,7 +205,7 @@ public class DbxClientWrapper extends Client<Dropbox,DbxFileEntity> {
                 fileList.add(getDbxFileInfo(file));
             }
         } catch (DbxException e) {
-            throw new SynchronizationException(e.getMessage());
+            throw new SynchronizationException(e.getMessage(), e);
         }
         return fileList;
     }
@@ -177,7 +225,7 @@ public class DbxClientWrapper extends Client<Dropbox,DbxFileEntity> {
         return fileList;
     }
 
-    private DbxServerEntry getDbxFileInfo(DbxEntry file) {
+    private DbxServerEntry getDbxFileInfo(final DbxEntry file) {
         final DbxServerEntry dbxServerEntry = new DbxServerEntry(file.path, file.isFolder());
         if (file.isFile()) {
             dbxServerEntry.setSize(file.asFile().numBytes);
@@ -197,26 +245,17 @@ public class DbxClientWrapper extends Client<Dropbox,DbxFileEntity> {
         }
     }
 
-    private ServerEntry upload(final Path remotePath, final DbxWriteMode writeMode, final File fileToUpload, final InputStream inputStream) {
-        DbxServerEntry serverEntry = null;
-        final String dropboxFilePath = getDropboxPath(remotePath) + "/" + fileToUpload.getName();
-        try {
-            DbxEntry.File uploadedFile = client.uploadFile(dropboxFilePath, writeMode, fileToUpload.length(), inputStream);
-            serverEntry = new DbxServerEntry(uploadedFile.path, uploadedFile.rev, uploadedFile.lastModified, uploadedFile.isFolder());
-        } catch (DbxException e) {
-            LOG.error("File upload failed to Dropbox: {}", remotePath);
-        } catch (IOException e) {
-            LOG.error("Could not read file to upload: {}", fileToUpload.getPath());
-        }
-        return serverEntry;
-    }
-
     private String getDropboxPath(final Path remotePath) {
         String dropboxPath = remotePath.toString();
-        if(!dropboxPath.startsWith("/")) {
+        return getDropboxPath(dropboxPath);
+    }
+
+    private String getDropboxPath(String path) {
+        String dropboxPath = path.replace("\\", "/");
+        if (!dropboxPath.startsWith("/")) {
             dropboxPath = "/" + dropboxPath;
         }
-        return dropboxPath.replace("\\", "/");
+        return dropboxPath;
     }
 
     @Override

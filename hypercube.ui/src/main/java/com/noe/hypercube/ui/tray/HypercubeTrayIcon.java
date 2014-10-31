@@ -4,6 +4,7 @@ import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
 import com.noe.hypercube.event.domain.FileEvent;
 import com.noe.hypercube.event.domain.type.FileEventType;
+import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -15,14 +16,16 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ResourceBundle;
 
-import static com.noe.hypercube.ui.tray.menu.TrayMenuFactory.showPopupMenuDialog;
+import static com.noe.hypercube.ui.tray.menu.TrayMenuFactory.createPopupMenuDialog;
 
 public class HypercubeTrayIcon implements EventHandler<FileEvent> {
     private static final String TOOLTIP_TEXT = "HyperCube - Cloud Connected (v1.0)";
     private static final String TRAY_DEFAULT_IMAGE_KEY = "tray.default";
     private static final String TRAY_SYNC_IMAGE_KEY = "tray.synchronizing";
     private static final String ERROR_TITLE = "ERROR";
+
     private TrayIcon trayIcon;
+    private JDialog trayPopupMenu;
     private boolean firstTime = true;
 
     public HypercubeTrayIcon(final Stage primaryStage) {
@@ -35,7 +38,11 @@ public class HypercubeTrayIcon implements EventHandler<FileEvent> {
                 @Override
                 public void mouseClicked(MouseEvent event) {
                     if (MouseEvent.BUTTON3 == event.getButton()) {
-                        Platform.runLater(() -> showPopupMenuDialog(event.getX(), event.getY(), primaryStage));
+                        Platform.runLater(() -> {
+                            trayPopupMenu = createPopupMenuDialog(event.getX(), event.getY(), primaryStage);
+                            trayPopupMenu.setVisible(true);
+                            ConfigurationBundle.activeLanguageProperty().addListener((observable, oldValue, newValue) -> trayPopupMenu.dispose());
+                        });
                     }
                 }
             });

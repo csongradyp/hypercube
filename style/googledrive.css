@@ -1,0 +1,65 @@
+.background {
+    -fx-background-color: white;
+}
+
+.table-view {
+    -fx-base: aliceblue;
+    -fx-control-inner-background: white;
+    -fx-background-color: aliceblue;
+    -fx-table-cell-border-color: transparent;
+    -fx-table-header-border-color: transparent;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-size: 20;
+    -fx-border-color: transparent transparent derive(-fx-base, 80%) transparent;
+}
+
+.table-view .column-header .label {
+    -fx-font-size: 14;
+    -fx-font-family: "Andalus";
+    -fx-text-fill: #000000;
+    -fx-alignment: center-left;
+}
+
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: -fx-focus-color;
+    -fx-border-color: #000000;
+    -fx-border-width: 1;
+}
+
+.table-row-cell:filled {
+    -fx-font-size: 14;
+    -fx-font-family: "Andalus";
+}
+
+.table-row-cell:odd:filled {
+    -fx-background-color: white;
+}
+
+.table-row-cell:odd:filled:hover {
+    -fx-background-color: transparent;
+    -fx-alternative-column-fill-visible: false;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: transparent;
+    -fx-alternative-column-fill-visible: false;
+}
+
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: #4285f4;
+    -fx-border-color: transparent;
+    -fx-alternative-column-fill-visible: false;
+    -fx-alternative-row-fill-visible: false;
+    -fx-selection-bar: #4285f4;
+}
+
+.folder {
+    -fx-text-fill: #8f8f8f;
+    -fx-effect: dropshadow(one-pass-box, black, 3, 0, 0, 0);
+}

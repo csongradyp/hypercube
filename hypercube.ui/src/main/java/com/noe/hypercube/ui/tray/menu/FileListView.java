@@ -20,9 +20,11 @@ public class FileListView extends ListView<FileListItem> {
     }
 
     public synchronized void clearAndSet(final List<FileEvent> files) {
-        getItems().clear();
-        for (FileEvent file : files) {
-            add(file);
+        if(files != null) {
+            getItems().clear();
+            for (FileEvent file : files) {
+                add(file);
+            }
         }
     }
 

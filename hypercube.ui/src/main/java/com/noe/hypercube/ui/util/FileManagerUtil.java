@@ -21,7 +21,7 @@ public final class FileManagerUtil {
     private FileManagerUtil() {
     }
 
-    public static void openFileManager(String path) {
+    public static void openFileManager(final String path) {
         String os = System.getProperty(OS_NAME_PROPERTY_KEY);
         if (os.contains(WINDOWS)) {
             executeFileManager(WINDOWS_COMMAND + path);
@@ -32,7 +32,7 @@ public final class FileManagerUtil {
         }
     }
 
-    private static void executeFileManager(String command) {
+    private static void executeFileManager(final String command) {
         try {
             Runtime.getRuntime().exec(command);
         } catch (IOException e) {

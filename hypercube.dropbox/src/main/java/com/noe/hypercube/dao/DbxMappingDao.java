@@ -1,10 +1,8 @@
 package com.noe.hypercube.dao;
 
 import com.noe.hypercube.domain.DbxMapping;
-import org.springframework.stereotype.Repository;
 
-@Repository
-public class DbxMappingDao extends EntityDao<DbxMapping> {
+public class DbxMappingDao extends Dao<DbxMapping> {
 
     @Override
     public Class<DbxMapping> getEntityClass() {

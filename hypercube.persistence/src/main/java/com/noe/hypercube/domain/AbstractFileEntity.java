@@ -11,6 +11,7 @@ public abstract class AbstractFileEntity implements FileEntity {
 
     @Id
     private String localPath;
+    private String remotePath;
     private String revision;
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModifiedDate;
@@ -18,14 +19,24 @@ public abstract class AbstractFileEntity implements FileEntity {
     public AbstractFileEntity() {
     }
 
-    public AbstractFileEntity(String localPath, String revision) {
-        this(localPath, revision, new Date());
+    protected AbstractFileEntity(final String localPath, final String remotePath, final String revision, final Date lastModifiedDate) {
+        this.localPath = localPath;
+        this.remotePath = remotePath;
+        this.revision = revision;
+        this.lastModifiedDate = lastModifiedDate;
     }
 
-    public AbstractFileEntity(String localPath, String revision, Date lastModified) {
+    protected AbstractFileEntity(final String localPath, final String remotePath, final String revision) {
+        this(localPath, remotePath, revision, new Date());
+    }
+
+    public AbstractFileEntity(final AbstractFileEntity fileEntity) {
+        this(fileEntity.getLocalPath(), fileEntity.getRemotePath(), fileEntity.getRevision(), fileEntity.lastModified());
+    }
+
+    @Override
+    public void setLocalPath(final String localPath) {
         this.localPath = localPath;
-        this.revision = revision;
-        this.lastModifiedDate = lastModified;
     }
 
     @Override
@@ -34,8 +45,8 @@ public abstract class AbstractFileEntity implements FileEntity {
     }
 
     @Override
-    public void setLocalPath(String dbxPath) {
-        this.localPath = dbxPath;
+    public void setRemotePath(String remotePath) {
+        this.remotePath = remotePath;
     }
 
     @Override
@@ -64,10 +75,22 @@ public abstract class AbstractFileEntity implements FileEntity {
     }
 
     @Override
+    public String getRemotePath() {
+        return remotePath;
+    }
+
+    @Override
     public int compareTo(FileEntity entry) {
         if (localPath.equals(entry.getLocalPath())) {
             return 0;
         }
         return -1;
     }
+
+    @Override
+    public FileEntity duplicate() {
+        return getNewInstance(this);
+    }
+
+    public abstract FileEntity getNewInstance(AbstractFileEntity fileEntity);
 }

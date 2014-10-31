@@ -34,7 +34,7 @@ public final class HistoryBundle implements EventHandler<FileEvent> {
     @Handler(rejectSubtypes = true)
     public void onEvent(final FileEvent event) {
         if (event.isFinished()) {
-            final ObservableList<FileEvent> fileEvents = lastSyncedFiles.get(event.getAccountName());
+            final ObservableList<FileEvent> fileEvents = lastSyncedFiles.get(event.getAccount());
             if (fileEvents.size() == historySize) {
                 fileEvents.remove(fileEvents.size() - 1);
             }

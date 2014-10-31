@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">
-    <persistence-unit name="myPersistenceUnit" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="hyperPersistenceUnit" transaction-type="RESOURCE_LOCAL">
         <provider>com.objectdb.jpa.Provider</provider>
 
         <!--<class>com.noe.hypercube.googledrive.domain.DriveFileEntity</class>-->
         <!--<class>com.noe.hypercube.googledrive.domain.DriveMapping</class>-->
+
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
     </persistence-unit>
 </persistence>

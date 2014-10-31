@@ -7,9 +7,16 @@ import com.noe.hypercube.event.domain.FileListResponse;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.domain.file.IFile;
 import com.noe.hypercube.ui.domain.file.LocalFile;
-import com.noe.hypercube.ui.elements.ManagedAccountSegmentedButton;
-import com.noe.hypercube.ui.factory.IconFactory;
+import com.noe.hypercube.ui.elements.AccountSegmentedButton;
+import com.noe.hypercube.ui.elements.LocalDriveSegmentedButton;
 import com.noe.hypercube.ui.util.StyleUtil;
+import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -21,23 +28,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.VBox;
 import net.engio.mbassy.listener.Handler;
 import org.controlsfx.control.BreadCrumbBar;
 import org.controlsfx.control.SegmentedButton;
 
-import java.awt.*;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import static com.noe.hypercube.ui.util.PathConverterUtil.getEventPath;
 import static javafx.scene.input.KeyCombination.ModifierValue.DOWN;
 import static javafx.scene.input.KeyCombination.ModifierValue.UP;
 
@@ -51,16 +48,15 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     private final KeyCombination ctrlF5 = new KeyCodeCombination(KeyCode.F5, UP, DOWN, UP, UP, UP);
     private final KeyCombination ctrlA = new KeyCodeCombination(KeyCode.A, UP, DOWN, UP, UP, UP);
 
-
     @FXML
     private FileTableView table;
 
     @FXML
     private MultiBreadCrumbBar multiBreadCrumbBar;
     @FXML
-    private SegmentedButton localDrives;
+    private LocalDriveSegmentedButton localDrives;
     @FXML
-    private ManagedAccountSegmentedButton remoteDrives;
+    private AccountSegmentedButton remoteDrives;
     @FXML
     private DriveSpaceBar driveSpaceBar;
 
@@ -86,19 +82,15 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        initLocalDrives();
+        localDrives.setOnAction(this::onLocalDriveAction);
+        localDrives.setActive(true);
         initRemoteDrives();
         table.getLocationProperty().addListener((observable, previousFolder, newFolder) -> {
             if (newFolder != null) {
                 if (isRemote()) {
                     waitForResponce = true;
                     final IFile folder = table.getSelectionModel().getSelectedItem();
-                    if (folder != null) {
-                        final Collection<String> accounts = folder.sharedWith();
-                        System.out.println(accounts);
-                    }
-
-                    EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), newFolder, previousFolder));
+                    EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getEventPath(newFolder), previousFolder));
                 } else {
                     waitForResponce = false;
                     multiBreadCrumbBar.setAllRemoteCrumbsInactive();
@@ -129,28 +121,6 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         }
     }
 
-    private void initLocalDrives() {
-        List<ToggleButton> drives = collectLocalDrives();
-        localDrives.getButtons().addAll(drives);
-        localDrives.getButtons().get(0).setSelected(true);
-    }
-
-    private List<ToggleButton> collectLocalDrives() {
-        List<ToggleButton> drives = new ArrayList<>(5);
-        Iterable<Path> rootDirectories = FileSystems.getDefault().getRootDirectories();
-        for (Path root : rootDirectories) {
-            drives.add(createLocalStorageButton(root));
-        }
-        return drives;
-    }
-
-    private ToggleButton createLocalStorageButton(Path root) {
-        ToggleButton button = new ToggleButton(root.toString(), new ImageView(IconFactory.getStorageIcon(root)));
-        button.setFocusTraversable(false);
-        button.setOnAction(this::onLocalDriveAction);
-        return button;
-    }
-
     private void initRemoteDrives() {
         remoteDrives.activeProperty().addListener((observableValue, oldValue, newValue) -> remote.set(newValue));
         remoteDrives.setOnAction(event -> {
@@ -166,11 +136,12 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     public void refresh() {
         table.getItems().clear();
+        final Path location = getLocation();
         if (isRemote()) {
             waitForResponce = true;
-            EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getLocation(), null));
+            EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getEventPath(location), null));
         } else {
-            table.setLocalFileList(getLocation(), null);
+            table.setLocalFileList(location, null);
         }
     }
 
@@ -212,10 +183,8 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
             selectedFile.mark();
         } else if (shiftUp.match(event)) {
             selectedFile.mark();
-            table.getSelectionModel().selectAboveCell();
         } else if (shiftDown.match(event)) {
             selectedFile.mark();
-            table.getSelectionModel().selectBelowCell();
         } else if (ctrlF5.match(event)) {
             refresh();
         } else if (ctrlA.match(event)) {
@@ -258,7 +227,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     private void setDefaultStyle() {
         table.getStylesheets().clear();
-        table.getStylesheets().add("style/fileTableView.css");
+        table.getStylesheets().add("style/HyperCubeTableView.css");
     }
 
     public IFile getSelectedFile() {
@@ -339,6 +308,16 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
             if (button.isSelected()) {
                 button.setSelected(false);
             }
+        }
+    }
+
+    public void jumpToFile(final Path filePath) {
+        table.setLocation(filePath.getParent());
+        final Optional<IFile> destinationFile = table.getItems().parallelStream().filter(file -> file.getName().equals(filePath.getFileName().toString())).findFirst();
+        if (destinationFile.isPresent()) {
+            final IFile iFile = destinationFile.get();
+            table.getSelectionModel().select(iFile);
+            table.scrollTo(iFile);
         }
     }
 

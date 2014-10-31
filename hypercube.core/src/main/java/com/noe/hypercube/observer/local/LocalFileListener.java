@@ -1,110 +1,140 @@
 package com.noe.hypercube.observer.local;
 
-import com.noe.hypercube.mapping.IMapper;
+import com.noe.hypercube.Action;
+import com.noe.hypercube.controller.IPersistenceController;
+import com.noe.hypercube.domain.AccountBox;
+import com.noe.hypercube.domain.IEntity;
+import com.noe.hypercube.domain.UploadEntity;
 import com.noe.hypercube.synchronization.SynchronizationException;
-import com.noe.hypercube.synchronization.upstream.IUploader;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.List;
-
 public class LocalFileListener implements FileAlterationListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalFileListener.class);
 
-    private final IMapper mapper;
-    private final IUploader uploader;
+    private final Path targetDir;
+    private final Collection<AccountBox> accountBoxes;
+    private final IPersistenceController persistenceController;
 
-    public LocalFileListener(IUploader uploader, IMapper mapper) {
-        this.uploader = uploader;
-        this.mapper = mapper;
+    public LocalFileListener(final Path targetDir, final Collection<AccountBox> accountBoxes, final IPersistenceController persistenceController) {
+        this.targetDir = targetDir;
+        this.accountBoxes = accountBoxes;
+        this.persistenceController = persistenceController;
     }
 
     @Override
-    public void onStart(FileAlterationObserver observer) {
+    public void onStart(final FileAlterationObserver observer) {
+
     }
 
     @Override
-    public void onDirectoryCreate(File directory) {
+    public void onDirectoryCreate(final File directory) {
         Path directoryPath = directory.toPath();
-        LOG.debug("Directory creation detected: {}", directoryPath);
+        LOG.info("Directory creation detected: {}", directoryPath);
     }
 
     @Override
-    public void onDirectoryChange(File directory) {
+    public void onDirectoryChange(final File directory) {
         Path directoryPath = directory.toPath();
-        LOG.debug("Directory content change detected: {}", directoryPath);
+        LOG.info("Directory content change detected: {}", directoryPath);
     }
 
     @Override
-    public void onDirectoryDelete(File directory) {
+    public void onDirectoryDelete(final File directory) {
         delete(directory);
     }
 
     @Override
-    public void onFileCreate(File file) {
+    public void onFileCreate(final File file) {
         Path filePath = file.toPath();
-        LOG.debug("File creation detected: " + filePath);
+        LOG.info("File creation detected: {}", filePath);
         upload(file);
     }
 
     @Override
-    public void onFileChange(File file) {
+    public void onFileChange(final File file) {
         Path filePath = file.toPath();
-        LOG.debug("File update detected: " + filePath);
+        LOG.info("File update detected: {}", filePath);
         update(file);
     }
 
     @Override
-    public void onFileDelete(File file) {
+    public void onFileDelete(final File file) {
         Path filePath = file.toPath();
-        LOG.debug("File delete detected: " + filePath);
+        LOG.info("File delete detected: {}", filePath);
         delete(file);
     }
 
     @Override
-    public void onStop(FileAlterationObserver observer) {
-        uploader.stop();
-    }
-
-    private void delete(File file) {
-        try {
-            List<Path> remotes = mapper.getRemotes(file);
-            for (Path remote : remotes) {
-                uploader.delete(file, remote);
-            }
-        } catch (SynchronizationException e) {
-            LOG.error(e.getMessage());
+    public void onStop(final FileAlterationObserver observer) {
+        for (AccountBox accountBox : accountBoxes) {
+            accountBox.getDownloader().stop();
         }
     }
 
-    private void update(File file) {
-        try {
-            List<Path> remotes = mapper.getRemotes(file);
-            for (Path remote : remotes) {
-                uploader.uploadUpdated(file, remote);
+    private void delete(final File file) {
+        forAllAccounts(file, (accountBox, remotePath) -> {
+            final UploadEntity removedLocalContent = new UploadEntity(file, remotePath, Action.REMOVED);
+            accountBox.getUploader().delete(removedLocalContent);
+        });
+    }
+
+    private void update(final File file) {
+        forAllAccounts(file, (accountBox, remotePath) -> {
+            final UploadEntity changedLocalContent = new UploadEntity(file, remotePath, Action.CHANGED);
+            accountBox.getUploader().uploadUpdated(changedLocalContent);
+        });
+    }
+
+    private void upload(final File file) {
+        forAllAccounts(file, (accountBox, remotePath) -> {
+            final UploadEntity addedLocalContent = new UploadEntity(file, remotePath, getOrigin(file));
+            accountBox.getUploader().uploadNew(addedLocalContent);
+        });
+    }
+
+    private void forAllAccounts(final File file, final AccountActionCallback accountAction) {
+        for (final AccountBox<?, ?, ?> accountBox : accountBoxes) {
+            try {
+                List<Path> remotes = accountBox.getMapper().getRemotes(file);
+                if (remotes != null) {
+                    for (final Path mappedRemoteFolder : remotes) {
+                        accountAction.call(accountBox, mappedRemoteFolder);
+                    }
+                }
+            } catch (SynchronizationException e) {
+                LOG.error(e.getMessage());
             }
-        } catch (SynchronizationException e) {
-            LOG.error(e.getMessage());
         }
     }
 
-    private void upload(File file) {
-        try {
-            List<Path> remotes = mapper.getRemotes(file);
-            for (Path remote : remotes) {
-                uploader.uploadNew(file, remote);
+    public String getOrigin(final File file) {
+        final Set<Class<IEntity>> entityTypes = persistenceController.getEntitiesMapping(file.toPath().toString());
+        final int foundOrigins = entityTypes.size();
+        if (foundOrigins > 0) {
+            if (foundOrigins == 1) {
+                for (AccountBox accountBox : accountBoxes) {
+                    if (accountBox.getClient().getEntityType().isAssignableFrom(entityTypes.iterator().next())) {
+                        return accountBox.getClient().getAccountName();
+                    }
+                }
             }
-        } catch (SynchronizationException e) {
-            LOG.error(e.getMessage());
+            LOG.debug("{} origin is ambiguous", file);
+            return String.format("(%d)", System.currentTimeMillis());
         }
+        LOG.debug("{} origin is Local", file);
+        return "local";
     }
 
-    public IUploader getUploader() {
-        return uploader;
+    public Path getTargetDir() {
+        return targetDir;
     }
 }

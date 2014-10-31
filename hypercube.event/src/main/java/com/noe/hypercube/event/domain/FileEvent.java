@@ -7,18 +7,17 @@ import com.noe.hypercube.event.domain.type.StreamDirection;
 import java.nio.file.Path;
 import java.util.Date;
 
-public class FileEvent implements IEvent {
+public class FileEvent extends AccountActionEvent {
 
     private final Path localPath;
     private final Path remotePath;
     private final Date timeStamp;
-    private final String accountName;
     private FileActionType actionType;
     private StreamDirection direction;
     private FileEventType eventType;
 
     public FileEvent(final String accountName, final Path localPath, final Path remotePath, final FileActionType actionType) {
-        this.accountName = accountName;
+        super(accountName);
         this.localPath = localPath;
         this.remotePath = remotePath;
         this.actionType = actionType;
@@ -64,10 +63,6 @@ public class FileEvent implements IEvent {
 
     public Date getTimeStamp() {
         return timeStamp;
-    }
-
-    public String getAccountName() {
-        return accountName;
     }
 
     public StreamDirection getDirection() {

@@ -50,8 +50,8 @@
                 <Insets left="20" right="20"/>
             </padding>
             <StateInfoLabel prefWidth="120"/>
-            <CloudActivityIcon download="true"/>
-            <CloudActivityIcon download="false"/>
+            <CloudActivityBar download="true"/>
+            <CloudActivityBar download="false"/>
         </HBox>
     </children>
 </fx:root>

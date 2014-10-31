@@ -39,6 +39,7 @@ public class LocalFileMonitor {
 
     public void addObserver(LocalFileObserver observer) {
         fileMonitor.addObserver(observer);
+        LOG.info("Observer has been added to File Monitor - targetfolder: {}", observer.getTargetDir());
     }
 
     public void start() {

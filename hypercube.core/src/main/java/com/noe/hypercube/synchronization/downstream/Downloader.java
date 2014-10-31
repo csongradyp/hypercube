@@ -1,20 +1,18 @@
 package com.noe.hypercube.synchronization.downstream;
 
+import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.FileEntityFactory;
+import com.noe.hypercube.domain.LocalFileEntity;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.FileEvent;
 import com.noe.hypercube.event.domain.type.FileActionType;
 import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.IClient;
-import com.noe.hypercube.synchronization.Action;
 import com.noe.hypercube.synchronization.SynchronizationException;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -25,8 +23,12 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static com.noe.hypercube.synchronization.Action.*;
+import static com.noe.hypercube.Action.*;
+
 
 public class Downloader implements IDownloader {
 
@@ -40,7 +42,7 @@ public class Downloader implements IDownloader {
 
     private AtomicBoolean stop = new AtomicBoolean(false);
 
-    public Downloader(IClient client, IMapper directoryMapper, FileEntityFactory entityFactory, IPersistenceController persistenceController) {
+    public Downloader(final IClient client, final IMapper directoryMapper, final FileEntityFactory entityFactory, final IPersistenceController persistenceController) {
         this.client = client;
         this.persistenceController = persistenceController;
         this.directoryMapper = directoryMapper;
@@ -49,8 +51,28 @@ public class Downloader implements IDownloader {
     }
 
     @Override
-    public void download(ServerEntry entry) {
+    public void run() {
+        while (!stop.get()) {
+            final ServerEntry entry = getNext();
+            LOG.info("{} downloader: {} was taken from queue", entry.getAccount(), entry.getPath() == null ? entry.getId() : entry.getPath());
+            LOG.debug("Download queue: {}", downloadQ);
+            try {
+                if (client.exist(entry)) {
+                    downloadFromServer(entry);
+                } else {
+                    deleteLocalFile(entry);
+                }
+            } catch (SynchronizationException e) {
+                EventBus.publishDownloadFinished(new FileEvent(client.getAccountName(), e.getRelatedFile(), entry.getPath(), FileActionType.FAIL));
+            }
+            logQueueEmpty();
+        }
+    }
+
+    @Override
+    public void download(final ServerEntry entry) {
         downloadQ.add(entry);
+        LOG.info("{} file: {} has been added to the download queue", entry.getAccount(), entry.getPath() == null ? entry.getId() : entry.getPath());
     }
 
     @Override
@@ -71,23 +93,6 @@ public class Downloader implements IDownloader {
         }
     }
 
-    @Override
-    public void run() {
-        while (!stop.get()) {
-            ServerEntry entry = getNext();
-            try {
-                if (client.exist(entry)) {
-                    downloadFromServer(entry);
-                } else {
-                    deleteLocalFile(entry);
-                }
-            } catch (SynchronizationException e) {
-                EventBus.publishDownloadFinished(new FileEvent(client.getAccountName(), e.getRelatedFile(), entry.getPath(), FileActionType.FAIL));
-            }
-            logQueueEmpty();
-        }
-    }
-
     private ServerEntry getNext() {
         ServerEntry entry = null;
         try {
@@ -100,7 +105,7 @@ public class Downloader implements IDownloader {
 
     private void logQueueEmpty() {
         if (downloadQ.isEmpty()) {
-            LOG.info(client.getAccountName() + " download queue is empty. Waiting for changes from server");
+            LOG.info("{} download queue is empty. Waiting for changes from server", client.getAccountName());
         }
     }
 
@@ -113,7 +118,7 @@ public class Downloader implements IDownloader {
         run();
     }
 
-    private Action getDeltaAction(ServerEntry entry, File localPath) {
+    private Action getDeltaAction(final ServerEntry entry, final File localPath) {
         FileEntity fileEntity = persistenceController.get(localPath.toString(), client.getEntityType());
         if (fileEntity != null) {
             if (isDifferentRevision(entry, fileEntity)) {
@@ -124,15 +129,35 @@ public class Downloader implements IDownloader {
         return ADDED;
     }
 
-    private boolean isDifferentRevision(ServerEntry entry, FileEntity dbEntry) {
+    private boolean isDifferentRevision(final ServerEntry entry, final FileEntity dbEntry) {
         return !dbEntry.getRevision().equals(entry.getRevision());
     }
 
-    private void downloadFromServer(ServerEntry entry) throws SynchronizationException {
+    private File createNewLocalFileReference(final ServerEntry entry, final Path localPath) {
+        File newLocalFile = new File(localPath.toString(), entry.getPath().getFileName().toString());
+        if (isConflicted(newLocalFile)) {
+            LOG.warn("{} Conflict {}", client.getAccountName(), newLocalFile);
+            final String conflictedFileName = FileConflictNamingUtil.resolveFileName(entry.getPath(), entry.getAccount());
+            LOG.info("{} already exists! File name updated to: {}", newLocalFile.toPath(), conflictedFileName);
+            newLocalFile = new File(localPath.toString(), conflictedFileName);
+        }
+        return newLocalFile;
+    }
+
+
+    private boolean isConflicted(final File newLocalFile) {
+        return newLocalFile.exists() && isNotMapped(newLocalFile);
+    }
+
+    private boolean isNotMapped(final File newLocalFile) {
+        return persistenceController.get(newLocalFile.toPath().toString(), client.getEntityType()) == null;
+    }
+
+    private void downloadFromServer(final ServerEntry entry) {
         if (entry.isFile()) {
             final List<Path> localPaths = directoryMapper.getLocals(entry.getPath());
             for (Path localPath : localPaths) {
-                File newLocalFile = new File(localPath.toString(), entry.getPath().getFileName().toString());
+                final File newLocalFile = createNewLocalFileReference(entry, localPath);
                 final Action action = getDeltaAction(entry, newLocalFile);
                 final String accountName = client.getAccountName();
                 if (ADDED == action) {
@@ -153,11 +178,9 @@ public class Downloader implements IDownloader {
         }
     }
 
-
-    private void download(ServerEntry entry, File newLocalFile) throws SynchronizationException {
+    private void download(final ServerEntry entry, final File newLocalFile) {
         try (FileOutputStream outputStream = FileUtils.openOutputStream(newLocalFile)) {
             client.download(entry, outputStream);
-            setLocalFileLastModifiedDate(entry, newLocalFile);
             persist(entry, newLocalFile.toPath());
             LOG.info("{} Successfully downloaded {}", client.getAccountName(), newLocalFile.toPath());
         } catch (FileNotFoundException e) {
@@ -167,8 +190,8 @@ public class Downloader implements IDownloader {
         } catch (SynchronizationException e) {
             e.setRelatedFile(newLocalFile.toPath());
             LOG.error(e.getMessage(), e);
-            throw e;
         }
+        setLocalFileLastModifiedDate(entry, newLocalFile);
     }
 
     private void createDirsFor(File newLocalFile) {
@@ -180,7 +203,7 @@ public class Downloader implements IDownloader {
         }
     }
 
-    private void setLocalFileLastModifiedDate(ServerEntry entry, File newLocalFile) {
+    private void setLocalFileLastModifiedDate(final ServerEntry entry, final File newLocalFile) {
         long lastModified = entry.lastModified().getTime();
         boolean success = newLocalFile.setLastModified(lastModified);
         if (!success) {
@@ -188,12 +211,13 @@ public class Downloader implements IDownloader {
         }
     }
 
-    private void persist(ServerEntry entry, Path localPath) {
-        FileEntity fileEntity = entityFactory.createFileEntity(localPath.toString(), entry.getRevision(), entry.lastModified());
+    private void persist(final ServerEntry entry, final Path localPath) {
+        FileEntity fileEntity = entityFactory.createFileEntity(localPath.toString(), entry.getPath().toString(), entry.getRevision(), entry.lastModified());
         persistenceController.save(fileEntity);
+        persistenceController.save(new LocalFileEntity(localPath.toFile()));
     }
 
-    private void deleteLocalFile(ServerEntry entry) {
+    private void deleteLocalFile(final ServerEntry entry) {
         List<Path> localDirs = directoryMapper.getLocals(entry.getPath());
         for (Path localDir : localDirs) {
             final Path localFile = Paths.get(localDir.toString(), entry.getPath().getFileName().toString());
@@ -201,7 +225,7 @@ public class Downloader implements IDownloader {
         }
     }
 
-    private void delete(Path localFile, ServerEntry entry) {
+    private void delete(final Path localFile, final ServerEntry entry) {
         File fileToDelete = localFile.toFile();
         if (fileToDelete.isFile()) {
             try {

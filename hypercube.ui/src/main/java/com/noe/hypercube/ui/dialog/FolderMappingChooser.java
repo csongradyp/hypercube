@@ -27,11 +27,11 @@ public class FolderMappingChooser extends HBox {
         accountChoice.setMinWidth(100.0d);
         folderPath = new TextField();
         folderPath.prefWidthProperty().bind(widthProperty());
-        folderChooserButton = AwesomeDude.createIconButton(AwesomeIcon.FOLDER_OPEN);
+        folderChooserButton = AwesomeDude.createIconButton(AwesomeIcon.FOLDER_ALTPEN);
         getChildren().addAll(accountChoice, folderPath, folderChooserButton);
 
-        validationSupport.registerValidator(folderPath, Validator.createEmptyValidator("Text is required", Severity.WARNING));
-        validationSupport.registerValidator(accountChoice, Validator.createEmptyValidator("Text is required", Severity.WARNING));
+        validationSupport.registerValidator(folderPath, Validator.createEmptyValidator("Text is required", Severity.ERROR));
+        validationSupport.registerValidator(accountChoice, Validator.createEmptyValidator("Text is required", Severity.ERROR));
     }
 
     public void setFolderPath(final Path remoteFolder) {
@@ -41,4 +41,13 @@ public class FolderMappingChooser extends HBox {
     public void setAccount(final String account) {
         accountChoice.getSelectionModel().select(account);
     }
+
+    public String getAccount() {
+        return accountChoice.getSelectionModel().getSelectedItem();
+    }
+
+    public String getFolder() {
+        return folderPath.getText();
+    }
+
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+    <bean id="box.daos" parent="daos" class="com.noe.hypercube.collector.DaoCollector">
+        <constructor-arg>
+            <list merge="true">
+                <bean class="com.noe.hypercube.dao.BoxEntityDao"/>
+                <bean class="com.noe.hypercube.dao.BoxMappingDao"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean parent="accountBoxCollection" class="com.noe.hypercube.collector.AccountBoxCollector">
+        <constructor-arg>
+            <list merge="true">
+                <ref bean="box.AccountBox"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="box.AccountBox" class="com.noe.hypercube.domain.AccountBox">
+        <constructor-arg ref="boxClient"/>
+        <constructor-arg ref="boxDirectoryMapper"/>
+        <constructor-arg ref="boxFileEntityFactory"/>
+        <constructor-arg ref="persistenceController"/>
+    </bean>
+
+    <bean id="boxDirectoryMapper" class="com.noe.hypercube.mapping.BoxDirectoryMapper"/>
+    <bean id="boxFileEntityFactory" class="com.noe.hypercube.domain.BoxFileEntityFactory"/>
+    <bean id="boxClient" class="com.noe.hypercube.service.BoxClientWrapper"/>
+
+</beans>

@@ -26,9 +26,9 @@ public final class AccountBundle {
 
     public static void registerAccount(final String accountName, final BooleanProperty active) {
         Platform.runLater(() -> {
+            HistoryBundle.createSpaceFor(accountName);
             INSTANCE.accounts.add(new AccountInfo(accountName, active));
             INSTANCE.connected.bind(active);
-            HistoryBundle.createSpaceFor(accountName);
         });
     }
 

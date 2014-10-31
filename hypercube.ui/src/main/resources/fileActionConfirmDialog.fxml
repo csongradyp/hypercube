@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.noe.hypercube.ui.factory.FileListCellFactory?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<fx:root type="org.controlsfx.dialog.Dialog" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" resizable="false">
+    <content>
+        <AnchorPane prefHeight="300" prefWidth="550.0">
+            <VBox>
+                <HBox>
+                    <Label text="%dialog.from" prefHeight="30.0" prefWidth="100.0"/>
+                    <Label fx:id="source" prefHeight="30.0" prefWidth="500.0"/>
+                </HBox>
+                <HBox>
+                    <Label text="%dialog.to" prefHeight="30.0" prefWidth="100.0"/>
+                    <Label fx:id="destination" prefHeight="30.0" prefWidth="500.0"/>
+                </HBox>
+                <HBox>
+                    <Label fx:id="selectedItemsText" text="%dialog.selected.items" prefHeight="30.0" prefWidth="110.0" focusTraversable="false"/>
+                    <Label fx:id="itemCount" prefHeight="30.0" prefWidth="100.0"/>
+                </HBox>
+                <ListView fx:id="targetList" prefHeight="200.0">
+                    <cellFactory>
+                        <FileListCellFactory/>
+                    </cellFactory>
+                </ListView>
+            </VBox>
+        </AnchorPane>
+    </content>
+</fx:root>

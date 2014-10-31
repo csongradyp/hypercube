@@ -1,18 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd ">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <jpa:repositories base-package="com.noe.hypercube.dao.repository" />
+    <context:annotation-config />
 
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
         <property name="entityManagerFactory" ref="entityManagerFactory"/>
     </bean>
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="persistenceUnitName" value="myPersistenceUnit"/>
+        <property name="persistenceUnitName" value="hyperPersistenceUnit"/>
+        <property name="sharedCacheMode" value="ALL" />
+        <property name="packagesToScan" value="com.noe.hypercube.domain" />
+        <property name="loadTimeWeaver">
+            <bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/>
+        </property>
         <property name="persistenceUnitManager" ref="persistenceUnitManager"/>
         <property name="jpaPropertyMap">
             <map>
-                <entry key="javax.persistence.jdbc.url" value="objectdb:test.odb"/>
+                <entry key="javax.persistence.jdbc.url" value="objectdb:hyper.db"/>
             </map>
         </property>
     </bean>
@@ -27,6 +37,9 @@
         <property name="persistenceUnitPostProcessors">
             <bean class="com.noe.hypercube.MergingPersistenceUnitPostProcessor"/>
         </property>
+        <property name="defaultPersistenceUnitName" value="hyperPersistenceUnit"/>
     </bean>
+
+    <bean id="localFileEntityDao" class="com.noe.hypercube.dao.LocalFileEntityDao"/>
 
 </beans>

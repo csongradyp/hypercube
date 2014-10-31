@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +37,7 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
     @Override
     public List<Path> getLocals(final Path remotePath) {
         List<MappingEntity> mappedDirectories = getMappedDirectories(remotePath, localDirectoryCollector);
-        List<Path> localDirs = new LinkedList<>();
+        List<Path> localDirs = new ArrayList<>();
         for (MappingEntity mapping : mappedDirectories) {
             Path localDir = convertToLocalPath(remotePath.getParent(), mapping);
             localDirs.add(localDir);
@@ -53,7 +54,7 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
     @Override
     public List<Path> getRemotes(final Path localPath) {
         List<MappingEntity> mappedDirectories = getMappedDirectories(localPath, remoteDirectoryCollector);
-        List<Path> remoteDirs = new LinkedList<>();
+        List<Path> remoteDirs = new ArrayList<>();
         for (MappingEntity mapping : mappedDirectories) {
             Path remoteDir = convertToRemotePath(localPath.getParent(), mapping);
             remoteDirs.add(remoteDir);
@@ -85,4 +86,6 @@ public abstract class DirectoryMapper<ACCOUNT_TYPE extends Account, MAPPING_TYPE
     public void setRemoteDirectoryCollector(final RemoteDirectoryCollector remoteDirectoryCollector) {
         this.remoteDirectoryCollector = remoteDirectoryCollector;
     }
+
+    protected abstract String getAccountName();
 }

@@ -11,8 +11,8 @@ import com.noe.hypercube.ui.domain.file.StepBackFile;
 import com.noe.hypercube.ui.elements.FileListComparator;
 import com.noe.hypercube.ui.factory.FileCellFactory;
 import com.noe.hypercube.ui.factory.IconFactory;
-import com.noe.hypercube.ui.util.DateUtil;
 import com.noe.hypercube.ui.util.FileSizeCalculator;
+import com.noe.hypercube.util.DateUtil;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.application.Platform;
@@ -194,12 +194,13 @@ public class FileTableView extends TableView<IFile> implements Initializable {
             final IFile stepBack = createStepBackFile(currentLocation);
             dirs.add(stepBack);
         } else {
-            final IFile stepBack = createStepBackFile(parentFolder);
-            if (stepBack != null) {
+            if (parentFolder!= null && !parentFolder.toString().isEmpty()) {
+                final IFile stepBack = new StepBackFile(Paths.get("/" + parentFolder.toString()));
                 dirs.add(stepBack);
             }
             for (ServerEntry file : list) {
-                final RemoteFile remoteFile = new RemoteFile(file.getPath(), 0, file.isFolder(), file.lastModified());
+                final Path path = Paths.get(file.getAccount(), file.getPath().toString());
+                final RemoteFile remoteFile = new RemoteFile(path, 0, file.isFolder(), file.lastModified());
                 if (file.isFolder()) {
                     dirs.add(remoteFile);
                 } else {
@@ -220,8 +221,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         final Collection<IFile> dirs = new ArrayList<>(100);
         final IFile previousFolder = new LocalFile(getLocation());
         if (list.isEmpty()) {
-            final Path location1 = getLocation();
-            final IFile stepBack = createStepBackFile(location1);
+            final IFile stepBack = createStepBackFile(getLocation());
             dirs.add(stepBack);
         } else {
             final IFile stepBack = createStepBackFile(parentFolder);
@@ -229,7 +229,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
                 dirs.add(stepBack);
             }
             for (ServerEntry file : list) {
-                final RemoteFile remoteFile = new RemoteFile(file.getPath(), 0, file.isFolder(), file.lastModified());
+                final RemoteFile remoteFile = new RemoteFile(Paths.get(file.getAccount(), file.getPath().toString()), 0, file.isFolder(), file.lastModified());
                 remoteFile.share(file.getAccount());
                 if(getItems().contains(remoteFile)) {
                     final IFile iFile = getItems().filtered(file1 -> file1.equals(remoteFile)).get(0);
@@ -278,7 +278,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         return location.get();
     }
 
-    public void setLocation(Path location) {
+    public void setLocation(final Path location) {
         this.location.set(location);
     }
 }

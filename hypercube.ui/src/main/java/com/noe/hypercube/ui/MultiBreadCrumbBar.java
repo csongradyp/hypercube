@@ -1,8 +1,13 @@
 package com.noe.hypercube.ui;
 
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.domain.MappingRequest;
+import com.noe.hypercube.ui.bundle.AccountBundle;
 import com.noe.hypercube.ui.bundle.PathBundle;
 import com.noe.hypercube.ui.dialog.AddMappingDialog;
+import com.noe.hypercube.ui.domain.account.AccountInfo;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -15,10 +20,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class MultiBreadCrumbBar extends VBox implements Initializable {
@@ -50,18 +52,48 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         remotebreadcrumbs = new HashMap<>();
         localBreadcrumb = new FileBreadCrumbBar();
         localBreadcrumb.setActive(true);
-        localBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapLocalDialog(localBreadcrumb.getLocation()));
+        localBreadcrumb.setOnAddMapping(mouseEvent -> {
+            final Optional<MappingRequest> request = AddMappingDialog.showMapLocalDialog(localBreadcrumb.getLocation());
+            if(request.isPresent()) {
+                EventBus.publish(request.get());
+            }
+        });
         getChildren().add(localBreadcrumb);
         setLocalCrumbActionHandler();
-        final Collection<String> accounts = PathBundle.getAccounts();
-        for (String account : accounts) {
-            final RemoteFileBreadCrumbBar remoteBreadcrumb = new RemoteFileBreadCrumbBar(account);
-            addRemoteCrumbEventHandler(remoteBreadcrumb);
-            remoteBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapRemoteDialog( remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation()));
-            setOnRemoveRemoteMapping(remoteBreadcrumb);
-            remotebreadcrumbs.put(account, remoteBreadcrumb);
-        }
+//        final Collection<String> accounts = AccountBundle.getAccountNames();
+//        for (String account : accounts) {
+//            final RemoteFileBreadCrumbBar remoteBreadcrumb = new RemoteFileBreadCrumbBar(account);
+//            addRemoteCrumbEventHandler(remoteBreadcrumb);
+//            remoteBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapRemoteDialog( remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation()));
+//            setOnRemoveRemoteMapping(remoteBreadcrumb);
+//            remotebreadcrumbs.put(account, remoteBreadcrumb);
+//        }
+        addListenerForAccountChanges();
         localBreadcrumb.activeProperty().bind(remote.not());
+    }
+
+    private void addListenerForAccountChanges() {
+        AccountBundle.getAccounts().addListener((ListChangeListener<AccountInfo>) change -> {
+            while (change.next()) {
+                final List<? extends AccountInfo> addedAccount = change.getAddedSubList();
+                for (AccountInfo account : addedAccount) {
+                    final RemoteFileBreadCrumbBar remoteBreadcrumb = new RemoteFileBreadCrumbBar(account.getName());
+                    addRemoteCrumbEventHandler(remoteBreadcrumb);
+                    remoteBreadcrumb.setOnAddMapping(event -> {
+                        final Optional<MappingRequest> request = AddMappingDialog.showMapRemoteDialog(remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation());
+                        if(request.isPresent()) {
+                            EventBus.publish(request.get());
+                        }
+                    });
+                    setOnRemoveRemoteMapping(remoteBreadcrumb);
+                    remotebreadcrumbs.put(account.getName(), remoteBreadcrumb);
+                }
+                final List<? extends AccountInfo> removedAccount = change.getRemoved();
+                for (AccountInfo account : removedAccount) {
+
+                }
+            }
+        });
     }
 
     private void setOnRemoveRemoteMapping(RemoteFileBreadCrumbBar remoteBreadcrumb) {
@@ -84,12 +116,12 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         });
     }
 
-    public Path getNewRemotePath(final BreadCrumbBar.BreadCrumbActionEvent<String> event, String account) {
+    public Path getNewRemotePath(final BreadCrumbBar.BreadCrumbActionEvent<String> event, final String account) {
         String path = "";
         TreeItem<String> selectedCrumb = event.getSelectedCrumb();
         while (selectedCrumb != null) {
             final String folder = selectedCrumb.getValue();
-            if (folder.equals(account) && selectedCrumb.getParent() != null) {
+            if (isAccountMarkerRootCrumb(account, selectedCrumb)) {
                 path = "/" + path;
             } else {
                 path = folder + "/" + path;
@@ -97,6 +129,10 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
             selectedCrumb = selectedCrumb.getParent();
         }
         return Paths.get(path);
+    }
+
+    private boolean isAccountMarkerRootCrumb(final String account, final TreeItem<String> selectedCrumb) {
+        return selectedCrumb.getValue().equals(account) && selectedCrumb.getParent() != null;
     }
 
     public Path getNewLocalPath(final BreadCrumbBar.BreadCrumbActionEvent<String> event) {
@@ -124,7 +160,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
 
     public void setBreadCrumbs(Path path) {
         setBreadCrumb(path.toString(), localBreadcrumb);
-        final Map<String, String> remoteFolders = PathBundle.getAllFolders(path.toString());
+        final Map<String, String> remoteFolders = PathBundle.getAllRemoteFolders(path.toString());
         getChildren().clear();
         if (path.toFile().exists()) {
             getChildren().add(localBreadcrumb);
@@ -134,8 +170,8 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
             final RemoteFileBreadCrumbBar remoteBreadcrumb = remotebreadcrumbs.get(account);
             final String folderPath = entry.getValue();
             setRemoteBreadCrumb(folderPath, account, remoteBreadcrumb);
-            if(remoteBreadcrumb.isActive()) {
-                getChildren().add(0,remoteBreadcrumb);
+            if (remoteBreadcrumb.isActive()) {
+                getChildren().add(0, remoteBreadcrumb);
             } else {
                 getChildren().add(remoteBreadcrumb);
             }
@@ -143,12 +179,12 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         }
     }
 
-    public void setRemoteBreadCrumbs(String account, Path path) {
+    public void setRemoteBreadCrumbs(final String account, final Path path) {
         final RemoteFileBreadCrumbBar activeAccountCrumb = remotebreadcrumbs.get(account);
         activeAccountCrumb.setActive(true);
         final String crumbPath = path == null || Paths.get(account).equals(path) ? "" : path.toString();
         final String localFolder = PathBundle.getLocalFolder(account, crumbPath);
-        if(isMapped(localFolder)) {
+        if (isMapped(localFolder)) {
             setBreadCrumbs(Paths.get(localFolder));
         } else {
             getChildren().clear();
@@ -180,8 +216,8 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     }
 
     private void setRemoteBreadCrumb(final String path, final String account, final RemoteFileBreadCrumbBar breadcrumb) {
-        String breadcrumbPath = account + path;
-        breadcrumbPath = SLASH_SEPARATOR.matcher(breadcrumbPath).replaceAll("\\\\");
+        final Path pathWithAccount = Paths.get(account, path);
+        final String breadcrumbPath = SLASH_SEPARATOR.matcher(pathWithAccount.toString()).replaceAll("\\\\");
         final TreeItem<String> model = BreadCrumbBar.buildTreeModel(breadcrumbPath.split(SEPARATOR_PATTERN));
         breadcrumb.setSelectedCrumb(model);
     }

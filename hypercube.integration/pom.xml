@@ -39,8 +39,8 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
         </dependency>
         <dependency>
             <groupId>com.noe.hypercube</groupId>
@@ -59,6 +59,11 @@
         </dependency>
         <dependency>
             <groupId>com.noe.hypercube</groupId>
+            <artifactId>hypercube.box</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.noe.hypercube</groupId>
             <artifactId>hypercube.googledrive</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
@@ -71,6 +76,11 @@
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.objectdb</groupId>
+            <artifactId>objectdb</artifactId>
+        </dependency>
+
     </dependencies>
 
 

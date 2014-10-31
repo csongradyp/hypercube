@@ -4,26 +4,25 @@ import com.noe.hypercube.event.domain.FileEvent;
 import com.noe.hypercube.ui.bundle.AccountBundle;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.HistoryBundle;
+import com.noe.hypercube.ui.bundle.ImageBundle;
+import com.noe.hypercube.ui.dialog.BindManagerDialog;
+import com.noe.hypercube.ui.domain.account.AccountInfo;
 import com.noe.hypercube.ui.elements.StateInfoLabel;
-import de.jensd.fx.fontawesome.AwesomeDude;
-import de.jensd.fx.fontawesome.AwesomeIcon;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
-import org.controlsfx.control.SegmentedButton;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+import org.controlsfx.control.SegmentedButton;
 
 public class TrayMenu extends AnchorPane implements Initializable {
 
@@ -39,6 +38,8 @@ public class TrayMenu extends AnchorPane implements Initializable {
     private FileListView fileListView;
     @FXML
     private SegmentedButton accounts;
+    @FXML
+    private Menu languages;
 
     public TrayMenu(Stage stage) {
         ResourceBundle messageBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
@@ -53,49 +54,72 @@ public class TrayMenu extends AnchorPane implements Initializable {
         }
         createAccountButtons();
         show.setOnAction(actionEvent -> stage.show());
-        final Map<String, ObservableList<FileEvent>> lastSyncedFiles = HistoryBundle.getLastSyncedFiles();
-        fileListView.clearAndSet(lastSyncedFiles.get(accounts.getButtons().get(0).getText()));
+        addListenerForAccountChanges();
+    }
+
+    private void addListenerForAccountChanges() {
+        AccountBundle.getAccounts().addListener((ListChangeListener<AccountInfo>) change -> {
+            while (change.next()) {
+                final List<? extends AccountInfo> addedAccount = change.getAddedSubList();
+                final ObservableList<ToggleButton> accountsButtons = accounts.getButtons();
+                for (AccountInfo account : addedAccount) {
+                    if (account.isActive()) {
+                        accountsButtons.add(createAccountButton(account.getName()));
+                        accountsButtons.get(0).fire();
+                    }
+                }
+                final List<? extends AccountInfo> removedAccount = change.getRemoved();
+                for (AccountInfo account : removedAccount) {
+                    accountsButtons.removeIf(toggleButton -> toggleButton.getText().equals(account.getName()));
+                    if (!accountsButtons.isEmpty()) {
+                        accountsButtons.get(0).fire();
+                    }
+                }
+            }
+        });
+    }
+
+    private void createAccountButtons() {
+        final List<String> accountNames = AccountBundle.getAccountNames();
+        final ObservableList<ToggleButton> accountsButtons = accounts.getButtons();
+        for (String account : accountNames) {
+            final ToggleButton accountButton = createAccountButton(account);
+            accountsButtons.add(accountButton);
+        }
+        if(!accountsButtons.isEmpty()) {
+            accountsButtons.get(0).fire();
+        }
+    }
+
+    private ToggleButton createAccountButton(final String account) {
+        final ToggleButton accountButton = new ToggleButton();
+        accountButton.setGraphic(ImageBundle.getAccountImageView(account));
+        accountButton.setFocusTraversable(false);
+        accountButton.setPrefHeight(accounts.getPrefHeight());
+        accountButton.setOnAction(e -> {
+            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(account);
+            fileListView.clearAndSet(fileEvents);
+            accountButton.setSelected(true);
+        });
+        addHistoryChangeListener(account);
+        return accountButton;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         fileListView.setMessageBundle(resourceBundle);
-        initShowButton();
-        initSettingsButton();
-        initExitButton();
+        selectActiveLanguage();
+        settings.setOnMouseClicked(mouseEvent -> settings.getContextMenu().show(getScene().getWindow(), mouseEvent.getScreenX(), mouseEvent.getScreenY()));
     }
 
-    private void initExitButton() {
-        exit.setFocusTraversable(false);
-        AwesomeDude.setIcon(exit, AwesomeIcon.POWER_OFF);
-        exit.setOnAction(actionEvent -> System.exit(0));
-    }
-
-    private void initSettingsButton() {
-        settings.setFocusTraversable(false);
-        AwesomeDude.setIcon(settings, AwesomeIcon.GEAR);
-    }
-
-    private void initShowButton() {
-        show.setFocusTraversable(false);
-        AwesomeDude.setIcon(show, AwesomeIcon.COLUMNS);
-    }
-
-    private void createAccountButtons() {
-        final List<String> accountNames = AccountBundle.getAccountNames();
-        for (String account : accountNames) {
-            final ToggleButton accountButton = new ToggleButton(account);
-            accountButton.setFocusTraversable(false);
-            accountButton.setPrefHeight(accounts.getPrefHeight());
-            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(account);
-            accountButton.setOnAction(e -> {
-                fileListView.clearAndSet(fileEvents);
-                accountButton.setSelected(true);
-            });
-            addHistoryChangeListener(account);
-            accounts.getButtons().add(accountButton);
+    private void selectActiveLanguage() {
+        final String current = ConfigurationBundle.getLanguageLongName();
+        final ObservableList<MenuItem> languageMenuItems = languages.getItems();
+        for (MenuItem languageMenuItem : languageMenuItems) {
+            if (languageMenuItem.getText().equals(current)) {
+                ((CheckMenuItem) languageMenuItem).setSelected(true);
+            }
         }
-        accounts.getButtons().get(0).setSelected(true);
     }
 
     private void addHistoryChangeListener(final String account) {
@@ -121,4 +145,21 @@ public class TrayMenu extends AnchorPane implements Initializable {
         }
         return buttons.get(0);
     }
+
+    @FXML
+    public void onLanguageChange(final ActionEvent event) {
+        final MenuItem menuItem = (MenuItem) event.getSource();
+        ConfigurationBundle.setLanguage(menuItem.getText());
+    }
+
+    @FXML
+    public void onPowerOff() {
+        System.exit(0);
+    }
+
+    @FXML
+    public void onManageBindings() {
+        new BindManagerDialog().show();
+    }
+
 }
