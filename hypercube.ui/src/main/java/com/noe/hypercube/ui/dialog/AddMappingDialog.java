@@ -1,6 +1,6 @@
 package com.noe.hypercube.ui.dialog;
 
-import com.noe.hypercube.event.domain.MappingRequest;
+import com.noe.hypercube.event.domain.request.MappingRequest;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;

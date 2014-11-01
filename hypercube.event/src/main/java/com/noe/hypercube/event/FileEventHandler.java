@@ -1,6 +1,6 @@
 package com.noe.hypercube.event;
 
-import com.noe.hypercube.event.domain.*;
+import com.noe.hypercube.event.domain.request.*;
 
 public interface FileEventHandler {
 

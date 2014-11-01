@@ -2,8 +2,8 @@ package com.noe.hypercube.ui;
 
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
-import com.noe.hypercube.event.domain.FileListRequest;
-import com.noe.hypercube.event.domain.FileListResponse;
+import com.noe.hypercube.event.domain.request.FileListRequest;
+import com.noe.hypercube.event.domain.response.FileListResponse;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.domain.file.IFile;
 import com.noe.hypercube.ui.domain.file.LocalFile;
@@ -90,7 +90,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
                 if (isRemote()) {
                     waitForResponce = true;
                     final IFile folder = table.getSelectionModel().getSelectedItem();
-                    EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getEventPath(newFolder), previousFolder));
+                    EventBus.publish(new FileListRequest(hashCode(), remoteDrives.getActiveAccount(), getEventPath(newFolder), previousFolder));
                 } else {
                     waitForResponce = false;
                     multiBreadCrumbBar.setAllRemoteCrumbsInactive();
@@ -139,7 +139,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         final Path location = getLocation();
         if (isRemote()) {
             waitForResponce = true;
-            EventBus.publish(new FileListRequest(remoteDrives.getActiveAccount(), getEventPath(location), null));
+            EventBus.publish(new FileListRequest(hashCode(), remoteDrives.getActiveAccount(), getEventPath(location), null));
         } else {
             table.setLocalFileList(location, null);
         }
@@ -324,8 +324,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     @Override
     @Handler(rejectSubtypes = true)
     public void onEvent(FileListResponse event) {
-        if (isRemote() && waitForResponce) {
-            waitForResponce = false;
+        if (isRemote() && isTarget(event)) {
             Platform.runLater(() -> {
                 if (event.isCloud()) {
                     multiBreadCrumbBar.setCloudBreadCrumbs(event.getAccount());
@@ -337,6 +336,10 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
                 driveSpaceBar.update(event.getQuotaInfo());
             });
         }
+    }
+
+    private boolean isTarget(FileListResponse event) {
+        return event.getTarget().equals(hashCode());
     }
 
     public SimpleBooleanProperty remoteProperty() {

@@ -4,11 +4,9 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
-import org.apache.log4j.Logger;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import org.apache.log4j.Logger;
 
 public class DriveDirectoryUtil {
 
@@ -132,6 +130,10 @@ public class DriveDirectoryUtil {
      * @throws java.io.IOException
      */
     public List<ParentReference> createFoldersPath(String... directories) throws IOException {
+        return createFoldersPath(Arrays.asList(directories));
+    }
+
+    public List<ParentReference> createFoldersPath(Iterable<String> directories) throws IOException {
         List<ParentReference> listParentReference = new ArrayList<>();
         File folder = null;
         for (String dirName : directories) {
