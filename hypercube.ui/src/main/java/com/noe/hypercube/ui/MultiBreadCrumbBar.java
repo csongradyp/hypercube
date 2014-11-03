@@ -117,22 +117,8 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     }
 
     public Path getNewRemotePath(final BreadCrumbBar.BreadCrumbActionEvent<String> event, final String account) {
-        String path = "";
-        TreeItem<String> selectedCrumb = event.getSelectedCrumb();
-        while (selectedCrumb != null) {
-            final String folder = selectedCrumb.getValue();
-            if (isAccountMarkerRootCrumb(account, selectedCrumb)) {
-                path = "/" + path;
-            } else {
-                path = folder + "/" + path;
-            }
-            selectedCrumb = selectedCrumb.getParent();
-        }
-        return Paths.get(path);
-    }
-
-    private boolean isAccountMarkerRootCrumb(final String account, final TreeItem<String> selectedCrumb) {
-        return selectedCrumb.getValue().equals(account) && selectedCrumb.getParent() != null;
+        final RemoteFileBreadCrumbBar remoteFileBreadCrumbBar = remotebreadcrumbs.get(account);
+        return remoteFileBreadCrumbBar.getPath(event);
     }
 
     public Path getNewLocalPath(final BreadCrumbBar.BreadCrumbActionEvent<String> event) {

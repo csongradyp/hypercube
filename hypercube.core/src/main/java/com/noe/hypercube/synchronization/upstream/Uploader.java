@@ -46,13 +46,13 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
     @Override
     public void uploadNew(final UploadEntity uploadEntity) throws SynchronizationException {
         final Path remoteFilePath = uploadEntity.getRemoteFilePath();
-        if (client.exist(uploadEntity)) {
-            LOG.error("{} conflict - File already exists on server: {}", client.getAccountName(), remoteFilePath.toString());
-            uploadEntity.setConflicted(true);
-        }
         if (isMapped(uploadEntity.getFile())) {
             LOG.info("file {} already mapped - cannot be new. Upload cancelled", uploadEntity.getFile());
         } else {
+            if (client.exist(uploadEntity)) {
+                LOG.error("{} conflict - File already exists on server: {}", client.getAccountName(), remoteFilePath.toString());
+                uploadEntity.setConflicted(true);
+            }
             upload(uploadEntity, ADDED);
         }
     }
@@ -68,7 +68,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
         if (client.exist(uploadEntity) && isNewer(fileToUpload)) {
             upload(uploadEntity, CHANGED);
         } else {
-            LOG.debug("{} inconsistency - Remote file '{}' is fresher than the local one: {}", client.getAccountName(), remoteFolder.toString(), fileToUpload.toPath());
+            LOG.debug("{} inconsistency - Remote file in folder '{}' is fresher than the local one: {}", client.getAccountName(), remoteFolder.toString(), fileToUpload.toPath());
         }
     }
 

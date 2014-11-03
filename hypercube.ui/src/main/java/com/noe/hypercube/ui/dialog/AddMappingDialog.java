@@ -14,7 +14,6 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
-import javafx.util.Callback;
 import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
@@ -57,14 +56,11 @@ public class AddMappingDialog extends Dialog<MappingRequest> implements Initiali
         }
         setTitle(bundle.getString("dialog.mapping.add.title"));
         setResizable(true);
-        setResultConverter(new Callback<ButtonType, MappingRequest>() {
-            @Override
-            public MappingRequest call(ButtonType param) {
-                if(ButtonBar.ButtonData.OK_DONE == param.getButtonData()) {
-                    return createMappingRequest();
-                }
-                return null;
+        setResultConverter(param -> {
+            if (ButtonBar.ButtonData.OK_DONE == param.getButtonData()) {
+                return createMappingRequest();
             }
+            return null;
         });
     }
 
@@ -107,7 +103,7 @@ public class AddMappingDialog extends Dialog<MappingRequest> implements Initiali
         final Node bindButton = buttonBar.getButtons().get(0);
         bindButton.setDisable(true);
         validationSupport.validationResultProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue.getErrors().isEmpty() && newValue.getWarnings().isEmpty()) {
+            if (newValue.getErrors().isEmpty() && newValue.getWarnings().isEmpty()) {
                 bindButton.setDisable(false);
             } else {
                 bindButton.setDisable(true);
@@ -140,7 +136,7 @@ public class AddMappingDialog extends Dialog<MappingRequest> implements Initiali
         final MappingRequest mappingRequest = new MappingRequest(Paths.get(localFolder.getText()));
         final ObservableList<Node> remoteMappingChoosers = remoteMappings.getChildren();
         for (Node remoteMappingChooser : remoteMappingChoosers) {
-            if(FolderMappingChooser.class.isAssignableFrom(remoteMappingChooser.getClass())) {
+            if (FolderMappingChooser.class.isAssignableFrom(remoteMappingChooser.getClass())) {
                 FolderMappingChooser mappingChooser = (FolderMappingChooser) remoteMappingChooser;
                 final String account = mappingChooser.getAccount();
                 final String remoteFolder = mappingChooser.getFolder();

@@ -66,11 +66,11 @@ public class FileBreadCrumbBar extends HBox {
         if (isActive) {
             setActiveStyle(breadCrumbButton);
         } else {
-            setIncativeStyle(breadCrumbButton);
+            setInactiveStyle(breadCrumbButton);
         }
     }
 
-    private void setIncativeStyle(final BreadCrumbBarSkin.BreadCrumbButton breadCrumbButton) {
+    private void setInactiveStyle(final BreadCrumbBarSkin.BreadCrumbButton breadCrumbButton) {
         breadCrumbButton.setStyle("-fx-font: 11 System;");
     }
 
@@ -126,5 +126,9 @@ public class FileBreadCrumbBar extends HBox {
 
     public SimpleBooleanProperty activeProperty() {
         return active;
+    }
+
+    public void removeMappingButton() {
+        getChildren().remove(mappingButton);
     }
 }

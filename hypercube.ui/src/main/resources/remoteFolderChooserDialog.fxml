@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+<fx:root type="javafx.scene.control.Dialog" resizable="true" title="%dialog.sync.title" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <dialogPane>
+        <DialogPane prefHeight="400.0" prefWidth="600.0" stylesheets="style/HyperCubeTableView.css">
+            <content>
+                <VBox fx:id="content" spacing="5">
+                    <ListView fx:id="folderListView" onKeyPressed="#onKeyPressed" VBox.vgrow="ALWAYS"/>
+                </VBox>
+            </content>
+        </DialogPane>
+    </dialogPane>
+</fx:root>

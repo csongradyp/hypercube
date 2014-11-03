@@ -190,7 +190,7 @@ public final class EventBus {
         instance.storageEventBus.unsubscribe(handler);
     }
 
-    public static void unsubscribeToFileListResponse(EventHandler<FileEvent> handler) {
+    public static void unsubscribeToFileListResponse(EventHandler<FileListResponse> handler) {
         instance.fileListResponseBus.unsubscribe(handler);
     }
 

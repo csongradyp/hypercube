@@ -4,6 +4,9 @@ import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.tray.HypercubeTrayIcon;
 import impl.org.controlsfx.i18n.Localization;
+import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -12,10 +15,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 import static javafx.scene.layout.AnchorPane.*;
 
