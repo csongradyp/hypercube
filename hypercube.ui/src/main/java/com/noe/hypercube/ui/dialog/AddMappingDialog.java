@@ -57,7 +57,7 @@ public class AddMappingDialog extends Dialog<MappingRequest> implements Initiali
         setTitle(bundle.getString("dialog.mapping.add.title"));
         setResizable(true);
         setResultConverter(param -> {
-            if (ButtonBar.ButtonData.OK_DONE == param.getButtonData()) {
+            if(ButtonBar.ButtonData.OK_DONE == param.getButtonData()) {
                 return createMappingRequest();
             }
             return null;
@@ -87,7 +87,7 @@ public class AddMappingDialog extends Dialog<MappingRequest> implements Initiali
         setupAddMappingChooserButton();
         validationSupport.registerValidator(localFolder, true, Validator.createEmptyValidator("Text is required", Severity.ERROR));
 //        ValidationSupport.setRequired(localFolder, true);
-//        validationSupport.validationResultProperty().addListener( (o, oldValue, newValue) ->  messageList.getItems().setAll(newValue.getMessages()));
+//        validationSupport.validationResultProperty().addListener( (o, oldValue, newValue) ->  messageList.etItems().setAll(newValue.getMessages()));
         addValidationListener();
         getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
         initialRemoteMappingChooser = new FolderMappingChooser(validationSupport);
@@ -103,7 +103,7 @@ public class AddMappingDialog extends Dialog<MappingRequest> implements Initiali
         final Node bindButton = buttonBar.getButtons().get(0);
         bindButton.setDisable(true);
         validationSupport.validationResultProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.getErrors().isEmpty() && newValue.getWarnings().isEmpty()) {
+            if(newValue.getErrors().isEmpty() && newValue.getWarnings().isEmpty()) {
                 bindButton.setDisable(false);
             } else {
                 bindButton.setDisable(true);
@@ -136,7 +136,7 @@ public class AddMappingDialog extends Dialog<MappingRequest> implements Initiali
         final MappingRequest mappingRequest = new MappingRequest(Paths.get(localFolder.getText()));
         final ObservableList<Node> remoteMappingChoosers = remoteMappings.getChildren();
         for (Node remoteMappingChooser : remoteMappingChoosers) {
-            if (FolderMappingChooser.class.isAssignableFrom(remoteMappingChooser.getClass())) {
+            if(FolderMappingChooser.class.isAssignableFrom(remoteMappingChooser.getClass())) {
                 FolderMappingChooser mappingChooser = (FolderMappingChooser) remoteMappingChooser;
                 final String account = mappingChooser.getAccount();
                 final String remoteFolder = mappingChooser.getFolder();

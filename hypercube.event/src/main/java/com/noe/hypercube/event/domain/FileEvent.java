@@ -37,6 +37,10 @@ public class FileEvent extends AccountActionEvent {
         eventType = FileEventType.FINISHED;
     }
 
+    public void setFailed() {
+        eventType = FileEventType.FAILED;
+    }
+
     public Boolean isStarted() {
         return eventType == FileEventType.STARTED;
     }
@@ -47,6 +51,10 @@ public class FileEvent extends AccountActionEvent {
 
     public Boolean isFinished() {
         return eventType == FileEventType.FINISHED;
+    }
+
+    public Boolean isFailed() {
+        return eventType == FileEventType.FAILED;
     }
 
     public FileActionType getActionType() {

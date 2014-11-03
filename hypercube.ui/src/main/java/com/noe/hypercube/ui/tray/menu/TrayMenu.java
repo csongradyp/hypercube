@@ -8,8 +8,11 @@ import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.dialog.BindManagerDialog;
 import com.noe.hypercube.ui.domain.account.AccountInfo;
 import com.noe.hypercube.ui.elements.StateInfoLabel;
+import com.noe.hypercube.ui.tray.menu.list.FileListView;
+import com.noe.hypercube.ui.tray.menu.list.TrayFileListItem;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -35,14 +38,15 @@ public class TrayMenu extends AnchorPane implements Initializable {
     @FXML
     private Button settings;
     @FXML
-    private FileListView fileListView;
+    private FileListView<TrayFileListItem> fileListView;
     @FXML
     private SegmentedButton accounts;
     @FXML
     private Menu languages;
+    private final ResourceBundle messageBundle;
 
     public TrayMenu(Stage stage) {
-        ResourceBundle messageBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
+        messageBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("trayMenu.fxml"));
         fxmlLoader.setResources(messageBundle);
         fxmlLoader.setRoot(this);
@@ -52,7 +56,6 @@ public class TrayMenu extends AnchorPane implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        createAccountButtons();
         show.setOnAction(actionEvent -> stage.show());
         addListenerForAccountChanges();
     }
@@ -61,34 +64,21 @@ public class TrayMenu extends AnchorPane implements Initializable {
         AccountBundle.getAccounts().addListener((ListChangeListener<AccountInfo>) change -> {
             while (change.next()) {
                 final List<? extends AccountInfo> addedAccount = change.getAddedSubList();
-                final ObservableList<ToggleButton> accountsButtons = accounts.getButtons();
                 for (AccountInfo account : addedAccount) {
                     if (account.isActive()) {
-                        accountsButtons.add(createAccountButton(account.getName()));
-                        accountsButtons.get(0).fire();
+                        accounts.getButtons().add(createAccountButton(account.getName()));
+                        accounts.getButtons().get(0).fire();
                     }
                 }
                 final List<? extends AccountInfo> removedAccount = change.getRemoved();
                 for (AccountInfo account : removedAccount) {
-                    accountsButtons.removeIf(toggleButton -> toggleButton.getText().equals(account.getName()));
-                    if (!accountsButtons.isEmpty()) {
-                        accountsButtons.get(0).fire();
+                    accounts.getButtons().removeIf(toggleButton -> toggleButton.getText().equals(account.getName()));
+                    if (!accounts.getButtons().isEmpty()) {
+                        accounts.getButtons().get(0).fire();
                     }
                 }
             }
         });
-    }
-
-    private void createAccountButtons() {
-        final List<String> accountNames = AccountBundle.getAccountNames();
-        final ObservableList<ToggleButton> accountsButtons = accounts.getButtons();
-        for (String account : accountNames) {
-            final ToggleButton accountButton = createAccountButton(account);
-            accountsButtons.add(accountButton);
-        }
-        if(!accountsButtons.isEmpty()) {
-            accountsButtons.get(0).fire();
-        }
     }
 
     private ToggleButton createAccountButton(final String account) {
@@ -98,16 +88,24 @@ public class TrayMenu extends AnchorPane implements Initializable {
         accountButton.setPrefHeight(accounts.getPrefHeight());
         accountButton.setOnAction(e -> {
             final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(account);
-            fileListView.clearAndSet(fileEvents);
+            fileListView.clearAndSet(createListItems(fileEvents));
             accountButton.setSelected(true);
         });
         addHistoryChangeListener(account);
         return accountButton;
     }
 
+    private List<TrayFileListItem> createListItems(ObservableList<FileEvent> fileEvents) {
+        final List<TrayFileListItem> trayFileListItems = new ArrayList<TrayFileListItem>(fileEvents.size());
+        for (FileEvent fileEvent : fileEvents) {
+            trayFileListItems.add(new TrayFileListItem(fileEvent, messageBundle));
+        }
+        return trayFileListItems;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        fileListView.setMessageBundle(resourceBundle);
+        fileListView.setLimit(6);
         selectActiveLanguage();
         settings.setOnMouseClicked(mouseEvent -> settings.getContextMenu().show(getScene().getWindow(), mouseEvent.getScreenX(), mouseEvent.getScreenY()));
     }
@@ -129,7 +127,7 @@ public class TrayMenu extends AnchorPane implements Initializable {
                 final List<? extends FileEvent> addedSubList = change.getAddedSubList();
                 for (FileEvent fileEvent : addedSubList) {
                     if (change.wasAdded() && getSelectedButton(accounts).getText().equals(account)) {
-                        fileListView.add(fileEvent);
+                        fileListView.add(new TrayFileListItem(fileEvent, messageBundle));
                     }
                 }
             }

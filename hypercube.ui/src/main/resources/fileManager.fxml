@@ -9,8 +9,7 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.*?>
 <?import org.controlsfx.control.HiddenSidesPane?>
-<fx:root type="javafx.scene.layout.VBox" VBox.vgrow="ALWAYS" prefHeight="400.0" prefWidth="800.0" stylesheets="style/status.css" xmlns="http://javafx.com/javafx/8"
-         xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="javafx.scene.layout.VBox" VBox.vgrow="ALWAYS" prefHeight="400.0" prefWidth="800.0" stylesheets="style/status.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HiddenSidesPane fx:id="doubleView" focusTraversable="false" triggerDistance="20.0" VBox.vgrow="ALWAYS">
             <content>

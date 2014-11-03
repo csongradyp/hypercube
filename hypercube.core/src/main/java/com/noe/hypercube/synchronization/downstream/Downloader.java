@@ -63,7 +63,7 @@ public class Downloader implements IDownloader {
                     deleteLocalFile(entry);
                 }
             } catch (SynchronizationException e) {
-                EventBus.publishDownloadFinished(new FileEvent(client.getAccountName(), e.getRelatedFile(), entry.getPath(), FileActionType.FAIL));
+                EventBus.publishDownloadFailed(new FileEvent(client.getAccountName(), e.getRelatedFile(), entry.getPath(), FileActionType.ADDED));
             }
             logQueueEmpty();
         }

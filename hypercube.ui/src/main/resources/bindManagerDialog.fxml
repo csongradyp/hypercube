@@ -6,7 +6,7 @@
 <?import com.noe.hypercube.ui.elements.AccountSegmentedButton?>
 <fx:root type="javafx.scene.control.Dialog" title="%dialog.mapping.add.title" resizable="false" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <dialogPane>
-        <DialogPane minWidth="300.0" minHeight="250.0">
+        <DialogPane minWidth="300.0" minHeight="250.0" stylesheets="style/HyperCubeListView.css">
             <content>
                 <AnchorPane prefHeight="400.0" prefWidth="600.0">
                     <VBox alignment="BOTTOM_LEFT" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

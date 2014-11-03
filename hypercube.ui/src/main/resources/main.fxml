@@ -6,31 +6,38 @@
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane fx:id="commander" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.noe.hypercube.ui.Controller">
-    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
+    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+        <ToolBar id="buttonBox" focusTraversable="false" prefHeight="30.0" prefWidth="800.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+            <Button fx:id="refresh" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false">
+                <graphic>
+                    <Icon awesomeIcon="REFRESH" size="14"/>
+                </graphic>
+            </Button>
+            <Separator orientation="VERTICAL" prefHeight="20.0"/>
+            <Button onAction="#onShowSyncView" mnemonicParsing="false" textAlignment="CENTER" focusTraversable="false">
+                <graphic>
+                    <StackPane alignment="CENTER">
+                        <Icon awesomeIcon="CLOUD" size="16" style="" styleClass=""/>
+                        <Icon awesomeIcon="EXCHANGE" size="8" style="-fx-text-fill: lightgrey;" styleClass="" rotate="90.0"/>
+                    </StackPane>
+                </graphic>
+            </Button>
+            <Button onAction="#onManageBindings" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false">
+                <graphic>
+                    <Icon awesomeIcon="CHAIN" size="14"/>
+                </graphic>
+                <tooltip>
+                    <Tooltip text="%menu.bind.manage"/>
+                </tooltip>
+            </Button>
+            <Button mnemonicParsing="false" prefHeight="20.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
+        </ToolBar>
         <FileManager fx:id="fileManager"/>
     </VBox>
-    <ToolBar id="buttonBox" focusTraversable="false" prefHeight="25.0" prefWidth="800.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
-        <Button fx:id="refresh" mnemonicParsing="false" prefHeight="20.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false">
-            <graphic>
-                <Icon awesomeIcon="REFRESH" size="15"/>
-            </graphic>
-        </Button>
-        <Separator orientation="VERTICAL" prefHeight="20.0"/>
-        <Button fx:id="queue" onAction="#onShowSyncView" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
-        <Button onAction="#onManageBindings" mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false">
-            <graphic>
-                <Icon awesomeIcon="CHAIN" size="15"/>
-            </graphic>
-            <tooltip>
-                <Tooltip text="%menu.bind.manage" />
-            </tooltip>
-        </Button>
-        <Button mnemonicParsing="false" prefHeight="10.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false"/>
-    </ToolBar>
     <MenuBar maxHeight="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" stylesheets="style/HyperCubeMenu.css">
         <Menu mnemonicParsing="false" text="%menu.file">
             <graphic>
-                <Icon awesomeIcon="BARS" size="15"/>
+                <Icon awesomeIcon="BARS" size="14"/>
             </graphic>
             <MenuItem onAction="#onClose" mnemonicParsing="false" text="%menu.file.close">
                 <graphic>
@@ -63,10 +70,8 @@
             <MenuItem fx:id="addConnection" mnemonicParsing="false" text="%menu.cloud.add">
                 <graphic>
                     <StackPane alignment="BOTTOM_LEFT">
-                        <children>
-                            <Icon awesomeIcon="CLOUD" style="-fx-text-fill: lightsteelblue" styleClass="" size="15"/>
-                            <Icon awesomeIcon="PLUS" size="10"/>
-                        </children>
+                        <Icon awesomeIcon="CLOUD" style="-fx-text-fill: lightsteelblue" styleClass="" size="15"/>
+                        <Icon awesomeIcon="PLUS" size="10"/>
                     </StackPane>
                 </graphic>
                 <accelerator>
