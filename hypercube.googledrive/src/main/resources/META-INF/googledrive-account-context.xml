@@ -13,30 +13,23 @@
         </constructor-arg>
     </bean>
 
-    <bean id="drive.clients" parent="clients" class="com.noe.hypercube.collector.ClientCollector">
+    <bean parent="accountBoxCollection" class="com.noe.hypercube.collector.AccountBoxCollector">
         <constructor-arg>
-            <list>
-                <ref bean="driveClient"/>
+            <list merge="true">
+                <ref bean="drive.AccountBox"/>
             </list>
         </constructor-arg>
     </bean>
 
-    <bean id="drive.mappers" parent="mappers" class="com.noe.hypercube.collector.MapperCollector">
-        <constructor-arg>
-            <list>
-                <bean class="com.noe.hypercube.googledrive.mapping.DriveDirectoryMapper" />
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="drive.entityFactories" parent="entityFactories" class="com.noe.hypercube.collector.EntityFactoryCollector">
-        <constructor-arg>
-            <list>
-                <bean class="com.noe.hypercube.googledrive.domain.DriveFileEntityFactory" />
-            </list>
-        </constructor-arg>
+    <bean id="drive.AccountBox" class="com.noe.hypercube.domain.AccountBox">
+        <constructor-arg ref="driveClient"/>
+        <constructor-arg ref="driveDirectoryMapper"/>
+        <constructor-arg ref="driveFileEntityFactory"/>
+        <constructor-arg ref="persistenceController"/>
     </bean>
 
     <bean id="driveClient" class="com.noe.hypercube.googledrive.service.DriveClient" />
+    <bean id="driveDirectoryMapper" class="com.noe.hypercube.googledrive.mapping.DriveDirectoryMapper" />
+    <bean id="driveFileEntityFactory" class="com.noe.hypercube.googledrive.domain.DriveFileEntityFactory" />
 
 </beans>
