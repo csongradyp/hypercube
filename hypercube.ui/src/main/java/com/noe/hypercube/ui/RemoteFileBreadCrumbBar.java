@@ -2,9 +2,12 @@ package com.noe.hypercube.ui;
 
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import impl.org.controlsfx.skin.BreadCrumbBarSkin;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javafx.geometry.Insets;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
+import org.controlsfx.control.BreadCrumbBar;
 
 public class RemoteFileBreadCrumbBar extends FileBreadCrumbBar {
 
@@ -40,6 +43,21 @@ public class RemoteFileBreadCrumbBar extends FileBreadCrumbBar {
 
     private boolean isAccountRoot(TreeItem<String> crumb) {
         return crumb.getValue().equals(account) && crumb.getParent() == null;
+    }
+
+    public Path getPath(final BreadCrumbBar.BreadCrumbActionEvent<String> event) {
+        String path = "";
+        TreeItem<String> selectedCrumb = event.getSelectedCrumb();
+        while (selectedCrumb != null) {
+            final String folder = selectedCrumb.getValue();
+            if (isAccountRoot(selectedCrumb)) {
+                path = "/" + path;
+            } else {
+                path = folder + "/" + path;
+            }
+            selectedCrumb = selectedCrumb.getParent();
+        }
+        return Paths.get(path);
     }
 
     private ImageView getAccountImage() {

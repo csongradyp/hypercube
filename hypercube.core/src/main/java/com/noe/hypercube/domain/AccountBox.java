@@ -4,7 +4,8 @@ import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.FileEventHandler;
-import com.noe.hypercube.event.domain.*;
+import com.noe.hypercube.event.domain.request.*;
+import com.noe.hypercube.event.domain.response.FileListResponse;
 import com.noe.hypercube.event.dto.RemoteQuotaInfo;
 import com.noe.hypercube.mapping.IMapper;
 import com.noe.hypercube.service.Account;
@@ -110,7 +111,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
                 } else {
                     fileList = client.getFileList(normalizeToRequest(remoteFolder));
                 }
-                EventBus.publish(new FileListResponse(client.getAccountName(), event.getPreviousFolder(), remoteFolder, fileList, getRemoteQuotaInfo()));
+                EventBus.publish(new FileListResponse(event.getTarget(), client.getAccountName(), event.getPreviousFolder(), remoteFolder, fileList, getRemoteQuotaInfo()));
             } catch (SynchronizationException e) {
                 e.printStackTrace();
             }
@@ -145,7 +146,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
             final Path remoteFolder = event.getBaseFolder();
             final Path folder = Paths.get(remoteFolder.toString(), event.getFolderName());
             client.createFolder(folder);
-            EventBus.publish(new FileListResponse(client.getAccountName(), null, remoteFolder, client.getFileList(remoteFolder), getRemoteQuotaInfo()));
+            EventBus.publish(new FileListResponse(event.getTarget(), client.getAccountName(), null, remoteFolder, client.getFileList(remoteFolder), getRemoteQuotaInfo()));
         } catch (SynchronizationException e) {
             //TODO send fail message
         }

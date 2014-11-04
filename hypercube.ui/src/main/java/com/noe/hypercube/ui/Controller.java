@@ -3,6 +3,7 @@ package com.noe.hypercube.ui;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.dialog.AddMappingDialog;
 import com.noe.hypercube.ui.dialog.BindManagerDialog;
+import com.noe.hypercube.ui.dialog.SynchronizationViewDialog;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -44,8 +45,8 @@ public class Controller implements Initializable {
 
     @FXML
     public void onShowSyncView() {
+        new SynchronizationViewDialog().show();
     }
-
 
     @FXML
     public void onManageBindings() {

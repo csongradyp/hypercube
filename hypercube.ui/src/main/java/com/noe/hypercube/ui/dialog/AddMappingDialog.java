@@ -1,6 +1,6 @@
 package com.noe.hypercube.ui.dialog;
 
-import com.noe.hypercube.event.domain.MappingRequest;
+import com.noe.hypercube.event.domain.request.MappingRequest;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
@@ -14,7 +14,6 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
-import javafx.util.Callback;
 import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
@@ -57,14 +56,11 @@ public class AddMappingDialog extends Dialog<MappingRequest> implements Initiali
         }
         setTitle(bundle.getString("dialog.mapping.add.title"));
         setResizable(true);
-        setResultConverter(new Callback<ButtonType, MappingRequest>() {
-            @Override
-            public MappingRequest call(ButtonType param) {
-                if(ButtonBar.ButtonData.OK_DONE == param.getButtonData()) {
-                    return createMappingRequest();
-                }
-                return null;
+        setResultConverter(param -> {
+            if(ButtonBar.ButtonData.OK_DONE == param.getButtonData()) {
+                return createMappingRequest();
             }
+            return null;
         });
     }
 
@@ -91,7 +87,7 @@ public class AddMappingDialog extends Dialog<MappingRequest> implements Initiali
         setupAddMappingChooserButton();
         validationSupport.registerValidator(localFolder, true, Validator.createEmptyValidator("Text is required", Severity.ERROR));
 //        ValidationSupport.setRequired(localFolder, true);
-//        validationSupport.validationResultProperty().addListener( (o, oldValue, newValue) ->  messageList.getItems().setAll(newValue.getMessages()));
+//        validationSupport.validationResultProperty().addListener( (o, oldValue, newValue) ->  messageList.etItems().setAll(newValue.getMessages()));
         addValidationListener();
         getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
         initialRemoteMappingChooser = new FolderMappingChooser(validationSupport);

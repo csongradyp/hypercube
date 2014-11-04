@@ -1,7 +1,7 @@
 package com.noe.hypercube.ui.dialog;
 
 import com.noe.hypercube.event.EventBus;
-import com.noe.hypercube.event.domain.MappingRequest;
+import com.noe.hypercube.event.domain.request.MappingRequest;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.PathBundle;
 import com.noe.hypercube.ui.elements.AccountSegmentedButton;

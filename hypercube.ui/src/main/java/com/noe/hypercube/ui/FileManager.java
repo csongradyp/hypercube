@@ -2,7 +2,11 @@ package com.noe.hypercube.ui;
 
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
-import com.noe.hypercube.event.domain.*;
+import com.noe.hypercube.event.domain.JumpToFileEvent;
+import com.noe.hypercube.event.domain.request.CreateFolderRequest;
+import com.noe.hypercube.event.domain.request.DeleteRequest;
+import com.noe.hypercube.event.domain.request.DownloadRequest;
+import com.noe.hypercube.event.domain.request.UploadRequest;
 import com.noe.hypercube.ui.action.FileAction;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.dialog.FileActionConfirmDialog;
@@ -375,7 +379,7 @@ public class FileManager extends VBox implements Initializable, EventHandler<Jum
                     Dialogs.create().message(resources.getString("dialog.newfolder.fail")).showError();
                 }
             } else if (NEW_CLOUD_FOLDER == action) {
-                EventBus.publish(new CreateFolderRequest(getAccount(location), getEventPath(location), folderName.get()));
+                EventBus.publish(new CreateFolderRequest(getActiveFileView().hashCode(), getAccount(location), getEventPath(location), folderName.get()));
             }
         }
     }

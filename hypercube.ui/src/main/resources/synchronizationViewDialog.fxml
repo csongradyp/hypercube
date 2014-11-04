@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.fontawesome.Icon?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.controlsfx.control.SegmentedButton?>
+<fx:root type="javafx.scene.control.Dialog" resizable="true" title="%dialog.sync.title" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <dialogPane>
+        <DialogPane prefHeight="600.0" prefWidth="600.0" stylesheets="style/HyperCubeListView.css">
+            <content>
+                <VBox>
+                    <SegmentedButton fx:id="changeViewButtons" minWidth="400.0">
+                        <buttons>
+                            <ToggleButton text="%button.backlog" onAction="#onShowBacklog" mnemonicParsing="false" prefHeight="25.0"  focusTraversable="false">
+                                <graphic>
+                                    <Icon awesomeIcon="EXCHANGE" size="15" rotate="90.0"/>
+                                </graphic>
+                            </ToggleButton>
+                            <ToggleButton text="%button.history" onAction="#onShowHistory" mnemonicParsing="false" prefHeight="25.0" focusTraversable="false">
+                                <graphic>
+                                    <Icon awesomeIcon="HISTORY" size="15"/>
+                                </graphic>
+                            </ToggleButton>
+                            <ToggleButton text="%button.failed" onAction="#onShowFailed" mnemonicParsing="false" prefHeight="25.0" focusTraversable="false">
+                                <graphic>
+                                    <Icon awesomeIcon="EXCLAMATION_TRIANGLE" size="15"/>
+                                </graphic>
+                            </ToggleButton>
+                        </buttons>
+                    </SegmentedButton>
+                    <Label fx:id="title" style="-fx-font: 18px Sans-serif;" prefHeight="50.0" prefWidth="400.0" textAlignment="CENTER" VBox.vgrow="NEVER"/>
+                    <AnchorPane fx:id="content" prefHeight="375.0" prefWidth="600.0" VBox.vgrow="ALWAYS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                </VBox>
+            </content>
+        </DialogPane>
+    </dialogPane>
+</fx:root>

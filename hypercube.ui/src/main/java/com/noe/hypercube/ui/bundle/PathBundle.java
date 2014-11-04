@@ -3,7 +3,7 @@ package com.noe.hypercube.ui.bundle;
 
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
-import com.noe.hypercube.event.domain.MappingResponse;
+import com.noe.hypercube.event.domain.response.MappingResponse;
 import com.noe.hypercube.ui.domain.account.AccountInfo;
 import com.noe.hypercube.ui.domain.file.LocalFile;
 import java.nio.file.Path;

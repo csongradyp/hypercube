@@ -63,7 +63,7 @@ public class Downloader implements IDownloader {
                     deleteLocalFile(entry);
                 }
             } catch (SynchronizationException e) {
-                EventBus.publishDownloadFinished(new FileEvent(client.getAccountName(), e.getRelatedFile(), entry.getPath(), FileActionType.FAIL));
+                EventBus.publishDownloadFailed(new FileEvent(client.getAccountName(), e.getRelatedFile(), entry.getPath(), FileActionType.ADDED));
             }
             logQueueEmpty();
         }
@@ -191,7 +191,6 @@ public class Downloader implements IDownloader {
             e.setRelatedFile(newLocalFile.toPath());
             LOG.error(e.getMessage(), e);
         }
-        setLocalFileLastModifiedDate(entry, newLocalFile);
     }
 
     private void createDirsFor(File newLocalFile) {
@@ -200,14 +199,6 @@ public class Downloader implements IDownloader {
             if (!success) {
                 LOG.error("Directory creation failed for {}", newLocalFile.getPath());
             }
-        }
-    }
-
-    private void setLocalFileLastModifiedDate(final ServerEntry entry, final File newLocalFile) {
-        long lastModified = entry.lastModified().getTime();
-        boolean success = newLocalFile.setLastModified(lastModified);
-        if (!success) {
-            LOG.debug("Couldn't change attribute 'lastModified' of file {}", newLocalFile.getPath());
         }
     }
 

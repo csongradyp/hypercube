@@ -1,5 +1,6 @@
-package com.noe.hypercube.event.domain;
+package com.noe.hypercube.event.domain.request;
 
+import com.noe.hypercube.event.domain.AccountActionEvent;
 import java.nio.file.Path;
 
 public class DeleteRequest extends AccountActionEvent {

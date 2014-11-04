@@ -182,17 +182,6 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping
         throw new UnsupportedOperationException("Use the public void download(ServerEntry serverEntry, FileOutputStream outputStream) method.");
     }
 
-//    @Override
-//    public void delete(final File localFile, final Path remotePath) throws SynchronizationException {
-//        String fileId = getFileId(localFile);
-//        try {
-//            client.files().delete(fileId);
-//        } catch (IOException e) {
-//            LOG.error("Google Drive file deletion failed from server: {}", remotePath);
-//            throw new SynchronizationException("Google Drive file deletion failed from server: " + remotePath);
-//        }
-//    }
-
     @Override
     public void delete(Path remoteFilePath) throws SynchronizationException {
         throw new UnsupportedOperationException("Delete operation is only available with file id");
@@ -293,8 +282,16 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping
     }
 
     @Override
-    public void createFolder(Path folder) throws SynchronizationException {
-        // TODO implement
+    public void createFolder(final Path folder) throws SynchronizationException {
+        final List<String> folders = new ArrayList<>(folder.getNameCount());
+        for (int i = 0; i < folder.getNameCount(); i++) {
+            folders.add(folder.getName(i).toString());
+        }
+        try {
+            dirUtil.createFoldersPath(folders);
+        } catch (IOException e) {
+            throw new SynchronizationException("folder creation failed", e);
+        }
     }
 
     @Override
