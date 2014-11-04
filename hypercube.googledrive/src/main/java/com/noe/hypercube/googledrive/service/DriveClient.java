@@ -5,25 +5,18 @@ import com.google.api.client.http.FileContent;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.model.Change;
-import com.google.api.services.drive.model.ChangeList;
-import com.google.api.services.drive.model.FileList;
-import com.google.api.services.drive.model.ParentReference;
+import com.google.api.services.drive.model.*;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.AccountQuota;
 import com.noe.hypercube.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
-import com.noe.hypercube.googledrive.Authentication;
 import com.noe.hypercube.domain.UploadEntity;
+import com.noe.hypercube.googledrive.Authentication;
 import com.noe.hypercube.googledrive.domain.DriveFileEntity;
 import com.noe.hypercube.googledrive.domain.DriveMapping;
 import com.noe.hypercube.googledrive.domain.DriveServerEntry;
 import com.noe.hypercube.service.Client;
 import com.noe.hypercube.synchronization.SynchronizationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,8 +30,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import javax.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping> {
+public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMapping> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DriveClient.class);
     private static final String EXCLUDE_FILE = "collaboration";
@@ -48,6 +44,7 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping
     private final DriveDirectoryUtil dirUtil;
 
     private final Drive client;
+    private Long cursor;
 
     public DriveClient() {
         this.client = Authentication.getDriveService("hypercube.app@gmail.com");
@@ -60,11 +57,10 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping
             final FileList list = client.files().list().execute();
             return list != null;
         } catch (GoogleJsonResponseException e) {
-            if(e.getStatusCode() == 401) {
-                LOG.error("Google Drive error: ", e);
-            }
+            LOG.error("Server error while testing connection - error: ", e);
             return false;
         } catch (IOException e) {
+            LOG.error("Error while testing connection - error: ", e);
             return false;
         }
     }
@@ -114,10 +110,36 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping
 
     @Override
     public Collection<ServerEntry> getChanges() throws SynchronizationException {
+        Collection<ServerEntry> changes = new ArrayList<>();
         try {
+            final List<Change> changeItems = retrieveAllChanges(cursor);
+            for (Change change : changeItems) {
+                final com.google.api.services.drive.model.File file = change.getFile();
+                changes.add(new DriveServerEntry(file, dirUtil.getPath(file), file.getHeadRevisionId(), new Date(change.getModificationDate().getValue())));
+                cursor = change.getId();
+            }
             return getFileList();
         } catch (IOException e) {
             throw new SynchronizationException("An error while getting file list from Google Drive Server ", e);
+        }
+    }
+
+    /**
+     *
+     * @param startChangeId Id of the last synchronize {@link com.google.api.services.drive.model.Change}
+     * @return List of {@link com.google.api.services.drive.model.Change}s
+     * @throws SynchronizationException in case of any errors
+     */
+    private List<Change> retrieveAllChanges(final Long startChangeId) throws SynchronizationException {
+        try {
+            Drive.Changes.List request = client.changes().list();
+            if (startChangeId != null) {
+                request.setStartChangeId(startChangeId);
+            }
+            ChangeList changeList = request.execute();
+            return changeList.getItems();
+        } catch (IOException e) {
+            throw new SynchronizationException("Error occurred while getting file changes from Google Drive", e);
         }
     }
 
@@ -296,8 +318,12 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping
 
     @Override
     public AccountQuota getQuota() throws SynchronizationException {
-        // TODO implement
-        return null;
+        try {
+            About about = client.about().get().execute();
+            return new AccountQuota(about.getQuotaBytesTotal(), about.getQuotaBytesUsedAggregate());
+        } catch (IOException e) {
+            throw new SynchronizationException("Could not get Drive storage quota", e);
+        }
     }
 
     @Override
