@@ -35,7 +35,7 @@
     </bean>
 
     <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer" destroy-method="shutdown"/>
-    <bean id="accountBoxCollection" class="com.noe.hypercube.collector.AccountBoxCollector"/>
+    <bean id="accountBoxCollection" class="com.noe.hypercube.collector.AccountBoxCollector" lazy-init="true"/>
     <bean id="accountProperties" class="com.noe.hypercube.collector.AccountPropertiesCollector"/>
 
     <bean id="persistenceController" class="com.noe.hypercube.controller.PersistenceController">

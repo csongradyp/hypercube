@@ -41,14 +41,19 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
 
     @Inject
     private IPersistenceController persistenceController;
-    private final DriveDirectoryUtil dirUtil;
+    private DriveDirectoryUtil dirUtil;
 
-    private final Drive client;
+    private Drive client;
     private Long cursor;
 
     public DriveClient() {
-        this.client = Authentication.getDriveService("hypercube.app@gmail.com");
-        dirUtil = new DriveDirectoryUtil(client);
+//        this.client = Authentication.getDriveService("hypercube.app@gmail.com");
+        try {
+            this.client = Authentication.createDriveService();
+            dirUtil = new DriveDirectoryUtil(client);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

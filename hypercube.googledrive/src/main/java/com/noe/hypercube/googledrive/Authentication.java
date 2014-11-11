@@ -14,6 +14,9 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.FileList;
+import java.awt.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -27,15 +30,20 @@ public class Authentication {
     private static String CLIENT_ID = "752406924353.apps.googleusercontent.com";
     private static String CLIENT_SECRET = "QbGMzP0XtBKq8XRJ0VQuPLOD";
 
-    private static String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
+    //    private static String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
+    private static String REDIRECT_URI = "http://localhost";
     private static String APPLICATION_NAME = "HyperCube";
 
     private static final String CLIENTSECRETS_LOCATION = "client_secrets.json";
 
-    /** Email of the Service Account */
+    /**
+     * Email of the Service Account
+     */
     private static final String SERVICE_ACCOUNT_EMAIL = "752406924353@project.googleusercontent.com";
 
-    /** Path to the Service Account's Private Key file */
+    /**
+     * Path to the Service Account's Private Key file
+     */
     private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "/HyperCube-8a2cd699b4d7.p12";
 
     public static void main(String[] args) {
@@ -59,10 +67,18 @@ public class Authentication {
         GoogleAuthorizationCodeFlow flow = getGoogleAuthorizationCodeFlow(httpTransport, jsonFactory);
 
         String url = flow.newAuthorizationUrl().setRedirectUri(REDIRECT_URI).build();
-        System.out.println("Please open the following URL in your browser then type the authorization code:");
-        System.out.println("  " + url);
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String code = br.readLine();
+//        System.out.println("Please open the following URL in your browser then type the authorization code:");
+//        System.out.println("  " + url);
+//        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//        String code = br.readLine();
+        String code = "";
+
+        try {
+            Desktop.getDesktop().browse(java.net.URI.create(url));
+            code = getCode();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         GoogleTokenResponse response = flow.newTokenRequest(code).setRedirectUri(REDIRECT_URI).execute();
         final String refreshToken = response.getRefreshToken();
@@ -77,13 +93,57 @@ public class Authentication {
         return drive;
     }
 
+    private static String getCode() throws IOException {
+
+        ServerSocket serverSocket = new ServerSocket();
+        Socket socket = serverSocket.accept();
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        while (true) {
+            String code = "";
+            try {
+                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                out.write("HTTP/1.1 200 OK\r\n");
+                out.write("Content-Type: text/html\r\n");
+                out.write("\r\n");
+
+                code = in.readLine();
+                System.out.println("code = " + code);
+                String match = "code";
+                int loc = 0;
+                if(code != null) {
+                    loc = code.indexOf(match);
+                }
+
+                if (loc > 0) {
+                    int httpstr = code.indexOf("HTTP") - 1;
+                    code = code.substring(code.indexOf(match), httpstr);
+                    String parts[] = code.split("=");
+                    code = parts[1];
+                    out.write("Thanks for using Hypercube!");
+                    out.close();
+                    socket.close();
+                    return code;
+                } else {
+                    // It doesn't have a code
+                    out.write("Code not found in the URL!");
+                }
+
+            } catch (IOException e) {
+                //error ("System: " + "Connection to server lost!");
+                System.exit(1);
+                break;
+            }
+        }
+        return "";
+    }
+
     public static Drive createDrive() {
         final HttpTransport httpTransport = new NetHttpTransport();
         final JsonFactory jsonFactory = new JacksonFactory();
         Credential credential = null;
         try {
             final GoogleAuthorizationCodeFlow flow = getFlow();
-             credential = exchangeCode(getProperty("google.auth.code"));
+            credential = exchangeCode(getProperty("google.auth.code"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -137,11 +197,47 @@ public class Authentication {
         return drive;
     }
 
+    public static Drive getDriveService() {
+        HttpTransport httpTransport = new NetHttpTransport();
+        JacksonFactory jsonFactory = new JacksonFactory();
+        GoogleCredential credential = null;
+        try {
+            credential = new GoogleCredential.Builder()
+                    .setTransport(httpTransport)
+                    .setJsonFactory(jsonFactory)
+                    .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
+                    .setServiceAccountScopes(Arrays.asList(DriveScopes.DRIVE))
+                    .setServiceAccountPrivateKeyFromP12File(new File(SERVICE_ACCOUNT_PKCS12_FILE_PATH))
+                    .build();
+        } catch (GeneralSecurityException | IOException e) {
+            e.printStackTrace();
+        }
+        Drive drive = new Drive.Builder(httpTransport, jsonFactory, credential)
+                .setApplicationName(APPLICATION_NAME).build();
+        final FileList fileList;
+        try {
+            fileList = drive.files().list().execute();
+            System.out.println(fileList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return drive;
+    }
+
+    static Drive buildService(GoogleCredential credentials) {
+        HttpTransport httpTransport = new NetHttpTransport();
+        JacksonFactory jsonFactory = new JacksonFactory();
+
+        return new Drive.Builder(httpTransport, jsonFactory, credentials).build();
+    }
+
+
     private static GoogleAuthorizationCodeFlow getGoogleAuthorizationCodeFlow(HttpTransport httpTransport, JsonFactory jsonFactory) {
         return new GoogleAuthorizationCodeFlow.Builder(
                 httpTransport, jsonFactory, CLIENT_ID, CLIENT_SECRET, Arrays.asList(DriveScopes.DRIVE))
                 .setAccessType("offline")
-                .setApprovalPrompt("force").build();
+                .setApprovalPrompt("auto")
+                .build();
     }
 
     private static String getProperty(final String key) {
@@ -188,7 +284,7 @@ public class Authentication {
 
         final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, Arrays.asList(DriveScopes.DRIVE, DriveScopes.DRIVE_FILE, DriveScopes.DRIVE_APPDATA, DriveScopes.DRIVE_APPDATA))
                 .setAccessType("offline")
-                .setApprovalPrompt("force").build();
+                .setApprovalPrompt("auto").build();
         return flow;
     }
 

@@ -26,7 +26,7 @@ public class BoxAuthentication {
     public static BoxClient create() {
         String code = "";
 //        String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + CLIENT_ID + "&redirect_uri=http%3A//localhost%3A" + PORT;
-        String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + CLIENT_ID + "&redirect_uri=http%3A//127.0.0.1%3A" + PORT;
+        String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + CLIENT_ID + "&redirect_uri=http%3A//127.0.0.1%3A" + PORT + "/hcbox";
         try {
             Desktop.getDesktop().browse(java.net.URI.create(url));
             code = getCode();
@@ -51,7 +51,7 @@ public class BoxAuthentication {
         BoxJSONParser parser = new BoxJSONParser(hub);
         IBoxConfig config = (new BoxConfigBuilder()).build();
         BoxClient client = new BoxClient(CLIENT_ID, CLIENT_SECRET, hub, parser, config);
-        BoxOAuthToken bt = client.getOAuthManager().createOAuth(code, CLIENT_ID, CLIENT_SECRET, "http://localhost:" + PORT);
+        BoxOAuthToken bt = client.getOAuthManager().createOAuth(code, CLIENT_ID, CLIENT_SECRET, "http://localhost:" + PORT + "/hcbox");
         client.authenticate(bt);
         return client;
     }
@@ -61,27 +61,25 @@ public class BoxAuthentication {
 
         ServerSocket serverSocket = new ServerSocket(PORT);
         Socket socket = serverSocket.accept();
-        BufferedReader in = new BufferedReader (new InputStreamReader(socket.getInputStream ()));
-        while (true)
-        {
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        while (true) {
             String code = "";
-            try
-            {
-                BufferedWriter out = new BufferedWriter (new OutputStreamWriter(socket.getOutputStream ()));
+            try {
+                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                 out.write("HTTP/1.1 200 OK\r\n");
                 out.write("Content-Type: text/html\r\n");
                 out.write("\r\n");
 
-                code = in.readLine ();
-                System.out.println (code);
+                code = in.readLine();
+                System.out.println(code);
                 String match = "code";
                 int loc = code.indexOf(match);
 
-                if( loc >0 ) {
-                    int httpstr = code.indexOf("HTTP")-1;
+                if (loc > 0) {
+                    int httpstr = code.indexOf("HTTP") - 1;
                     code = code.substring(code.indexOf(match), httpstr);
                     String parts[] = code.split("=");
-                    code=parts[1];
+                    code = parts[1];
                     out.write("Thanks for using Hypercube!");
                 } else {
                     // It doesn't have a code
@@ -89,13 +87,11 @@ public class BoxAuthentication {
                 }
 
                 out.close();
-
+                socket.close();
                 return code;
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 //error ("System: " + "Connection to server lost!");
-                System.exit (1);
+                System.exit(1);
                 break;
             }
         }
