@@ -15,7 +15,6 @@ public final class EventBus {
 
     private final MBassador<StorageEvent> storageEventBus;
     private final MBassador<FileEvent> fileEventBus;
-    private final MBassador<StateChangeEvent> stateEventBus;
     private final MBassador<FileListRequest> fileListRequestBus;
     private final MBassador<FileListResponse> fileListResponseBus;
     private final MBassador<UploadRequest> uploadRequestBus;
@@ -30,7 +29,6 @@ public final class EventBus {
     private EventBus() {
         storageEventBus = new MBassador<>(BusConfiguration.Default());
         fileEventBus = new MBassador<>(BusConfiguration.Default());
-        stateEventBus = new MBassador<>(BusConfiguration.Default());
         fileListRequestBus = new MBassador<>(BusConfiguration.Default());
         fileListResponseBus = new MBassador<>(BusConfiguration.Default());
         uploadRequestBus = new MBassador<>(BusConfiguration.Default());
@@ -41,7 +39,7 @@ public final class EventBus {
         mappingResponseBus = new MBassador<>(BusConfiguration.Default());
         jumpToFileBus = new MBassador<>(BusConfiguration.Default());
         queueContentEventBus = new MBassador<>(BusConfiguration.Default());
-        registerShutdownHook(storageEventBus, fileEventBus, stateEventBus, fileListRequestBus,
+        registerShutdownHook(storageEventBus, fileEventBus, fileListRequestBus,
                 fileListResponseBus, uploadRequestBus, downloadRequestBus, createFolderRequestBus,
                 deleteRequestBus, mappingRequestBus, mappingResponseBus, queueContentEventBus, jumpToFileBus);
     }
@@ -102,10 +100,6 @@ public final class EventBus {
 
     public static void publish(StorageEvent storageEvent) {
         instance.storageEventBus.publish(storageEvent);
-    }
-
-    public static void publish(StateChangeEvent stateChangeEvent) {
-        instance.stateEventBus.publishAsync(stateChangeEvent);
     }
 
     public static void publish(FileListRequest fileListRequest) {
@@ -194,10 +188,6 @@ public final class EventBus {
 
     public static void subscribeToFileListResponse(EventHandler<FileListResponse> handler) {
         instance.fileListResponseBus.subscribe(handler);
-    }
-
-    public static void subscribeToStateEvent(EventHandler<StateChangeEvent> handler) {
-        instance.stateEventBus.subscribe(handler);
     }
 
     public static void subscribeToFileEvent(EventHandler<FileEvent> handler) {

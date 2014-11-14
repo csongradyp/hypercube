@@ -1,25 +1,29 @@
 package com.noe.hypercube.ui.util;
 
 import com.noe.hypercube.event.domain.FileEvent;
-import com.noe.hypercube.event.domain.StateChangeEvent;
+import com.noe.hypercube.event.domain.type.SynchronizationSate;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import de.jensd.fx.fontawesome.AwesomeIconsStack;
 import de.jensd.fx.fontawesome.Icon;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.paint.Color;
 
-import static com.noe.hypercube.event.domain.StateChangeEvent.State.*;
 import static com.noe.hypercube.event.domain.type.FileActionType.*;
 import static com.noe.hypercube.event.domain.type.StreamDirection.DOWN;
+import static com.noe.hypercube.event.domain.type.SynchronizationSate.State.*;
 
-public class IconInjector {
+public final class IconInjector {
 
-    public static final String ICON_SIZE = "20";
+    private static final String ICON_SIZE = "20";
     private static final String SECONDARY_ICON_SIZE = "12";
+
+    private IconInjector() {
+    }
 
     public static void setFileStatusIcon(final FileEvent file, final Label label) {
         AwesomeIconsStack graphic = null;
@@ -42,17 +46,22 @@ public class IconInjector {
         }
     }
 
-    public static void setSyncStatusIcon(final StateChangeEvent.State state, Label label) {
-        label.getGraphic().getStyleClass().clear();
+    public static void setSyncStatusIcon(final SynchronizationSate.State state, Label label) {
+        final Node graphic = label.getGraphic();
+        if(graphic != null) {
+            graphic.getStyleClass().clear();
+        }
         if (SYNCHRONIZING == state) {
-            AwesomeDude.setIcon(label, AwesomeIcon.REFRESH);
-            label.getGraphic().getStyleClass().add("synchronizing");
+            final AwesomeIconsStack iconsStack = AwesomeIconsStack.create();
+            iconsStack.add(new Icon(AwesomeIcon.CIRCLE, "16", "-fx-text-fill: #0096c8", "synchronizing"))
+                    .add(new Icon(AwesomeIcon.REFRESH, "11", "-fx-text-fill: #f4f4f4", "synchronizing"));
+            label.setGraphic(iconsStack);
         } else if (UP_TO_DATE == state) {
             AwesomeDude.setIcon(label, AwesomeIcon.CHECK_CIRCLE);
-            label.getGraphic().getStyleClass().add("up-to-date");
+            label.setGraphic(new Icon(AwesomeIcon.CHECK_CIRCLE, "16", "", "up-to-date"));
         } else if (OFFLINE == state) {
             AwesomeDude.setIcon(label, AwesomeIcon.WARNING);
-            label.getGraphic().getStyleClass().add("offline");
+            label.setGraphic(new Icon(AwesomeIcon.WARNING, "16", "", "offline"));
         }
     }
 
