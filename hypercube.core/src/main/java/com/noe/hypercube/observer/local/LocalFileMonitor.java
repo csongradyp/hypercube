@@ -1,6 +1,7 @@
 package com.noe.hypercube.observer.local;
 
 
+import java.nio.file.Path;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.slf4j.Logger;
@@ -41,6 +42,18 @@ public class LocalFileMonitor {
         fileMonitor.addObserver(observer);
         LOG.info("Observer has been added to File Monitor - targetfolder: {}", observer.getTargetDir());
     }
+
+    public void removeObserver(final Path targetDir) {
+        FileAlterationObserver toRemove = null;
+        final Iterable<FileAlterationObserver> observers = fileMonitor.getObservers();
+        for (FileAlterationObserver fileAlterationObserver : observers) {
+            if (fileAlterationObserver.getDirectory().toPath().equals(targetDir)) {
+                toRemove = fileAlterationObserver;
+            }
+        }
+        fileMonitor.removeObserver(toRemove);
+    }
+
 
     public void start() {
         try {

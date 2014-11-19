@@ -21,6 +21,8 @@ public interface MappingController {
 
     void removeMapping(MappingEntity mapping);
 
+    void removeMapping(String id, Class<? extends MappingEntity> mappingClass);
+
     Collection<Path> getRemoteFolder(Class<? extends MappingEntity> mappingType, Path targetFolder);
 
     Map<String, List<FileEntity>> getMappedEntities(String folder);

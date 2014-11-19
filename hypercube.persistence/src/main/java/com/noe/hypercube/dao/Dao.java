@@ -18,22 +18,27 @@ public abstract class Dao<ENTITY extends IEntity> implements IDao<String, ENTITY
 
     public abstract Class<ENTITY> getEntityClass();
 
-    public void persist(ENTITY entity) {
+    @Override
+    public void persist(final ENTITY entity) {
         repository.saveAndFlush(entity);
     }
 
-    public void remove(ENTITY entity) {
+    @Override
+    public void remove(final ENTITY entity) {
         repository.delete(entity);
     }
 
-    public void remove(String id) {
+    @Override
+    public void remove(final String id) {
         repository.delete(id);
     }
 
-    public ENTITY findById(String id) {
+    @Override
+    public ENTITY findById(final String id) {
         return repository.findOne(id);
     }
 
+    @Override
     public Collection<ENTITY> getAll() {
         return repository.findAll();
     }

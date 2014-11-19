@@ -15,4 +15,6 @@ public interface MappingEntity extends IEntity<String> {
     Filter getFilter();
 
     Class<? extends Account> getAccountType();
+
+    String getAccountName();
 }

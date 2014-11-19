@@ -55,7 +55,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         localBreadcrumb.setOnAddMapping(mouseEvent -> {
             final Optional<MappingRequest> request = AddMappingDialog.showMapLocalDialog(localBreadcrumb.getLocation());
             if(request.isPresent()) {
-                EventBus.publish(request.get());
+                EventBus.publishAddMappingRequest(request.get());
             }
         });
         getChildren().add(localBreadcrumb);
@@ -82,7 +82,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
                     remoteBreadcrumb.setOnAddMapping(event -> {
                         final Optional<MappingRequest> request = AddMappingDialog.showMapRemoteDialog(remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation());
                         if(request.isPresent()) {
-                            EventBus.publish(request.get());
+                            EventBus.publishAddMappingRequest(request.get());
                         }
                     });
                     setOnRemoveRemoteMapping(remoteBreadcrumb);

@@ -45,6 +45,11 @@ public class TestMapping implements MappingEntity {
     }
 
     @Override
+    public String getAccountName() {
+        return "test";
+    }
+
+    @Override
     public String getId() {
         return localDir;
     }

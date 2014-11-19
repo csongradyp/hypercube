@@ -19,4 +19,9 @@ public class BoxMapping extends Mapping {
     public Class<? extends Account> getAccountType() {
         return Box.class;
     }
+
+    @Override
+    public String getAccountName() {
+        return Box.getName();
+    }
 }

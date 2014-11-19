@@ -37,6 +37,10 @@ public class CloudObserver<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends Fil
         targetFolders.add(targetFolder);
     }
 
+    public void removeTargetFolder(Path targetFolder) {
+        targetFolders.remove(targetFolder);
+    }
+
     @Override
     public void run() {
         try {

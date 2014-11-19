@@ -126,7 +126,13 @@ public final class EventBus {
         instance.deleteRequestBus.publish(deleteRequest);
     }
 
-    public static void publish(MappingRequest mappingRequest) {
+    public static void publishAddMappingRequest(MappingRequest mappingRequest) {
+        mappingRequest.setAction(MappingEvent.Action.ADD);
+        instance.mappingRequestBus.publish(mappingRequest);
+    }
+
+    public static void publishRemoveMappingRequest(MappingRequest mappingRequest) {
+        mappingRequest.setAction(MappingEvent.Action.REMOVE);
         instance.mappingRequestBus.publish(mappingRequest);
     }
 

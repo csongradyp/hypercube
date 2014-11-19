@@ -15,6 +15,9 @@ import com.noe.hypercube.observer.remote.CloudMonitor;
 import com.noe.hypercube.observer.remote.CloudObserver;
 import com.noe.hypercube.observer.remote.CloudObserverFactory;
 import com.noe.hypercube.synchronization.presynchronization.IPreSynchronizer;
+import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.function.Predicate;
 import net.engio.mbassy.listener.Handler;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +32,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import static com.noe.hypercube.event.domain.MappingEvent.Action.ADD;
+import static com.noe.hypercube.event.domain.MappingEvent.Action.REMOVE;
 
 @Named
 public class Synchronizer implements EventHandler<MappingRequest> {
@@ -127,28 +133,55 @@ public class Synchronizer implements EventHandler<MappingRequest> {
     @Override
     @Handler(rejectSubtypes = true)
     public void onEvent(final MappingRequest event) {
-        final Path localFolder = event.getLocalFolder();
-        final MappingResponse mappingResponse = new MappingResponse(localFolder);
+        if (ADD == event.getAction()) {
+            final Path localFolder = event.getLocalFolder();
+            final MappingResponse mappingResponse = new MappingResponse(localFolder);
+            final Map<String, Path> remoteFolders = event.getRemoteFolders();
+            for (Map.Entry<String, Path> remoteMapping : remoteFolders.entrySet()) {
+                final AccountBox accountBox = accountController.getAccountBox(remoteMapping.getKey());
+                final MappingEntity mapping = accountBox.getMapper().createMapping();
+                final String account = remoteMapping.getKey();
+                final Path remoteFolder = remoteMapping.getValue();
+                mapping.setLocalDir(localFolder.toString());
+                mapping.setRemoteDir(remoteFolder.toString());
+                persistenceController.addMapping(mapping);
+                mappingResponse.addRemoteFolder(account, remoteFolder);
+            }
+            final IPreSynchronizer preSynchronizer = preSynchronizerFactory.create(localFolder);
+            final Future<Boolean> submit = presynchronizationExecutorService.submit(preSynchronizer);
+            try {
+                submit.get();
+                submitMapping(localFolder, remoteFolders);
+                EventBus.publish(mappingResponse);
+            } catch (InterruptedException | ExecutionException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        } else {
+            if (REMOVE == event.getAction()) {
+                removeMapping(event);
+            }
+        }
+    }
+
+    private void removeMapping(final MappingRequest event) {
+        fileMonitor.removeObserver(event.getLocalFolder());
         final Map<String, Path> remoteFolders = event.getRemoteFolders();
-        for (Map.Entry<String, Path> remoteMapping : remoteFolders.entrySet()) {
-            final AccountBox accountBox = accountController.getAccountBox(remoteMapping.getKey());
-            final MappingEntity mapping = accountBox.getMapper().createMapping();
-            final String account = remoteMapping.getKey();
-            final Path remoteFolder = remoteMapping.getValue();
-            mapping.setLocalDir(localFolder.toString());
-            mapping.setRemoteDir(remoteFolder.toString());
-            persistenceController.addMapping(mapping);
-            mappingResponse.addRemoteFolder(account, remoteFolder);
+        for (String account : remoteFolders.keySet()) {
+            final AccountBox accountBox = accountController.getAccountBox(account);
+            final Collection mappings = persistenceController.getMappings(accountBox.getMapper().getMappingClass());
+            final Optional<MappingEntity> removableMapping = mappings.stream()
+                    .filter((Predicate<MappingEntity>) (MappingEntity mappingEntity) -> Paths.get(mappingEntity.getRemoteDir()).equals(event.getRemoteFolders().get(account))
+                            && Paths.get(mappingEntity.getLocalDir()).equals(event.getLocalFolder()))
+                    .findAny();
+            cloudMonitor.removeObserver(accountBox.getAccountType(), remoteFolders.get(account));
+            if (removableMapping.isPresent()) {
+                final MappingEntity mappingToRemove = removableMapping.get();
+                final String id = mappingToRemove.getId();
+                persistenceController.removeMapping(id, mappingToRemove.getClass());
+            }
         }
-        final IPreSynchronizer preSynchronizer = preSynchronizerFactory.create(localFolder);
-        final Future<Boolean> submit = presynchronizationExecutorService.submit(preSynchronizer);
-        try {
-            submit.get();
-            submitMapping(localFolder, remoteFolders);
-            EventBus.publish(mappingResponse);
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        final Collection<MappingEntity> allMappings = persistenceController.getAllMappings();
+        System.out.println(allMappings);
     }
 
     private void submitMapping(Path localFolder, Map<String, Path> remoteFolders) {
