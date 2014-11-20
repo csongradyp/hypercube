@@ -5,6 +5,7 @@ import com.noe.hypercube.event.EventHandler;
 import com.noe.hypercube.event.domain.request.FileListRequest;
 import com.noe.hypercube.event.domain.response.FileListResponse;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
+import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.domain.file.IFile;
 import com.noe.hypercube.ui.domain.file.LocalFile;
 import com.noe.hypercube.ui.elements.AccountSegmentedButton;
@@ -27,8 +28,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.effect.GaussianBlur;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import net.engio.mbassy.listener.Handler;
 import org.controlsfx.control.BreadCrumbBar;
@@ -37,6 +43,8 @@ import org.controlsfx.control.SegmentedButton;
 import static com.noe.hypercube.ui.util.PathConverterUtil.getEventPath;
 import static javafx.scene.input.KeyCombination.ModifierValue.DOWN;
 import static javafx.scene.input.KeyCombination.ModifierValue.UP;
+
+//import java.awt.*;
 
 public class FileView extends VBox implements Initializable, EventHandler<FileListResponse> {
 
@@ -59,6 +67,8 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     private AccountSegmentedButton remoteDrives;
     @FXML
     private DriveSpaceBar driveSpaceBar;
+    @FXML
+    private StackPane tableStack;
 
     @FXML
     private SimpleStringProperty side = new SimpleStringProperty();
@@ -91,6 +101,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
                     waitForResponce = true;
                     final IFile folder = table.getSelectionModel().getSelectedItem();
                     EventBus.publish(new FileListRequest(hashCode(), remoteDrives.getActiveAccount(), getEventPath(newFolder), previousFolder));
+                    showLoadingOverlay(resources);
                 } else {
                     waitForResponce = false;
                     multiBreadCrumbBar.setAllRemoteCrumbsInactive();
@@ -103,6 +114,30 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         multiBreadCrumbBar.remoteProperty().bindBidirectional(remote);
         multiBreadCrumbBar.setOnLocalCrumbAction(this::onLocalCrumbAction);
         multiBreadCrumbBar.setOnRemoteCrumbAction(event -> setLocation(multiBreadCrumbBar.getNewRemotePath(event, remoteDrives.getActiveAccount())));
+    }
+
+    private void showLoadingOverlay(ResourceBundle resources) {
+        table.setDisable(true);
+        localDrives.setDisable(true);
+        remoteDrives.setDisable(true);
+        multiBreadCrumbBar.setDisable(true);
+        setEffect(new GaussianBlur(0.5d));
+        final ImageView loadingImage = ImageBundle.getImageView("icon.loading");
+        final Label loading = new Label(resources.getString("loading.file.list"), loadingImage);
+        loading.setContentDisplay(ContentDisplay.TOP);
+        loading.setStyle("-fx-font-size: 15");
+        loading.setId("loading");
+        tableStack.getChildren().add(0, loading);
+    }
+
+
+    private void hideLoadingOverLay() {
+        table.setDisable(false);
+        localDrives.setDisable(false);
+        remoteDrives.setDisable(false);
+        multiBreadCrumbBar.setDisable(false);
+        setEffect(null);
+        tableStack.getChildren().removeIf(node -> node.getId().equals("loading"));
     }
 
     public void initStartLocation() {
@@ -331,6 +366,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
                 } else {
                     multiBreadCrumbBar.setRemoteBreadCrumbs(event.getAccount(), event.getFolder());
                 }
+                hideLoadingOverLay();
                 StyleUtil.changeStyle(table, event.getAccount());
                 setRemoteFileList(event);
                 driveSpaceBar.update(event.getQuotaInfo());
