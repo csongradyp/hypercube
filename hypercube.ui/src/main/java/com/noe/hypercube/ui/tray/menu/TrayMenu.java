@@ -56,6 +56,7 @@ public class TrayMenu extends AnchorPane implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        createAccountButtons();
         show.setOnAction(actionEvent -> stage.show());
         addListenerForAccountChanges();
     }
@@ -79,6 +80,18 @@ public class TrayMenu extends AnchorPane implements Initializable {
                 }
             }
         });
+    }
+
+    private void createAccountButtons() {
+        final List<String> accountNames = AccountBundle.getAccountNames();
+        final ObservableList<ToggleButton> accountsButtons = accounts.getButtons();
+        for (String account : accountNames) {
+            final ToggleButton accountButton = createAccountButton(account);
+            accountsButtons.add(accountButton);
+        }
+        if(!accountsButtons.isEmpty()) {
+            accountsButtons.get(0).fire();
+        }
     }
 
     private ToggleButton createAccountButton(final String account) {

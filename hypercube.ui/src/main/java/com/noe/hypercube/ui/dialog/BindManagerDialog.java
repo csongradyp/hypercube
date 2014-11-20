@@ -9,6 +9,10 @@ import com.noe.hypercube.ui.elements.LocalDriveSegmentedButton;
 import com.noe.hypercube.ui.factory.MappingListCellFactory;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.*;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -16,12 +20,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.Dialog;
+import javafx.scene.input.MouseButton;
 import javafx.util.Callback;
 import org.apache.commons.collections4.keyvalue.DefaultMapEntry;
+import org.controlsfx.control.action.Action;
+import org.controlsfx.dialog.*;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
+import static org.controlsfx.dialog.Dialog.ACTION_YES;
 
 public class BindManagerDialog extends Dialog<String> implements Initializable {
 
@@ -57,7 +63,28 @@ public class BindManagerDialog extends Dialog<String> implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         final ButtonType buttonType = new ButtonType(resources.getString("tooltip.mapping.add"), ButtonBar.ButtonData.APPLY);
         getDialogPane().getButtonTypes().addAll(buttonType, ButtonType.CLOSE);
-        mappingFolderList.setCellFactory(new MappingListCellFactory(remoteDrives));
+        final MappingListCellFactory mappingListCellFactory = new MappingListCellFactory(remoteDrives);
+        mappingListCellFactory.setOnRemoveMapping(event -> {
+            if (event.getButton().equals(MouseButton.PRIMARY)) {
+                final Map.Entry<String, String> mapping = mappingFolderList.getSelectionModel().getSelectedItem();
+                MappingRequest removeMappingRequest;
+                if (remoteDrives.isActive()) {
+                    removeMappingRequest = new MappingRequest(Paths.get(mapping.getValue()));
+                    removeMappingRequest.addRemoteFolder(remoteDrives.getActiveAccount(), Paths.get(sourceFolderList.getSelectionModel().getSelectedItem()));
+                } else {
+                    removeMappingRequest = new MappingRequest(Paths.get(sourceFolderList.getSelectionModel().getSelectedItem()));
+                    removeMappingRequest.addRemoteFolder(mapping.getKey(), Paths.get(mapping.getValue()));
+                }
+                final Action response = Dialogs.create()
+                        .title(resources.getString("dialog.mapping.title.remove"))
+                        .message(String.format(resources.getString("dialog.mapping.remove"), removeMappingRequest.getLocalFolder(), removeMappingRequest.getRemoteFolders().values().iterator().next()))
+                        .showConfirm();
+                if(response == ACTION_YES) {
+                    EventBus.publishRemoveMappingRequest(removeMappingRequest);
+                }
+            }
+        });
+        mappingFolderList.setCellFactory(mappingListCellFactory);
         sourceFolderList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 final Collection<Map.Entry<String, String>> mappedFolders = new HashSet<>();
@@ -112,7 +139,7 @@ public class BindManagerDialog extends Dialog<String> implements Initializable {
     public void onAdd() {
         final Optional<MappingRequest> requests = new AddMappingDialog().showAndWait();
         if (requests.isPresent()) {
-            EventBus.publish(requests.get());
+            EventBus.publishAddMappingRequest(requests.get());
         }
     }
 }

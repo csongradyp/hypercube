@@ -77,6 +77,10 @@ public class CloudMonitor {
         }
     }
 
+    public void removeObserver(Class<? extends Account> accountClass, Path targetFolder) {
+        cloudObservers.get(accountClass).removeTargetFolder(targetFolder);
+    }
+
     public void addTargetFolder(final Class<? extends Account> accountType, final Path targetFolder) {
         cloudObservers.get(accountType).addTargetFolder(targetFolder);
         LOG.debug("New folder added for observation to {} - targetfolder: {}", accountType.getName(), targetFolder);

@@ -1,9 +1,6 @@
 package com.noe.hypercube.domain;
 
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 @MappedSuperclass
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"localDir", "remoteDir"}))
@@ -14,24 +11,15 @@ public abstract class Mapping implements MappingEntity {
 
     private String localDir;
     private String remoteDir;
-//    @OneToOne(fetch= FetchType.EAGER)
-//    private FileFilter fileFilters;
 
     protected Mapping() {
     }
 
-    public Mapping(String localDir, String remoteDir) {
+    public Mapping(final String localDir, final String remoteDir) {
         this.localDir = localDir;
         this.remoteDir = remoteDir;
-//        fileFilters = new FileFilter();
+        id = localDir + remoteDir;
     }
-
-//    public Mapping(String localDir, String remoteDir, FileFilter fileFilters) {
-//        this.localDir = localDir;
-//        this.remoteDir = remoteDir;
-//        this.fileFilters = fileFilters;
-//    }
-
 
     @Override
     public String getLocalDir() {
@@ -60,13 +48,9 @@ public abstract class Mapping implements MappingEntity {
         return null;
     }
 
-//    public void setFileFilters(FileFilter fileFilters) {
-//        this.fileFilters = fileFilters;
-//    }
-
     @Override
     public String getId() {
-        return localDir + remoteDir;
+        return id;
     }
 
     @Override
@@ -74,7 +58,6 @@ public abstract class Mapping implements MappingEntity {
         return "Mapping{" +
                 "localDir=" + localDir +
                 ", remoteDir=" + remoteDir +
-//                ", fileFilters=" + fileFilters +
                 '}';
     }
 }

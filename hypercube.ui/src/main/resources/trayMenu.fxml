@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.noe.hypercube.ui.elements.StateInfoLabel?>
-<?import com.noe.hypercube.ui.tray.menu.FileListView?>
-<?import de.jensd.fx.fontawesome.Icon?>
+<?import com.noe.hypercube.ui.tray.menu.list.FileListView?>
+<?import de.jensd.fx.fontawesome.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>

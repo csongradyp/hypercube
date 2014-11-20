@@ -20,4 +20,9 @@ public class DriveMapping extends Mapping {
     public Class<? extends Account> getAccountType() {
         return GoogleDrive.class;
     }
+
+    @Override
+    public String getAccountName() {
+        return GoogleDrive.name;
+    }
 }

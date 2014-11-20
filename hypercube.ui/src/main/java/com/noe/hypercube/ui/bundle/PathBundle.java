@@ -8,6 +8,7 @@ import com.noe.hypercube.ui.domain.account.AccountInfo;
 import com.noe.hypercube.ui.domain.file.LocalFile;
 import java.nio.file.Path;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import net.engio.mbassy.listener.Handler;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
@@ -20,15 +21,22 @@ public class PathBundle implements EventHandler<MappingResponse> {
 
     private PathBundle() {
         mappings = new HashMap<>();
-//        mappings.put("test", new DualHashBidiMap(new HashMap<>()));
-//        mappings.put("other", new DualHashBidiMap(new HashMap<>()));
-//        mappings.put("Dropbox", new DualHashBidiMap(new HashMap<>()));
-//        mappings.get("test").put("C:\\Users", "/A/B/C");
-//        mappings.get("test").put("C:\\Users", "/x");
-//        mappings.get("Dropbox").put("D:\\test", "/newtest");
-//        mappings.get("Dropbox").put("D:\\install", "/other");
+        final ObservableList<AccountInfo> accountInfos = AccountBundle.getAccounts();
+        for (AccountInfo accountInfo : accountInfos) {
+            if(!mappings.containsKey(accountInfo.getName())) {
+                mappings.put(accountInfo.getName(), new DualHashBidiMap(new HashMap<>()));
+            }
+        }
         addListenerForAccountChanges();
         EventBus.subscribeToMappingResponse(this);
+    }
+
+    /**
+     * Called by {@code com.noe.hypercube.bridge.PersistenceDataBridge} at program startup phase.
+     * @param mappings Previously persisted mappings from database.
+     */
+    public static void setInitialMappings(final Map<String, DualHashBidiMap<String, String>> mappings) {
+        instance.mappings.putAll(mappings);
     }
 
     private void addListenerForAccountChanges() {
@@ -36,7 +44,9 @@ public class PathBundle implements EventHandler<MappingResponse> {
             while (change.next()) {
                 final List<? extends AccountInfo> addedAccount = change.getAddedSubList();
                 for (AccountInfo account : addedAccount) {
-                    mappings.put(account.getName(), new DualHashBidiMap(new HashMap<>()));
+                    if(!mappings.containsKey(account.getName())) {
+                        mappings.put(account.getName(), new DualHashBidiMap(new HashMap<>()));
+                    }
                 }
                 final List<? extends AccountInfo> removedAccount = change.getRemoved();
                 for (AccountInfo account : removedAccount) {

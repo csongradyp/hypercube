@@ -101,10 +101,16 @@ public class PersistenceController implements IPersistenceController {
     }
 
     @Override
-    public void removeMapping(MappingEntity mapping) {
+    public void removeMapping(final MappingEntity mapping) {
         final Class<? extends MappingEntity> entityClass = mapping.getClass();
         final IDao dao = daoMap.get(entityClass);
         dao.remove(mapping);
+    }
+
+    @Override
+    public void removeMapping(final String id, final Class<? extends MappingEntity> mappingClass) {
+        final IDao dao = daoMap.get(mappingClass);
+        dao.remove(id);
     }
 
     @Override

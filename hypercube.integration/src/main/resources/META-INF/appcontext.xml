@@ -56,5 +56,6 @@
     <bean id="localDirectoryCollector" class="com.noe.hypercube.mapping.collector.LocalDirectoryCollector"/>
     <bean id="remoteDirectoryCollector" class="com.noe.hypercube.mapping.collector.RemoteDirectoryCollector"/>
     <bean class="com.noe.hypercube.bridge.AccountDataBridge"/>
+    <bean class="com.noe.hypercube.bridge.PersistenceDataBridge"/>
 
 </beans>

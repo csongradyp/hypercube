@@ -99,13 +99,15 @@ public class CloudActivityBar extends HBox implements Initializable, EventHandle
             Platform.runLater(() -> {
                 cloudLabel.getGraphic().getStyleClass().clear();
                 final ImageView accountIcon = accounts.get(event.getAccount());
-                accountIcon.getStyleClass().clear();
-                if (event.isStarted()) {
-                    accountIcon.getStyleClass().add(ACTIVE_STYLE);
-                    setCloudIconActive();
-                } else if (event.isFinished()) {
-                    accountIcon.getStyleClass().add(INACTIVE_STYLE);
-                    setCloudIconInactive();
+                if(accountIcon != null) {
+                    accountIcon.getStyleClass().clear();
+                    if (event.isStarted()) {
+                        accountIcon.getStyleClass().add(ACTIVE_STYLE);
+                        setCloudIconActive();
+                    } else if (event.isFinished()) {
+                        accountIcon.getStyleClass().add(INACTIVE_STYLE);
+                        setCloudIconInactive();
+                    }
                 }
             });
         }

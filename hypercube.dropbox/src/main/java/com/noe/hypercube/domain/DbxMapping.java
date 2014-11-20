@@ -19,4 +19,9 @@ public class DbxMapping extends Mapping {
     public Class<? extends Account> getAccountType() {
         return Dropbox.class;
     }
+
+    @Override
+    public String getAccountName() {
+        return Dropbox.getName();
+    }
 }
