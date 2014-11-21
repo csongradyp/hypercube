@@ -8,6 +8,8 @@ import de.jensd.fx.fontawesome.AwesomeIcon;
 import de.jensd.fx.fontawesome.AwesomeIconsStack;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.nio.file.FileStore;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
@@ -37,9 +39,10 @@ public final class IconFactory {
         String driveType = fileSystemView.getSystemTypeDescription(rootPath.toFile());
         if (driveType.toLowerCase().contains("local")) {
             icon = hardDriveIcon;
-        } else if (driveType.toLowerCase().contains("cd")) {
+        } else if (driveType.toLowerCase().contains("cd") || driveType.toLowerCase().contains("opti")) {
             icon = ImageBundle.getImage(OPTICAL_DRIVE_ICON);
-        } else if (driveType.toLowerCase().contains("removable")) {
+            //TODO provide language independent solution
+        } else if (driveType.toLowerCase().contains("removable") || driveType.toLowerCase().contains("cser")) {
             icon = ImageBundle.getImage(USB_DRIVE_ICON);
         }
         return icon;

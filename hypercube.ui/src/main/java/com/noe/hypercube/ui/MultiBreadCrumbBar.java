@@ -144,7 +144,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         }
     }
 
-    public void setBreadCrumbs(Path path) {
+    public void setBreadCrumbs(final Path path) {
         setBreadCrumb(path.toString(), localBreadcrumb);
         final Map<String, String> remoteFolders = PathBundle.getAllRemoteFolders(path.toString());
         getChildren().clear();
