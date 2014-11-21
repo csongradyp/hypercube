@@ -24,6 +24,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.css.Styleable;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -73,7 +74,6 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     private SimpleBooleanProperty remote = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty cloud = new SimpleBooleanProperty(false);
-    private Boolean waitForResponce = false;
 
     public FileView() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fileView.fxml"));
@@ -96,12 +96,13 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         table.getLocationProperty().addListener((observable, previousFolder, newFolder) -> {
             if (newFolder != null) {
                 if (isRemote()) {
-                    waitForResponce = true;
-                    final IFile folder = table.getSelectionModel().getSelectedItem();
-                    EventBus.publish(new FileListRequest(hashCode(), remoteDrives.getActiveAccount(), getEventPath(newFolder), previousFolder));
+                    final String activeAccount = remoteDrives.getActiveAccount();
+                    if(activeAccount.equals("Cloud")) {
+                        // TODO change account for proper request !!!
+                    }
+                    EventBus.publish(new FileListRequest(hashCode(), activeAccount, getEventPath(newFolder), previousFolder));
                     showLoadingOverlay(resources);
                 } else {
-                    waitForResponce = false;
                     multiBreadCrumbBar.setAllRemoteCrumbsInactive();
                     multiBreadCrumbBar.setBreadCrumbs(newFolder);
                     table.setLocalFileList(newFolder, previousFolder);
@@ -161,10 +162,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     private void initRemoteDrives() {
         remoteDrives.activeProperty().addListener((observableValue, oldValue, newValue) -> remote.set(newValue));
         remoteDrives.setOnAction(event -> {
-            if (((ToggleButton) event.getSource()).getId().equals("Cloud")) {
-                table.getItems().clear();
-            }
-            final String account = ((ToggleButton) event.getSource()).getId();
+            final String account = ((Styleable) event.getSource()).getId();
             setLocation(null);
             setLocation(Paths.get(account));
             driveSpaceBar.clear();
@@ -175,7 +173,6 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         table.getItems().clear();
         final Path location = getLocation();
         if (isRemote()) {
-            waitForResponce = true;
             EventBus.publish(new FileListRequest(hashCode(), remoteDrives.getActiveAccount(), getEventPath(location), null));
         } else {
             table.setLocalFileList(location, null);
@@ -360,7 +357,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     @Override
     @Handler(rejectSubtypes = true)
-    public void onEvent(FileListResponse event) {
+    public void onEvent(final FileListResponse event) {
         if (isRemote() && isTarget(event)) {
             Platform.runLater(() -> {
                 if (event.isCloud()) {

@@ -102,7 +102,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEn
     @Override
     @Handler(rejectSubtypes = true)
     public void onFileListRequest(final FileListRequest event) {
-        if (event.getAccount().equals(client.getAccountName()) || event.isCloud()) {
+        if (event.getAccount().equals(client.getAccountName())) {
             try {
                 final List<ServerEntry> fileList;
                 final Path remoteFolder = event.getFolder();

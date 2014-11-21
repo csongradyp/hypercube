@@ -191,6 +191,9 @@ public final class EventBus {
     public static void subscribeToFileListRequest(FileEventHandler handler) {
         instance.fileListRequestBus.subscribe(handler);
     }
+    public static void subscribeToFileListRequest(EventHandler<FileListRequest> handler) {
+        instance.fileListRequestBus.subscribe(handler);
+    }
 
     public static void subscribeToFileListResponse(EventHandler<FileListResponse> handler) {
         instance.fileListResponseBus.subscribe(handler);

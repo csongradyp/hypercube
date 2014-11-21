@@ -90,7 +90,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
                 }
                 final List<? extends AccountInfo> removedAccount = change.getRemoved();
                 for (AccountInfo account : removedAccount) {
-
+                    //TODO handle removed accounts
                 }
             }
         });
@@ -166,21 +166,25 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     }
 
     public void setRemoteBreadCrumbs(final String account, final Path path) {
-        final RemoteFileBreadCrumbBar activeAccountCrumb = remotebreadcrumbs.get(account);
-        activeAccountCrumb.setActive(true);
-        final String crumbPath = path == null || Paths.get(account).equals(path) ? "" : path.toString();
-        final String localFolder = PathBundle.getLocalFolder(account, crumbPath);
-        if (isMapped(localFolder)) {
-            setBreadCrumbs(Paths.get(localFolder));
+        if (!account.equals("Cloud")) {
+            final RemoteFileBreadCrumbBar activeAccountCrumb = remotebreadcrumbs.get(account);
+            activeAccountCrumb.setActive(true);
+            final String crumbPath = path == null || Paths.get(account).equals(path) ? "" : path.toString();
+            final String localFolder = PathBundle.getLocalFolder(account, crumbPath);
+            if (isMapped(localFolder)) {
+                setBreadCrumbs(Paths.get(localFolder));
+            } else {
+                getChildren().clear();
+                activeAccountCrumb.setCanAddMapping(true);
+                setRemoteBreadCrumb(crumbPath, account, activeAccountCrumb);
+                getChildren().add(activeAccountCrumb);
+            }
         } else {
             getChildren().clear();
-            activeAccountCrumb.setCanAddMapping(true);
-            setRemoteBreadCrumb(crumbPath, account, activeAccountCrumb);
-            getChildren().add(activeAccountCrumb);
         }
     }
 
-    public void setCloudBreadCrumbs(String account) {
+    public void setCloudBreadCrumbs(final String account) {
         getChildren().clear();
         final Collection<RemoteFileBreadCrumbBar> remoteCrumbBars = remotebreadcrumbs.values();
         for (RemoteFileBreadCrumbBar activeAccountCrumb : remoteCrumbBars) {
