@@ -51,13 +51,13 @@ public class AccountSegmentedButton extends SegmentedButton {
         });
     }
 
-    private ToggleButton createAccountButton(String account) {
+    private ToggleButton createAccountButton(final String account) {
         final ToggleButton accountStorageButton = createButton(account);
         accountStorageButton.setGraphic(ImageBundle.getAccountImageView(account));
         return accountStorageButton;
     }
 
-    protected ToggleButton createButton(String account) {
+    protected ToggleButton createButton(final String account) {
         final ToggleButton accountStorageButton = new ToggleButton();
         accountStorageButton.setMinHeight(25.0);
         accountStorageButton.setMaxHeight(25.0);
@@ -74,7 +74,7 @@ public class AccountSegmentedButton extends SegmentedButton {
         return accountStorageButton;
     }
 
-    public void setOnAction(EventHandler<ActionEvent> eventHandler) {
+    public void setOnAction(final EventHandler<ActionEvent> eventHandler) {
         this.eventHandler = eventHandler;
     }
 
@@ -94,6 +94,15 @@ public class AccountSegmentedButton extends SegmentedButton {
         for (ToggleButton button : buttons) {
             if (button.isSelected()) {
                 button.setSelected(false);
+            }
+        }
+    }
+
+    public void select(final String account) {
+        final ObservableList<ToggleButton> accountButtons = getButtons();
+        for (ToggleButton accountButton : accountButtons) {
+            if(accountButton.getId().equals(account)) {
+                accountButton.setSelected(true);
             }
         }
     }

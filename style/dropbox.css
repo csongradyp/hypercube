@@ -1,11 +1,11 @@
 .background {
-    -fx-background-color: aliceblue;
+    -fx-background-color: white;
 }
 
 .table-view {
-    -fx-base: aliceblue;
+    -fx-base: white;
     -fx-control-inner-background: white;
-    -fx-background-color: aliceblue;
+    -fx-background-color: white;
     -fx-table-cell-border-color: transparent;
     -fx-table-header-border-color: transparent;
 }

@@ -118,7 +118,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
 
     public Path getNewRemotePath(final BreadCrumbBar.BreadCrumbActionEvent<String> event, final String account) {
         final RemoteFileBreadCrumbBar remoteFileBreadCrumbBar = remotebreadcrumbs.get(account);
-        return remoteFileBreadCrumbBar.getPath(event);
+        return Paths.get(account, remoteFileBreadCrumbBar.getPath(event).toString());
     }
 
     public Path getNewLocalPath(final BreadCrumbBar.BreadCrumbActionEvent<String> event) {
@@ -151,11 +151,11 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         if (path.toFile().exists()) {
             getChildren().add(localBreadcrumb);
         }
-        for (Map.Entry<String, String> entry : remoteFolders.entrySet()) {
-            final String account = entry.getKey();
+        for (Map.Entry<String, String> folderMapping : remoteFolders.entrySet()) {
+            final String account = folderMapping.getKey();
+            final String remoteFolderPath = folderMapping.getValue();
             final RemoteFileBreadCrumbBar remoteBreadcrumb = remotebreadcrumbs.get(account);
-            final String folderPath = entry.getValue();
-            setRemoteBreadCrumb(folderPath, account, remoteBreadcrumb);
+            setRemoteBreadCrumb(remoteFolderPath, account, remoteBreadcrumb);
             if (remoteBreadcrumb.isActive()) {
                 getChildren().add(0, remoteBreadcrumb);
             } else {
@@ -206,6 +206,15 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         final String breadcrumbPath = SLASH_SEPARATOR.matcher(pathWithAccount.toString()).replaceAll("\\\\");
         final TreeItem<String> model = BreadCrumbBar.buildTreeModel(breadcrumbPath.split(SEPARATOR_PATTERN));
         breadcrumb.setSelectedCrumb(model);
+    }
+
+    public RemoteFileBreadCrumbBar getActiveRemoteCrumb() {
+        for (RemoteFileBreadCrumbBar remoteFileBreadCrumbBar : remotebreadcrumbs.values()) {
+            if(remoteFileBreadCrumbBar.isActive()) {
+                return remoteFileBreadCrumbBar;
+            }
+        }
+        return null;
     }
 
     public void setOnLocalCrumbAction(EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> eventHandler) {

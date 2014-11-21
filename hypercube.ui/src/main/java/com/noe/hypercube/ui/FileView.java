@@ -44,8 +44,6 @@ import static com.noe.hypercube.ui.util.PathConverterUtil.getEventPath;
 import static javafx.scene.input.KeyCombination.ModifierValue.DOWN;
 import static javafx.scene.input.KeyCombination.ModifierValue.UP;
 
-//import java.awt.*;
-
 public class FileView extends VBox implements Initializable, EventHandler<FileListResponse> {
 
     private final KeyCombination enter = new KeyCodeCombination(KeyCode.ENTER);
@@ -113,7 +111,11 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         });
         multiBreadCrumbBar.remoteProperty().bindBidirectional(remote);
         multiBreadCrumbBar.setOnLocalCrumbAction(this::onLocalCrumbAction);
-        multiBreadCrumbBar.setOnRemoteCrumbAction(event -> setLocation(multiBreadCrumbBar.getNewRemotePath(event, remoteDrives.getActiveAccount())));
+        multiBreadCrumbBar.setOnRemoteCrumbAction(event -> {
+            final RemoteFileBreadCrumbBar activeRemoteCrumb = multiBreadCrumbBar.getActiveRemoteCrumb();
+            remoteDrives.select(activeRemoteCrumb.getAccount());
+            setLocation(multiBreadCrumbBar.getNewRemotePath(event, remoteDrives.getActiveAccount()));
+        });
     }
 
     private void showLoadingOverlay(ResourceBundle resources) {
