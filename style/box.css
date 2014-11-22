@@ -22,7 +22,6 @@
 .table-view:focused .table-row-cell:filled:focused:selected {
     -fx-background-color: -fx-focus-color;
     -fx-border-color: #000000;
-    -fx-border-width: 1;
 }
 
 .table-row-cell:filled {

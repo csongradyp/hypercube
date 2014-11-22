@@ -40,4 +40,9 @@ public class LocalFile extends File {
         return file.getParentFile().getParentFile() == null;
     }
 
+    @Override
+    public String getOrigin() {
+        return "Local";
+    }
+
 }

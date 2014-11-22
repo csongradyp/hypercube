@@ -46,4 +46,6 @@ public interface IFile {
     void share(String account);
 
     void share(Collection<String> account);
+
+    String getOrigin();
 }

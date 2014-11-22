@@ -138,7 +138,7 @@ public class RemoteFolderChooserDialog extends Dialog<Path> implements Initializ
             if (fileList != null) {
                 for (ServerEntry serverEntry : fileList) {
                     if (serverEntry.isFolder()) {
-                        remoteFiles.add(new RemoteFile(serverEntry.getPath(), 0L, serverEntry.isFolder(), serverEntry.lastModified()));
+                        remoteFiles.add(new RemoteFile(account, serverEntry.getPath(), 0L, serverEntry.isFolder(), serverEntry.lastModified()));
                     }
                 }
                 Platform.runLater(() -> {

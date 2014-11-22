@@ -8,10 +8,12 @@ public class RemoteFile extends File {
     private final boolean directory;
     private final long size;
     private final Date lastModified;
+    private final String origin;
     private String id;
 
-    public RemoteFile(final Path path, final long size, final boolean directory, final Date lastModified) {
+    public RemoteFile(final String origin, final Path path, final long size, final boolean directory, final Date lastModified) {
         super(path);
+        this.origin = origin;
         this.directory = directory;
         this.size = size;
         this.lastModified = lastModified;
@@ -48,6 +50,11 @@ public class RemoteFile extends File {
     @Override
     public boolean isShared() {
         return sharedWith().size() > 1;
+    }
+
+    @Override
+    public String getOrigin() {
+        return origin;
     }
 
     public String getId() {

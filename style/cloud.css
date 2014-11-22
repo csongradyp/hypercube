@@ -1,11 +1,11 @@
 .background {
-    -fx-background-color: white;
+    -fx-background-color: skyblue;
 }
 
 .table-view {
-    -fx-base: white;
-    -fx-control-inner-background: white;
-    -fx-background-color: white;
+    -fx-base: #3f779b;
+    -fx-control-inner-background: #3f779b;
+    -fx-background-color: #3f779b;
     -fx-table-cell-border-color: transparent;
     -fx-table-header-border-color: transparent;
 }
@@ -25,35 +25,35 @@
 }
 
 .table-row-cell:filled {
-    -fx-font-family: "Franklin Gothic";
+    -fx-font-family: "Arial";
 }
 
 .table-row-cell:odd:filled {
-    -fx-background-color: white;
+    -fx-background-color: #346381;
 }
 
 .table-row-cell:odd:filled:hover {
-    -fx-background-color: aliceblue;
+    -fx-background-color: #346381;
 }
 
 .table-row-cell:hover {
-    -fx-background-color: aliceblue;
+    -fx-background-color: #3f779b;
     -fx-alternative-column-fill-visible: false;
 }
 
 .table-view:focused .table-row-cell:filled:focused:selected {
-    -fx-background-color: #E3F2FF;
+    -fx-background-color: lightskyblue;
     -fx-border-color: transparent;
     -fx-alternative-column-fill-visible: false;
     -fx-alternative-row-fill-visible: false;
-    -fx-selection-bar: #E3F2FF;
-}
-
-.table-row-cell .text {
-    -fx-fill: #000000;
+    -fx-selection-bar: lightskyblue;
 }
 
 .folder {
-    -fx-text-fill: #cce5fa;
+    -fx-text-fill: #f5f5f5;
     -fx-effect: dropshadow(one-pass-box, black, 3, 0, 0, 0);
+}
+
+.account-icon {
+    -fx-effect: innershadow(gaussian, white, 7, 1, 1, 1);
 }

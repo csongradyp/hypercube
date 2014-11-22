@@ -96,9 +96,12 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         table.getLocationProperty().addListener((observable, previousFolder, newFolder) -> {
             if (newFolder != null) {
                 if (isRemote()) {
-                    final String activeAccount = remoteDrives.getActiveAccount();
+                    String activeAccount = remoteDrives.getActiveAccount();
                     if(activeAccount.equals("Cloud")) {
-                        // TODO change account for proper request !!!
+                        final IFile selectedFile = getSelectedFile();
+                        if(selectedFile.getPath().equals(newFolder)) {
+                            activeAccount = selectedFile.getOrigin();
+                        }
                     }
                     EventBus.publish(new FileListRequest(hashCode(), activeAccount, getEventPath(newFolder), previousFolder));
                     showLoadingOverlay(resources);
@@ -320,7 +323,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
             }
             table.setCloudFileList(folder, event.getFileList());
         } else {
-            table.setRemoteFileList(event.getPreviousFolder(), folder, event.getFileList());
+            table.setRemoteFileList(event.getAccount(), event.getPreviousFolder(), folder, event.getFileList());
         }
         activateRemoteStorageButton(event);
         deselectButtons(localDrives);
