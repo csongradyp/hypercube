@@ -63,3 +63,7 @@
     -fx-text-fill: #8f8f8f;
     -fx-effect: dropshadow(one-pass-box, black, 3, 0, 0, 0);
 }
+
+.account-icon {
+    -fx-effect: innershadow(gaussian, gray, 7, 1, 1, 1);
+}

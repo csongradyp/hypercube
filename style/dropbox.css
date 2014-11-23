@@ -57,3 +57,7 @@
     -fx-text-fill: #cce5fa;
     -fx-effect: dropshadow(one-pass-box, black, 3, 0, 0, 0);
 }
+
+.account-icon {
+    -fx-effect: innershadow(gaussian, #cce5fa, 7, 1, 1, 1);
+}

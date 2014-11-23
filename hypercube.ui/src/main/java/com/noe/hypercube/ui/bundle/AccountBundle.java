@@ -65,14 +65,8 @@ public final class AccountBundle {
         throw new IllegalArgumentException(String.format("Unknown account: %s", accountName));
     }
 
-    public Boolean isAnyAccountActive() {
-//        for (AccountInfo account : accounts) {
-//            if(isActive(account.getName())) {
-//                return true;
-//            }
-//        }
-//        return false;
-        return connected.get();
+    public static Boolean isAnyAccountActive() {
+        return INSTANCE.connected.get();
     }
 
     public static SimpleBooleanProperty connectedProperty() {

@@ -75,11 +75,15 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         cloudColumn.setCellFactory(new FileCellFactory(file -> {
             HBox content = new HBox(2.0d);
             if (!file.isStepBack() && !file.isLocal()) {
-                createAccountMarkLabel(content, file.getOrigin());
+                final Label accountMarkLabel = createAccountMarkLabel(file.getOrigin());
+                accountMarkLabel.getStyleClass().add("account-icon");
+                content.getChildren().add(accountMarkLabel);
             }
             final Collection<String> sharedWith = file.sharedWith();
             for (final String account : sharedWith) {
-                createAccountMarkLabel(content, account);
+                final Label sharedAccountMarkLabel = createAccountMarkLabel(account);
+                sharedAccountMarkLabel.getStyleClass().add("account-icon");
+                content.getChildren().add(sharedAccountMarkLabel);
             }
             return content;
         }));
@@ -116,14 +120,13 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         });
     }
 
-    private void createAccountMarkLabel(final HBox content, final String account) {
+    private Label createAccountMarkLabel(final String account) {
         final Label accountMark = new Label();
         accountMark.setId(account);
         final ImageView icon = ImageBundle.getAccountImageView(account);
-//        icon.getStyleClass().add("account-icon ");
         accountMark.setGraphic(icon);
         accountMark.setTooltip(new Tooltip(account));
-        content.getChildren().add(accountMark);
+        return accountMark;
     }
 
     private void setEmptyTablePlaceholder(ResourceBundle resources) {

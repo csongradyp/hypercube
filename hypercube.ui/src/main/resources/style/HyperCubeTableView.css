@@ -78,3 +78,7 @@
         linear-gradient(from 0% 0% to 15% 50%, rgba(255,255,255,0.9), rgba(255,255,255,0));
     -fx-effect: dropshadow(one-pass-box, black, 3, 0, 0, 0);
 }
+
+.account-icon {
+    -fx-effect: innershadow(gaussian, black, 7, 1, 1, 1);
+}
