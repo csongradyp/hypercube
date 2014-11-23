@@ -131,7 +131,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         final ImageView loadingImage = ImageBundle.getImageView("icon.loading");
         final Label loading = new Label(resources.getString("loading.file.list"), loadingImage);
         loading.setContentDisplay(ContentDisplay.TOP);
-        loading.setStyle("-fx-font-size: 25");
+        loading.setStyle("-fx-font-size: 15");
         loading.setId("loading");
         tableStack.getChildren().add(0, loading);
     }

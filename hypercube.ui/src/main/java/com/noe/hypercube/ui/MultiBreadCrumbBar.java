@@ -60,14 +60,14 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         });
         getChildren().add(localBreadcrumb);
         setLocalCrumbActionHandler();
-//        final Collection<String> accounts = AccountBundle.getAccountNames();
-//        for (String account : accounts) {
-//            final RemoteFileBreadCrumbBar remoteBreadcrumb = new RemoteFileBreadCrumbBar(account);
-//            addRemoteCrumbEventHandler(remoteBreadcrumb);
-//            remoteBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapRemoteDialog( remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation()));
-//            setOnRemoveRemoteMapping(remoteBreadcrumb);
-//            remotebreadcrumbs.put(account, remoteBreadcrumb);
-//        }
+        final Collection<String> accounts = AccountBundle.getAccountNames();
+        for (String account : accounts) {
+            final RemoteFileBreadCrumbBar remoteBreadcrumb = new RemoteFileBreadCrumbBar(account);
+            addRemoteCrumbEventHandler(remoteBreadcrumb);
+            remoteBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapRemoteDialog( remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation()));
+            setOnRemoveRemoteMapping(remoteBreadcrumb);
+            remotebreadcrumbs.put(account, remoteBreadcrumb);
+        }
         addListenerForAccountChanges();
         localBreadcrumb.activeProperty().bind(remote.not());
     }
