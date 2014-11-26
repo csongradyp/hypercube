@@ -377,7 +377,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     }
 
     private boolean isTarget(FileListResponse event) {
-        return event.getTarget().equals(hashCode());
+        return event.getTarget().equals(hashCode()) || getLocation().equals(event.getFolder());
     }
 
     public SimpleBooleanProperty remoteProperty() {
