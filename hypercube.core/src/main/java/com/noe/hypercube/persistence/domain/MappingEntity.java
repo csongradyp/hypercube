@@ -1,5 +1,6 @@
-package com.noe.hypercube.domain;
+package com.noe.hypercube.persistence.domain;
 
+import com.noe.hypercube.domain.Filter;
 import com.noe.hypercube.service.Account;
 
 public interface MappingEntity extends IEntity<String> {

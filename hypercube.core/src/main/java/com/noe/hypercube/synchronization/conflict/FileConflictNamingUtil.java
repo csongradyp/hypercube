@@ -1,8 +1,8 @@
 package com.noe.hypercube.synchronization.conflict;
 
-import com.noe.hypercube.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
-import com.noe.hypercube.domain.UploadEntity;
+import com.noe.hypercube.persistence.domain.UploadEntity;
 import com.noe.hypercube.util.DateUtil;
 import org.apache.commons.io.FilenameUtils;
 

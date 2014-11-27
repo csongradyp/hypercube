@@ -1,6 +1,6 @@
 package com.noe.hypercube.synchronization.presynchronization.domain;
 
-import com.noe.hypercube.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.FileEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;

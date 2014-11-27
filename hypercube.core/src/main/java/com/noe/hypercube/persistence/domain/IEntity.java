@@ -1,4 +1,4 @@
-package com.noe.hypercube.domain;
+package com.noe.hypercube.persistence.domain;
 
 public interface IEntity<KEY_TYPE> {
 

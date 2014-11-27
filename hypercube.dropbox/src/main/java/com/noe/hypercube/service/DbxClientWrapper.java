@@ -3,6 +3,8 @@ package com.noe.hypercube.service;
 
 import com.dropbox.core.*;
 import com.noe.hypercube.domain.*;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.UploadEntity;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;

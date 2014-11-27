@@ -1,6 +1,6 @@
 package com.noe.hypercube.dao;
 
-import com.noe.hypercube.domain.LocalFileEntity;
+import com.noe.hypercube.persistence.domain.LocalFileEntity;
 
 import javax.inject.Named;
 

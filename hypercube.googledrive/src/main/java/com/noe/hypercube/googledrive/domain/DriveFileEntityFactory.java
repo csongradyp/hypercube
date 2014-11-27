@@ -1,7 +1,7 @@
 package com.noe.hypercube.googledrive.domain;
 
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.FileEntityFactory;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.FileEntityFactory;
 import com.noe.hypercube.googledrive.service.GoogleDrive;
 
 import java.util.Date;

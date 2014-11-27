@@ -3,6 +3,8 @@ package com.noe.hypercube.observer.remote;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.*;
 import com.noe.hypercube.mapping.IMapper;
+import com.noe.hypercube.persistence.FileEntityFactory;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.service.TestAccount;
 import com.noe.hypercube.synchronization.SynchronizationException;

@@ -1,7 +1,8 @@
-package com.noe.hypercube.domain;
+package com.noe.hypercube.persistence.domain;
 
 
 import com.noe.hypercube.Action;
+import com.noe.hypercube.domain.IStreamEntry;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;

@@ -1,6 +1,6 @@
 package com.noe.hypercube.synchronization.presynchronization;
 
-import com.noe.hypercube.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.FileEntity;
 import com.noe.hypercube.observer.local.LocalFileListener;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;

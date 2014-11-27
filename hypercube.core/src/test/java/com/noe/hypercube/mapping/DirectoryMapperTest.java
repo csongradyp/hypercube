@@ -1,7 +1,7 @@
 package com.noe.hypercube.mapping;
 
 import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 import com.noe.hypercube.domain.TestMapping;
 import com.noe.hypercube.mapping.collector.LocalDirectoryCollector;
 import com.noe.hypercube.mapping.collector.RemoteDirectoryCollector;

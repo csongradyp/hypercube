@@ -1,6 +1,6 @@
 package com.noe.hypercube.converter;
 
-import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

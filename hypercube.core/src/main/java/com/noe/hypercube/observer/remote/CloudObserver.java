@@ -1,8 +1,8 @@
 package com.noe.hypercube.observer.remote;
 
 import com.noe.hypercube.domain.AccountBox;
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;

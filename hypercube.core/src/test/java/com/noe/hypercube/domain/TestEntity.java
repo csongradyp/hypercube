@@ -1,5 +1,6 @@
 package com.noe.hypercube.domain;
 
+import com.noe.hypercube.persistence.domain.FileEntity;
 import java.util.Date;
 
 public class TestEntity implements FileEntity {

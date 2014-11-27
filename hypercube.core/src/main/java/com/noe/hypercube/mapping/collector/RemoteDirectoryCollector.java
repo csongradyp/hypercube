@@ -1,6 +1,6 @@
 package com.noe.hypercube.mapping.collector;
 
-import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 
 import javax.inject.Named;
 import java.nio.file.Path;
