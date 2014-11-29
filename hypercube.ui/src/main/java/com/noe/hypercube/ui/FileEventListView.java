@@ -28,11 +28,11 @@ import java.util.ResourceBundle;
 public abstract class FileEventListView extends VBox implements Initializable {
 
     @FXML
-    private AccountSegmentedButton accounts;
+    protected AccountSegmentedButton accounts;
     @FXML
-    private FileListView<DetailedFileListItem> downloadList;
+    protected FileListView<DetailedFileListItem> downloadList;
     @FXML
-    private FileListView<DetailedFileListItem> uploadList;
+    protected FileListView<DetailedFileListItem> uploadList;
     private ResourceBundle resourceBundle;
 
     public FileEventListView() {
@@ -67,12 +67,12 @@ public abstract class FileEventListView extends VBox implements Initializable {
         getListSource(account).addListener((ListChangeListener<FileEvent>) change -> {
             while (change.next()) {
                 final List<? extends FileEvent> added = change.getAddedSubList();
-                for (FileEvent item : added) {
+                for (FileEvent event : added) {
                     Platform.runLater(() -> {
-                        if (StreamDirection.DOWN == item.getDirection()) {
-                            downloadList.add(new DetailedFileListItem(item, resourceBundle));
+                        if (StreamDirection.DOWN == event.getDirection()) {
+                            downloadList.add(new DetailedFileListItem(event, resourceBundle));
                         } else {
-                            uploadList.add(new DetailedFileListItem(item, resourceBundle));
+                            uploadList.add(new DetailedFileListItem(event, resourceBundle));
                         }
                     });
                 }

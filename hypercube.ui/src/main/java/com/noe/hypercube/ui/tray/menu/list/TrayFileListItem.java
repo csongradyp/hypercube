@@ -1,19 +1,20 @@
 package com.noe.hypercube.ui.tray.menu.list;
 
+import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.FileEvent;
+import com.noe.hypercube.event.domain.JumpToFileEvent;
 import com.noe.hypercube.ui.util.FileManagerUtil;
 import com.noe.hypercube.ui.util.IconInjector;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class TrayFileListItem extends FileListItem implements Initializable {
 
@@ -27,7 +28,7 @@ public class TrayFileListItem extends FileListItem implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         final Label streamDirection = IconInjector.getStreamDirectionIcon(fileEvent);
         final Label filePath = createFileLabel(fileEvent);
-        final Button viewButton = createShareButton(fileEvent);
+        final Button viewButton = createViewButton(fileEvent);
         setOnMouseEntered(event -> viewButton.setVisible(true));
         setOnMouseExited(event -> viewButton.setVisible(false));
         setOnMouseClicked(event -> {
@@ -52,14 +53,15 @@ public class TrayFileListItem extends FileListItem implements Initializable {
         return fileName;
     }
 
-    private Button createShareButton(final FileEvent file) {
+    private Button createViewButton(final FileEvent file) {
         final Button viewButton = new Button();
         viewButton.setPrefSize(15, 15);
         viewButton.setFocusTraversable(false);
-        AwesomeDude.setIcon(viewButton, AwesomeIcon.SHARE_ALT);
+        AwesomeDude.setIcon(viewButton, AwesomeIcon.EYE);
         viewButton.setVisible(false);
         viewButton.setOnAction(event -> {
-            System.out.println(file.getLocalPath());
+            // TODO handle account while filejump
+            EventBus.publish(new JumpToFileEvent(file.getAccount(), file.getLocalPath()));
         });
         return viewButton;
     }
