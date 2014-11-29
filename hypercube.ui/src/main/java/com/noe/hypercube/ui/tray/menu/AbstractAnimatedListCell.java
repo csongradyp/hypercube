@@ -5,7 +5,7 @@ import javafx.animation.Timeline;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 
-public abstract class AbstractAnimatedListCell<T extends Node> extends ListCell<T> {
+public abstract class AbstractAnimatedListCell<NODE extends Node> extends ListCell<NODE> {
 
     public enum AnimationType {
         FADE_OUT,
@@ -88,20 +88,22 @@ public abstract class AbstractAnimatedListCell<T extends Node> extends ListCell<
     }
 
     @Override
-    protected void updateItem(T t, boolean empty) {
-        super.updateItem(t, empty);
-        if (t == null) {
-            return;
-        }
-        setGraphic(t);
-        if(isFirstItem()) {
-            if (animationPack.getKeyFrames().isEmpty()) {
-                KeyFrame[] f = getKeyFrames(types);
-                if (f != null) {
-                    animationPack.getKeyFrames().addAll(f);
+    protected void updateItem(NODE item, boolean empty) {
+        super.updateItem(item, empty);
+        if (item != null && !empty ) {
+            setGraphic(item);
+            if(isFirstItem()) {
+                if (animationPack.getKeyFrames().isEmpty()) {
+                    KeyFrame[] keyFrames = getKeyFrames(types);
+                    if (keyFrames != null) {
+                        animationPack.getKeyFrames().addAll(keyFrames);
+                    }
                 }
+                animate();
             }
-            animate();
+        } else {
+            setGraphic(null);
+            setText(null);
         }
     }
 

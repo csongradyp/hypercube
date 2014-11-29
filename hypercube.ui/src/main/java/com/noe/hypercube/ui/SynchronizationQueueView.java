@@ -7,70 +7,66 @@ import com.noe.hypercube.event.domain.request.QueueContentRequest;
 import com.noe.hypercube.event.domain.type.QueueType;
 import com.noe.hypercube.event.domain.type.StreamDirection;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
-import com.noe.hypercube.ui.elements.AccountSegmentedButton;
+import com.noe.hypercube.ui.tray.menu.list.DetailedFileListItem;
+import com.noe.hypercube.ui.tray.menu.list.ProcessedDetailedFileListItem;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+import de.jensd.fx.fontawesome.AwesomeIconsStack;
+import de.jensd.fx.fontawesome.Icon;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 import net.engio.mbassy.listener.Handler;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static com.noe.hypercube.event.domain.type.FileEventType.*;
 
-public class SynchronizationQueueView extends VBox implements Initializable, EventHandler<FileEvent> {
+public class SynchronizationQueueView extends FileEventListView implements Initializable, EventHandler<FileEvent> {
 
-    @FXML
-    private AccountSegmentedButton accounts;
-    @FXML
-    private ListView<Label> downloadList;
-    @FXML
-    private ListView<Label> uploadList;
+    private final ResourceBundle resourceBundle;
 
     public SynchronizationQueueView() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("synchronizationQueueView.fxml"));
-        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage())));
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
-        try {
-            fxmlLoader.load();
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
+        resourceBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         EventBus.subscribeToFileEvent(this);
-        downloadList.setPlaceholder(createPlaceholder(AwesomeIcon.CLOUD_DOWNLOAD));
-        uploadList.setPlaceholder(createPlaceholder(AwesomeIcon.CLOUD_UPLOAD));
         accounts.setOnAction(event -> EventBus.publish(new QueueContentRequest(QueueType.MAIN, accounts.getActiveAccount())));
         final ObservableList<ToggleButton> accountsButtons = accounts.getButtons();
-        if(!accountsButtons.isEmpty()) {
+        if (!accountsButtons.isEmpty()) {
             accountsButtons.get(0).fire();
         }
     }
 
-    private Label createPlaceholder(AwesomeIcon icon) {
-        final Label iconLabel = AwesomeDude.createIconLabel(icon, "", "150px", "12", ContentDisplay.TOP);
-        iconLabel.getGraphic().setOpacity(0.1d);
-        return iconLabel;
+    @Override
+    protected ObservableList<FileEvent> getListSource(final String account) {
+        return null;
+    }
+
+    @Override
+    protected StackPane getDownloadListPlaceholderIcon() {
+        final AwesomeIconsStack iconsStack = AwesomeIconsStack.create();
+        iconsStack.add(new Icon(AwesomeIcon.CLOUD_DOWNLOAD, "150px", "", ""));
+        return iconsStack;
+    }
+
+    @Override
+    protected StackPane getUploadListPlaceholder() {
+        final AwesomeIconsStack iconsStack = AwesomeIconsStack.create();
+        iconsStack.add(new Icon(AwesomeIcon.CLOUD_DOWNLOAD, "150px", "", ""));
+        return iconsStack;
     }
 
     @Override
     @Handler(rejectSubtypes = true)
-    public void onEvent(FileEvent event) {
+    public void onEvent(final FileEvent event) {
         Platform.runLater(() -> {
             if (StreamDirection.DOWN == event.getDirection()) {
                 handle(event, downloadList.getItems());
@@ -80,7 +76,7 @@ public class SynchronizationQueueView extends VBox implements Initializable, Eve
         });
     }
 
-    private void handle(FileEvent event, ObservableList<Label> items) {
+    private void handle(final FileEvent event, final ObservableList<DetailedFileListItem> items) {
         if (SUBMITTED == event.getEventType()) {
             addListItem(event, items);
         } else {
@@ -88,20 +84,26 @@ public class SynchronizationQueueView extends VBox implements Initializable, Eve
         }
     }
 
-    private void addListItem(FileEvent event, ObservableList<Label> items) {
-        Label item = AwesomeDude.createIconLabel(AwesomeIcon.CLOCK_ALT, event.getLocalPath().toString(), "15", "12", ContentDisplay.LEFT);
+    private void addListItem(final FileEvent event, final ObservableList<DetailedFileListItem> items) {
+        DetailedFileListItem item = new ProcessedDetailedFileListItem(event, resourceBundle);
         items.add(0, item);
     }
 
-    private void updateItems(FileEvent event, ObservableList<Label> items) {
-        for (Label label : items) {
-            if(label.getText().equals(event.getLocalPath().toString())) {
+    private void updateItems(final FileEvent event, final ObservableList<DetailedFileListItem> items) {
+        final Optional<DetailedFileListItem> match = items.parallelStream().filter(item -> item.getFileEvent().getLocalPath().equals(event.getLocalPath())
+                        && item.getFileEvent().getRemotePath().equals(event.getRemotePath())
+                        && item.getFileEvent().getActionType().equals(event.getActionType())
+        ).findAny();
+
+        if (match.isPresent()) {
+            final DetailedFileListItem itemToUpdate = match.get();
+            final FileEvent itemEvent = itemToUpdate.getFileEvent();
+            if (itemEvent.getLocalPath().equals(event.getLocalPath()) && itemEvent.getRemotePath().equals(event.getRemotePath()) && itemEvent.getActionType().equals(event.getActionType())) {
                 if (STARTED == event.getEventType()) {
-                    AwesomeDude.setIcon(label, AwesomeIcon.REFRESH);
+                    itemToUpdate.setStatusIcon(AwesomeDude.createIconLabel(AwesomeIcon.REFRESH, "20"));
                 } else if (FINISHED == event.getEventType()) {
-                    items.remove(label);
+                    items.remove(itemToUpdate);
                 }
-                break;
             }
         }
     }

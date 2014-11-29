@@ -6,44 +6,51 @@ import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.util.IconInjector;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
-import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.net.URL;
+import java.nio.file.FileSystems;
 import java.util.ResourceBundle;
 
-public class DetailedFileListItem extends FileListItem implements Initializable {
+public class DetailedFileListItem extends FileListItem {
 
     public DetailedFileListItem(final FileEvent fileEvent, final ResourceBundle messageBundle) {
         super(fileEvent, messageBundle);
+        getChildren().clear();
+        Label statusIcon = getDefaultStatusIcon();
+        final Node fileInfo = createFileLabel(fileEvent);
+        getChildren().addAll(statusIcon, fileInfo, syncTime);
+        setAlignment(Pos.CENTER_LEFT);
+    }
+
+    protected Label getDefaultStatusIcon() {
+        return IconInjector.getStreamDirectionIcon(fileEvent);
+    }
+
+    public void setStatusIcon(final Label statusIcon) {
+        getChildren().remove(0);
+        getChildren().add(0, statusIcon);
     }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        final Label streamDirection = IconInjector.getStreamDirectionIcon(fileEvent);
-        final Label filePath = createFileLabel(fileEvent);
-        getChildren().addAll(streamDirection, filePath, syncTime);
-    }
-
-    @Override
-    protected Label createFileLabel(final FileEvent fileEvent) {
-        String text = createFileText(fileEvent);
-        final Label label = new Label(text);
-        label.setTooltip(new Tooltip(text));
-        IconInjector.setFileStatusIcon(fileEvent, label);
-        label.setAlignment(Pos.CENTER_LEFT);
-        label.autosize();
-        return label;
+    protected HBox createFileLabel(final FileEvent fileEvent) {
+        final VBox graphic = createFileGraphic(fileEvent);
+        final Label status = new Label();
+        IconInjector.setFileStatusIcon(fileEvent, status);
+        return new HBox(5.0d, status, graphic);
     }
 
     private VBox createFileGraphic(final FileEvent fileEvent) {
-        VBox graphic = new VBox();
-        final Label local = new Label(fileEvent.getLocalPath().toString());
-        AwesomeDude.setIcon(local, AwesomeIcon.HOME);
-        final Label remote = new Label(fileEvent.getRemotePath().toString(), ImageBundle.getAccountImageView(fileEvent.getAccount()));
+        VBox graphic = new VBox(2.0d);
+        final Label local = new Label(FileSystems.getDefault().getSeparator() + fileEvent.getLocalPath().toString());
+        local.setTooltip(new Tooltip(createFileText(fileEvent)));
+        AwesomeDude.setIcon(local, AwesomeIcon.HOME, "18");
+        final Label remote = new Label(FileSystems.getDefault().getSeparator() + fileEvent.getRemotePath().toString(), ImageBundle.getAccountImageView(fileEvent.getAccount()));
+        remote.setTooltip(new Tooltip(createFileText(fileEvent)));
         if(StreamDirection.DOWN == fileEvent.getDirection()) {
             graphic.getChildren().addAll(local, remote);
         } else {

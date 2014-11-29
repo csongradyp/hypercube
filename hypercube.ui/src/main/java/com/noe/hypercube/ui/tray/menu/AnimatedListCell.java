@@ -9,7 +9,7 @@ public class AnimatedListCell<T extends Node> extends AbstractAnimatedListCell<T
     }
 
     @Override
-    protected void updateItem(T t, boolean empty) {
-        super.updateItem(t, empty);
+    protected void updateItem(T item, boolean empty) {
+        super.updateItem(item, empty);
     }
 }

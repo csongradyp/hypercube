@@ -9,9 +9,6 @@ import de.jensd.fx.fontawesome.Icon;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.effect.BlurType;
-import javafx.scene.effect.InnerShadow;
-import javafx.scene.paint.Color;
 
 import static com.noe.hypercube.event.domain.type.FileActionType.*;
 import static com.noe.hypercube.event.domain.type.StreamDirection.DOWN;
@@ -20,7 +17,7 @@ import static com.noe.hypercube.event.domain.type.SynchronizationSate.State.*;
 public final class IconInjector {
 
     private static final String ICON_SIZE = "20";
-    private static final String SECONDARY_ICON_SIZE = "12";
+    private static final String SECONDARY_ICON_SIZE = "14";
 
     private IconInjector() {
     }
@@ -29,19 +26,19 @@ public final class IconInjector {
         AwesomeIconsStack graphic = null;
         if (ADDED == file.getActionType()) {
             graphic = AwesomeIconsStack.create()
-                    .add(new Icon(AwesomeIcon.FILE_ALT, ICON_SIZE, "", ""))
-                    .add(new Icon(AwesomeIcon.PLUS, SECONDARY_ICON_SIZE, "-fx-text-fill: green", ""));
+                    .add(new Icon(AwesomeIcon.SQUARE, ICON_SIZE, "-fx-text-fill: forestgreen", ""))
+                    .add(new Icon(AwesomeIcon.PLUS, SECONDARY_ICON_SIZE, "-fx-text-background-color: transparent; -fx-text-fill: white;", ""));
         } else if (DELETED == file.getActionType()) {
             graphic = AwesomeIconsStack.create()
-                    .add(new Icon(AwesomeIcon.FILE_ALT, ICON_SIZE, "", ""))
-                    .add(new Icon(AwesomeIcon.TRASH, SECONDARY_ICON_SIZE, "-fx-text-fill: red", ""));
+                    .add(new Icon(AwesomeIcon.SQUARE, ICON_SIZE, "-fx-text-fill: red", ""))
+                    .add(new Icon(AwesomeIcon.TRASH, SECONDARY_ICON_SIZE, "-fx-text-background-color: transparent; -fx-text-fill: white;", ""));
         } else if (UPDATED == file.getActionType()) {
             graphic = AwesomeIconsStack.create()
-                    .add(new Icon(AwesomeIcon.FILE_ALT, ICON_SIZE, "", ""))
-                    .add(new Icon(AwesomeIcon.PENCIL, SECONDARY_ICON_SIZE, "-fx-text-fill: blue", ""));
+                    .add(new Icon(AwesomeIcon.SQUARE, ICON_SIZE, "-fx-text-fill: steelblue", ""))
+                    .add(new Icon(AwesomeIcon.PENCIL, SECONDARY_ICON_SIZE, "-fx-text-background-color: transparent; -fx-text-fill: white;", ""));
         }
         if (graphic != null) {
-            graphic.setAlignment(Pos.BOTTOM_LEFT);
+            graphic.setAlignment(Pos.CENTER);
             label.setGraphic(graphic);
         }
     }
@@ -68,11 +65,11 @@ public final class IconInjector {
     public static Label getStreamDirectionIcon(final FileEvent fileEvent) {
         final Label icon;
         if (fileEvent.getDirection() == DOWN) {
-            icon = AwesomeDude.createIconLabel(AwesomeIcon.ARROW_CIRCLE_DOWN, ICON_SIZE);
+            icon = AwesomeDude.createIconLabel(AwesomeIcon.ARROW_DOWN, ICON_SIZE);
         } else {
-            icon = AwesomeDude.createIconLabel(AwesomeIcon.ARROW_CIRCLE_UP, ICON_SIZE);
+            icon = AwesomeDude.createIconLabel(AwesomeIcon.ARROW_UP, ICON_SIZE);
         }
-        icon.setEffect(new InnerShadow(BlurType.GAUSSIAN, Color.GREY, 7, 1, 1, 1));
+//        icon.setEffect(new InnerShadow(BlurType.GAUSSIAN, Color.GREY, 7, 1, 1, 1));
         return icon;
     }
 }
