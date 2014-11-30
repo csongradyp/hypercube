@@ -29,14 +29,6 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
 
     Class<ACCOUNT_TYPE> getAccountType();
 
-    String getRefreshToken();
-
-    void setRefreshToken(final String refreshToken);
-
-    String getAccessToken();
-
-    void setAccessToken(final String accessToken);
-
     /**
      * Checks whether the file exists on the server or not.
      *

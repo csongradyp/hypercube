@@ -1,61 +1,64 @@
 package com.noe.hypercube.service;
 
 
-import com.noe.hypercube.persistence.IAccountPersistenceController;
 import com.noe.hypercube.persistence.domain.AccountEntity;
 import com.noe.hypercube.persistence.domain.FileEntity;
 import com.noe.hypercube.persistence.domain.MappingEntity;
 import java.util.Optional;
 import javafx.beans.property.SimpleBooleanProperty;
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class Client<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_ENTITY extends MappingEntity> implements IClient<ACCOUNT_TYPE, ENTITY_TYPE, MAPPING_ENTITY> {
+public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE extends FileEntity, MAPPING_ENTITY extends MappingEntity> implements IClient<ACCOUNT_TYPE, ENTITY_TYPE, MAPPING_ENTITY> {
 
-    @Inject
-    private IAccountPersistenceController accountPersistenceController;
+    private static final Logger LOG = LoggerFactory.getLogger(Client.class);
 
     private SimpleBooleanProperty connected = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty attached = new SimpleBooleanProperty(false);
+    protected Authentication<CLIENT> authentication;
+    private CLIENT client;
 
-    private String refreshToken;
-    private String accessToken;
-
-    public Client() {
+    public Client(Authentication<CLIENT> authentication) {
+        this.authentication = authentication;
     }
 
     @PostConstruct
     public void initState() {
-        final Optional<AccountEntity> storedAccountProperties = accountPersistenceController.findByAccountName(getAccountName());
+        final Optional<AccountEntity> storedAccountProperties = authentication.getStoredTokens();
         if (storedAccountProperties.isPresent()) {
             final AccountEntity accountEntity = storedAccountProperties.get();
             if (accountEntity.isAttached()) {
                 attached.set(true);
-                refreshToken = accountEntity.getRefreshToken();
-                accessToken = accountEntity.getAccessToken();
+                client = createClient(accountEntity.getRefreshToken(), accountEntity.getAccessToken());
             }
+        } else {
+            client = createClientWithNewAuthentication();
         }
         setConnected(testConnectionActive());
     }
 
-    @Override
-    public String getRefreshToken() {
-        return refreshToken;
+    protected CLIENT createClientWithNewAuthentication() {
+        try {
+            return authentication.createClient();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw new RuntimeException("Client could not be created", e);
+        }
     }
 
-    @Override
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
+    protected abstract CLIENT createClient(final String refreshToken, final String accessToken);
+
+    protected CLIENT getClient() {
+        return client;
     }
 
-    @Override
-    public String getAccessToken() {
-        return accessToken;
+    public Authentication<CLIENT> getAuthentication() {
+        return authentication;
     }
 
-    @Override
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+    protected void storeNewTokens(final String refreshToken, final String accessToken) {
+        authentication.storeTokens(refreshToken, accessToken);
     }
 
     public Boolean isAttached() {

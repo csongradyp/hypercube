@@ -38,7 +38,7 @@ public class FolderPreSynchronizerTest {
     @Mock
     private PreSynchronizationSubmitManager mockSubmitManager;
 
-    private AccountBox<TestAccount, TestEntity, TestMapping> accountBox;
+    private AccountBox<TestAccount, Object, TestEntity, TestMapping> accountBox;
     private FolderPreSynchronizer underTest;
 
     @Before

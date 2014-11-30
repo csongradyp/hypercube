@@ -15,6 +15,7 @@ import com.noe.hypercube.persistence.domain.UploadEntity;
 import com.noe.hypercube.googledrive.domain.DriveFileEntity;
 import com.noe.hypercube.googledrive.domain.DriveMapping;
 import com.noe.hypercube.googledrive.domain.DriveServerEntry;
+import com.noe.hypercube.service.Authentication;
 import com.noe.hypercube.service.Client;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping> {
+public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, DriveMapping> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DriveClient.class);
     private static final String EXCLUDE_FILE = "collaboration";
@@ -45,10 +46,24 @@ public class DriveClient extends Client<GoogleDrive,DriveFileEntity,DriveMapping
     @Inject
     private DriveDirectoryUtil dirUtil;
 
-    private final Drive client;
+    private Drive client;
 
-    public DriveClient(Drive client) {
-        this.client = client;
+//    public DriveClient(Drive client) {
+//        this.client = client;
+//    }
+
+    public DriveClient(Authentication<Drive> authentication) {
+        super(authentication);
+    }
+
+    @Override
+    protected Drive createClientWithNewAuthentication() {
+        return null;
+    }
+
+    @Override
+    protected Drive createClient(final String refreshToken, final String accessToken) {
+        return null;
     }
 
     @Override

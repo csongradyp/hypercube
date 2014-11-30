@@ -7,8 +7,8 @@ import javax.inject.Named;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
 @Named
+@Repository
 public interface IAccountPersistenceController extends JpaRepository<AccountEntity, Integer> {
 
     Optional<AccountEntity> findByAccountName(String accountName);

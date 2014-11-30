@@ -31,5 +31,6 @@
     <bean id="boxDirectoryMapper" class="com.noe.hypercube.mapping.BoxDirectoryMapper"/>
     <bean id="boxFileEntityFactory" class="com.noe.hypercube.domain.BoxFileEntityFactory"/>
     <bean id="boxClient" class="com.noe.hypercube.service.BoxClientWrapper"/>
+    <bean id="boxAuthentication" class="com.noe.hypercube.BoxAuthentication" />
 
 </beans>

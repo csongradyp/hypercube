@@ -102,7 +102,7 @@ public class LocalFileListener implements FileAlterationListener {
     }
 
     private void forAllAccounts(final File file, final AccountActionCallback accountAction) {
-        for (final AccountBox<?, ?, ?> accountBox : accountBoxes) {
+        for (final AccountBox<?, ?, ?, ?> accountBox : accountBoxes) {
             try {
                 List<Path> remotes = accountBox.getMapper().getRemotes(file);
                 if (remotes != null) {

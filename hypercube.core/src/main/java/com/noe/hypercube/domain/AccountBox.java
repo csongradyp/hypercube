@@ -25,16 +25,16 @@ import java.nio.file.Paths;
 import java.util.List;
 import net.engio.mbassy.listener.Handler;
 
-public class AccountBox<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileEntity, MAPPING_TYPE extends MappingEntity> implements FileEventHandler {
+public class AccountBox<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE extends FileEntity, MAPPING_TYPE extends MappingEntity> implements FileEventHandler {
 
-    private final Client<ACCOUNT_TYPE, ENTITY_TYPE, MAPPING_TYPE> client;
+    private final Client<ACCOUNT_TYPE, CLIENT, ENTITY_TYPE, MAPPING_TYPE> client;
     private final IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper;
     private final FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory;
 
     private final IDownloader downloader;
     private final IUploader<ACCOUNT_TYPE, ENTITY_TYPE> uploader;
 
-    public AccountBox(Client<ACCOUNT_TYPE, ENTITY_TYPE, MAPPING_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory, IPersistenceController persistenceController) {
+    public AccountBox(Client<ACCOUNT_TYPE, CLIENT, ENTITY_TYPE, MAPPING_TYPE> client, IMapper<ACCOUNT_TYPE, MAPPING_TYPE> mapper, FileEntityFactory<ACCOUNT_TYPE, ENTITY_TYPE> entityFactory, IPersistenceController persistenceController) {
         validate(client, mapper, entityFactory);
         this.entityFactory = entityFactory;
         this.client = client;

@@ -6,14 +6,14 @@ import org.springframework.beans.factory.FactoryBean;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccountBoxCollector implements FactoryBean<List<AccountBox<?,?,?>>> {
+public class AccountBoxCollector implements FactoryBean<List<AccountBox<?,?,?,?>>> {
 
-    private static final List<AccountBox<?,?,?>> list = new ArrayList<>();
+    private static final List<AccountBox<?,?,?,?>> list = new ArrayList<>();
 
     public AccountBoxCollector() {
     }
 
-    public AccountBoxCollector(List<List<AccountBox<?,?,?>>> boxes) {
+    public AccountBoxCollector(List<List<AccountBox<?,?,?,?>>> boxes) {
         for (List item : boxes) {
             if (item != null) {
                 list.addAll(item);
