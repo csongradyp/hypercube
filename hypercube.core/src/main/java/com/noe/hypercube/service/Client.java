@@ -22,6 +22,10 @@ public abstract class Client<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends F
     private String accessToken;
 
     public Client() {
+    }
+
+    @PostConstruct
+    public void initState() {
         final Optional<AccountEntity> storedAccountProperties = accountPersistenceController.findByAccountName(getAccountName());
         if (storedAccountProperties.isPresent()) {
             final AccountEntity accountEntity = storedAccountProperties.get();
@@ -31,10 +35,6 @@ public abstract class Client<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends F
                 accessToken = accountEntity.getAccessToken();
             }
         }
-    }
-
-    @PostConstruct
-    public void initState() {
         setConnected(testConnectionActive());
     }
 

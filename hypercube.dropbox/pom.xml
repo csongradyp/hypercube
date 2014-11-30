@@ -30,8 +30,8 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.objectdb</groupId>
-            <artifactId>objectdb</artifactId>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
         </dependency>
 
         <dependency>
@@ -51,6 +51,11 @@
         <dependency>
             <groupId>com.noe.hypercube</groupId>
             <artifactId>hypercube.persistence</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.noe.hypercube</groupId>
+            <artifactId>hypercube.api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

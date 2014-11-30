@@ -43,9 +43,19 @@
             <artifactId>spring-beans</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.objectdb</groupId>
-            <artifactId>objectdb</artifactId>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
@@ -73,6 +83,11 @@
         <dependency>
             <groupId>com.noe.hypercube</groupId>
             <artifactId>hypercube.persistence</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.noe.hypercube</groupId>
+            <artifactId>hypercube.api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
