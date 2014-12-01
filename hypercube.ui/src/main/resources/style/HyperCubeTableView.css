@@ -11,7 +11,7 @@
 }
 
 .table-row-cell:empty .table-cell {
-    -fx-border-width: 0px;
+    -fx-border-width: 0;
 }
 
 .table-row-cell:odd:filled:focused:selected {
