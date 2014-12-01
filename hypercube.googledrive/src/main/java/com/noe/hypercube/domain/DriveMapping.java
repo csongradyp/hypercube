@@ -1,7 +1,6 @@
-package com.noe.hypercube.googledrive.domain;
+package com.noe.hypercube.domain;
 
-import com.noe.hypercube.domain.Mapping;
-import com.noe.hypercube.googledrive.service.GoogleDrive;
+import com.noe.hypercube.service.GoogleDrive;
 import com.noe.hypercube.service.Account;
 
 import javax.persistence.Entity;

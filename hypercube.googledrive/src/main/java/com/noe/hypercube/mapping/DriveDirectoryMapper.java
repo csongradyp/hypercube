@@ -1,8 +1,7 @@
-package com.noe.hypercube.googledrive.mapping;
+package com.noe.hypercube.mapping;
 
-import com.noe.hypercube.googledrive.domain.DriveMapping;
-import com.noe.hypercube.googledrive.service.GoogleDrive;
-import com.noe.hypercube.mapping.DirectoryMapper;
+import com.noe.hypercube.domain.DriveMapping;
+import com.noe.hypercube.service.GoogleDrive;
 
 public class DriveDirectoryMapper extends DirectoryMapper<GoogleDrive, DriveMapping> {
 

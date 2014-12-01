@@ -1,4 +1,4 @@
-package com.noe.hypercube.googledrive;
+package com.noe.hypercube;
 
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -13,25 +13,25 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
-import com.google.api.services.drive.model.FileList;
+import com.noe.hypercube.service.Authentication;
+import com.noe.hypercube.service.GoogleDrive;
 import java.awt.*;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import org.apache.log4j.Logger;
-
-import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Properties;
+import org.apache.log4j.Logger;
 
-public class Authentication {
-    private static final Logger LOG = Logger.getLogger(Authentication.class);
+public class DriveAuthentication extends Authentication<Drive> {
+    private static final Logger LOG = Logger.getLogger(DriveAuthentication.class);
 
     private static String CLIENT_ID = "752406924353.apps.googleusercontent.com";
     private static String CLIENT_SECRET = "QbGMzP0XtBKq8XRJ0VQuPLOD";
 
     //    private static String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
-    private static String REDIRECT_URI = "http://localhost";
+    private static String REDIRECT_URI = "http://localhost:8888";
     private static String APPLICATION_NAME = "HyperCube";
 
     private static final String CLIENTSECRETS_LOCATION = "client_secrets.json";
@@ -46,33 +46,14 @@ public class Authentication {
      */
     private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "/HyperCube-8a2cd699b4d7.p12";
 
-    public static void main(String[] args) {
-        try {
-            createDriveService();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static String getUrl() {
-        HttpTransport httpTransport = new NetHttpTransport();
-        JsonFactory jsonFactory = new JacksonFactory();
-        GoogleAuthorizationCodeFlow flow = getGoogleAuthorizationCodeFlow(httpTransport, jsonFactory);
-        return flow.newAuthorizationUrl().setRedirectUri(REDIRECT_URI).build();
-    }
-
-    public static Drive createDriveService() throws IOException {
+    @Override
+    public Drive createClient() throws Exception {
         HttpTransport httpTransport = new NetHttpTransport();
         JsonFactory jsonFactory = new JacksonFactory();
         GoogleAuthorizationCodeFlow flow = getGoogleAuthorizationCodeFlow(httpTransport, jsonFactory);
 
         String url = flow.newAuthorizationUrl().setRedirectUri(REDIRECT_URI).build();
-//        System.out.println("Please open the following URL in your browser then type the authorization code:");
-//        System.out.println("  " + url);
-//        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//        String code = br.readLine();
         String code = "";
-
         try {
             Desktop.getDesktop().browse(java.net.URI.create(url));
             code = getCode();
@@ -81,21 +62,34 @@ public class Authentication {
         }
 
         GoogleTokenResponse response = flow.newTokenRequest(code).setRedirectUri(REDIRECT_URI).execute();
-        final String refreshToken = response.getRefreshToken();
-        final String accessToken = response.getAccessToken();
-        System.out.println("refreshToken: " + refreshToken);
-        System.out.println("accessToken: " + accessToken);
+        storeTokens(response.getRefreshToken(), response.getAccessToken());
         GoogleCredential credential = new GoogleCredential.Builder().setJsonFactory(jsonFactory).setTransport(httpTransport).setClientSecrets(CLIENT_ID, CLIENT_SECRET).build();
         credential.setFromTokenResponse(response);
-        final Drive drive = new Drive.Builder(httpTransport, jsonFactory, credential).setApplicationName(APPLICATION_NAME).build();
-        final FileList fileList = drive.files().list().execute();
-        System.out.println(fileList);
-        return drive;
+        return new Drive.Builder(httpTransport, jsonFactory, credential).setApplicationName(APPLICATION_NAME).build();
+    }
+
+    @Override
+    public Drive getClient(final String refreshToken, final String accessToken) {
+        HttpTransport httpTransport = new NetHttpTransport();
+        JacksonFactory jsonFactory = new JacksonFactory();
+
+        final GoogleCredential credentials = new GoogleCredential.Builder()
+                .setClientSecrets(CLIENT_ID, CLIENT_SECRET)
+                .setJsonFactory(jsonFactory)
+                .setTransport(httpTransport)
+                .build();
+        credentials.setRefreshToken(refreshToken);
+        credentials.setAccessToken(accessToken);
+        return new Drive.Builder(httpTransport, jsonFactory, credentials).build();
+    }
+
+    @Override
+    public String getAccountName() {
+        return GoogleDrive.name;
     }
 
     private static String getCode() throws IOException {
-
-        ServerSocket serverSocket = new ServerSocket();
+        ServerSocket serverSocket = new ServerSocket(8888);
         Socket socket = serverSocket.accept();
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         while (true) {
@@ -107,10 +101,9 @@ public class Authentication {
                 out.write("\r\n");
 
                 code = in.readLine();
-                System.out.println("code = " + code);
                 String match = "code";
                 int loc = 0;
-                if(code != null) {
+                if (code != null) {
                     loc = code.indexOf(match);
                 }
 
@@ -185,16 +178,7 @@ public class Authentication {
         } catch (GeneralSecurityException | IOException e) {
             e.printStackTrace();
         }
-        Drive drive = new Drive.Builder(httpTransport, jsonFactory, credential)
-                .setApplicationName(APPLICATION_NAME).build();
-        final FileList fileList;
-        try {
-            fileList = drive.files().list().execute();
-            System.out.println(fileList);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return drive;
+        return new Drive.Builder(httpTransport, jsonFactory, credential).setApplicationName(APPLICATION_NAME).build();
     }
 
     public static Drive getDriveService() {
@@ -212,16 +196,7 @@ public class Authentication {
         } catch (GeneralSecurityException | IOException e) {
             e.printStackTrace();
         }
-        Drive drive = new Drive.Builder(httpTransport, jsonFactory, credential)
-                .setApplicationName(APPLICATION_NAME).build();
-        final FileList fileList;
-        try {
-            fileList = drive.files().list().execute();
-            System.out.println(fileList);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return drive;
+        return new Drive.Builder(httpTransport, jsonFactory, credential).setApplicationName(APPLICATION_NAME).build();
     }
 
     static Drive buildService(GoogleCredential credentials) {
@@ -243,7 +218,7 @@ public class Authentication {
     private static String getProperty(final String key) {
         String authCode = "";
         Properties properties = new Properties();
-        InputStream resourceAsStream = Authentication.class.getClassLoader().getResourceAsStream("auth.properties");
+        InputStream resourceAsStream = DriveAuthentication.class.getClassLoader().getResourceAsStream("auth.properties");
         try {
             properties.load(resourceAsStream);
             authCode = properties.getProperty(key);
@@ -287,5 +262,6 @@ public class Authentication {
                 .setApprovalPrompt("auto").build();
         return flow;
     }
+
 
 }

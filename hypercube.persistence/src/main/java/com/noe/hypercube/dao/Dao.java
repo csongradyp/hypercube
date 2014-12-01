@@ -1,16 +1,14 @@
 package com.noe.hypercube.dao;
 
 import com.noe.hypercube.persistence.domain.IEntity;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import javax.inject.Inject;
 import java.util.Collection;
+import javax.inject.Inject;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public abstract class Dao<ENTITY extends IEntity> implements IDao<String, ENTITY> {
 
     @Inject
-    @Lazy
+//    @Lazy
     private JpaRepository<ENTITY, String> repository;
 
     protected Dao() {

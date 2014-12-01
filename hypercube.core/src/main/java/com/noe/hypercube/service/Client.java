@@ -19,7 +19,7 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
     protected Authentication<CLIENT> authentication;
     private CLIENT client;
 
-    public Client(Authentication<CLIENT> authentication) {
+    public Client(final Authentication<CLIENT> authentication) {
         this.authentication = authentication;
     }
 
@@ -30,7 +30,7 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
             final AccountEntity accountEntity = storedAccountProperties.get();
             if (accountEntity.isAttached()) {
                 attached.set(true);
-                client = createClient(accountEntity.getRefreshToken(), accountEntity.getAccessToken());
+                client = authentication.getClient(accountEntity.getRefreshToken(), accountEntity.getAccessToken());
             }
         } else {
             client = createClientWithNewAuthentication();
@@ -38,7 +38,7 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
         setConnected(testConnectionActive());
     }
 
-    protected CLIENT createClientWithNewAuthentication() {
+    private CLIENT createClientWithNewAuthentication() {
         try {
             return authentication.createClient();
         } catch (Exception e) {
@@ -46,8 +46,6 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
             throw new RuntimeException("Client could not be created", e);
         }
     }
-
-    protected abstract CLIENT createClient(final String refreshToken, final String accessToken);
 
     protected CLIENT getClient() {
         return client;
@@ -71,11 +69,6 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
 
     public void setAttached(final Boolean attached) {
         this.attached.set(attached);
-    }
-
-    @PostConstruct
-    public void initState() {
-        connected.set(testConnectionActive());
     }
 
     @Override

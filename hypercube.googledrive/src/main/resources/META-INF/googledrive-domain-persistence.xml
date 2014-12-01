@@ -3,8 +3,8 @@
     <persistence-unit name="hyperPersistenceUnit" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 
-        <!--<class>com.noe.hypercube.googledrive.domain.DriveFileEntity</class>-->
-        <!--<class>com.noe.hypercube.googledrive.domain.DriveMapping</class>-->
+        <!--<class>DriveFileEntity</class>-->
+        <!--<class>DriveMapping</class>-->
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
     </persistence-unit>

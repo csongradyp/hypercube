@@ -33,11 +33,6 @@ public class DbxClientWrapper extends Client<Dropbox, DbxClient, DbxFileEntity, 
     }
 
     @Override
-    protected DbxClient createClient(final String refreshToken, final String accessToken) {
-        return authentication.getClient(refreshToken, accessToken);
-    }
-
-    @Override
     protected boolean testConnectionActive() {
         try {
             return getClient().getAccountInfo() != null;

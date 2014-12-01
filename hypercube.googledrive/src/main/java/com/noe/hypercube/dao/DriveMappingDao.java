@@ -1,7 +1,6 @@
-package com.noe.hypercube.googledrive.dao;
+package com.noe.hypercube.dao;
 
-import com.noe.hypercube.dao.Dao;
-import com.noe.hypercube.googledrive.domain.DriveMapping;
+import com.noe.hypercube.domain.DriveMapping;
 
 public class DriveMappingDao extends Dao<DriveMapping> {
 

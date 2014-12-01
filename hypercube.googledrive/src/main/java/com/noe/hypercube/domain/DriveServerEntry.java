@@ -1,4 +1,4 @@
-package com.noe.hypercube.googledrive.domain;
+package com.noe.hypercube.domain;
 
 import com.google.api.services.drive.model.File;
 import com.noe.hypercube.domain.ServerEntry;

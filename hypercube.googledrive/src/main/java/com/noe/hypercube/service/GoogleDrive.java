@@ -1,4 +1,4 @@
-package com.noe.hypercube.googledrive.service;
+package com.noe.hypercube.service;
 
 import com.noe.hypercube.service.Account;
 

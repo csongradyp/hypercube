@@ -1,4 +1,4 @@
-package com.noe.hypercube.googledrive.service;
+package com.noe.hypercube.service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.FileContent;
@@ -8,14 +8,12 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.*;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.AccountQuota;
+import com.noe.hypercube.domain.DriveServerEntry;
 import com.noe.hypercube.persistence.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.persistence.domain.UploadEntity;
-import com.noe.hypercube.googledrive.domain.DriveFileEntity;
-import com.noe.hypercube.googledrive.domain.DriveMapping;
-import com.noe.hypercube.googledrive.domain.DriveServerEntry;
-import com.noe.hypercube.service.Authentication;
-import com.noe.hypercube.service.Client;
+import com.noe.hypercube.domain.DriveFileEntity;
+import com.noe.hypercube.domain.DriveMapping;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,23 +44,13 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
 
     private Long cursor;
 
-    public DriveClient(final Authentication<Drive> authentication) {
-        super(authentication);
+    public DriveClient(final Authentication<Drive> driveAuthentication) {
+        super(driveAuthentication);
     }
 
     @PostConstruct
     public void init() {
         dirUtil = new DriveDirectoryUtil(getClient());
-    }
-
-    @Override
-    protected Drive createClientWithNewAuthentication() {
-        return null;
-    }
-
-    @Override
-    protected Drive createClient(final String refreshToken, final String accessToken) {
-        return null;
     }
 
     @Override
@@ -139,7 +127,6 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
     }
 
     /**
-     *
      * @param startChangeId Id of the last synchronize {@link com.google.api.services.drive.model.Change}
      * @return List of {@link com.google.api.services.drive.model.Change}s
      * @throws SynchronizationException in case of any errors

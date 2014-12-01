@@ -2,17 +2,12 @@ package com.noe.hypercube.service;
 
 
 import com.box.boxjavalibv2.BoxClient;
-import com.box.boxjavalibv2.BoxConfigBuilder;
-import com.box.boxjavalibv2.IBoxConfig;
 import com.box.boxjavalibv2.dao.*;
 import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
 import com.box.boxjavalibv2.exceptions.BoxJSONException;
 import com.box.boxjavalibv2.exceptions.BoxServerException;
-import com.box.boxjavalibv2.jsonparsing.BoxJSONParser;
-import com.box.boxjavalibv2.jsonparsing.BoxResourceHub;
 import com.box.boxjavalibv2.requests.requestobjects.BoxFileRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
-import com.box.boxjavalibv2.resourcemanagers.IBoxOAuthManager;
 import com.box.boxjavalibv2.utils.ISO8601DateParser;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
@@ -55,27 +50,6 @@ public class BoxClientWrapper extends Client<Box, BoxClient, BoxFileEntity, BoxM
         directoryUtil = new BoxDirectoryUtil(getClient());
         getClient().setAutoRefreshOAuth(true);
         getClient().addOAuthRefreshListener(newAuthData -> storeNewTokens(newAuthData.getRefreshToken(), newAuthData.getAccessToken()));
-    }
-
-    @Override
-    protected BoxClient createClient(final String refreshToken, final String accessToken) {
-        final IBoxConfig config = new BoxConfigBuilder().build();
-        final BoxResourceHub hub = new BoxResourceHub();
-        final BoxJSONParser parser = new BoxJSONParser(hub);
-        BoxClient client = new BoxClient(CLIENT_ID, CLIENT_SECRET, hub, parser, config);
-        final IBoxOAuthManager manager = client.getOAuthManager();
-        try {
-            BoxOAuthToken newToken = manager.refreshOAuth(refreshToken, CLIENT_ID, CLIENT_SECRET);
-            storeNewTokens(newToken.getRefreshToken(), newToken.getAccessToken());
-            client.authenticate(newToken);
-        } catch (BoxRestException e) {
-            e.printStackTrace();
-        } catch (BoxServerException e) {
-            e.printStackTrace();
-        } catch (AuthFatalFailureException e) {
-            e.printStackTrace();
-        }
-        return client;
     }
 
     @Override

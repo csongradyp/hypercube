@@ -7,8 +7,8 @@
     <bean id="drive.daos" parent="daos" class="com.noe.hypercube.collector.DaoCollector">
         <constructor-arg>
             <list>
-                <bean class="com.noe.hypercube.googledrive.dao.DriveFileEntryDao"/>
-                <bean class="com.noe.hypercube.googledrive.dao.DriveMappingDao"/>
+                <bean class="com.noe.hypercube.dao.DriveFileEntryDao"/>
+                <bean class="com.noe.hypercube.dao.DriveMappingDao"/>
             </list>
         </constructor-arg>
     </bean>
@@ -28,8 +28,11 @@
         <constructor-arg ref="persistenceController"/>
     </bean>
 
-    <bean id="driveClient" class="com.noe.hypercube.googledrive.service.DriveClient" />
-    <bean id="driveDirectoryMapper" class="com.noe.hypercube.googledrive.mapping.DriveDirectoryMapper" />
-    <bean id="driveFileEntityFactory" class="com.noe.hypercube.googledrive.domain.DriveFileEntityFactory" />
+    <bean id="driveAuthentication" class="com.noe.hypercube.DriveAuthentication" />
+    <bean id="driveClient" class="com.noe.hypercube.service.DriveClient">
+        <constructor-arg ref="driveAuthentication" />
+    </bean>
+    <bean id="driveDirectoryMapper" class="com.noe.hypercube.mapping.DriveDirectoryMapper" />
+    <bean id="driveFileEntityFactory" class="com.noe.hypercube.domain.DriveFileEntityFactory" />
 
 </beans>

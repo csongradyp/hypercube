@@ -1,6 +1,6 @@
-package com.noe.hypercube.googledrive.dao.repository;
+package com.noe.hypercube.dao.repository;
 
-import com.noe.hypercube.googledrive.domain.DriveFileEntity;
+import com.noe.hypercube.domain.DriveFileEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DriveEntityRepository extends JpaRepository<DriveFileEntity, String> {

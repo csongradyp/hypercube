@@ -1,7 +1,6 @@
-package com.noe.hypercube.googledrive.dao;
+package com.noe.hypercube.dao;
 
-import com.noe.hypercube.dao.Dao;
-import com.noe.hypercube.googledrive.domain.DriveFileEntity;
+import com.noe.hypercube.domain.DriveFileEntity;
 
 public class DriveFileEntryDao extends Dao<DriveFileEntity> {
 

@@ -1,11 +1,13 @@
-package com.noe.hypercube.googledrive.service;
+package com.noe.hypercube.service;
 
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.log4j.Logger;
 
 public class DriveDirectoryUtil {
@@ -19,7 +21,7 @@ public class DriveDirectoryUtil {
     }
 
     private void getPath(com.google.api.services.drive.model.File file, ArrayList<String> path) throws IOException {
-        System.out.println(path + " - " + file.getTitle() + " is current file with id=" + file.getId());
+//        System.out.println(path + " - " + file.getTitle() + " is current file with id=" + file.getId());
         List<ParentReference> parents = file.getParents();
 //        for(int i=0;i<parents.size();i++){
         for (ParentReference parent : parents) {

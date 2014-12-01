@@ -8,6 +8,7 @@ import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
 import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.boxjavalibv2.jsonparsing.BoxJSONParser;
 import com.box.boxjavalibv2.jsonparsing.BoxResourceHub;
+import com.box.boxjavalibv2.resourcemanagers.IBoxOAuthManager;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.noe.hypercube.service.Authentication;
 import com.noe.hypercube.service.Box;
@@ -20,7 +21,6 @@ public class BoxAuthentication extends Authentication<BoxClient> {
 
     private static final int PORT = 8080;
     private static final String CLIENT_ID = "s0fym1o198dy9k0qaesuiyuvyurnh080";
-    private static final String API_KEY = "s0fym1o198dy9k0qaesuiyuvyurnh080";
     private static final String CLIENT_SECRET = "uTCbyzgarF2PQREyBSa59GLoG0VQ6F3R";
 
     @Override
@@ -31,7 +31,6 @@ public class BoxAuthentication extends Authentication<BoxClient> {
     @Override
     public BoxClient createClient() {
         String code = "";
-//        String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + CLIENT_ID + "&redirect_uri=http%3A//localhost%3A" + PORT;
         String url = "https://www.box.com/api/oauth2/authorize?response_type=code&client_id=" + CLIENT_ID + "&redirect_uri=http%3A//127.0.0.1%3A" + PORT;
         try {
             Desktop.getDesktop().browse(java.net.URI.create(url));
@@ -53,8 +52,24 @@ public class BoxAuthentication extends Authentication<BoxClient> {
     }
 
     @Override
-    public BoxClient getClient(String refreshToken, String accessToken) {
-        return null;
+    public BoxClient getClient(final String refreshToken, final String accessToken) {
+        final IBoxConfig config = new BoxConfigBuilder().build();
+        final BoxResourceHub hub = new BoxResourceHub();
+        final BoxJSONParser parser = new BoxJSONParser(hub);
+        BoxClient client = new BoxClient(CLIENT_ID, CLIENT_SECRET, hub, parser, config);
+        final IBoxOAuthManager manager = client.getOAuthManager();
+        try {
+            BoxOAuthToken newToken = manager.refreshOAuth(refreshToken, CLIENT_ID, CLIENT_SECRET);
+            storeTokens(newToken.getRefreshToken(), newToken.getAccessToken());
+            client.authenticate(newToken);
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
+        return client;
     }
 
     private BoxClient getAuthenticatedClient(final String code) throws BoxRestException, BoxServerException, AuthFatalFailureException {
