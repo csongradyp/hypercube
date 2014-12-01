@@ -1,5 +1,6 @@
 package com.noe.hypercube.domain;
 
+import com.noe.hypercube.persistence.domain.FileEntity;
 import com.noe.hypercube.service.Dropbox;
 
 import javax.persistence.Entity;

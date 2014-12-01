@@ -3,13 +3,12 @@ package com.noe.hypercube.controller;
 
 import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.service.Account;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 @Named
 public class AccountController implements IAccountController {

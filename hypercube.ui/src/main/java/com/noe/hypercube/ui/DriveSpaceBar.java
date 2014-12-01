@@ -40,7 +40,7 @@ public class DriveSpaceBar extends HBox {
         }
     }
 
-    public void update(Path localPath) {
+    public void update(final Path localPath) {
         final File driveRoot = localPath.getRoot().toFile();
         final Long totalSpace = driveRoot.getTotalSpace();
         final Long freeSpace = driveRoot.getFreeSpace();
@@ -48,19 +48,30 @@ public class DriveSpaceBar extends HBox {
         update(totalSpace, usedSpace, freeSpace);
     }
 
-    public void update(RemoteQuotaInfo quotaInfo) {
-        final Long totalSpace = quotaInfo.getTotalSpace();
-        final Long usedSpace = quotaInfo.getUsedSpace();
-        final Long freeSpace = totalSpace - usedSpace;
-        update(totalSpace, usedSpace, freeSpace);
+    public void update(final RemoteQuotaInfo quotaInfo) {
+        if (quotaInfo == null) {
+            update(null, null, null);
+        } else {
+            final Long totalSpace = quotaInfo.getTotalSpace();
+            final Long usedSpace = quotaInfo.getUsedSpace();
+            final Long freeSpace = totalSpace - usedSpace;
+            update(totalSpace, usedSpace, freeSpace);
+        }
     }
 
     private void update(final Long totalSpace, final Long usedSpace, final Long freeSpace) {
-        final Double usedPercent = usedSpace.doubleValue() / totalSpace.doubleValue();
-        spaceBar.setProgress(usedPercent);
-        used.setText((int)(usedPercent*100) + "%");
-        total.setText(FileSizeCalculator.humanReadableByteCount(totalSpace));
-        available.setText(FileSizeCalculator.humanReadableByteCount(freeSpace));
+        if (totalSpace == null || usedSpace == null || freeSpace == null) {
+            spaceBar.setProgress(0);
+            used.setText("-");
+            total.setText("-");
+            available.setText("-");
+        } else {
+            final Double usedPercent = usedSpace.doubleValue() / totalSpace.doubleValue();
+            spaceBar.setProgress(usedPercent);
+            used.setText((int) (usedPercent * 100) + "%");
+            total.setText(FileSizeCalculator.humanReadableByteCount(totalSpace));
+            available.setText(FileSizeCalculator.humanReadableByteCount(freeSpace));
+        }
     }
 
     public void clear() {

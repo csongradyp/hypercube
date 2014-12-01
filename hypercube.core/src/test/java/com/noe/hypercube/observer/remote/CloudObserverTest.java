@@ -3,6 +3,8 @@ package com.noe.hypercube.observer.remote;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.*;
 import com.noe.hypercube.mapping.IMapper;
+import com.noe.hypercube.persistence.FileEntityFactory;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.service.TestAccount;
 import com.noe.hypercube.synchronization.SynchronizationException;
@@ -34,9 +36,9 @@ public class CloudObserverTest {
     @Mock
     private FileEntityFactory<TestAccount, TestEntity> mockFactory;
     @Mock
-    private AccountBox<TestAccount, TestEntity, TestMapping> mockAccountBox;
+    private AccountBox<TestAccount, Object, TestEntity, TestMapping> mockAccountBox;
 
-    private CloudObserver<TestAccount, TestEntity> underTest;
+    private CloudObserver<TestAccount, Object, TestEntity> underTest;
 
     private final ServerEntry relevantFile = new TestServerEntry("X/Y/relevantFile.txt", "dummyRevision");
     private final ServerEntry notRelevantSubfolderFile = new TestServerEntry("X/Z/willNotDownloaded.txt", "dummyRevision2");

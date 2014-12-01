@@ -3,11 +3,9 @@ package com.noe.hypercube.service;
 
 import com.dropbox.core.*;
 import com.noe.hypercube.domain.*;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.UploadEntity;
 import com.noe.hypercube.synchronization.SynchronizationException;
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,23 +16,31 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import javax.inject.Inject;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping> {
+public class DbxClientWrapper extends Client<Dropbox, DbxClient, DbxFileEntity, DbxMapping> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DbxClientWrapper.class);
 
-    private final DbxClient client;
     private String cursor;
 
-    public DbxClientWrapper(final DbxClient client) {
-        this.client = client;
-        cursor = null;
+    @Inject
+    public DbxClientWrapper(final Authentication<DbxClient> dbxAuthentication) {
+        super(dbxAuthentication);
+    }
+
+    @Override
+    protected DbxClient createClient(final String refreshToken, final String accessToken) {
+        return authentication.getClient(refreshToken, accessToken);
     }
 
     @Override
     protected boolean testConnectionActive() {
         try {
-            return client.getAccountInfo() != null;
+            return getClient().getAccountInfo() != null;
         } catch (DbxException e) {
             return false;
         }
@@ -73,7 +79,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     private boolean exist(final String dropboxFilePath) {
         boolean exists = false;
         try {
-            final DbxEntry.WithChildren metadata = client.getMetadataWithChildren(dropboxFilePath);
+            final DbxEntry.WithChildren metadata = getClient().getMetadataWithChildren(dropboxFilePath);
             exists = metadata != null;
         } catch (DbxException e) {
             LOG.error("Failed to get file information from Dropbox: {}", dropboxFilePath, e);
@@ -85,7 +91,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     public Collection<ServerEntry> getChanges() throws SynchronizationException {
         Collection<ServerEntry> serverEntries = new LinkedList<>();
         try {
-            DbxDelta<DbxEntry> delta = client.getDelta(cursor);
+            DbxDelta<DbxEntry> delta = getClient().getDelta(cursor);
             for (DbxDelta.Entry<DbxEntry> entry : delta.entries) {
                 if (entry.metadata.isFile()) {
                     DbxServerEntry dbxServerEntry = new DbxServerEntry(entry.lcPath, entry.metadata.asFile().rev, entry.metadata.asFile().lastModified, entry.metadata.isFolder());
@@ -103,7 +109,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     public void download(ServerEntry serverEntry, FileOutputStream outputStream) throws SynchronizationException {
         final String dropboxPath = getDropboxPath(serverEntry.getPath());
         try {
-            client.getFile(dropboxPath, serverEntry.getRevision(), outputStream);
+            getClient().getFile(dropboxPath, serverEntry.getRevision(), outputStream);
         } catch (DbxException e) {
             LOG.error("Dropbox file download failed: {}", serverEntry.getPath());
             throw new SynchronizationException("Dropbox file download failed: " + serverEntry);
@@ -116,7 +122,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     @Override
     public ServerEntry download(String serverPath, FileOutputStream outputStream, Object... extraArgs) throws SynchronizationException {
         try {
-            final DbxEntry.File file = client.getFile(serverPath, null, outputStream);
+            final DbxEntry.File file = getClient().getFile(serverPath, null, outputStream);
             return new DbxServerEntry(file.path, file.rev, file.lastModified, file.isFolder());
         } catch (DbxException e) {
             LOG.error("Dropbox file download failed: {}", serverPath);
@@ -131,7 +137,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     public void delete(final Path remoteFilePath) throws SynchronizationException {
         final String dropboxFilePath = getDropboxPath(remoteFilePath);
         try {
-            client.delete(dropboxFilePath);
+            getClient().delete(dropboxFilePath);
         } catch (DbxException e) {
             LOG.error("Dropbox file deletion failed from server: {}", dropboxFilePath);
             throw new SynchronizationException("Dropbox file deletion failed from server: " + dropboxFilePath);
@@ -159,7 +165,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
         final File fileToUpload = uploadEntity.getFile();
         DbxServerEntry serverEntry = null;
         try (FileInputStream inputStream = FileUtils.openInputStream(fileToUpload)) {
-            DbxEntry.File uploadedFile = client.uploadFile(dropboxFilePath, writeMode, fileToUpload.length(), inputStream);
+            DbxEntry.File uploadedFile = getClient().uploadFile(dropboxFilePath, writeMode, fileToUpload.length(), inputStream);
             serverEntry = new DbxServerEntry(uploadedFile.path, uploadedFile.rev, uploadedFile.lastModified, uploadedFile.isFolder());
         } catch (DbxException e) {
             LOG.error("File upload failed to Dropbox: {}", remoteFilePath);
@@ -174,7 +180,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     public FileEntity rename(FileEntity remoteFile, String newName) throws SynchronizationException {
         final Path remoteFolder = Paths.get(remoteFile.getRemotePath()).getParent();
         try {
-            final DbxEntry renamedFile = client.move(getDropboxPath(remoteFile.getRemotePath()), getDropboxPath(remoteFolder + newName));
+            final DbxEntry renamedFile = getClient().move(getDropboxPath(remoteFile.getRemotePath()), getDropboxPath(remoteFolder + newName));
             return new DbxFileEntity(remoteFile.getLocalPath(), renamedFile.path, renamedFile.asFile().rev);
         } catch (DbxException e) {
             LOG.error(String.format("%s file rename failed", getAccountName()), e);
@@ -186,7 +192,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     public FileEntity rename(ServerEntry remoteFile, String newName) throws SynchronizationException {
         final Path remoteFolder = remoteFile.getPath().getParent();
         try {
-            final DbxEntry renamedFile = client.move(getDropboxPath(remoteFile.getPath()), getDropboxPath(remoteFolder + "/" + newName));
+            final DbxEntry renamedFile = getClient().move(getDropboxPath(remoteFile.getPath()), getDropboxPath(remoteFolder + "/" + newName));
             return new DbxFileEntity(null, renamedFile.path, renamedFile.asFile().rev);
         } catch (DbxException e) {
             LOG.error(String.format("%s file rename failed", getAccountName()), e);
@@ -199,7 +205,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
         final String dropboxPath = remoteFolder.toString().replace("\\", "/");
         final List<ServerEntry> fileList = new ArrayList<>();
         try {
-            final DbxEntry.WithChildren metadataWithChildren = client.getMetadataWithChildren(dropboxPath);
+            final DbxEntry.WithChildren metadataWithChildren = getClient().getMetadataWithChildren(dropboxPath);
             final List<DbxEntry> folderContent = metadataWithChildren.children;
             for (DbxEntry file : folderContent) {
                 fileList.add(getDbxFileInfo(file));
@@ -214,7 +220,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     public List<ServerEntry> getRootFileList() throws SynchronizationException {
         final List<ServerEntry> fileList = new ArrayList<>();
         try {
-            final DbxEntry.WithChildren metadataWithChildren = client.getMetadataWithChildren("/");
+            final DbxEntry.WithChildren metadataWithChildren = getClient().getMetadataWithChildren("/");
             final List<DbxEntry> folderContent = metadataWithChildren.children;
             for (DbxEntry file : folderContent) {
                 fileList.add(getDbxFileInfo(file));
@@ -239,7 +245,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     public void createFolder(final Path folder) throws SynchronizationException {
         try {
             final String folderPath = getDropboxPath(folder);
-            final DbxEntry.Folder createdFolder = client.createFolder(folderPath);
+            final DbxEntry.Folder createdFolder = getClient().createFolder(folderPath);
         } catch (DbxException e) {
             throw new SynchronizationException("Unable to create folder: " + folder);
         }
@@ -261,7 +267,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxFileEntity, DbxMapping>
     @Override
     public AccountQuota getQuota() throws SynchronizationException {
         try {
-            final DbxAccountInfo.Quota quota = client.getAccountInfo().quota;
+            final DbxAccountInfo.Quota quota = getClient().getAccountInfo().quota;
             return new AccountQuota(quota.total, quota.normal + quota.shared);
         } catch (DbxException e) {
             throw new SynchronizationException("Could not get Dropbox qouta info", e);

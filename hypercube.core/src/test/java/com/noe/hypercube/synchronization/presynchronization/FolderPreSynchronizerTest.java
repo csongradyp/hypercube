@@ -3,6 +3,9 @@ package com.noe.hypercube.synchronization.presynchronization;
 import com.noe.hypercube.controller.IAccountController;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.*;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.LocalFileEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 import com.noe.hypercube.service.TestAccount;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.presynchronization.util.PreSynchronizationSubmitManager;
@@ -35,7 +38,7 @@ public class FolderPreSynchronizerTest {
     @Mock
     private PreSynchronizationSubmitManager mockSubmitManager;
 
-    private AccountBox<TestAccount, TestEntity, TestMapping> accountBox;
+    private AccountBox<TestAccount, Object, TestEntity, TestMapping> accountBox;
     private FolderPreSynchronizer underTest;
 
     @Before

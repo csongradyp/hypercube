@@ -1,21 +1,23 @@
 package com.noe.hypercube.ui.tray.menu;
 
 import com.noe.hypercube.event.domain.FileEvent;
-import com.noe.hypercube.ui.bundle.AccountBundle;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.HistoryBundle;
-import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.dialog.BindManagerDialog;
-import com.noe.hypercube.ui.domain.account.AccountInfo;
+import com.noe.hypercube.ui.elements.AccountSegmentedButton;
 import com.noe.hypercube.ui.elements.StateInfoLabel;
 import com.noe.hypercube.ui.tray.menu.list.FileListView;
 import com.noe.hypercube.ui.tray.menu.list.TrayFileListItem;
+import de.jensd.fx.fontawesome.AwesomeIcon;
+import de.jensd.fx.fontawesome.Icon;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -40,12 +42,12 @@ public class TrayMenu extends AnchorPane implements Initializable {
     @FXML
     private FileListView<TrayFileListItem> fileListView;
     @FXML
-    private SegmentedButton accounts;
+    private AccountSegmentedButton accounts;
     @FXML
     private Menu languages;
     private final ResourceBundle messageBundle;
 
-    public TrayMenu(Stage stage) {
+    public TrayMenu(final Stage stage) {
         messageBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("trayMenu.fxml"));
         fxmlLoader.setResources(messageBundle);
@@ -56,63 +58,29 @@ public class TrayMenu extends AnchorPane implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        createAccountButtons();
         show.setOnAction(actionEvent -> stage.show());
-        addListenerForAccountChanges();
-    }
-
-    private void addListenerForAccountChanges() {
-        AccountBundle.getAccounts().addListener((ListChangeListener<AccountInfo>) change -> {
-            while (change.next()) {
-                final List<? extends AccountInfo> addedAccount = change.getAddedSubList();
-                for (AccountInfo account : addedAccount) {
-                    if (account.isActive()) {
-                        accounts.getButtons().add(createAccountButton(account.getName()));
-                        accounts.getButtons().get(0).fire();
-                    }
-                }
-                final List<? extends AccountInfo> removedAccount = change.getRemoved();
-                for (AccountInfo account : removedAccount) {
-                    accounts.getButtons().removeIf(toggleButton -> toggleButton.getText().equals(account.getName()));
-                    if (!accounts.getButtons().isEmpty()) {
-                        accounts.getButtons().get(0).fire();
-                    }
-                }
-            }
-        });
-    }
-
-    private void createAccountButtons() {
-        final List<String> accountNames = AccountBundle.getAccountNames();
-        final ObservableList<ToggleButton> accountsButtons = accounts.getButtons();
-        for (String account : accountNames) {
-            final ToggleButton accountButton = createAccountButton(account);
-            accountsButtons.add(accountButton);
-        }
-        if(!accountsButtons.isEmpty()) {
-            accountsButtons.get(0).fire();
-        }
-    }
-
-    private ToggleButton createAccountButton(final String account) {
-        final ToggleButton accountButton = new ToggleButton();
-        accountButton.setGraphic(ImageBundle.getAccountImageView(account));
-        accountButton.setFocusTraversable(false);
-        accountButton.setPrefHeight(accounts.getPrefHeight());
-        accountButton.setOnAction(e -> {
-            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(account);
+        accounts.addButton("Local", new Icon(AwesomeIcon.HOME, "18", "", ""));
+        accounts.getButtons().get(0).fire();
+        accounts.setOnAction(e -> Platform.runLater(() -> {
+            final ToggleButton accountButton = (ToggleButton) e.getSource();
+            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(accountButton.getId());
             fileListView.clearAndSet(createListItems(fileEvents));
             accountButton.setSelected(true);
-        });
-        addHistoryChangeListener(account);
-        return accountButton;
+        }));
+        addHistoryChangeListenerToStorages();
     }
 
-    private List<TrayFileListItem> createListItems(ObservableList<FileEvent> fileEvents) {
-        final List<TrayFileListItem> trayFileListItems = new ArrayList<TrayFileListItem>(fileEvents.size());
-        for (FileEvent fileEvent : fileEvents) {
-            trayFileListItems.add(new TrayFileListItem(fileEvent, messageBundle));
+    private void addHistoryChangeListenerToStorages() {
+        final ObservableList<ToggleButton> buttons = accounts.getButtons();
+        for (ToggleButton button : buttons) {
+            addHistoryChangeListener(button.getId());
         }
+        accounts.setOnButtonAdded(this::addHistoryChangeListener);
+    }
+
+    private List<TrayFileListItem> createListItems(final ObservableList<FileEvent> fileEvents) {
+        final List<TrayFileListItem> trayFileListItems = new ArrayList<>(fileEvents.size());
+        trayFileListItems.addAll(fileEvents.stream().map(fileEvent -> new TrayFileListItem(fileEvent, messageBundle)).collect(Collectors.toList()));
         return trayFileListItems;
     }
 
@@ -126,11 +94,8 @@ public class TrayMenu extends AnchorPane implements Initializable {
     private void selectActiveLanguage() {
         final String current = ConfigurationBundle.getLanguageLongName();
         final ObservableList<MenuItem> languageMenuItems = languages.getItems();
-        for (MenuItem languageMenuItem : languageMenuItems) {
-            if (languageMenuItem.getText().equals(current)) {
-                ((CheckMenuItem) languageMenuItem).setSelected(true);
-            }
-        }
+        languageMenuItems.stream().filter(languageMenuItem -> languageMenuItem.getText().equals(current)).forEach(languageMenuItem ->
+                ((CheckMenuItem) languageMenuItem).setSelected(true));
     }
 
     private void addHistoryChangeListener(final String account) {
@@ -138,16 +103,13 @@ public class TrayMenu extends AnchorPane implements Initializable {
         fileEvents.addListener((ListChangeListener<FileEvent>) change -> {
             while (change.next()) {
                 final List<? extends FileEvent> addedSubList = change.getAddedSubList();
-                for (FileEvent fileEvent : addedSubList) {
-                    if (change.wasAdded() && getSelectedButton(accounts).getText().equals(account)) {
-                        fileListView.add(new TrayFileListItem(fileEvent, messageBundle));
-                    }
-                }
+                addedSubList.stream().filter(fileEvent -> change.wasAdded() && getSelectedButton(accounts).getId().equals(account)).forEach(fileEvent ->
+                        fileListView.add(new TrayFileListItem(fileEvent, messageBundle)));
             }
         });
     }
 
-    public ToggleButton getSelectedButton(SegmentedButton segmentedButton) {
+    public ToggleButton getSelectedButton(final SegmentedButton segmentedButton) {
         final ObservableList<ToggleButton> buttons = segmentedButton.getButtons();
         for (ToggleButton button : buttons) {
             if (button.isSelected()) {

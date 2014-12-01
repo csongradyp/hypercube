@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.VBox?>
 <fx:root type="javafx.scene.control.TableView" stylesheets="style/HyperCubeTableView.css" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <columns>
-        <TableColumn fx:id="sharedColumn" editable="false" maxWidth="60.0" minWidth="30.0" prefWidth="50.0"/>
+        <TableColumn fx:id="cloudColumn" editable="false" maxWidth="60.0" minWidth="30.0" prefWidth="50.0"/>
         <TableColumn fx:id="fileNameColumn" editable="false" minWidth="100.0" prefWidth="200.0" text="%file.name"/>
         <TableColumn fx:id="extColumn" editable="false" maxWidth="80.0" minWidth="45.0" prefWidth="55.0" text="%file.ext"/>
         <TableColumn fx:id="fileSizeColumn" editable="false" maxWidth="100.0" minWidth="60.0" prefWidth="60.0" text="%file.size"/>

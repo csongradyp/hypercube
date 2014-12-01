@@ -4,13 +4,17 @@ import java.nio.file.Path;
 
 public class StepBackFile extends File {
 
-    public StepBackFile(final Path path) {
+    private final String origin;
+
+    public StepBackFile(final String account, final Path path) {
         super(path);
+        this.origin = account;
         setStepBack(true);
     }
 
     public StepBackFile(final java.io.File parentFile) {
         super(parentFile.toPath());
+        origin = "Local";
         setStepBack(true);
     }
 
@@ -38,6 +42,11 @@ public class StepBackFile extends File {
     @Override
     public boolean isRoot() {
         return false;
+    }
+
+    @Override
+    public String getOrigin() {
+        return "";
     }
 
 }

@@ -1,5 +1,6 @@
 package com.noe.hypercube.domain;
 
+import com.noe.hypercube.persistence.FileEntityFactory;
 import com.noe.hypercube.service.Dropbox;
 
 import java.util.Date;

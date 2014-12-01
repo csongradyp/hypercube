@@ -21,18 +21,22 @@ public class FileListView<LIST_ITEM extends FileListItem> extends ListView<LIST_
     }
 
     public synchronized void clearAndSet(final List<LIST_ITEM> files) {
-        setItems(FXCollections.observableArrayList(files));
+        List<LIST_ITEM> items = files;
+        if(files.size() >= limit) {
+            items = files.subList(0, limit);
+        }
+        setItems(FXCollections.observableArrayList(items));
     }
 
     public synchronized void add(final LIST_ITEM listItem) {
         Platform.runLater(() -> {
             final ObservableList<LIST_ITEM> items = getItems();
-            if(limit != null) {
+            if (limit != null) {
                 if (items.size() == limit) {
                     items.remove(items.size() - 1);
                 }
             }
-            items.add(0, listItem);
+            items.add(listItem);
             for (LIST_ITEM item : items) {
                 item.refresh();
             }

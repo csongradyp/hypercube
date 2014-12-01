@@ -1,7 +1,7 @@
 package com.noe.hypercube.controller;
 
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.LocalFileEntity;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.LocalFileEntity;
 
 import java.util.Collection;
 

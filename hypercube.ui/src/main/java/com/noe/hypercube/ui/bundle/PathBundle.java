@@ -61,7 +61,14 @@ public class PathBundle implements EventHandler<MappingResponse> {
     }
 
     public static String getFolder(final String account, final String localFolder) {
-        return instance.mappings.get(account).get(localFolder);
+        final DualHashBidiMap<String, String> accountMappings = instance.mappings.get(account);
+        for (String mappedLocalFolder : accountMappings.keySet()) {
+            if(localFolder.contains(mappedLocalFolder)) {
+                final String subDirectories = localFolder.replace(mappedLocalFolder, "");
+                return accountMappings.get(mappedLocalFolder) + subDirectories;
+            }
+        }
+        return accountMappings.get(localFolder);
     }
 
     public static String getLocalFolder(final String account, final String folder) {

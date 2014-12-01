@@ -3,9 +3,9 @@
 }
 
 .table-view {
-    -fx-base: #ededed;
+    -fx-base: white;
     -fx-control-inner-background: white;
-    -fx-background-color: #ededed;
+    -fx-background-color: white;
     -fx-table-cell-border-color: transparent;
     -fx-table-header-border-color: transparent;
 }
@@ -22,7 +22,6 @@
 .table-view:focused .table-row-cell:filled:focused:selected {
     -fx-background-color: -fx-focus-color;
     -fx-border-color: #000000;
-    -fx-border-width: 1;
 }
 
 .table-row-cell:filled {
@@ -43,14 +42,18 @@
 }
 
 .table-view:focused .table-row-cell:filled:focused:selected {
-    -fx-background-color: #267cb7;
+    -fx-background-color: #252525;
     -fx-border-color: transparent;
     -fx-alternative-column-fill-visible: false;
     -fx-alternative-row-fill-visible: false;
-    -fx-selection-bar: #267cb7;
+    -fx-selection-bar: #252525;;
 }
 
 .folder {
     -fx-text-fill: #ead7a5;
     -fx-effect: dropshadow(one-pass-box, black, 3, 0, 0, 0);
+}
+
+.account-icon {
+    -fx-effect: innershadow(gaussian, #267cb7, 7, 1, 1, 1);
 }

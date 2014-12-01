@@ -1,15 +1,15 @@
 package com.noe.hypercube.controller;
 
 
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface MappingController {
+public interface IMappingPersistenceController {
 
     Collection<MappingEntity> getMappings(Class<? extends MappingEntity> mappingClass);
 

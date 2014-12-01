@@ -1,5 +1,7 @@
 package com.noe.hypercube.domain;
 
+import com.noe.hypercube.persistence.FileEntityFactory;
+import com.noe.hypercube.persistence.domain.FileEntity;
 import com.noe.hypercube.service.Box;
 
 import java.util.Date;

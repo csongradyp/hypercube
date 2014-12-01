@@ -3,7 +3,7 @@ package com.noe.hypercube.synchronization;
 import com.noe.hypercube.controller.IAccountController;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.AccountBox;
-import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
 import com.noe.hypercube.event.domain.request.MappingRequest;

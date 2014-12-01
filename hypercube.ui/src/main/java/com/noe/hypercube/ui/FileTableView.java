@@ -15,6 +15,10 @@ import com.noe.hypercube.ui.util.FileSizeCalculator;
 import com.noe.hypercube.util.DateUtil;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.*;
+import java.util.*;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -26,19 +30,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.TextAlignment;
 import org.apache.commons.io.FilenameUtils;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.*;
-import java.util.*;
-
 public class FileTableView extends TableView<IFile> implements Initializable {
 
     @FXML
-    private TableColumn<IFile, IFile> sharedColumn;
+    private TableColumn<IFile, IFile> cloudColumn;
     @FXML
     private TableColumn<IFile, IFile> fileNameColumn;
     @FXML
@@ -70,18 +70,20 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         focusedProperty().addListener((observable, oldValue, newValue) -> setActive(newValue));
         requestFocusIfActive();
 
-        sharedColumn.setGraphic(AwesomeDude.createIconLabel(AwesomeIcon.CODE_FORK, "15"));
-        sharedColumn.setCellValueFactory(file -> new ReadOnlyObjectWrapper<>(file.getValue()));
-        sharedColumn.setCellFactory(new FileCellFactory(file -> {
+        cloudColumn.setGraphic(AwesomeDude.createIconLabel(AwesomeIcon.CLOUD, "15"));
+        cloudColumn.setCellValueFactory(file -> new ReadOnlyObjectWrapper<>(file.getValue()));
+        cloudColumn.setCellFactory(new FileCellFactory(file -> {
             HBox content = new HBox(2.0d);
+            if (!file.isStepBack() && !file.isLocal()) {
+                final Label accountMarkLabel = createAccountMarkLabel(file.getOrigin());
+                accountMarkLabel.getStyleClass().add("account-icon");
+                content.getChildren().add(accountMarkLabel);
+            }
             final Collection<String> sharedWith = file.sharedWith();
             for (final String account : sharedWith) {
-                final Label accountMark = new Label();
-                // TODO add icon
-                accountMark.setGraphic(ImageBundle.getAccountImageView(account));
-//                AwesomeDude.setIcon(accountMark, AwesomeIcon.DROPBOX);
-                accountMark.setTooltip(new Tooltip(account));
-                content.getChildren().add(accountMark);
+                final Label sharedAccountMarkLabel = createAccountMarkLabel(account);
+                sharedAccountMarkLabel.getStyleClass().add("account-icon");
+                content.getChildren().add(sharedAccountMarkLabel);
             }
             return content;
         }));
@@ -90,15 +92,15 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         fileNameColumn.setComparator(new FileListComparator());
         fileNameColumn.setSortable(true);
         fileNameColumn.setCellFactory(new FileCellFactory(file -> {
-            Label label = IconFactory.getFileIcon(file);
-            label.getStyleClass().removeAll("table-row-marked", "table-row-shared");
+            Label iconLabel = IconFactory.getFileIcon(file);
+            iconLabel.getStyleClass().removeAll("table-row-marked", "table-row-shared");
             if (file.isMarked()) {
-                label.getStyleClass().add("table-row-marked");
+                iconLabel.getStyleClass().add("table-row-marked");
             }
             if (file.isShared()) {
-                label.getStyleClass().add("table-row-shared");
+                iconLabel.getStyleClass().add("table-row-shared");
             }
-            return label;
+            return iconLabel;
         }));
 
         fileSizeColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
@@ -118,6 +120,15 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         });
     }
 
+    private Label createAccountMarkLabel(final String account) {
+        final Label accountMark = new Label();
+        accountMark.setId(account);
+        final ImageView icon = ImageBundle.getAccountImageView(account);
+        accountMark.setGraphic(icon);
+        accountMark.setTooltip(new Tooltip(account));
+        return accountMark;
+    }
+
     private void setEmptyTablePlaceholder(ResourceBundle resources) {
         final Label iconLabel = AwesomeDude.createIconLabel(AwesomeIcon.PUZZLE_PIECE, resources.getString("table.empty"), "100px", "12", ContentDisplay.TOP);
         iconLabel.getGraphic().setOpacity(0.3d);
@@ -133,7 +144,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
     }
 
     public void setLocalFileList(final Path directory, final Path previousDirectory) {
-        final Collection <IFile> files = new ArrayList<>(100);
+        final Collection<IFile> files = new ArrayList<>(100);
         final Collection<IFile> dirs = new ArrayList<>(100);
         final IFile stepBack = createStepBackFile(directory);
         final IFile previousFolder = getPreviousFolder(previousDirectory);
@@ -145,11 +156,11 @@ public class FileTableView extends TableView<IFile> implements Initializable {
                 if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) {
                     final LocalFile localFolder = new LocalFile(file);
                     final Set<String> accounts = PathBundle.getAccounts(localFolder);
-                    if(!accounts.isEmpty()) {
+                    if (!accounts.isEmpty()) {
                         localFolder.share(accounts);
                     }
                     dirs.add(localFolder);
-                } else if(Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)){
+                } else if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
                     files.add(new LocalFile(file));
                 }
             }
@@ -162,16 +173,16 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         selectIfSteppedBack(previousFolder);
     }
 
-    private IFile getPreviousFolder(Path previousDirectory) {
-        if(previousDirectory != null) {
-            return new StepBackFile(previousDirectory);
+    private IFile getPreviousFolder(final Path previousDirectory) {
+        if (previousDirectory != null) {
+            return new StepBackFile(previousDirectory.toFile());
         }
         return null;
     }
 
     private void selectIfSteppedBack(IFile previousFolder) {
         final ObservableList<IFile> items = getItems();
-        if(previousFolder != null && items.contains(previousFolder)) {
+        if (previousFolder != null && items.contains(previousFolder)) {
             scrollTo(previousFolder);
             getSelectionModel().select(previousFolder);
         } else {
@@ -180,27 +191,27 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         }
     }
 
-    public void setRemoteFileList(final Path previousParentFolder, final Path parentFolder, final List<ServerEntry> list) {
+    public void setRemoteFileList(final String account, final Path previousParentFolder, final Path parentFolder, final List<ServerEntry> list) {
         final Collection<IFile> files = new ArrayList<>(100);
         final Collection<IFile> dirs = new ArrayList<>(100);
         final Path currentLocation = getLocation();
         IFile previousFolder = null;
-        if(currentLocation == null) {
-            previousFolder = new StepBackFile(Paths.get("/"));
-        } else if(currentLocation.startsWith("/")) {
-            previousFolder = new StepBackFile(previousParentFolder);
+        if (currentLocation == null) {
+            previousFolder = new StepBackFile(account, Paths.get("/"));
+        } else if (currentLocation.startsWith("/")) {
+            previousFolder = new StepBackFile(account, previousParentFolder);
         }
         if (list.isEmpty()) {
             final IFile stepBack = createStepBackFile(currentLocation);
             dirs.add(stepBack);
         } else {
-            if (parentFolder!= null && !parentFolder.toString().isEmpty()) {
-                final IFile stepBack = new StepBackFile(Paths.get("/" + parentFolder.toString()));
+            if (parentFolder != null && !parentFolder.toString().isEmpty()) {
+                final IFile stepBack = new StepBackFile(account, Paths.get("/" + parentFolder.toString()));
                 dirs.add(stepBack);
             }
             for (ServerEntry file : list) {
                 final Path path = Paths.get(file.getAccount(), file.getPath().toString());
-                final RemoteFile remoteFile = new RemoteFile(path, 0, file.isFolder(), file.lastModified());
+                final RemoteFile remoteFile = new RemoteFile(file.getAccount(), path, 0, file.isFolder(), file.lastModified());
                 if (file.isFolder()) {
                     dirs.add(remoteFile);
                 } else {
@@ -229,9 +240,9 @@ public class FileTableView extends TableView<IFile> implements Initializable {
                 dirs.add(stepBack);
             }
             for (ServerEntry file : list) {
-                final RemoteFile remoteFile = new RemoteFile(Paths.get(file.getAccount(), file.getPath().toString()), 0, file.isFolder(), file.lastModified());
+                final RemoteFile remoteFile = new RemoteFile(file.getAccount(), Paths.get(file.getAccount(), file.getPath().toString()), 0, file.isFolder(), file.lastModified());
                 remoteFile.share(file.getAccount());
-                if(getItems().contains(remoteFile)) {
+                if (getItems().contains(remoteFile)) {
                     final IFile iFile = getItems().filtered(file1 -> file1.equals(remoteFile)).get(0);
                     iFile.share(remoteFile.sharedWith());
                 } else {

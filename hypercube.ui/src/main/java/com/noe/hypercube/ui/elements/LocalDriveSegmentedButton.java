@@ -1,20 +1,23 @@
 package com.noe.hypercube.ui.elements;
 
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.domain.StorageEvent;
 import com.noe.hypercube.ui.factory.IconFactory;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
+import net.engio.mbassy.listener.Handler;
 import org.controlsfx.control.SegmentedButton;
 
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
-public class LocalDriveSegmentedButton extends SegmentedButton {
+public class LocalDriveSegmentedButton extends SegmentedButton implements com.noe.hypercube.event.EventHandler<StorageEvent> {
 
     private SimpleBooleanProperty active = new SimpleBooleanProperty(false);
 
@@ -26,6 +29,7 @@ public class LocalDriveSegmentedButton extends SegmentedButton {
                 deselectButtons();
             }
         });
+        EventBus.subscribeToStorageEvent(this);
     }
 
     private List<ToggleButton> collectLocalDrives() {
@@ -76,5 +80,19 @@ public class LocalDriveSegmentedButton extends SegmentedButton {
 
     public void setActive(boolean active) {
         this.active.set(active);
+    }
+
+    @Override
+    @Handler( rejectSubtypes = true)
+    public void onEvent(final StorageEvent event) {
+        Platform.runLater(() -> {
+            if(event.isAttached()) {
+                final ToggleButton removableDriveButton = createLocalStorageButton(event.getStorage());
+                getButtons().add(removableDriveButton);
+            } else {
+                getButtons().removeIf(storageButton -> storageButton.getId().equals(event.getStorage().toString()));
+            }
+        });
+
     }
 }

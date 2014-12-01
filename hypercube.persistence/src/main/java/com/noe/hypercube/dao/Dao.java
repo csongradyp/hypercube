@@ -1,6 +1,6 @@
 package com.noe.hypercube.dao;
 
-import com.noe.hypercube.domain.IEntity;
+import com.noe.hypercube.persistence.domain.IEntity;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.JpaRepository;
 

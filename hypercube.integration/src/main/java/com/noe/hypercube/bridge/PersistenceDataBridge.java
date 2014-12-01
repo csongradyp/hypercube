@@ -1,7 +1,7 @@
 package com.noe.hypercube.bridge;
 
 import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 import com.noe.hypercube.ui.bundle.PathBundle;
 import java.util.Collection;
 import java.util.HashMap;

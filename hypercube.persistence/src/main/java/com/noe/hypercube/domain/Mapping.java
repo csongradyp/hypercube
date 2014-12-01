@@ -1,5 +1,6 @@
 package com.noe.hypercube.domain;
 
+import com.noe.hypercube.persistence.domain.MappingEntity;
 import javax.persistence.*;
 
 @MappedSuperclass

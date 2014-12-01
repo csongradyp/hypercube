@@ -299,9 +299,9 @@ public class FileManager extends VBox implements Initializable, EventHandler<Jum
                     final String remoteFileId = remoteFile.getId();
                     final String account = getAccount(getActiveFileView().getLocation());
                     if (remoteFileId != null) {
-                        EventBus.publish(new DeleteRequest(account, remoteFileId));
+                        EventBus.publish(new DeleteRequest(account, remoteFileId, getActiveFileView().getLocation()));
                     } else {
-                        EventBus.publish(new DeleteRequest(account, getEventPath(remoteFile.getPath())));
+                        EventBus.publish(new DeleteRequest(account, getEventPath(remoteFile.getPath()), remoteFile.getParentDirectory()));
                     }
                 }
             }
@@ -409,7 +409,7 @@ public class FileManager extends VBox implements Initializable, EventHandler<Jum
     }
 
     @Override
-    public void onEvent(JumpToFileEvent event) {
+    public void onEvent(final JumpToFileEvent event) {
         Platform.runLater(() -> {
             leftFileView.jumpToFile(event.getFilePath());
             ((Stage) getScene().getWindow()).show();

@@ -1,6 +1,6 @@
 package com.noe.hypercube.mapping;
 
-import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 import com.noe.hypercube.service.Account;
 
 import java.io.File;

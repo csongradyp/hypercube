@@ -1,10 +1,10 @@
 package com.noe.hypercube.controller;
 
 import com.noe.hypercube.dao.IDao;
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.IEntity;
-import com.noe.hypercube.domain.LocalFileEntity;
-import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.IEntity;
+import com.noe.hypercube.persistence.domain.LocalFileEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

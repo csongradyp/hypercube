@@ -8,13 +8,13 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.*;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.AccountQuota;
-import com.noe.hypercube.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.FileEntity;
 import com.noe.hypercube.domain.ServerEntry;
-import com.noe.hypercube.domain.UploadEntity;
-import com.noe.hypercube.googledrive.Authentication;
+import com.noe.hypercube.persistence.domain.UploadEntity;
 import com.noe.hypercube.googledrive.domain.DriveFileEntity;
 import com.noe.hypercube.googledrive.domain.DriveMapping;
 import com.noe.hypercube.googledrive.domain.DriveServerEntry;
+import com.noe.hypercube.service.Authentication;
 import com.noe.hypercube.service.Client;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import java.io.File;
@@ -30,11 +30,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMapping> {
+public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, DriveMapping> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DriveClient.class);
     private static final String EXCLUDE_FILE = "collaboration";
@@ -43,23 +44,31 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
     private IPersistenceController persistenceController;
     private DriveDirectoryUtil dirUtil;
 
-    private Drive client;
     private Long cursor;
 
-    public DriveClient() {
-//        this.client = Authentication.getDriveService("hypercube.app@gmail.com");
-        try {
-            this.client = Authentication.createDriveService();
-            dirUtil = new DriveDirectoryUtil(client);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public DriveClient(final Authentication<Drive> authentication) {
+        super(authentication);
+    }
+
+    @PostConstruct
+    public void init() {
+        dirUtil = new DriveDirectoryUtil(getClient());
     }
 
     @Override
-    protected boolean testConnectionActive() {
+    protected Drive createClientWithNewAuthentication() {
+        return null;
+    }
+
+    @Override
+    protected Drive createClient(final String refreshToken, final String accessToken) {
+        return null;
+    }
+
+    @Override
+    public boolean testConnectionActive() {
         try {
-            final FileList list = client.files().list().execute();
+            final FileList list = getClient().files().list().execute();
             return list != null;
         } catch (GoogleJsonResponseException e) {
             LOG.error("Server error while testing connection - error: ", e);
@@ -106,7 +115,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
     private boolean isExisting(String fileId) {
         com.google.api.services.drive.model.File file = null;
         try {
-            file = client.files().get(fileId).execute();
+            file = getClient().files().get(fileId).execute();
         } catch (IOException e) {
 
         }
@@ -137,7 +146,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
      */
     private List<Change> retrieveAllChanges(final Long startChangeId) throws SynchronizationException {
         try {
-            Drive.Changes.List request = client.changes().list();
+            Drive.Changes.List request = getClient().changes().list();
             if (startChangeId != null) {
                 request.setStartChangeId(startChangeId);
             }
@@ -151,7 +160,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
     public List<ServerEntry> getFileList() throws IOException {
         List<ServerEntry> result = new ArrayList<>();
         List<Change> remotes = new ArrayList<>();
-        Drive.Changes.List request = client.changes().list();
+        Drive.Changes.List request = getClient().changes().list();
         do {
             ChangeList files = request.execute();
             remotes.addAll(files.getItems());
@@ -175,7 +184,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
         String downloadUrl = remoteFile.getDownloadUrl();
         if (downloadUrl != null && !downloadUrl.isEmpty()) {
             try {
-                HttpResponse resp = client.getRequestFactory().buildGetRequest(new GenericUrl(downloadUrl)).execute();
+                HttpResponse resp = getClient().getRequestFactory().buildGetRequest(new GenericUrl(downloadUrl)).execute();
                 InputStream inputStream = resp.getContent();
                 writeToFile(inputStream, outputStream);
 
@@ -217,7 +226,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
     @Override
     public void delete(String remoteFileId) throws SynchronizationException {
         try {
-            client.files().delete(remoteFileId).execute();
+            getClient().files().delete(remoteFileId).execute();
         } catch (IOException e) {
             throw new SynchronizationException(String.format("Failed to delete file (id=%s) from Google Drive", remoteFileId));
         }
@@ -231,7 +240,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
         final FileContent mediaContent = new FileContent("text/plain", fileToUpload);
         com.google.api.services.drive.model.File driveFile;
         try {
-            driveFile = client.files().insert(content, mediaContent).execute();
+            driveFile = getClient().files().insert(content, mediaContent).execute();
         } catch (IOException e) {
             throw new SynchronizationException("Drive new remoteFile upload failed", e);
         }
@@ -259,7 +268,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
 
         com.google.api.services.drive.model.File updatedFile;
         try {
-            updatedFile = client.files().update(driveFileId, driveFile, mediaContent).execute();
+            updatedFile = getClient().files().update(driveFileId, driveFile, mediaContent).execute();
         } catch (IOException e) {
             throw new SynchronizationException("Drive remote file update failed", e);
         }
@@ -274,7 +283,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
         final List<com.google.api.services.drive.model.File> remotes = new ArrayList<>();
         final FileList fileList;
         try {
-            fileList = client.files().list().execute();
+            fileList = getClient().files().list().execute();
             remotes.addAll(fileList.getItems());
             for (com.google.api.services.drive.model.File remoteFile : remotes) {
                 if (!remoteFile.getTitle().equals(EXCLUDE_FILE)) {
@@ -294,7 +303,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
         final List<com.google.api.services.drive.model.File> remotes = new ArrayList<>();
         final FileList fileList;
         try {
-            fileList = client.files().list().execute();
+            fileList = getClient().files().list().execute();
             remotes.addAll(fileList.getItems());
             for (com.google.api.services.drive.model.File remoteFile : remotes) {
                 if (!remoteFile.getTitle().equals(EXCLUDE_FILE)) {
@@ -324,7 +333,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
     @Override
     public AccountQuota getQuota() throws SynchronizationException {
         try {
-            About about = client.about().get().execute();
+            About about = getClient().about().get().execute();
             return new AccountQuota(about.getQuotaBytesTotal(), about.getQuotaBytesUsedAggregate());
         } catch (IOException e) {
             throw new SynchronizationException("Could not get Drive storage quota", e);
@@ -337,7 +346,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
             com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
             file.setTitle(newName);
 
-            Drive.Files.Patch patchRequest = client.files().patch(remoteFile.getId(), file);
+            Drive.Files.Patch patchRequest = getClient().files().patch(remoteFile.getId(), file);
             patchRequest.setFields("title");
 
             com.google.api.services.drive.model.File updatedFile = patchRequest.execute();
@@ -354,7 +363,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
             com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
             file.setTitle(newName);
 
-            Drive.Files.Patch patchRequest = client.files().patch(remoteFile.getId(), file);
+            Drive.Files.Patch patchRequest = getClient().files().patch(remoteFile.getId(), file);
             patchRequest.setFields("title");
 
             com.google.api.services.drive.model.File updatedFile = patchRequest.execute();
@@ -368,7 +377,7 @@ public class DriveClient extends Client<GoogleDrive, DriveFileEntity, DriveMappi
     private com.google.api.services.drive.model.File getDriveFile(String driveFileId) throws SynchronizationException {
         com.google.api.services.drive.model.File driveFile;
         try {
-            driveFile = client.files().get(driveFileId).execute();
+            driveFile = getClient().files().get(driveFileId).execute();
         } catch (IOException e) {
             throw new SynchronizationException("Drive remoteFile update failed", e);
         }

@@ -1,4 +1,4 @@
-package com.noe.hypercube.domain;
+package com.noe.hypercube.persistence.domain;
 
 import java.util.Date;
 

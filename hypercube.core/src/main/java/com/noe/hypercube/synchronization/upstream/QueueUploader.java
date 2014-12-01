@@ -3,10 +3,10 @@ package com.noe.hypercube.synchronization.upstream;
 
 import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.FileEntityFactory;
-import com.noe.hypercube.domain.MappingEntity;
-import com.noe.hypercube.domain.UploadEntity;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.FileEntityFactory;
+import com.noe.hypercube.persistence.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.UploadEntity;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.SynchronizationException;

@@ -3,6 +3,7 @@ package com.noe.hypercube.ui.bundle;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
 import com.noe.hypercube.event.domain.FileEvent;
+import com.noe.hypercube.event.domain.type.StreamDirection;
 import com.sun.javafx.collections.ObservableListWrapper;
 import javafx.collections.ObservableList;
 import net.engio.mbassy.listener.Handler;
@@ -10,9 +11,11 @@ import net.engio.mbassy.listener.Handler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public final class HistoryBundle implements EventHandler<FileEvent> {
 
+    public static final String LOCAL_STORAGE = "Local";
     private final Map<String, ObservableList<FileEvent>> lastSyncedFiles;
     private final Map<String, ObservableList<FileEvent>> failedSyncedFiles;
     private static final Integer historySize = 1000;
@@ -21,6 +24,8 @@ public final class HistoryBundle implements EventHandler<FileEvent> {
     private HistoryBundle() {
         lastSyncedFiles = new HashMap<>();
         failedSyncedFiles = new HashMap<>();
+        lastSyncedFiles.put(LOCAL_STORAGE, new ObservableListWrapper<>(new ArrayList<>(historySize)));
+        failedSyncedFiles.put(LOCAL_STORAGE, new ObservableListWrapper<>(new ArrayList<>(historySize)));
         EventBus.subscribeToFileEvent(this);
     }
 
@@ -47,9 +52,21 @@ public final class HistoryBundle implements EventHandler<FileEvent> {
         }
     }
 
-    private void add(final FileEvent event, final Map<String, ObservableList<FileEvent>> map) {
-        final ObservableList<FileEvent> fileEvents = map.get(event.getAccount());
-        if (fileEvents.size() == historySize) {
+    private void add(final FileEvent event, final Map<String, ObservableList<FileEvent>> trayHistoryMap) {
+        ObservableList<FileEvent> fileEvents = trayHistoryMap.get(event.getAccount());
+        if(event.getDirection() == StreamDirection.DOWN) {
+            fileEvents = trayHistoryMap.get(LOCAL_STORAGE);
+        }
+        final Optional<FileEvent> sameItem = fileEvents.parallelStream().filter(listItem -> listItem.getDirection().equals(event.getDirection())
+                && listItem.getLocalPath().equals(event.getLocalPath())
+                && listItem.getRemotePath().equals(event.getRemotePath())
+                && listItem.getActionType().equals(event.getActionType())
+                && listItem.getAccount().equals(event.getAccount()))
+                .findAny();
+        if(sameItem.isPresent()) {
+            fileEvents.remove(sameItem.get());
+        }
+        if (historySize == fileEvents.size()) {
             fileEvents.remove(fileEvents.size() - 1);
         }
         fileEvents.add(event);

@@ -2,9 +2,9 @@ package com.noe.hypercube.synchronization.downstream;
 
 import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.FileEntityFactory;
-import com.noe.hypercube.domain.LocalFileEntity;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.FileEntityFactory;
+import com.noe.hypercube.persistence.domain.LocalFileEntity;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.FileEvent;

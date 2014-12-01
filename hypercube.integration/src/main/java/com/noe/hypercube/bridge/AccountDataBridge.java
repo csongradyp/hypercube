@@ -21,7 +21,7 @@ public class AccountDataBridge {
     @PostConstruct
     public void transferData() {
         final Collection<AccountBox> accountBoxes = accountController.getAll();
-        for (AccountBox<?, ?, ?> accountBox : accountBoxes) {
+        for (AccountBox<?, ?, ?, ?> accountBox : accountBoxes) {
             AccountBundle.registerAccount(accountBox.getClient().getAccountName(), accountBox.getClient().connectedProperty());
         }
     }

@@ -1,5 +1,6 @@
 package com.noe.hypercube.domain;
 
+import com.noe.hypercube.persistence.domain.MappingEntity;
 import com.noe.hypercube.service.TestAccount;
 
 public class TestMapping implements MappingEntity {

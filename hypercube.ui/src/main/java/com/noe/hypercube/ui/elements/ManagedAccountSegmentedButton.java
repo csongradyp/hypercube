@@ -16,7 +16,7 @@ public class ManagedAccountSegmentedButton extends AccountSegmentedButton {
         super();
         final ObservableList<ToggleButton> buttons = getButtons();
         buttons.add(0, createCloudButton());
-        buttons.add(buttons.size() - 1, createAddConnectionButton());
+        buttons.add(0, createAddConnectionButton());
     }
 
     private ToggleButton createAddConnectionButton() {
@@ -38,7 +38,7 @@ public class ManagedAccountSegmentedButton extends AccountSegmentedButton {
     private ToggleButton createCloudButton() {
         final ToggleButton accountStorageButton = createButton("Cloud");
         AwesomeDude.setIcon(accountStorageButton, AwesomeIcon.CLOUD, ContentDisplay.GRAPHIC_ONLY);
-        accountStorageButton.setDisable(true);
+        accountStorageButton.setDisable(!AccountBundle.isAnyAccountActive());
         AccountBundle.connectedProperty().addListener((observableValue, aBoolean, connected) -> {
             if(connected) {
                 accountStorageButton.setDisable(false);

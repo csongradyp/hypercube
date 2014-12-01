@@ -1,6 +1,6 @@
 package com.noe.hypercube.synchronization.queue;
 
-import com.noe.hypercube.domain.UploadEntity;
+import com.noe.hypercube.persistence.domain.UploadEntity;
 import java.io.File;
 
 public class UploadManagedQueue extends ManagedQueue<UploadEntity, File> {

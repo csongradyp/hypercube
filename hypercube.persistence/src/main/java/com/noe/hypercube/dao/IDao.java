@@ -1,6 +1,6 @@
 package com.noe.hypercube.dao;
 
-import com.noe.hypercube.domain.IEntity;
+import com.noe.hypercube.persistence.domain.IEntity;
 
 import java.util.Collection;
 

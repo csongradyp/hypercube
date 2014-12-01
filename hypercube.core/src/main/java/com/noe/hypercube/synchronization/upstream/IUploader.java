@@ -1,7 +1,7 @@
 package com.noe.hypercube.synchronization.upstream;
 
-import com.noe.hypercube.domain.FileEntity;
-import com.noe.hypercube.domain.UploadEntity;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.UploadEntity;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.synchronization.SynchronizationException;
 

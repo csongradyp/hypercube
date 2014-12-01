@@ -1,9 +1,9 @@
 package com.noe.hypercube.ui.tray.menu.list;
 
 import com.noe.hypercube.event.domain.FileEvent;
-import com.noe.hypercube.ui.util.IconInjector;
 import com.noe.hypercube.ui.util.LastSyncDisplayUtil;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.TextAlignment;
@@ -21,13 +21,13 @@ public abstract class FileListItem extends HBox {
         this.messageBundle = messageBundle;
         this.fileEvent = fileEvent;
         syncTime = createTimeLabel(fileEvent);
-        final Label streamDirection = IconInjector.getStreamDirectionIcon(fileEvent);
-        final Label filePath = createFileLabel(fileEvent);
+        final Node filePath = createFileLabel(fileEvent);
         setAlignment(Pos.CENTER_LEFT);
-        getChildren().addAll(streamDirection, filePath, syncTime);
+        getChildren().addAll(filePath, syncTime);
+        setSpacing(5.0d);
     }
 
-    protected abstract Label createFileLabel(final FileEvent file);
+    protected abstract Node createFileLabel(final FileEvent file);
 
     private Label createTimeLabel(final FileEvent file) {
         final Label syncTime = new Label(LastSyncDisplayUtil.convertToString(file.getTimeStamp(), messageBundle));

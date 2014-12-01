@@ -3,6 +3,8 @@ package com.noe.hypercube.synchronization.presynchronization.util;
 import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IAccountController;
 import com.noe.hypercube.domain.*;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.UploadEntity;
 import com.noe.hypercube.service.Account;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil;

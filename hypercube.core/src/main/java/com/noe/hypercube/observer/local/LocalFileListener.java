@@ -3,8 +3,8 @@ package com.noe.hypercube.observer.local;
 import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IPersistenceController;
 import com.noe.hypercube.domain.AccountBox;
-import com.noe.hypercube.domain.IEntity;
-import com.noe.hypercube.domain.UploadEntity;
+import com.noe.hypercube.persistence.domain.IEntity;
+import com.noe.hypercube.persistence.domain.UploadEntity;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import java.io.File;
 import java.nio.file.Path;
@@ -102,7 +102,7 @@ public class LocalFileListener implements FileAlterationListener {
     }
 
     private void forAllAccounts(final File file, final AccountActionCallback accountAction) {
-        for (final AccountBox<?, ?, ?> accountBox : accountBoxes) {
+        for (final AccountBox<?, ?, ?, ?> accountBox : accountBoxes) {
             try {
                 List<Path> remotes = accountBox.getMapper().getRemotes(file);
                 if (remotes != null) {

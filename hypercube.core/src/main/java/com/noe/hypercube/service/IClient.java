@@ -1,6 +1,9 @@
 package com.noe.hypercube.service;
 
 import com.noe.hypercube.domain.*;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.UploadEntity;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -36,7 +39,7 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
     /**
      * Checks whether the file exists on the server or not.
      *
-     * @return {@code true} if the file exists on the server in the given path in the {@link com.noe.hypercube.domain.UploadEntity} instance.
+     * @return {@code true} if the file exists on the server in the given path in the {@link com.noe.hypercube.persistence.domain.UploadEntity} instance.
      */
     boolean exist(final UploadEntity uploadEntity) throws SynchronizationException;
 
@@ -62,12 +65,14 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
 
     AccountQuota getQuota() throws SynchronizationException;
 
+    Boolean isAttached();
+
     Boolean isConnected();
 
     SimpleBooleanProperty connectedProperty();
 
     /**
-     * Renames remote file. After method call original file will not exist, just with the new name.
+     * Renames remote file. After method call original file will not exist, just the one with the new name.
      * @param remoteFile
      * @param newName
      * @return

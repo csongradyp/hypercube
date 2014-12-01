@@ -1,7 +1,7 @@
 package com.noe.hypercube.mapping.collector;
 
 import com.noe.hypercube.domain.Filter;
-import com.noe.hypercube.domain.MappingEntity;
+import com.noe.hypercube.persistence.domain.MappingEntity;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
