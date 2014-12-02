@@ -285,12 +285,10 @@ public class BoxClientWrapper extends Client<Box, BoxClient, BoxFileEntity, BoxM
         try {
             final String foldersId = directoryUtil.getFoldersId(remoteFolder);
             final List<BoxTypedObject> folderEntries = getClient().getFoldersManager().getFolderItems(foldersId, pagingRequestObject).getEntries();
-            for (BoxTypedObject entry : folderEntries) {
-                if (entry instanceof BoxItem) {
-                    BoxItem boxItem = (BoxItem) entry;
-                    fileList.add(new BoxServerEntry(directoryUtil.getFilePath(boxItem), boxItem.getId(), boxItem.getSize().longValue(), boxItem.getSequenceId(), boxItem.dateModifiedAt(), directoryUtil.isFolder(boxItem)));
-                }
-            }
+            folderEntries.stream().filter(entry -> entry instanceof BoxItem).forEach(entry -> {
+                BoxItem boxItem = (BoxItem) entry;
+                fileList.add(new BoxServerEntry(directoryUtil.getFilePath(boxItem), boxItem.getId(), boxItem.getSize().longValue(), boxItem.getSequenceId(), boxItem.dateModifiedAt(), directoryUtil.isFolder(boxItem)));
+            });
         } catch (BoxRestException e) {
             e.printStackTrace();
         } catch (BoxServerException e) {

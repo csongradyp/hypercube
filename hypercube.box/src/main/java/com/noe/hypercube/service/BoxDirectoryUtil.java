@@ -22,7 +22,7 @@ public class BoxDirectoryUtil {
 
     private final BoxClient client;
 
-    public BoxDirectoryUtil(BoxClient client) {
+    public BoxDirectoryUtil(final BoxClient client) {
         this.client = client;
     }
 
@@ -34,7 +34,7 @@ public class BoxDirectoryUtil {
         String folderPath = "";
 
         final BoxCollection pathCollection = bFile.getPathCollection();
-        final ArrayList<BoxTypedObject> entries = pathCollection.getEntries();
+        final List<BoxTypedObject> entries = pathCollection.getEntries();
 
         if (pathCollection.getTotalCount() > 0) {
             folderPath = "/";
@@ -49,7 +49,6 @@ public class BoxDirectoryUtil {
         return folderPath + "/" + bFile.getName();
     }
 
-
     public String getFoldersId(final Path remoteFolder) throws BoxServerException, AuthFatalFailureException, BoxRestException, SynchronizationException {
         final String[] folders = getPathParts(remoteFolder.toString());
         return getId(folders);
@@ -61,16 +60,12 @@ public class BoxDirectoryUtil {
     }
 
     public String getId(final String... pathParts) throws BoxServerException, BoxRestException, AuthFatalFailureException, SynchronizationException {
-        final List<String> subPaths = new ArrayList<>();
-        Collections.addAll(subPaths, pathParts);
-
         String id = ROOT_DIRECTORY;
         for (String dirName : pathParts) {
             BoxTypedObject existing = getExisting(dirName, id);
             if (existing == null) {
                 throw new SynchronizationException("Box folder/file does not exist");
             }
-            subPaths.remove(0);
             id = existing.getId();
         }
         return id;
@@ -89,7 +84,7 @@ public class BoxDirectoryUtil {
     }
 
     public String createFoldersPath(final String... directories) throws BoxServerException, BoxRestException, AuthFatalFailureException {
-        List<String> subDirs = new ArrayList<>();
+        final List<String> subDirs = new ArrayList<>();
         Collections.addAll(subDirs, directories);
 
         String folderId = ROOT_DIRECTORY;

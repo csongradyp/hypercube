@@ -1,8 +1,8 @@
 package com.noe.hypercube.domain;
 
-import com.google.api.services.drive.model.File;
-import com.noe.hypercube.domain.ServerEntry;
 
+import com.google.api.services.drive.model.File;
+import com.noe.hypercube.service.GoogleDrive;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -23,11 +23,13 @@ public class DriveServerEntry implements ServerEntry {
         this.isFolder = isFolder;
     }
 
-    public DriveServerEntry(final File remoteFile, final String path, final String revision, final Date lastModified) {
+    public DriveServerEntry(final File remoteFile, final String path, final String revision, final Date lastModified, final boolean isFolder) {
         this.remoteFile = remoteFile;
+        this.path = Paths.get(path);
         this.revision = revision;
         this.lastModified = lastModified;
         this.id = remoteFile.getId();
+        this.isFolder = isFolder;
     }
 
     public File getRemoteFile() {
@@ -76,6 +78,6 @@ public class DriveServerEntry implements ServerEntry {
 
     @Override
     public String getAccount() {
-        return "Google Drive";
+        return GoogleDrive.name;
     }
 }

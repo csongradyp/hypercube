@@ -117,7 +117,10 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
             final List<Change> changeItems = retrieveAllChanges(cursor);
             for (Change change : changeItems) {
                 final com.google.api.services.drive.model.File file = change.getFile();
-                changes.add(new DriveServerEntry(file, dirUtil.getPath(file), file.getHeadRevisionId(), new Date(change.getModificationDate().getValue())));
+                final String path = dirUtil.getPath(file);
+                final String revision = file.getHeadRevisionId();
+                final Date lastModified = new Date(change.getModificationDate().getValue());
+                changes.add(new DriveServerEntry(file, path, revision, lastModified, dirUtil.isFolder(file)));
                 cursor = change.getId();
             }
             return getFileList();
@@ -144,7 +147,7 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
         }
     }
 
-    public List<ServerEntry> getFileList() throws IOException {
+    public List<ServerEntry> getFileList() throws IOException, SynchronizationException {
         List<ServerEntry> result = new ArrayList<>();
         List<Change> remotes = new ArrayList<>();
         Drive.Changes.List request = getClient().changes().list();
@@ -154,7 +157,7 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
             for (Change change : remotes) {
                 com.google.api.services.drive.model.File remoteFile = change.getFile();
                 if (!remoteFile.getTitle().equals(EXCLUDE_FILE)) {
-                    DriveServerEntry serverEntry = new DriveServerEntry(remoteFile, dirUtil.getPath(remoteFile), remoteFile.getHeadRevisionId(), new Date(remoteFile.getModifiedDate().getValue()));
+                    final DriveServerEntry serverEntry = createDriveServerEntry(remoteFile);
                     result.add(serverEntry);
                 }
             }
@@ -201,17 +204,17 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
     }
 
     @Override
-    public DriveServerEntry download(String serverPath, FileOutputStream outputStream, Object... extraArgs) throws SynchronizationException {
+    public DriveServerEntry download(final String serverPath, final FileOutputStream outputStream, final Object... extraArgs) throws SynchronizationException {
         throw new UnsupportedOperationException("Use the public void download(ServerEntry serverEntry, FileOutputStream outputStream) method.");
     }
 
     @Override
-    public void delete(Path remoteFilePath) throws SynchronizationException {
+    public void delete(final Path remoteFilePath) throws SynchronizationException {
         throw new UnsupportedOperationException("Delete operation is only available with file id");
     }
 
     @Override
-    public void delete(String remoteFileId) throws SynchronizationException {
+    public void delete(final String remoteFileId) throws SynchronizationException {
         try {
             getClient().files().delete(remoteFileId).execute();
         } catch (IOException e) {
@@ -247,7 +250,7 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
     }
 
     @Override
-    public ServerEntry uploadAsUpdated(UploadEntity uploadEntity) throws SynchronizationException {
+    public ServerEntry uploadAsUpdated(final UploadEntity uploadEntity) throws SynchronizationException {
         final File fileToUpload = uploadEntity.getFile();
         final String driveFileId = getFileId(fileToUpload);
         final com.google.api.services.drive.model.File driveFile = getDriveFile(driveFileId);
@@ -265,16 +268,14 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
     }
 
     @Override
-    public List<ServerEntry> getFileList(Path remoteFolder) throws SynchronizationException {
+    public List<ServerEntry> getFileList(final Path remoteFolder) throws SynchronizationException {
         final List<ServerEntry> result = new ArrayList<>();
-        final List<com.google.api.services.drive.model.File> remotes = new ArrayList<>();
-        final FileList fileList;
         try {
-            fileList = getClient().files().list().execute();
-            remotes.addAll(fileList.getItems());
-            for (com.google.api.services.drive.model.File remoteFile : remotes) {
+            final String folderId = dirUtil.getId(remoteFolder);
+            final FileList fileList = getClient().files().list().setQ(String.format("'%s' in parents AND trashed = false", folderId)).execute();
+            for (com.google.api.services.drive.model.File remoteFile : fileList.getItems()) {
                 if (!remoteFile.getTitle().equals(EXCLUDE_FILE)) {
-                    DriveServerEntry serverEntry = new DriveServerEntry(remoteFile, dirUtil.getPath(remoteFile), remoteFile.getHeadRevisionId(), new Date(remoteFile.getModifiedDate().getValue()));
+                    DriveServerEntry serverEntry = createDriveServerEntry(remoteFile);
                     result.add(serverEntry);
                 }
             }
@@ -288,13 +289,12 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
     public List<ServerEntry> getRootFileList() throws SynchronizationException {
         final List<ServerEntry> result = new ArrayList<>();
         final List<com.google.api.services.drive.model.File> remotes = new ArrayList<>();
-        final FileList fileList;
         try {
-            fileList = getClient().files().list().execute();
+            final FileList fileList = getClient().files().list().setQ("'root' in parents AND trashed=false").execute();
             remotes.addAll(fileList.getItems());
             for (com.google.api.services.drive.model.File remoteFile : remotes) {
                 if (!remoteFile.getTitle().equals(EXCLUDE_FILE)) {
-                    DriveServerEntry serverEntry = new DriveServerEntry(remoteFile, dirUtil.getPath(remoteFile), remoteFile.getHeadRevisionId(), new Date(remoteFile.getModifiedDate().getValue()));
+                    DriveServerEntry serverEntry = createDriveServerEntry(remoteFile);
                     result.add(serverEntry);
                 }
             }
@@ -328,7 +328,7 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
     }
 
     @Override
-    public FileEntity rename(FileEntity remoteFile, String newName) throws SynchronizationException {
+    public FileEntity rename(final FileEntity remoteFile, final String newName) throws SynchronizationException {
         try {
             com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
             file.setTitle(newName);
@@ -345,7 +345,7 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
     }
 
     @Override
-    public FileEntity rename(ServerEntry remoteFile, String newName) throws SynchronizationException {
+    public FileEntity rename(final ServerEntry remoteFile, final String newName) throws SynchronizationException {
         try {
             com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
             file.setTitle(newName);
@@ -361,7 +361,7 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
         }
     }
 
-    private com.google.api.services.drive.model.File getDriveFile(String driveFileId) throws SynchronizationException {
+    private com.google.api.services.drive.model.File getDriveFile(final String driveFileId) throws SynchronizationException {
         com.google.api.services.drive.model.File driveFile;
         try {
             driveFile = getClient().files().get(driveFileId).execute();
@@ -371,16 +371,24 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
         return driveFile;
     }
 
-    private String getFileId(File fileToUpload) {
+    private String getFileId(final File fileToUpload) {
         DriveFileEntity driveFileEntity = (DriveFileEntity) persistenceController.get(fileToUpload.getPath(), DriveFileEntity.class);
         return driveFileEntity.getFileId();
     }
 
-    private com.google.api.services.drive.model.File getContent(java.io.File file, List<ParentReference> parentReferences) {
+    private com.google.api.services.drive.model.File getContent(final File file, final List<ParentReference> parentReferences) {
         com.google.api.services.drive.model.File content = new com.google.api.services.drive.model.File();
         content.setTitle(file.getName());
         content.setMimeType("text/plain");
         content.setParents(parentReferences);
         return content;
     }
+
+    private DriveServerEntry createDriveServerEntry(final com.google.api.services.drive.model.File remoteFile) throws SynchronizationException {
+        final String path = dirUtil.getPath(remoteFile);
+        final String revision = remoteFile.getHeadRevisionId();
+        final Date lastModified = new Date(remoteFile.getModifiedDate().getValue());
+        return new DriveServerEntry(remoteFile, path, revision, lastModified, dirUtil.isFolder(remoteFile));
+    }
+
 }

@@ -205,8 +205,8 @@ public class FileTableView extends TableView<IFile> implements Initializable {
             final IFile stepBack = createStepBackFile(currentLocation);
             dirs.add(stepBack);
         } else {
-            if (parentFolder != null && !parentFolder.toString().isEmpty()) {
-                final IFile stepBack = new StepBackFile(account, Paths.get("/" + parentFolder.toString()));
+            if (!parentFolder.toString().isEmpty()) {
+                final IFile stepBack = new StepBackFile(account, Paths.get(account, parentFolder.getParent() == null ? "/" : parentFolder.getParent().toString()));
                 dirs.add(stepBack);
             }
             for (ServerEntry file : list) {
@@ -261,7 +261,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         selectIfSteppedBack(previousFolder);
     }
 
-    private IFile createStepBackFile(Path dir) {
+    private IFile createStepBackFile(final Path dir) {
         if (dir != null && dir.toFile().getParentFile() != null) {
             java.io.File parentFile = dir.toFile().getParentFile();
             return new StepBackFile(parentFile);

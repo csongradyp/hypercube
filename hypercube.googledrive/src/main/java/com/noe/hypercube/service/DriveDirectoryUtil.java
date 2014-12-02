@@ -4,87 +4,81 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
+import com.noe.hypercube.synchronization.SynchronizationException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.nio.file.Path;
+import java.util.*;
 import org.apache.log4j.Logger;
 
 public class DriveDirectoryUtil {
 
     private static final Logger LOG = Logger.getLogger(DriveDirectoryUtil.class);
     public static final String ROOT_DIRECTORY = "root";
+    public static final String FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
     private final Drive client;
 
-    public DriveDirectoryUtil(Drive client) {
+    public DriveDirectoryUtil(final Drive client) {
         this.client = client;
     }
 
-    private void getPath(com.google.api.services.drive.model.File file, ArrayList<String> path) throws IOException {
-//        System.out.println(path + " - " + file.getTitle() + " is current file with id=" + file.getId());
-        List<ParentReference> parents = file.getParents();
-//        for(int i=0;i<parents.size();i++){
-        for (ParentReference parent : parents) {
-//            File parent = Download.printFile(client, parents.get(i).getId());
-            File parentFolder = client.files().get(parent.getId()).execute();
-            if (!parentFolder.getTitle().equals("root")) {
-                path.add(parentFolder.getTitle());
-                getPath(parentFolder, path);
-            }
-        }
+    public boolean isFolder(final File file) {
+        return file.getMimeType().contains(FOLDER_MIME_TYPE);
     }
 
-    public String getPathString(File file) {
-        String pathString = "";
-        ArrayList<String> path = new ArrayList<>();
+    public String getId(final Path remotePath) throws SynchronizationException {
+        final String[] pathParts = getPathParts(remotePath.toString());
+        return getId(pathParts);
+    }
+
+    private String[] getPathParts(final String remotePath) {
+        String path = remotePath;
+        if (path.startsWith("\\") || path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return path.replace("\\", "/").split("/");
+    }
+
+    public String getId(final String... pathParts) throws SynchronizationException {
+        String id = ROOT_DIRECTORY;
+        for (String folderName : pathParts) {
+            final File folder = getExistingFolder(folderName, id);
+            id = folder.getId();
+        }
+        return id;
+    }
+
+    private File getExistingFolder(final String folderName, final String id) throws SynchronizationException {
         try {
-            getPath(file, path);
-            for (int i = path.size() - 1; i >= 0; i--) {
-                pathString += path.get(i) + "/";
-
+//            final FileList fileList = client.files().list().setQ(String.format("title = '%s' AND mimeType = '%s' AND %s in parents AND trashed = false", folderName, FOLDER_MIME_TYPE, id)).execute();
+            final String query = String.format("title = '%s' AND mimeType = '%s' AND trashed = false", folderName, FOLDER_MIME_TYPE);
+            final FileList fileList = client.files().list().setQ(query).execute();
+            final List<File> items = fileList.getItems();
+            final Optional<File> folder = items.parallelStream().filter(file -> id.equals(ROOT_DIRECTORY) ? file.getParents().get(0).getIsRoot() : id.equals(file.getParents().get(0).getId())).findAny();
+            if (folder.isPresent()) {
+                return folder.get();
             }
-            return pathString;
         } catch (IOException e) {
-            e.printStackTrace();
-            return "";
+            throw new SynchronizationException(String.format("Google Drive: folder/file does not exist %s", folderName), e);
         }
+        throw new SynchronizationException(String.format("Google Drive: folder/file does not exist %s", folderName));
     }
 
-
-    public String getPath(File file) throws IOException {
-        return getPathString(file);
-    }
-
-    private String getPath(File file, String path) throws IOException {
-        // TODO get path for file
-        LOG.debug(path + " - " + file.getTitle() + " is current file with id=" + file.getId());
-        List<ParentReference> parents = file.getParents();
-
-        ParentReference parent = parents.get(0);
-        String mimeType = file.getMimeType();
-        LOG.debug("parentId=" + parent.getId() + " mimeType=" + mimeType);
-        String ID = parent.getId();
-        if (mimeType.equals("application/vnd.google-apps.folder")) {
-            ID = file.getId();
-        }
-
-        if (parent.getIsRoot()) {
-            return "/" + file.getTitle();
-        } else {
-            Drive.Files.List request = client.files().list();
-            String query = "mimeType='application/vnd.google-apps.folder' AND trashed=false AND '" + ID + "' in parents";
-            LOG.debug("isFolderExists(): Query= " + query);
-            request = request.setQ(query);
-            FileList folderList = request.execute();
-            File folder;
-            if (folderList.getItems() == null || folderList.getItems().isEmpty()) {
-                return "/" + file.getTitle();
-            } else {
-                folder = folderList.getItems().get(0);
+    public String getPath(final File file) {
+        String path = "";
+        ParentReference parentReference = file.getParents().get(0);
+        while (!parentReference.getIsRoot()) {
+            final File folder;
+            try {
+                folder = client.files().get(parentReference.getId()).execute();
+                parentReference = folder.getParents().get(0);
+                path = folder.getTitle() +  "/" + path;
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            return getPath(folder, "/" + folder.getTitle() + path);
         }
+        return "/" + path + file.getTitle();
     }
+
 
     /**
      * @param title    the title (name) of the folder (the one you search for)
@@ -94,7 +88,7 @@ public class DriveDirectoryUtil {
      */
     private File getExistsFolder(String title, String parentId) throws IOException {
         Drive.Files.List request = client.files().list();
-        String query = "mimeType='application/vnd.google-apps.folder' AND trashed=false AND title='" + title + "' AND '" + parentId + "' in parents";
+        String query = String.format("mimeType = '%s' AND trashed = false AND title = '%s' AND '%s' in parents", FOLDER_MIME_TYPE, title, parentId);
         LOG.debug("isFolderExists(): Query= " + query);
         request = request.setQ(query);
         FileList files = request.execute();
@@ -120,9 +114,8 @@ public class DriveDirectoryUtil {
         File body = new File();
         body.setTitle(title);
         body.setParents(listParentReference);
-        body.setMimeType("application/vnd.google-apps.folder");
+        body.setMimeType(FOLDER_MIME_TYPE);
         return client.files().insert(body).execute();
-
     }
 
     /**

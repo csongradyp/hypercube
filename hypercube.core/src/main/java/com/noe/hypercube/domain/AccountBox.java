@@ -146,14 +146,16 @@ public class AccountBox<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE extend
     @Override
     @Handler(rejectSubtypes = true)
     public void onCreateFolderRequest(final CreateFolderRequest event) {
-        try {
-            final Path remoteFolder = event.getBaseFolder();
-            final Path folder = Paths.get(remoteFolder.toString(), event.getFolderName());
-            client.createFolder(folder);
-            // TODO - event published before action was done - somehow detect when action has ended
-            EventBus.publish(new FileListResponse(event.getTarget(), client.getAccountName(), null, remoteFolder, client.getFileList(remoteFolder), getRemoteQuotaInfo()));
-        } catch (SynchronizationException e) {
-            //TODO send fail message
+        if (event.getAccount().equals(client.getAccountName())) {
+            try {
+                final Path remoteFolder = event.getBaseFolder();
+                final Path folder = Paths.get(remoteFolder.toString(), event.getFolderName());
+                client.createFolder(folder);
+                // TODO - event published before action was done - somehow detect when action has ended
+                EventBus.publish(new FileListResponse(event.getTarget(), client.getAccountName(), null, remoteFolder, client.getFileList(remoteFolder), getRemoteQuotaInfo()));
+            } catch (SynchronizationException e) {
+                //TODO send fail message
+            }
         }
     }
 

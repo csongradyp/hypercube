@@ -80,7 +80,7 @@ public class DriveAuthentication extends Authentication<Drive> {
                 .build();
         credentials.setRefreshToken(refreshToken);
         credentials.setAccessToken(accessToken);
-        return new Drive.Builder(httpTransport, jsonFactory, credentials).build();
+        return new Drive.Builder(httpTransport, jsonFactory, credentials).setApplicationName("Hypercube").build();
     }
 
     @Override
