@@ -7,6 +7,7 @@ import com.noe.hypercube.event.domain.request.FileListRequest;
 import com.noe.hypercube.event.domain.response.FileListResponse;
 import com.noe.hypercube.ui.RemoteFileBreadCrumbBar;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
+import com.noe.hypercube.ui.bundle.PathBundle;
 import com.noe.hypercube.ui.domain.file.IFile;
 import com.noe.hypercube.ui.domain.file.RemoteFile;
 import com.noe.hypercube.ui.factory.IconFactory;
@@ -17,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -136,11 +138,8 @@ public class RemoteFolderChooserDialog extends Dialog<Path> implements Initializ
             final Collection<RemoteFile> remoteFiles = new ArrayList<>();
             final List<ServerEntry> fileList = event.getFileList();
             if (fileList != null) {
-                for (ServerEntry serverEntry : fileList) {
-                    if (serverEntry.isFolder()) {
-                        remoteFiles.add(new RemoteFile(account, serverEntry.getPath(), 0L, serverEntry.isFolder(), serverEntry.lastModified()));
-                    }
-                }
+                remoteFiles.addAll(fileList.stream().filter(serverEntry -> serverEntry.isFolder() && !isMapped(serverEntry)).map(serverEntry ->
+                        new RemoteFile(account, serverEntry.getPath(), 0L, serverEntry.isFolder(), serverEntry.lastModified())).collect(Collectors.toList()));
                 Platform.runLater(() -> {
                     folderListView.setItems(FXCollections.observableArrayList(remoteFiles));
                     setBreadCrumb(event.getFolder().toString());
@@ -149,11 +148,16 @@ public class RemoteFolderChooserDialog extends Dialog<Path> implements Initializ
         }
     }
 
+    public Boolean isMapped(final ServerEntry serverEntry) {
+        final Path remoteFolder = serverEntry.getPath();
+        return PathBundle.getRemoteFolders(serverEntry.getAccount()).parallelStream().anyMatch(mappedRemoteFolders ->
+                remoteFolder.equals(Paths.get(mappedRemoteFolders)));
+    }
+
     private void setBreadCrumb(final String path) {
         final Path pathWithAccount = Paths.get(account, path);
         final String breadcrumbPath = SLASH_SEPARATOR.matcher(pathWithAccount.toString()).replaceAll("\\\\");
         final TreeItem<String> model = BreadCrumbBar.buildTreeModel(breadcrumbPath.split(SEPARATOR_PATTERN));
         folderBreadcrumb.setSelectedCrumb(model);
     }
-
 }
