@@ -6,6 +6,7 @@ import com.box.boxjavalibv2.dao.*;
 import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
 import com.box.boxjavalibv2.exceptions.BoxJSONException;
 import com.box.boxjavalibv2.exceptions.BoxServerException;
+import com.box.boxjavalibv2.requests.requestobjects.BoxEventRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxFileRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
 import com.box.boxjavalibv2.utils.ISO8601DateParser;
@@ -26,23 +27,25 @@ import java.text.ParseException;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BoxClientWrapper extends Client<Box, BoxClient, BoxFileEntity, BoxMapping> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BoxClientWrapper.class);
-
-    private static final String CLIENT_ID = "s0fym1o198dy9k0qaesuiyuvyurnh080";
-    private static final String API_KEY = "s0fym1o198dy9k0qaesuiyuvyurnh080";
-    private static final String CLIENT_SECRET = "uTCbyzgarF2PQREyBSa59GLoG0VQ6F3R";
-
+    public static final int EVENT_CACHE_CAPACITY = 500;
 
     private BoxDirectoryUtil directoryUtil;
+    private Long streamPosition;
+    private CircularFifoQueue<String> lastRecentEvents;
 
     @Inject
     public BoxClientWrapper(final Authentication<BoxClient> boxAuthentication) {
         super(boxAuthentication);
+//        streamPosition = 0L;
+        streamPosition = (long) BoxEventRequestObject.STREAM_POSITION_NOW;
+        lastRecentEvents = new CircularFifoQueue<>(EVENT_CACHE_CAPACITY);
     }
 
     @PostConstruct
@@ -117,7 +120,31 @@ public class BoxClientWrapper extends Client<Box, BoxClient, BoxFileEntity, BoxM
     @Override
     public Collection<ServerEntry> getChanges() throws SynchronizationException {
         Collection<ServerEntry> serverEntries = new LinkedList<>();
-
+        try {
+            final BoxEventRequestObject eventsRequestObject1 = BoxEventRequestObject.getEventsRequestObject(streamPosition);
+            eventsRequestObject1.setStreamType(BoxEventRequestObject.STREAM_TYPE_CHANGES);
+            final BoxEventCollection boxEventCollection = getClient().getEventsManager().getEvents(eventsRequestObject1);
+            final List<BoxTypedObject> entries = boxEventCollection.getEntries();
+            for (BoxTypedObject eventObject : entries) {
+                BoxEvent event = (BoxEvent) eventObject;
+                final String eventId = event.getId();
+                if(lastRecentEvents.parallelStream().noneMatch(storedId -> storedId.equals(eventId))) {
+                    final BoxTypedObject source = event.getSource();
+                    if(BoxFile.class.isAssignableFrom(source.getClass())) {
+                        BoxFile bFile = (BoxFile) source;
+                        serverEntries.add(new BoxServerEntry(directoryUtil.getFilePath(bFile), bFile.getId(), bFile.getSize().longValue(), bFile.getSequenceId(), getLastModified(bFile), false));
+                    }
+                }
+                lastRecentEvents.add(eventId);
+            }
+            streamPosition = boxEventCollection.getNextStreamPosition();
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            throw new SynchronizationException("Box: Error occurred while getting changes", e);
+        } catch (AuthFatalFailureException e) {
+            throw new SynchronizationException("Box authentication error", e);
+        }
         return serverEntries;
     }
 
@@ -261,7 +288,7 @@ public class BoxClientWrapper extends Client<Box, BoxClient, BoxFileEntity, BoxM
     }
 
     private Date getLastModified(final BoxItem boxItem) {
-        if(boxItem != null && boxItem.getModifiedAt() != null) {
+        if (boxItem != null && boxItem.getModifiedAt() != null) {
             try {
                 return ISO8601DateParser.parse(boxItem.getModifiedAt());
             } catch (ParseException e) {
