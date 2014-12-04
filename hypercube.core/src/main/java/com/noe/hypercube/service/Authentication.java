@@ -27,7 +27,7 @@ public abstract class Authentication<CLIENT> implements IAuthentication {
     }
 
     @Override
-    public Optional<AccountEntity> getStoredTokens() {
+    public Optional<AccountEntity> getStoredAccountProperties() {
         return accountPersistenceController.findByAccountName(getAccountName());
     }
 

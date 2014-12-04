@@ -106,7 +106,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE extend
     @Override
     @Handler(rejectSubtypes = true)
     public void onFileListRequest(final FileListRequest event) {
-        if (event.getAccount().equals(client.getAccountName())) {
+        if (event.getAccount().equals(client.getAccountName()) && client.isConnected()) {
             try {
                 final List<ServerEntry> fileList;
                 final Path remoteFolder = event.getFolder();
@@ -125,7 +125,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE extend
     @Override
     @Handler(rejectSubtypes = true)
     public void onUploadRequest(final UploadRequest event) {
-        if (event.getAccount().equals(client.getAccountName())) {
+        if (event.getAccount().equals(client.getAccountName()) && client.isConnected()) {
             try {
                 // TODO uploadrequest type??? always ADDED?
                 uploader.uploadNew(new UploadEntity(event.getLocalFile().toFile(), event.getRemoteFolder(), Action.ADDED));
@@ -138,7 +138,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE extend
     @Override
     @Handler(rejectSubtypes = true)
     public void onDownloadRequest(final DownloadRequest event) {
-        if (event.getAccount().equals(client.getAccountName())) {
+        if (event.getAccount().equals(client.getAccountName()) && client.isConnected()) {
             downloader.download(new FileServerEntry(event.getAccount(), event.getRemoteFile().toString()));
         }
     }
@@ -146,7 +146,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE extend
     @Override
     @Handler(rejectSubtypes = true)
     public void onCreateFolderRequest(final CreateFolderRequest event) {
-        if (event.getAccount().equals(client.getAccountName())) {
+        if (event.getAccount().equals(client.getAccountName()) && client.isConnected()) {
             try {
                 final Path remoteFolder = event.getBaseFolder();
                 final Path folder = Paths.get(remoteFolder.toString(), event.getFolderName());
@@ -162,7 +162,7 @@ public class AccountBox<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE extend
     @Override
     @Handler(rejectSubtypes = true)
     public void onDeleteRequest(final DeleteRequest event) {
-        if (event.getAccount().equals(client.getAccountName())) {
+        if (event.getAccount().equals(client.getAccountName()) && client.isConnected()) {
             try {
                 if (event.getId() != null) {
                     client.delete(event.getId());

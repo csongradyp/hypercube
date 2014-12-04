@@ -67,6 +67,10 @@ public interface IClient<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends FileE
 
     Boolean isAttached();
 
+    SimpleBooleanProperty attachedProperty();
+
+    void setAttached(Boolean attached);
+
     Boolean isConnected();
 
     SimpleBooleanProperty connectedProperty();

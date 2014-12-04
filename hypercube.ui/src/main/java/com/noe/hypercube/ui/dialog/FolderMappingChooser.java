@@ -1,49 +1,27 @@
 package com.noe.hypercube.ui.dialog;
 
-import com.noe.hypercube.ui.bundle.AccountBundle;
-import com.noe.hypercube.ui.bundle.ImageBundle;
-import com.sun.javafx.collections.ObservableListWrapper;
+import com.noe.hypercube.ui.elements.AccountChooser;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
-import javafx.scene.control.*;
+import java.nio.file.Path;
+import java.util.Optional;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import javafx.util.Callback;
 import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
-
-import java.nio.file.Path;
-import java.util.Optional;
 
 
 public class FolderMappingChooser extends HBox {
 
     private final TextField folderPath;
     private final Button folderChooserButton;
-    private final ComboBox<String> accountChoice;
+    private final AccountChooser accountChoice;
 
     public FolderMappingChooser(final ValidationSupport validationSupport) {
         setSpacing(10.0d);
-        accountChoice = new ComboBox<>(new ObservableListWrapper<>(AccountBundle.getAccountNames()));
-        accountChoice.setMinWidth(100.0d);
-        final Callback<ListView<String>, ListCell<String>> cellFactory = (param) -> new ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item != null && !empty) {
-                    setGraphic(ImageBundle.getAccountImageView(item));
-                    setText(item);
-                } else {
-                    setGraphic(null);
-                    setText(null);
-                }
-            }
-        };
-        accountChoice.setButtonCell(cellFactory.call(null));
-        accountChoice.setCellFactory(cellFactory);
-        if(!accountChoice.getItems().isEmpty()) {
-            accountChoice.setValue(accountChoice.getItems().get(0));
-        }
+        accountChoice = new AccountChooser();
         folderPath = new TextField();
         folderPath.setEditable(false);
         folderPath.prefWidthProperty().bind(widthProperty().subtract(180.0d));

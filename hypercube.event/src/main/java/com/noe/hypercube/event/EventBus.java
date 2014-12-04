@@ -14,6 +14,7 @@ public final class EventBus {
     private static final EventBus instance = new EventBus();
 
     private final MBassador<StorageEvent> storageEventBus;
+    private final MBassador<AccountConnectionRequest> connectionRequestBus;
     private final MBassador<FileEvent> fileEventBus;
     private final MBassador<FileListRequest> fileListRequestBus;
     private final MBassador<FileListResponse> fileListResponseBus;
@@ -28,6 +29,7 @@ public final class EventBus {
 
     private EventBus() {
         storageEventBus = new MBassador<>(BusConfiguration.Default());
+        connectionRequestBus = new MBassador<>(BusConfiguration.Default());
         fileEventBus = new MBassador<>(BusConfiguration.Default());
         fileListRequestBus = new MBassador<>(BusConfiguration.Default());
         fileListResponseBus = new MBassador<>(BusConfiguration.Default());
@@ -39,7 +41,7 @@ public final class EventBus {
         mappingResponseBus = new MBassador<>(BusConfiguration.Default());
         jumpToFileBus = new MBassador<>(BusConfiguration.Default());
         queueContentEventBus = new MBassador<>(BusConfiguration.Default());
-        registerShutdownHook(storageEventBus, fileEventBus, fileListRequestBus,
+        registerShutdownHook(storageEventBus, connectionRequestBus, fileEventBus, fileListRequestBus,
                 fileListResponseBus, uploadRequestBus, downloadRequestBus, createFolderRequestBus,
                 deleteRequestBus, mappingRequestBus, mappingResponseBus, queueContentEventBus, jumpToFileBus);
     }
@@ -120,6 +122,14 @@ public final class EventBus {
 
     public static void publish(CreateFolderRequest createFolderRequest) {
         instance.createFolderRequestBus.publish(createFolderRequest);
+    }
+
+    public static void publish(final AccountConnectionRequest connectionRequest) {
+        instance.connectionRequestBus.publish(connectionRequest);
+    }
+
+    public static void subscribeToConnectionRequest(final EventHandler<AccountConnectionRequest> handler) {
+        instance.connectionRequestBus.subscribe(handler);
     }
 
     public static void publish(DeleteRequest deleteRequest) {

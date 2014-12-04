@@ -11,7 +11,7 @@ import javafx.util.Callback;
 public class AccountChooser extends ComboBox<String> {
 
     public AccountChooser() {
-        super(new ObservableListWrapper<>(AccountBundle.getAccountNames()));
+        super(new ObservableListWrapper<>(AccountBundle.getConnectedAccountNames()));
         setMinWidth(100.0d);
         final Callback<ListView<String>, ListCell<String>> cellFactory = new Callback<ListView<String>, ListCell<String>>() {
             @Override

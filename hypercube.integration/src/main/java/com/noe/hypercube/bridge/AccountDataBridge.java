@@ -2,6 +2,7 @@ package com.noe.hypercube.bridge;
 
 import com.noe.hypercube.controller.IAccountController;
 import com.noe.hypercube.domain.AccountBox;
+import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.ui.bundle.AccountBundle;
 
 import javax.annotation.PostConstruct;
@@ -20,9 +21,10 @@ public class AccountDataBridge {
 
     @PostConstruct
     public void transferData() {
-        final Collection<AccountBox> accountBoxes = accountController.getAll();
-        for (AccountBox<?, ?, ?, ?> accountBox : accountBoxes) {
-            AccountBundle.registerAccount(accountBox.getClient().getAccountName(), accountBox.getClient().connectedProperty());
+        final Collection<AccountBox> accountBoxes = accountController.getAllAttached();
+        for (AccountBox accountBox : accountBoxes) {
+            final IClient client = accountBox.getClient();
+            AccountBundle.registerAccount(client.getAccountName(), client.attachedProperty(), client.connectedProperty());
         }
     }
 }

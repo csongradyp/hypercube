@@ -1,36 +1,36 @@
 package com.noe.hypercube.ui.elements;
 
 import com.noe.hypercube.ui.bundle.AccountBundle;
+import com.noe.hypercube.ui.bundle.ConfigurationBundle;
+import com.noe.hypercube.ui.dialog.AddConnectionDialog;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ToggleButton;
-import javafx.util.Callback;
-import javafx.util.Pair;
-import org.controlsfx.dialog.LoginDialog;
 
 public class ManagedAccountSegmentedButton extends AccountSegmentedButton {
 
+    private final ResourceBundle resourceBundle;
+
     public ManagedAccountSegmentedButton() {
         super();
+        resourceBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
         final ObservableList<ToggleButton> buttons = getButtons();
         buttons.add(0, createCloudButton());
         buttons.add(0, createAddConnectionButton());
     }
 
     private ToggleButton createAddConnectionButton() {
-        final ToggleButton addConnectionButton = createButton("Add new connection");
+        final ToggleButton addConnectionButton = createButton(resourceBundle.getString("menu.cloud.add"));
         AwesomeDude.setIcon(addConnectionButton, AwesomeIcon.PLUS, ContentDisplay.GRAPHIC_ONLY);
         addConnectionButton.setOnAction(actionEvent -> {
             addConnectionButton.setSelected(false);
-            final LoginDialog loginDialog = new LoginDialog(new Pair<>("", ""), new Callback<Pair<String, String>, Void>() {
-                @Override
-                public Void call(Pair<String, String> stringStringPair) {
-                    return null;
-                }
-            });
-            loginDialog.show();
+            final AddConnectionDialog addConnectionDialog = new AddConnectionDialog();
+            addConnectionDialog.initOwner(getScene().getWindow());
+            addConnectionDialog.show();
         });
         return addConnectionButton;
     }

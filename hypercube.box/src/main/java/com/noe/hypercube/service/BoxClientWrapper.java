@@ -33,11 +33,6 @@ public class BoxClientWrapper extends Client<Box, BoxClient, BoxFileEntity, BoxM
 
     private static final Logger LOG = LoggerFactory.getLogger(BoxClientWrapper.class);
 
-    private static final String CLIENT_ID = "s0fym1o198dy9k0qaesuiyuvyurnh080";
-    private static final String API_KEY = "s0fym1o198dy9k0qaesuiyuvyurnh080";
-    private static final String CLIENT_SECRET = "uTCbyzgarF2PQREyBSa59GLoG0VQ6F3R";
-
-
     private BoxDirectoryUtil directoryUtil;
 
     @Inject
@@ -53,7 +48,7 @@ public class BoxClientWrapper extends Client<Box, BoxClient, BoxFileEntity, BoxM
     }
 
     @Override
-    protected boolean testConnectionActive() {
+    protected boolean testConnection() {
         try {
             getClient().getAuthData().getExpiresIn();
             return true;

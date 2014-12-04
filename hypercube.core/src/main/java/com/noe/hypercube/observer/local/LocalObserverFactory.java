@@ -40,7 +40,7 @@ public class LocalObserverFactory {
     }
 
     public LocalFileObserver createFileObserver(final Path localDir) {
-        final FileAlterationListener listener = new LocalFileListener(localDir, accountController.getAll(), persistenceController);
+        final FileAlterationListener listener = new LocalFileListener(localDir, accountController.getAllAttached(), persistenceController);
         final LocalFileObserver localFileObserver = new LocalFileObserver(localDir, listener);
         LOG.info("File observer created to watch '{}' directory ", localDir);
         return localFileObserver;

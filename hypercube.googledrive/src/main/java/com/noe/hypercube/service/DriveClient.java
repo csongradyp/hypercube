@@ -54,7 +54,7 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
     }
 
     @Override
-    public boolean testConnectionActive() {
+    public boolean testConnection() {
         try {
             final FileList list = getClient().files().list().execute();
             return list != null;

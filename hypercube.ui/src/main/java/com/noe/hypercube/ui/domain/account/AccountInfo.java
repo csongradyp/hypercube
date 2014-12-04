@@ -5,11 +5,13 @@ import javafx.beans.property.BooleanProperty;
 public class AccountInfo {
 
     private final String name;
-    private final BooleanProperty active;
+    private final BooleanProperty connected;
+    private final BooleanProperty attached;
 
-    public AccountInfo(String name, BooleanProperty active) {
+    public AccountInfo(final String name, final BooleanProperty attached, final BooleanProperty connected) {
         this.name = name;
-        this.active = active;
+        this.attached = attached;
+        this.connected = connected;
     }
 
     public String getName() {
@@ -17,10 +19,26 @@ public class AccountInfo {
     }
 
     public Boolean isActive() {
-        return active.get();
+        return connected.get();
     }
 
-    public void setActive(Boolean active) {
-        this.active.set(active);
+    public boolean isAttached() {
+        return attached.get();
+    }
+
+    public BooleanProperty attachedProperty() {
+        return attached;
+    }
+
+    public boolean isConnected() {
+        return connected.get();
+    }
+
+    public BooleanProperty connectedProperty() {
+        return connected;
+    }
+
+    public void setConnected(Boolean connected) {
+        this.connected.set(connected);
     }
 }

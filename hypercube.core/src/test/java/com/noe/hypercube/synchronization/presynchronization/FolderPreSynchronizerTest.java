@@ -108,6 +108,6 @@ public class FolderPreSynchronizerTest {
         final List<AccountBox> accountBoxes = new ArrayList<>();
 //        final AccountBox<TestAccount, TestEntity, TestMapping> accountBox = new AccountBox<>(null, null, null, mockPersistenceController);
         accountBoxes.add(accountBox);
-        given(mockAccountController.getAll()).willReturn(accountBoxes);
+        given(mockAccountController.getAllAttached()).willReturn(accountBoxes);
     }
 }

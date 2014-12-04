@@ -53,6 +53,11 @@
             <artifactId>hypercube.api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.noe.hypercube</groupId>
+            <artifactId>hypercube.event</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 </project>

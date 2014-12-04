@@ -102,7 +102,7 @@ public class Synchronizer implements EventHandler<MappingRequest> {
     }
 
     private void submitDownloaders() {
-        final Collection<AccountBox> accountBoxes = accountController.getAll();
+        final Collection<AccountBox> accountBoxes = accountController.getAllAttached();
         for (AccountBox accountBox : accountBoxes) {
             executorService.submit(accountBox.getDownloader());
             LOG.info("Downloader submitted for account: {}", accountBox.getClient().getAccountName());
@@ -110,7 +110,7 @@ public class Synchronizer implements EventHandler<MappingRequest> {
     }
 
     private void submitUploaders() {
-        final Collection<AccountBox> accountBoxes = accountController.getAll();
+        final Collection<AccountBox> accountBoxes = accountController.getAllAttached();
         for (AccountBox accountBox : accountBoxes) {
             executorService.submit(accountBox.getUploader());
             LOG.info("Uploader submitted for account: {}", accountBox.getClient().getAccountName());

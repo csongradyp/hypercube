@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.noe.hypercube.ui.elements.AccountChooser?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.layout.VBox?>
+<fx:root type="javafx.scene.control.Dialog" resizable="false" title="%dialog.sync.title" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <dialogPane>
+        <DialogPane prefHeight="300.0" prefWidth="400.0" stylesheets="style/HyperCubeTableView.css">
+            <content>
+                <VBox spacing="5" alignment="CENTER">
+                    <AccountChooser fx:id="accountChooser" prefWidth="200.0" />
+                </VBox>
+            </content>
+        </DialogPane>
+    </dialogPane>
+</fx:root>

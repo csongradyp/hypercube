@@ -21,13 +21,11 @@ public class CloudObserverFactory {
 
     public List<CloudObserver> create() {
         LinkedList<CloudObserver> observers = new LinkedList<>();
-        Collection<AccountBox> accountBoxes = accountController.getAll();
-        for (AccountBox accountBox : accountBoxes) {
-            if (accountBox.getClient().isConnected()) {
-                final Collection<Path> mappedRemotes = persistenceController.getMappedRemotes(accountBox.getMapper().getMappingClass());
-                observers.add(new CloudObserver(accountBox, mappedRemotes));
-            }
-        }
+        Collection<AccountBox> accountBoxes = accountController.getAllAttached();
+        accountBoxes.stream().filter(accountBox -> accountBox.getClient().isConnected()).forEach(accountBox -> {
+            final Collection<Path> mappedRemotes = persistenceController.getMappedRemotes(accountBox.getMapper().getMappingClass());
+            observers.add(new CloudObserver(accountBox, mappedRemotes));
+        });
         return observers;
     }
 }

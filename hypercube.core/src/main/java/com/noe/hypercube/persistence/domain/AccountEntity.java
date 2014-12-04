@@ -1,8 +1,6 @@
 package com.noe.hypercube.persistence.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class AccountEntity implements IEntity<Integer> {
@@ -10,6 +8,7 @@ public class AccountEntity implements IEntity<Integer> {
     @Id
     @GeneratedValue
     private Integer id;
+    @Column(unique = true)
     private String accountName;
     private Boolean attached;
     private String refreshToken;

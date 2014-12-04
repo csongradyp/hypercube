@@ -31,7 +31,7 @@ public class CloudListAggregator implements EventHandler<FileListRequest> {
     public void onEvent(final FileListRequest event) {
         if (event.isCloud()) {
             List<ServerEntry> cloudList = new ArrayList<>();
-            final Collection<AccountBox> accountBoxes = accountController.getAll();
+            final Collection<AccountBox> accountBoxes = accountController.getAllAttached();
             for (AccountBox accountBox : accountBoxes) {
                 try {
                     final List<ServerEntry> fileList = accountBox.getClient().getRootFileList();

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxClient, DbxFileEntity, 
     }
 
     @Override
-    protected boolean testConnectionActive() {
+    protected boolean testConnection() {
         try {
             return getClient().getAccountInfo() != null;
         } catch (DbxException e) {
@@ -202,9 +203,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxClient, DbxFileEntity, 
         try {
             final DbxEntry.WithChildren metadataWithChildren = getClient().getMetadataWithChildren(dropboxPath);
             final List<DbxEntry> folderContent = metadataWithChildren.children;
-            for (DbxEntry file : folderContent) {
-                fileList.add(getDbxFileInfo(file));
-            }
+            fileList.addAll(folderContent.stream().map(this::getDbxFileInfo).collect(Collectors.toList()));
         } catch (DbxException e) {
             throw new SynchronizationException(e.getMessage(), e);
         }
@@ -217,9 +216,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxClient, DbxFileEntity, 
         try {
             final DbxEntry.WithChildren metadataWithChildren = getClient().getMetadataWithChildren("/");
             final List<DbxEntry> folderContent = metadataWithChildren.children;
-            for (DbxEntry file : folderContent) {
-                fileList.add(getDbxFileInfo(file));
-            }
+            fileList.addAll(folderContent.stream().map(this::getDbxFileInfo).collect(Collectors.toList()));
         } catch (DbxException e) {
             throw new SynchronizationException(e.getMessage());
         }

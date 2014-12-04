@@ -1,22 +1,31 @@
 package com.noe.hypercube.service;
 
 
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.request.AccountConnectionRequest;
+import com.noe.hypercube.persistence.IAccountPersistenceController;
 import com.noe.hypercube.persistence.domain.AccountEntity;
 import com.noe.hypercube.persistence.domain.FileEntity;
 import com.noe.hypercube.persistence.domain.MappingEntity;
 import java.util.Optional;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import net.engio.mbassy.listener.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE extends FileEntity, MAPPING_ENTITY extends MappingEntity> implements IClient<ACCOUNT_TYPE, ENTITY_TYPE, MAPPING_ENTITY> {
+public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE extends FileEntity, MAPPING_ENTITY extends MappingEntity> implements IClient<ACCOUNT_TYPE, ENTITY_TYPE, MAPPING_ENTITY>, EventHandler<AccountConnectionRequest> {
 
     private static final Logger LOG = LoggerFactory.getLogger(Client.class);
 
     private SimpleBooleanProperty connected = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty attached = new SimpleBooleanProperty(false);
-    protected Authentication<CLIENT> authentication;
+    @Inject
+    private IAccountPersistenceController accountPersistenceController;
+    private Authentication<CLIENT> authentication;
     private CLIENT client;
 
     public Client(final Authentication<CLIENT> authentication) {
@@ -25,17 +34,30 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
 
     @PostConstruct
     public void initState() {
-        final Optional<AccountEntity> storedAccountProperties = authentication.getStoredTokens();
+        final Optional<AccountEntity> storedAccountProperties = accountPersistenceController.findByAccountName(getAccountName());
         if (storedAccountProperties.isPresent()) {
             final AccountEntity accountEntity = storedAccountProperties.get();
+            attached.set(accountEntity.isAttached());
             if (accountEntity.isAttached()) {
-                attached.set(true);
                 client = authentication.getClient(accountEntity.getRefreshToken(), accountEntity.getAccessToken());
             }
+            setConnected(testConnection());
         } else {
-            client = createClientWithNewAuthentication();
+            final AccountEntity accountEntity = new AccountEntity(getAccountName());
+            accountEntity.setAttached(false);
+            accountPersistenceController.save(accountEntity);
         }
-        setConnected(testConnectionActive());
+        disconnectWhenDetached();
+        EventBus.subscribeToConnectionRequest(this);
+
+    }
+
+    private void disconnectWhenDetached() {
+        attached.addListener((ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) -> {
+            if(!newValue) {
+                connected.set(newValue);
+            }
+        });
     }
 
     private CLIENT createClientWithNewAuthentication() {
@@ -59,14 +81,17 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
         authentication.storeTokens(refreshToken, accessToken);
     }
 
+    @Override
     public Boolean isAttached() {
         return attached.get();
     }
 
+    @Override
     public SimpleBooleanProperty attachedProperty() {
         return attached;
     }
 
+    @Override
     public void setAttached(final Boolean attached) {
         this.attached.set(attached);
     }
@@ -85,5 +110,13 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
         return connected;
     }
 
-    protected abstract boolean testConnectionActive();
+    protected abstract boolean testConnection();
+
+    @Override
+    @Handler(rejectSubtypes = true)
+    public void onEvent(final AccountConnectionRequest event) {
+        if(event.getAccount().equals(getAccountName()) && !isAttached()) {
+            client = createClientWithNewAuthentication();
+        }
+    }
 }

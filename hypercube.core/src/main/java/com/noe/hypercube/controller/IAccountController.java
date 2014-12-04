@@ -11,5 +11,7 @@ public interface IAccountController {
 
     Collection<AccountBox> getAll();
 
+    Collection<AccountBox> getAllAttached();
+
     AccountBox getAccountBox(String accountName);
 }

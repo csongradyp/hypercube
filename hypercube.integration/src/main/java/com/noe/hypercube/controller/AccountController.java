@@ -6,6 +6,7 @@ import com.noe.hypercube.service.Account;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -40,6 +41,11 @@ public class AccountController implements IAccountController {
     @Override
     public Collection<AccountBox> getAll() {
         return accountBoxes.values();
+    }
+
+    @Override
+    public Collection<AccountBox> getAllAttached() {
+        return accountBoxes.values().parallelStream().filter(accountBox -> accountBox.getClient().isAttached()).collect(Collectors.toList());
     }
 
     @Override

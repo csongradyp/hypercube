@@ -2,6 +2,7 @@ package com.noe.hypercube.ui.bundle;
 
 import com.noe.hypercube.ui.domain.account.AccountInfo;
 import com.sun.javafx.collections.ObservableListWrapper;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -14,7 +15,7 @@ public final class AccountBundle {
 
     private static final AccountBundle INSTANCE = new AccountBundle();
     private final ObservableList<AccountInfo> accounts;
-    private final SimpleBooleanProperty connected = new SimpleBooleanProperty(false);
+    private final BooleanProperty connected = new SimpleBooleanProperty(false);
 
     private AccountBundle() {
         accounts = new ObservableListWrapper<>(new ArrayList<>());
@@ -24,20 +25,22 @@ public final class AccountBundle {
         return INSTANCE.accounts;
     }
 
-    public static void registerAccount(final String accountName, final BooleanProperty active) {
+    public static void registerAccount(final String accountName, final BooleanProperty attached, final BooleanProperty connected) {
         Platform.runLater(() -> {
             HistoryBundle.createSpaceFor(accountName);
-            INSTANCE.accounts.add(new AccountInfo(accountName, active));
-            INSTANCE.connected.bind(active);
+            INSTANCE.accounts.add(new AccountInfo(accountName, attached, connected));
+            if(connected.get()) {
+                INSTANCE.connected.set(true);
+            }
         });
     }
 
     public static List<String> getAccountNames() {
-        final List<String> accountNames = new ArrayList<>();
-        for (final AccountInfo accountInfo : getAccounts()) {
-            accountNames.add(accountInfo.getName());
-        }
-        return accountNames;
+        return getAccounts().stream().map(AccountInfo::getName).collect(Collectors.toList());
+    }
+
+    public static List<String> getConnectedAccountNames() {
+        return getAccounts().stream().filter(AccountInfo::isConnected).map(AccountInfo::getName).collect(Collectors.toList());
     }
 
     private void activate(final String accountName) {
@@ -49,11 +52,7 @@ public final class AccountBundle {
     }
 
     private void activate(final String accountName, final Boolean active) {
-        for (AccountInfo account : accounts) {
-            if(account.getName().equals(accountName)) {
-                account.setActive(active);
-            }
-        }
+        accounts.stream().filter(account -> account.getName().equals(accountName)).forEach(account -> account.setConnected(active));
     }
 
     public Boolean isActive(final String accountName) {
@@ -69,7 +68,7 @@ public final class AccountBundle {
         return INSTANCE.connected.get();
     }
 
-    public static SimpleBooleanProperty connectedProperty() {
+    public static BooleanProperty connectedProperty() {
         return INSTANCE.connected;
     }
 }

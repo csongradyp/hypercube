@@ -9,5 +9,5 @@ public interface IAuthentication {
 
     void storeTokens(String refreshToken, String accessToken);
 
-    Optional<AccountEntity> getStoredTokens();
+    Optional<AccountEntity> getStoredAccountProperties();
 }
