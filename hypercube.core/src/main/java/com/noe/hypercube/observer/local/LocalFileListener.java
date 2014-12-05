@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 public class LocalFileListener implements FileAlterationListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalFileListener.class);
+    private static final String TEMP_FILE_EXTENSION = "hyperTmp";
 
     private final Path targetDir;
     private final Collection<AccountBox> accountBoxes;
@@ -54,23 +56,33 @@ public class LocalFileListener implements FileAlterationListener {
 
     @Override
     public void onFileCreate(final File file) {
-        Path filePath = file.toPath();
-        LOG.info("File creation detected: {}", filePath);
-        upload(file);
+        if(!isTemp(file)) {
+            Path filePath = file.toPath();
+            LOG.info("File creation detected: {}", filePath);
+            upload(file);
+        }
     }
 
     @Override
     public void onFileChange(final File file) {
-        Path filePath = file.toPath();
-        LOG.info("File update detected: {}", filePath);
-        update(file);
+        if(!isTemp(file)) {
+            Path filePath = file.toPath();
+            LOG.info("File update detected: {}", filePath);
+            update(file);
+        }
     }
 
     @Override
     public void onFileDelete(final File file) {
-        Path filePath = file.toPath();
-        LOG.info("File delete detected: {}", filePath);
-        delete(file);
+        if(!isTemp(file)) {
+            Path filePath = file.toPath();
+            LOG.info("File delete detected: {}", filePath);
+            delete(file);
+        }
+    }
+
+    private boolean isTemp(File file) {
+        return FilenameUtils.getExtension(file.getName()).equals(TEMP_FILE_EXTENSION);
     }
 
     @Override
