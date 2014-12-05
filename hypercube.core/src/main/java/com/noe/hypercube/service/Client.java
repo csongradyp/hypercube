@@ -4,6 +4,7 @@ package com.noe.hypercube.service;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
 import com.noe.hypercube.event.domain.request.AccountConnectionRequest;
+import com.noe.hypercube.event.domain.response.AccountConnectionResponse;
 import com.noe.hypercube.persistence.IAccountPersistenceController;
 import com.noe.hypercube.persistence.domain.AccountEntity;
 import com.noe.hypercube.persistence.domain.FileEntity;
@@ -23,6 +24,7 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
 
     private SimpleBooleanProperty connected = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty attached = new SimpleBooleanProperty(false);
+    private AccountAttachedCallback accountAttachedCallback;
     @Inject
     private IAccountPersistenceController accountPersistenceController;
     private Authentication<CLIENT> authentication;
@@ -40,8 +42,8 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
             attached.set(accountEntity.isAttached());
             if (accountEntity.isAttached()) {
                 client = authentication.getClient(accountEntity.getRefreshToken(), accountEntity.getAccessToken());
+                setConnected(testConnection());
             }
-            setConnected(testConnection());
         } else {
             final AccountEntity accountEntity = new AccountEntity(getAccountName());
             accountEntity.setAttached(false);
@@ -49,12 +51,11 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
         }
         disconnectWhenDetached();
         EventBus.subscribeToConnectionRequest(this);
-
     }
 
     private void disconnectWhenDetached() {
         attached.addListener((ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) -> {
-            if(!newValue) {
+            if (!newValue) {
                 connected.set(newValue);
             }
         });
@@ -77,10 +78,6 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
         return authentication;
     }
 
-    protected void storeNewTokens(final String refreshToken, final String accessToken) {
-        authentication.storeTokens(refreshToken, accessToken);
-    }
-
     @Override
     public Boolean isAttached() {
         return attached.get();
@@ -101,8 +98,14 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
         return connected.get();
     }
 
-    public void setConnected(final Boolean connected) {
+    private void setConnected(final Boolean connected) {
         this.connected.set(connected);
+        final Optional<AccountEntity> entity = accountPersistenceController.findByAccountName(getAccountName());
+        if (entity.isPresent()) {
+            final AccountEntity accountEntity = entity.get();
+            accountEntity.setAttached(connected);
+            accountPersistenceController.save(accountEntity);
+        }
     }
 
     @Override
@@ -112,11 +115,24 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
 
     protected abstract boolean testConnection();
 
+    protected void setOnAccountAttached(final AccountAttachedCallback accountAttachedCallback) {
+        this.accountAttachedCallback = accountAttachedCallback;
+    }
+
     @Override
     @Handler(rejectSubtypes = true)
     public void onEvent(final AccountConnectionRequest event) {
-        if(event.getAccount().equals(getAccountName()) && !isAttached()) {
+        if (event.getAccount().equals(getAccountName()) && !isAttached()) {
             client = createClientWithNewAuthentication();
+            if (accountAttachedCallback != null) {
+                accountAttachedCallback.onAccountAttached(client);
+            }
+            setConnected(testConnection());
+            EventBus.publish(new AccountConnectionResponse(event.getAccount(), isAttached(), isConnected()));
         }
+    }
+
+    public interface AccountAttachedCallback<CLIENT> {
+        public void onAccountAttached(final CLIENT client);
     }
 }

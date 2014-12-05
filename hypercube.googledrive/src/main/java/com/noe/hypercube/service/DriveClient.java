@@ -7,13 +7,9 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.*;
 import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.domain.AccountQuota;
-import com.noe.hypercube.domain.DriveServerEntry;
+import com.noe.hypercube.domain.*;
 import com.noe.hypercube.persistence.domain.FileEntity;
-import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.persistence.domain.UploadEntity;
-import com.noe.hypercube.domain.DriveFileEntity;
-import com.noe.hypercube.domain.DriveMapping;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,11 +41,7 @@ public class DriveClient extends Client<GoogleDrive, Drive, DriveFileEntity, Dri
 
     public DriveClient(final Authentication<Drive> driveAuthentication) {
         super(driveAuthentication);
-    }
-
-    @PostConstruct
-    public void init() {
-        dirUtil = new DriveDirectoryUtil(getClient());
+        setOnAccountAttached(driveClient -> dirUtil = new DriveDirectoryUtil(getClient()));
     }
 
     @Override

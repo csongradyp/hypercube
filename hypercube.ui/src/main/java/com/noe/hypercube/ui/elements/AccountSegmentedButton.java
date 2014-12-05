@@ -22,7 +22,7 @@ public class AccountSegmentedButton extends SegmentedButton {
 
     public AccountSegmentedButton() {
         super();
-        final ObservableList<AccountInfo> accounts = AccountBundle.getAccounts();
+        final ObservableList<AccountInfo> accounts = AccountBundle.getConnectedAccounts();
         final ObservableList<ToggleButton> buttons = getButtons();
         if (!accounts.isEmpty()) {
             for (AccountInfo account : accounts) {
@@ -34,8 +34,8 @@ public class AccountSegmentedButton extends SegmentedButton {
         addListenerForAccountChanges();
     }
 
-    private void addListenerForAccountChanges() {
-        AccountBundle.getAccounts().addListener((ListChangeListener<AccountInfo>) change -> {
+    protected void addListenerForAccountChanges() {
+        AccountBundle.getConnectedAccounts().addListener((ListChangeListener<AccountInfo>) change -> {
             while (change.next()) {
                 final List<? extends AccountInfo> addedAccount = change.getAddedSubList();
                 addedAccount.stream().filter(AccountInfo::isActive).forEach(account -> {

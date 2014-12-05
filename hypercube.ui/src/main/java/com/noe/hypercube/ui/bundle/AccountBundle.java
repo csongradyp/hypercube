@@ -1,34 +1,61 @@
 package com.noe.hypercube.ui.bundle;
 
+import com.noe.hypercube.event.EventBus;
+import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.response.AccountConnectionResponse;
 import com.noe.hypercube.ui.domain.account.AccountInfo;
 import com.sun.javafx.collections.ObservableListWrapper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import net.engio.mbassy.listener.Handler;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public final class AccountBundle {
+public final class AccountBundle implements EventHandler<AccountConnectionResponse> {
 
     private static final AccountBundle INSTANCE = new AccountBundle();
     private final ObservableList<AccountInfo> accounts;
+    private final ObservableList<AccountInfo> connectedAccounts;
     private final BooleanProperty connected = new SimpleBooleanProperty(false);
 
     private AccountBundle() {
         accounts = new ObservableListWrapper<>(new ArrayList<>());
+        connectedAccounts = new ObservableListWrapper<>(new ArrayList<>());
+        EventBus.subscribeToConnectionResponse(this);
     }
 
     public static ObservableList<AccountInfo> getAccounts() {
         return INSTANCE.accounts;
     }
 
+    public static ObservableList<AccountInfo> getConnectedAccounts() {
+        return INSTANCE.connectedAccounts;
+    }
+
     public static void registerAccount(final String accountName, final BooleanProperty attached, final BooleanProperty connected) {
         Platform.runLater(() -> {
             HistoryBundle.createSpaceFor(accountName);
-            INSTANCE.accounts.add(new AccountInfo(accountName, attached, connected));
+            final AccountInfo accountInfo = new AccountInfo(accountName, attached, connected);
+            if(connected.get()) {
+                INSTANCE.connectedAccounts.add(accountInfo);
+            }
+            accountInfo.connectedProperty().addListener(new ChangeListener<Boolean>() {
+                @Override
+                public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
+                    if(newValue) {
+                        INSTANCE.connectedAccounts.add(accountInfo);
+                    } else {
+                        INSTANCE.connectedAccounts.remove(accountInfo);
+                    }
+                }
+            });
+            INSTANCE.accounts.add(accountInfo);
             if(connected.get()) {
                 INSTANCE.connected.set(true);
             }
@@ -41,6 +68,11 @@ public final class AccountBundle {
 
     public static List<String> getConnectedAccountNames() {
         return getAccounts().stream().filter(AccountInfo::isConnected).map(AccountInfo::getName).collect(Collectors.toList());
+    }
+
+    public static List<String> getDetachedAccountNames() {
+        return getAccounts().stream().filter(accountInfo ->
+                !accountInfo.isAttached()).map(AccountInfo::getName).collect(Collectors.toList());
     }
 
     private void activate(final String accountName) {
@@ -70,5 +102,15 @@ public final class AccountBundle {
 
     public static BooleanProperty connectedProperty() {
         return INSTANCE.connected;
+    }
+
+    @Override
+    @Handler(rejectSubtypes = true)
+    public void onEvent(final AccountConnectionResponse event) {
+        final Optional<AccountInfo> matchingAccount = accounts.parallelStream().filter(accountInfo -> event.getAccount().equals(accountInfo.getName())).findAny();
+        if(matchingAccount.isPresent()) {
+            final AccountInfo connectedAccount = matchingAccount.get();
+            connectedAccounts.add(connectedAccount);
+        }
     }
 }

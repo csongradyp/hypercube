@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
@@ -46,13 +45,8 @@ public class BoxClientWrapper extends Client<Box, BoxClient, BoxFileEntity, BoxM
 //        streamPosition = 0L;
         streamPosition = (long) BoxEventRequestObject.STREAM_POSITION_NOW;
         lastRecentEvents = new CircularFifoQueue<>(EVENT_CACHE_CAPACITY);
-    }
+        setOnAccountAttached(boxClientWrapper -> directoryUtil = new BoxDirectoryUtil(getClient()));
 
-    @PostConstruct
-    public void init() {
-        directoryUtil = new BoxDirectoryUtil(getClient());
-        getClient().setAutoRefreshOAuth(true);
-        getClient().addOAuthRefreshListener(newAuthData -> storeNewTokens(newAuthData.getRefreshToken(), newAuthData.getAccessToken()));
     }
 
     @Override

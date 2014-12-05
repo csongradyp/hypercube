@@ -40,7 +40,10 @@ public class BoxAuthentication extends Authentication<BoxClient> {
         }
 
         try {
-            return getAuthenticatedClient(code);
+            final BoxClient boxClient = getAuthenticatedClient(code);
+            boxClient.setAutoRefreshOAuth(true);
+            boxClient.addOAuthRefreshListener(newAuthData -> storeTokens(newAuthData.getRefreshToken(), newAuthData.getAccessToken()));
+            return boxClient;
         } catch (BoxRestException e) {
             e.printStackTrace();
         } catch (BoxServerException e) {

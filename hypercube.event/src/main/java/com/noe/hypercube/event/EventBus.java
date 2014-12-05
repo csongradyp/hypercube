@@ -2,6 +2,7 @@ package com.noe.hypercube.event;
 
 import com.noe.hypercube.event.domain.*;
 import com.noe.hypercube.event.domain.request.*;
+import com.noe.hypercube.event.domain.response.AccountConnectionResponse;
 import com.noe.hypercube.event.domain.response.FileListResponse;
 import com.noe.hypercube.event.domain.response.MappingResponse;
 import com.noe.hypercube.event.domain.response.QueueContentResponse;
@@ -15,6 +16,7 @@ public final class EventBus {
 
     private final MBassador<StorageEvent> storageEventBus;
     private final MBassador<AccountConnectionRequest> connectionRequestBus;
+    private final MBassador<AccountConnectionResponse> connectionResponseBus;
     private final MBassador<FileEvent> fileEventBus;
     private final MBassador<FileListRequest> fileListRequestBus;
     private final MBassador<FileListResponse> fileListResponseBus;
@@ -30,6 +32,7 @@ public final class EventBus {
     private EventBus() {
         storageEventBus = new MBassador<>(BusConfiguration.Default());
         connectionRequestBus = new MBassador<>(BusConfiguration.Default());
+        connectionResponseBus = new MBassador<>(BusConfiguration.Default());
         fileEventBus = new MBassador<>(BusConfiguration.Default());
         fileListRequestBus = new MBassador<>(BusConfiguration.Default());
         fileListResponseBus = new MBassador<>(BusConfiguration.Default());
@@ -41,7 +44,7 @@ public final class EventBus {
         mappingResponseBus = new MBassador<>(BusConfiguration.Default());
         jumpToFileBus = new MBassador<>(BusConfiguration.Default());
         queueContentEventBus = new MBassador<>(BusConfiguration.Default());
-        registerShutdownHook(storageEventBus, connectionRequestBus, fileEventBus, fileListRequestBus,
+        registerShutdownHook(storageEventBus, connectionRequestBus, connectionResponseBus, fileEventBus, fileListRequestBus,
                 fileListResponseBus, uploadRequestBus, downloadRequestBus, createFolderRequestBus,
                 deleteRequestBus, mappingRequestBus, mappingResponseBus, queueContentEventBus, jumpToFileBus);
     }
@@ -130,6 +133,14 @@ public final class EventBus {
 
     public static void subscribeToConnectionRequest(final EventHandler<AccountConnectionRequest> handler) {
         instance.connectionRequestBus.subscribe(handler);
+    }
+
+    public static void publish(final AccountConnectionResponse connectionResponse) {
+        instance.connectionResponseBus.publish(connectionResponse);
+    }
+
+    public static void subscribeToConnectionResponse(final EventHandler<AccountConnectionResponse> handler) {
+        instance.connectionResponseBus.subscribe(handler);
     }
 
     public static void publish(DeleteRequest deleteRequest) {

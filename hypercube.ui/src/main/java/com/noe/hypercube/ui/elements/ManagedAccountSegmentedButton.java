@@ -7,7 +7,6 @@ import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import javafx.collections.ObservableList;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ToggleButton;
 
@@ -18,9 +17,8 @@ public class ManagedAccountSegmentedButton extends AccountSegmentedButton {
     public ManagedAccountSegmentedButton() {
         super();
         resourceBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
-        final ObservableList<ToggleButton> buttons = getButtons();
-        buttons.add(0, createCloudButton());
-        buttons.add(0, createAddConnectionButton());
+        getButtons().add(0, createCloudButton());
+        getButtons().add(0, createAddConnectionButton());
     }
 
     private ToggleButton createAddConnectionButton() {
