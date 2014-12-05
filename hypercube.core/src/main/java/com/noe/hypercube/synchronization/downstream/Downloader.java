@@ -2,23 +2,19 @@ package com.noe.hypercube.synchronization.downstream;
 
 import com.noe.hypercube.Action;
 import com.noe.hypercube.controller.IPersistenceController;
-import com.noe.hypercube.persistence.domain.FileEntity;
-import com.noe.hypercube.persistence.FileEntityFactory;
-import com.noe.hypercube.persistence.domain.LocalFileEntity;
 import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.domain.FileEvent;
 import com.noe.hypercube.event.domain.type.FileActionType;
 import com.noe.hypercube.mapping.IMapper;
+import com.noe.hypercube.persistence.FileEntityFactory;
+import com.noe.hypercube.persistence.domain.FileEntity;
+import com.noe.hypercube.persistence.domain.LocalFileEntity;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.file.*;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -178,13 +174,47 @@ public class Downloader implements IDownloader {
         }
     }
 
+
+    private void createDirsFor(final File newLocalFile) {
+        if (!newLocalFile.getParentFile().exists()) {
+            boolean success = newLocalFile.getParentFile().mkdirs();
+            if (!success) {
+                LOG.error("Directory creation failed for {}", newLocalFile.getPath());
+            }
+        }
+    }
+
     private void download(final ServerEntry entry, final File newLocalFile) {
-        try (FileOutputStream outputStream = FileUtils.openOutputStream(newLocalFile)) {
+        Long checksum = -1L;
+        Path tempFile = null;
+        if(newLocalFile.exists()) {
+            try {
+                checksum = FileUtils.checksumCRC32(newLocalFile);
+                final Path folder = getOrCreateFolderFor(newLocalFile);
+                tempFile = Files.createTempFile(folder, "", ".hyperTmp");
+                downloadToTempFile(entry, newLocalFile, tempFile.toFile());
+            } catch (IOException e) {
+                LOG.error("Error occurred while creating temp file for {}", newLocalFile);
+            }
+        }
+        try {
+            if (tempFile != null && (!newLocalFile.exists() || FileUtils.checksumCRC32(newLocalFile) == checksum)) {
+                Files.move(tempFile, newLocalFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void downloadToTempFile(final ServerEntry entry, final File newLocalFile, final File tempFile) {
+        try {
+            FileOutputStream outputStream = FileUtils.openOutputStream(tempFile);
             client.download(entry, outputStream);
+            FileUtils.moveFile(tempFile, newLocalFile);
             persist(entry, newLocalFile.toPath());
             LOG.info("{} Successfully downloaded {}", client.getAccountName(), newLocalFile.toPath());
         } catch (FileNotFoundException e) {
-            LOG.error("Couldn't write file {}", newLocalFile.toPath(), e);
+            LOG.error("{}: Couldn't write file {}", client.getAccountName(), newLocalFile.toPath(), e);
         } catch (IOException e) {
             LOG.error("Error occurred while downloading file from {}", client.getAccountName(), e);
         } catch (SynchronizationException e) {
@@ -193,13 +223,12 @@ public class Downloader implements IDownloader {
         }
     }
 
-    private void createDirsFor(File newLocalFile) {
-        if (!newLocalFile.getParentFile().exists()) {
-            boolean success = newLocalFile.getParentFile().mkdirs();
-            if (!success) {
-                LOG.error("Directory creation failed for {}", newLocalFile.getPath());
-            }
+    private static Path getOrCreateFolderFor(final File newLocalFile) throws IOException {
+        final Path folder = newLocalFile.toPath().getParent();
+        if (!folder.toFile().exists()) {
+            Files.createDirectory(folder);
         }
+        return folder;
     }
 
     private void persist(final ServerEntry entry, final Path localPath) {
