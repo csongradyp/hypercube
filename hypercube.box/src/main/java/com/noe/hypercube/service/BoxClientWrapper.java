@@ -46,7 +46,6 @@ public class BoxClientWrapper extends Client<Box, BoxClient, BoxFileEntity, BoxM
         streamPosition = (long) BoxEventRequestObject.STREAM_POSITION_NOW;
         lastRecentEvents = new CircularFifoQueue<>(EVENT_CACHE_CAPACITY);
         setOnAccountAttached(boxClientWrapper -> directoryUtil = new BoxDirectoryUtil(getClient()));
-
     }
 
     @Override

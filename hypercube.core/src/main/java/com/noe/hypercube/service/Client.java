@@ -42,6 +42,7 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
             attached.set(accountEntity.isAttached());
             if (accountEntity.isAttached()) {
                 client = authentication.getClient(accountEntity.getRefreshToken(), accountEntity.getAccessToken());
+                accountAttachedCallback.onAccountAttached(client);
                 setConnected(testConnection());
             }
         } else {
