@@ -8,8 +8,6 @@ import javax.persistence.*;
 public abstract class Mapping implements MappingEntity {
 
     @Id
-    private String id;
-
     private String localDir;
     private String remoteDir;
 
@@ -19,7 +17,6 @@ public abstract class Mapping implements MappingEntity {
     public Mapping(final String localDir, final String remoteDir) {
         this.localDir = localDir;
         this.remoteDir = remoteDir;
-        id = localDir + remoteDir;
     }
 
     @Override
@@ -51,7 +48,7 @@ public abstract class Mapping implements MappingEntity {
 
     @Override
     public String getId() {
-        return id;
+        return localDir;
     }
 
     @Override

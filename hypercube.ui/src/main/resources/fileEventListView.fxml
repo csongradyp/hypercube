@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.noe.hypercube.ui.elements.AccountSegmentedButton?>
-<?import javafx.scene.control.ListView?>
+<?import com.noe.hypercube.ui.tray.menu.list.FileListView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.*?>
-<?import com.noe.hypercube.ui.tray.menu.list.FileListView?>
-<fx:root type="javafx.scene.layout.VBox" style="-fx-background-color: #f5f5f5" opacity="0.95"  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="javafx.scene.layout.VBox" style="-fx-background-color: #f5f5f5" opacity="0.95" stylesheets="style/HyperCubeListView.css"  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HBox prefHeight="20.0" alignment="CENTER"  VBox.vgrow="NEVER">
             <AccountSegmentedButton fx:id="accounts"/>
         </HBox>
         <SplitPane dividerPositions="0.5" focusTraversable="false" VBox.vgrow="ALWAYS" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0">
-            <FileListView fx:id="downloadList"/>
+            <FileListView fx:id="downloadList" />
             <FileListView fx:id="uploadList"/>
         </SplitPane>
     </children>

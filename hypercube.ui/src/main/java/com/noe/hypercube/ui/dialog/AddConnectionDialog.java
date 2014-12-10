@@ -39,8 +39,13 @@ public class AddConnectionDialog extends Dialog<Boolean> implements Initializabl
             throw new RuntimeException(exception);
         }
         setTitle(bundle.getString("menu.cloud.add"));
-        final List<String> detachedAccountNames = AccountBundle.getDetachedAccountNames();
-        accountChooser.setItems(FXCollections.observableList(detachedAccountNames));
+        setOnShown(dialogEvent -> {
+            final List<String> detachedAccountNames = AccountBundle.getDetachedAccountNames();
+            accountChooser.setItems(FXCollections.observableList(detachedAccountNames));
+            if(!accountChooser.getItems().isEmpty()) {
+                accountChooser.getSelectionModel().selectFirst();
+            }
+        });
         setResultConverter(param -> {
             if (ButtonBar.ButtonData.OK_DONE == param.getButtonData()) {
                 final String account = accountChooser.getSelectionModel().getSelectedItem();

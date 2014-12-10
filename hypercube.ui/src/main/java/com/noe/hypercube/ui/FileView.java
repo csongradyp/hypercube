@@ -97,9 +97,9 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
             if (newFolder != null) {
                 if (isRemote()) {
                     String activeAccount = remoteDrives.getActiveAccount();
-                    if(activeAccount.equals("Cloud")) {
+                    if (activeAccount.equals("Cloud")) {
                         final IFile selectedFile = getSelectedFile();
-                        if(selectedFile.getPath().equals(newFolder)) {
+                        if (selectedFile != null && selectedFile.getPath().equals(newFolder)) {
                             activeAccount = selectedFile.getOrigin();
                         }
                     }
@@ -155,11 +155,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
             }
         });
         ObservableList<ToggleButton> buttons = localDrives.getButtons();
-        for (ToggleButton button : buttons) {
-            if (startLocation.startsWith(button.getText())) {
-                button.setSelected(true);
-            }
-        }
+        buttons.stream().filter(button -> startLocation.startsWith(button.getText())).forEach(button -> button.setSelected(true));
     }
 
     private void initRemoteDrives() {
@@ -332,20 +328,12 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
 
     private void activateRemoteStorageButton(final FileListResponse event) {
         final ObservableList<ToggleButton> buttons = remoteDrives.getButtons();
-        for (ToggleButton button : buttons) {
-            if (button.getText().equals(event.getAccount())) {
-                button.setSelected(true);
-            }
-        }
+        buttons.stream().filter(button -> button.getText().equals(event.getAccount())).forEach(button -> button.setSelected(true));
     }
 
     public void deselectButtons(final SegmentedButton segmentedButton) {
         final ObservableList<ToggleButton> buttons = segmentedButton.getButtons();
-        for (ToggleButton button : buttons) {
-            if (button.isSelected()) {
-                button.setSelected(false);
-            }
-        }
+        buttons.stream().filter(ToggleButton::isSelected).forEach(button -> button.setSelected(false));
     }
 
     public void jumpToFile(final Path filePath) {
@@ -363,11 +351,7 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     public void onEvent(final FileListResponse event) {
         if (isRemote() && isTarget(event)) {
             Platform.runLater(() -> {
-                if (event.isCloud()) {
-                    multiBreadCrumbBar.setCloudBreadCrumbs(event.getAccount());
-                } else {
-                    multiBreadCrumbBar.setRemoteBreadCrumbs(event.getAccount(), event.getFolder());
-                }
+                multiBreadCrumbBar.setRemoteBreadCrumbs(event.getAccount(), event.getFolder());
                 hideLoadingOverLay();
                 StyleUtil.changeStyle(table, event.getAccount());
                 setRemoteFileList(event);

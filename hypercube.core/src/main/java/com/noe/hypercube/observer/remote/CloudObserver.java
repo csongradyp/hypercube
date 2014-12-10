@@ -33,6 +33,10 @@ public class CloudObserver<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE ext
         return client.getAccountType();
     }
 
+    protected String getAccountName() {
+        return client.getAccountName();
+    }
+
     public void addTargetFolder(Path targetFolder) {
         targetFolders.add(targetFolder);
     }

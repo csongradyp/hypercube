@@ -218,7 +218,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxClient, DbxFileEntity, 
             final List<DbxEntry> folderContent = metadataWithChildren.children;
             fileList.addAll(folderContent.stream().map(this::getDbxFileInfo).collect(Collectors.toList()));
         } catch (DbxException e) {
-            throw new SynchronizationException(e.getMessage());
+            throw new SynchronizationException(e.getMessage(), e);
         }
         return fileList;
     }
@@ -239,7 +239,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxClient, DbxFileEntity, 
             final String folderPath = getDropboxPath(folder);
             final DbxEntry.Folder createdFolder = getClient().createFolder(folderPath);
         } catch (DbxException e) {
-            throw new SynchronizationException("Unable to create folder: " + folder);
+            throw new SynchronizationException("Unable to create folder: " + folder, e);
         }
     }
 

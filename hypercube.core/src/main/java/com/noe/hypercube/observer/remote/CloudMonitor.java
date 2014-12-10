@@ -1,6 +1,8 @@
 package com.noe.hypercube.observer.remote;
 
+import com.noe.hypercube.domain.AccountBox;
 import com.noe.hypercube.service.Account;
+import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,12 +43,10 @@ public class CloudMonitor {
             LOG.error("No clients are added for synchronization");
         }
         executorService = Executors.newScheduledThreadPool(cloudObservers.size());
-        for (CloudObserver observer : cloudObservers.values()) {
-            if(observer.isActive()) {
-                submit(observer);
-                LOG.info("Cloud observer has been started for {}", observer.getAccountType().getName());
-            }
-        }
+        cloudObservers.values().stream().filter(CloudObserver::isActive).forEach(observer -> {
+            submit(observer);
+            LOG.info("Cloud observer has been started for {}", observer.getAccountType().getName());
+        });
     }
 
     public void submit(final ICloudObserver observer) {
@@ -54,26 +54,22 @@ public class CloudMonitor {
     }
 
     public void stop() {
-        for (CloudObserver cloudObserver : cloudObservers.values()) {
-            cloudObserver.stop();
-        }
+        cloudObservers.values().forEach(com.noe.hypercube.observer.remote.CloudObserver::stop);
         executorService.shutdown();
         LOG.info("Cloud monitoring has been stopped");
     }
 
     public void addObservers(final Collection<CloudObserver> observers) {
-        for (CloudObserver observer : observers) {
-            addObserver(observer);
-        }
+        observers.forEach(this::addObserver);
     }
 
     public void addObserver(final CloudObserver observer) {
         final Class accountType = observer.getAccountType();
         if(!cloudObservers.containsKey(accountType)) {
             cloudObservers.put(accountType, observer);
-            LOG.debug("Cloud observer added for account: {}", accountType.getName());
+            LOG.debug("Cloud observer added for account: {}", observer.getAccountName());
         } else {
-            LOG.debug("Cloud observer already set for account: {}", accountType.getName());
+            LOG.debug("Cloud observer already set for account: {}", observer.getAccountName());
         }
     }
 
@@ -81,9 +77,14 @@ public class CloudMonitor {
         cloudObservers.get(accountClass).removeTargetFolder(targetFolder);
     }
 
-    public void addTargetFolder(final Class<? extends Account> accountType, final Path targetFolder) {
-        cloudObservers.get(accountType).addTargetFolder(targetFolder);
-        LOG.debug("New folder added for observation to {} - targetfolder: {}", accountType.getName(), targetFolder);
+    public void addTargetFolder(final AccountBox accountBox, final Path targetFolder) {
+        CloudObserver cloudObserver = cloudObservers.get(accountBox);
+        if(cloudObserver == null) {
+            cloudObserver = new CloudObserver(accountBox, new ArrayList<>());
+            addObserver(cloudObserver);
+        }
+        cloudObserver.addTargetFolder(targetFolder);
+        LOG.debug("New folder added for observation to {} - targetfolder: {}", accountBox.getClient().getAccountName(), targetFolder);
     }
 
     public CloudObserver getCloudObserver(final Class<? extends Account> accountType) {

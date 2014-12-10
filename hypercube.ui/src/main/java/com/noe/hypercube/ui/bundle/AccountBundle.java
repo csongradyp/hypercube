@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import net.engio.mbassy.listener.Handler;
@@ -42,23 +41,19 @@ public final class AccountBundle implements EventHandler<AccountConnectionRespon
         Platform.runLater(() -> {
             HistoryBundle.createSpaceFor(accountName);
             final AccountInfo accountInfo = new AccountInfo(accountName, attached, connected);
-            if(connected.get()) {
+            INSTANCE.accounts.add(accountInfo);
+            if (connected.get()) {
+                INSTANCE.connected.set(true);
                 INSTANCE.connectedAccounts.add(accountInfo);
             }
-            accountInfo.connectedProperty().addListener(new ChangeListener<Boolean>() {
-                @Override
-                public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
-                    if(newValue) {
-                        INSTANCE.connectedAccounts.add(accountInfo);
-                    } else {
-                        INSTANCE.connectedAccounts.remove(accountInfo);
-                    }
+//            connected.bind(accountInfo.connectedProperty().or());
+            accountInfo.connectedProperty().addListener((ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) -> {
+                if (newValue) {
+                    INSTANCE.connectedAccounts.add(accountInfo);
+                } else {
+                    INSTANCE.connectedAccounts.remove(accountInfo);
                 }
             });
-            INSTANCE.accounts.add(accountInfo);
-            if(connected.get()) {
-                INSTANCE.connected.set(true);
-            }
         });
     }
 
@@ -75,21 +70,9 @@ public final class AccountBundle implements EventHandler<AccountConnectionRespon
                 !accountInfo.isAttached()).map(AccountInfo::getName).collect(Collectors.toList());
     }
 
-    private void activate(final String accountName) {
-        activate(accountName, true);
-    }
-
-    private void deactivate(final String accountName) {
-        activate(accountName, false);
-    }
-
-    private void activate(final String accountName, final Boolean active) {
-        accounts.stream().filter(account -> account.getName().equals(accountName)).forEach(account -> account.setConnected(active));
-    }
-
     public Boolean isActive(final String accountName) {
         for (AccountInfo account : accounts) {
-            if(account.getName().equals(accountName)) {
+            if (account.getName().equals(accountName)) {
                 return account.isActive();
             }
         }
@@ -108,9 +91,9 @@ public final class AccountBundle implements EventHandler<AccountConnectionRespon
     @Handler(rejectSubtypes = true)
     public void onEvent(final AccountConnectionResponse event) {
         final Optional<AccountInfo> matchingAccount = accounts.parallelStream().filter(accountInfo -> event.getAccount().equals(accountInfo.getName())).findAny();
-        if(matchingAccount.isPresent()) {
-            final AccountInfo connectedAccount = matchingAccount.get();
-            connectedAccounts.add(connectedAccount);
+        if (matchingAccount.isPresent()) {
+            matchingAccount.get().setConnected(event.isConnected());
+            accounts.stream().filter(AccountInfo::isConnected).forEach(account -> connected.set(true));
         }
     }
 }

@@ -2,7 +2,7 @@
 
 <?import com.noe.hypercube.ui.elements.*?>
 <?import com.noe.hypercube.ui.FileView?>
-<?import com.noe.hypercube.ui.SynchronizationView?>
+<?import com.noe.hypercube.ui.SynchronizationQueueView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ToolBar?>
@@ -29,7 +29,7 @@
                             <Tooltip text="%tooltip.syncView.hide"/>
                         </tooltip>
                     </Label>
-                    <SynchronizationView focusTraversable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.leftAnchor="15.0"/>
+                    <SynchronizationQueueView focusTraversable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.leftAnchor="15.0"/>
                 </AnchorPane>
             </right>
         </HiddenSidesPane>

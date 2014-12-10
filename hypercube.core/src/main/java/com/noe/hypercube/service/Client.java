@@ -24,7 +24,7 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
 
     private SimpleBooleanProperty connected = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty attached = new SimpleBooleanProperty(false);
-    private AccountAttachedCallback accountAttachedCallback;
+    private AccountAttachedCallback<CLIENT> accountAttachedCallback;
     @Inject
     private IAccountPersistenceController accountPersistenceController;
     private Authentication<CLIENT> authentication;
@@ -42,7 +42,9 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
             attached.set(accountEntity.isAttached());
             if (accountEntity.isAttached()) {
                 client = authentication.getClient(accountEntity.getRefreshToken(), accountEntity.getAccessToken());
-                accountAttachedCallback.onAccountAttached(client);
+                if(accountAttachedCallback != null) {
+                    accountAttachedCallback.onAccountAttached(client);
+                }
                 setConnected(testConnection());
             }
         } else {
@@ -125,6 +127,7 @@ public abstract class Client<ACCOUNT_TYPE extends Account, CLIENT, ENTITY_TYPE e
     public void onEvent(final AccountConnectionRequest event) {
         if (event.getAccount().equals(getAccountName()) && !isAttached()) {
             client = createClientWithNewAuthentication();
+            setAttached(true);
             if (accountAttachedCallback != null) {
                 accountAttachedCallback.onAccountAttached(client);
             }

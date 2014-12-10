@@ -241,7 +241,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
             }
             for (ServerEntry file : list) {
                 final RemoteFile remoteFile = new RemoteFile(file.getAccount(), Paths.get(file.getAccount(), file.getPath().toString()), 0, file.isFolder(), file.lastModified());
-                remoteFile.share(file.getAccount());
+//                remoteFile.share(file.getAccount());
                 if (getItems().contains(remoteFile)) {
                     final IFile iFile = getItems().filtered(file1 -> file1.equals(remoteFile)).get(0);
                     iFile.share(remoteFile.sharedWith());

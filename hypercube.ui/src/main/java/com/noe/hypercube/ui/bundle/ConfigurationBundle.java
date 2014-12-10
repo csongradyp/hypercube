@@ -1,6 +1,11 @@
 package com.noe.hypercube.ui.bundle;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.commons.collections4.BidiMap;
@@ -8,14 +13,6 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.ini4j.Ini;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Locale;
 
 public class ConfigurationBundle {
 
@@ -32,9 +29,8 @@ public class ConfigurationBundle {
         languages.put("Magyar", "hu");
         languages.put("English", "en");
         try {
-            URL resource = getClass().getClassLoader().getResource("settings/settings.ini");
-            ini = new Ini(new File(resource.toURI()));
-        } catch (NullPointerException | IOException | URISyntaxException e) {
+            ini = new Ini(new File("./settings/settings.ini"));
+        } catch (NullPointerException | IOException e) {
             throw new IllegalStateException("Configuration File is missing!", e);
         }
         Runtime.getRuntime().addShutdownHook(new Thread() {

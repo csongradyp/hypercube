@@ -31,6 +31,10 @@ public class AccountSegmentedButton extends SegmentedButton {
                 buttons.add(accountStorageButton);
             }
         }
+        final ObservableList<ToggleButton> accountsButtons = getButtons();
+        if (!accountsButtons.isEmpty()) {
+            accountsButtons.get(0).fire();
+        }
         addListenerForAccountChanges();
     }
 
@@ -40,7 +44,11 @@ public class AccountSegmentedButton extends SegmentedButton {
                 final List<? extends AccountInfo> addedAccount = change.getAddedSubList();
                 addedAccount.stream().filter(AccountInfo::isActive).forEach(account -> {
                     final ToggleButton accountStorageButton = createAccountButton(account.getName());
-                    getButtons().add(accountStorageButton);
+                    final ObservableList<ToggleButton> buttons = getButtons();
+                    buttons.add(accountStorageButton);
+                    if(buttons.size() == 1) {
+                        accountStorageButton.fire();
+                    }
                 });
                 final List<? extends AccountInfo> removedAccount = change.getRemoved();
                 for (AccountInfo account : removedAccount) {

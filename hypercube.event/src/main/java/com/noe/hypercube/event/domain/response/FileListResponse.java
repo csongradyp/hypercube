@@ -10,6 +10,7 @@ import java.util.List;
 
 public class FileListResponse extends AccountActionEvent {
 
+    public static final String CLOUD = "Cloud";
     private final Integer target;
     private final List<ServerEntry> fileList;
     private final Path folder;
@@ -24,7 +25,7 @@ public class FileListResponse extends AccountActionEvent {
         this.folder = folder;
         this.fileList = fileList;
         this.quotaInfo = quotaInfo;
-        cloud = false;
+        cloud = account.equals(CLOUD);
     }
 
     public List<ServerEntry> getFileList() {

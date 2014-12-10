@@ -1,5 +1,6 @@
 package com.noe.hypercube.ui.tray.menu.list;
 
+import com.noe.hypercube.ui.bundle.HistoryBundle;
 import com.noe.hypercube.ui.tray.menu.AbstractAnimatedListCell;
 import com.noe.hypercube.ui.tray.menu.AnimatedListCell;
 import javafx.application.Platform;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class FileListView<LIST_ITEM extends FileListItem> extends ListView<LIST_ITEM> {
 
-    private Integer limit;
+    private volatile Integer limit = HistoryBundle.getHistorySize();
 
     public FileListView() {
         setPadding(Insets.EMPTY);
@@ -37,9 +38,7 @@ public class FileListView<LIST_ITEM extends FileListItem> extends ListView<LIST_
                 }
             }
             items.add(listItem);
-            for (LIST_ITEM item : items) {
-                item.refresh();
-            }
+            items.forEach(LIST_ITEM::refresh);
         });
     }
 

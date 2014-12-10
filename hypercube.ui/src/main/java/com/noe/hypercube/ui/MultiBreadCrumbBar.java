@@ -184,16 +184,6 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         }
     }
 
-    public void setCloudBreadCrumbs(final String account) {
-        getChildren().clear();
-        final Collection<RemoteFileBreadCrumbBar> remoteCrumbBars = remotebreadcrumbs.values();
-        for (RemoteFileBreadCrumbBar activeAccountCrumb : remoteCrumbBars) {
-            activeAccountCrumb.setCanAddMapping(true);
-            setRemoteBreadCrumb("", account, activeAccountCrumb);
-            getChildren().add(activeAccountCrumb);
-        }
-    }
-
     private boolean isMapped(String localFolder) {
         return localFolder != null && !localFolder.isEmpty();
     }

@@ -13,8 +13,14 @@ import com.noe.hypercube.persistence.domain.LocalFileEntity;
 import com.noe.hypercube.service.IClient;
 import com.noe.hypercube.synchronization.SynchronizationException;
 import com.noe.hypercube.synchronization.conflict.FileConflictNamingUtil;
-import java.io.*;
-import java.nio.file.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -51,11 +57,12 @@ public class Downloader implements IDownloader {
         while (!stop.get()) {
             final ServerEntry entry = getNext();
             LOG.info("{} downloader: {} was taken from queue", entry.getAccount(), entry.getPath() == null ? entry.getId() : entry.getPath());
-            LOG.debug("Download queue: {}", downloadQ);
             try {
                 if (client.exist(entry)) {
+                    LOG.info("{} downloader: Downloading {}", entry.getAccount(), entry.getPath() == null ? entry.getId() : entry.getPath());
                     downloadFromServer(entry);
                 } else {
+                    LOG.info("{} downloader: Deleting local file mapped with {}", entry.getAccount(), entry.getPath() == null ? entry.getId() : entry.getPath());
                     deleteLocalFile(entry);
                 }
             } catch (SynchronizationException e) {
@@ -160,12 +167,12 @@ public class Downloader implements IDownloader {
                     final FileEvent event = new FileEvent(accountName, entry.getPath(), newLocalFile.toPath(), FileActionType.ADDED);
                     EventBus.publishDownloadStart(event);
                     createDirsFor(newLocalFile);
-                    download(entry, newLocalFile);
+                    downloadNew(entry, newLocalFile);
                     EventBus.publishDownloadFinished(event);
                 } else if (CHANGED == action) {
                     final FileEvent event = new FileEvent(accountName, entry.getPath(), newLocalFile.toPath(), FileActionType.UPDATED);
                     EventBus.publishDownloadStart(event);
-                    download(entry, newLocalFile);
+                    downloadChanged(entry, newLocalFile);
                     EventBus.publishDownloadFinished(event);
                 } else {
                     LOG.debug("{} is up to date", localPath);
@@ -173,7 +180,6 @@ public class Downloader implements IDownloader {
             }
         }
     }
-
 
     private void createDirsFor(final File newLocalFile) {
         if (!newLocalFile.getParentFile().exists()) {
@@ -184,7 +190,30 @@ public class Downloader implements IDownloader {
         }
     }
 
-    private void download(final ServerEntry entry, final File newLocalFile) {
+    private void downloadNew(final ServerEntry entry, final File newLocalFile) {
+        Path tempFile = null;
+            try {
+                final Path folder = getOrCreateFolderFor(newLocalFile);
+                tempFile = Files.createTempFile(folder, newLocalFile.getName(), ".hyperTmp");
+                downloadToTempFile(entry, newLocalFile, tempFile.toFile());
+            } catch (IOException e) {
+                LOG.error("Error occurred while creating temp file for {}", newLocalFile);
+            }
+        try {
+            if (tempFile != null) {
+                replaceTempFile(entry, newLocalFile, tempFile);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void replaceTempFile(ServerEntry entry, File newLocalFile, Path tempFile) throws IOException {
+        Files.move(tempFile, newLocalFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        persist(entry, newLocalFile.toPath());
+    }
+
+    private void downloadChanged(final ServerEntry entry, final File newLocalFile) {
         Long checksum = -1L;
         Path tempFile = null;
         if(newLocalFile.exists()) {
@@ -199,7 +228,7 @@ public class Downloader implements IDownloader {
         }
         try {
             if (tempFile != null && (!newLocalFile.exists() || FileUtils.checksumCRC32(newLocalFile) == checksum)) {
-                Files.move(tempFile, newLocalFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                replaceTempFile(entry, newLocalFile, tempFile);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -207,11 +236,8 @@ public class Downloader implements IDownloader {
     }
 
     private void downloadToTempFile(final ServerEntry entry, final File newLocalFile, final File tempFile) {
-        try {
-            FileOutputStream outputStream = FileUtils.openOutputStream(tempFile);
+        try(FileOutputStream outputStream = FileUtils.openOutputStream(tempFile)) {
             client.download(entry, outputStream);
-            FileUtils.moveFile(tempFile, newLocalFile);
-            persist(entry, newLocalFile.toPath());
             LOG.info("{} Successfully downloaded {}", client.getAccountName(), newLocalFile.toPath());
         } catch (FileNotFoundException e) {
             LOG.error("{}: Couldn't write file {}", client.getAccountName(), newLocalFile.toPath(), e);

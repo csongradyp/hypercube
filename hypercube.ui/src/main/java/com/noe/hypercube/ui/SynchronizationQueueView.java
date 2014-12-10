@@ -1,33 +1,23 @@
 package com.noe.hypercube.ui;
 
-import com.noe.hypercube.event.EventBus;
-import com.noe.hypercube.event.EventHandler;
 import com.noe.hypercube.event.domain.FileEvent;
-import com.noe.hypercube.event.domain.request.QueueContentRequest;
-import com.noe.hypercube.event.domain.type.QueueType;
 import com.noe.hypercube.event.domain.type.StreamDirection;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
+import com.noe.hypercube.ui.bundle.HistoryBundle;
 import com.noe.hypercube.ui.tray.menu.list.DetailedFileListItem;
 import com.noe.hypercube.ui.tray.menu.list.ProcessedDetailedFileListItem;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import de.jensd.fx.fontawesome.AwesomeIconsStack;
 import de.jensd.fx.fontawesome.Icon;
+import java.util.*;
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.StackPane;
-import net.engio.mbassy.listener.Handler;
 
-import java.net.URL;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
-import static com.noe.hypercube.event.domain.type.FileEventType.*;
-
-public class SynchronizationQueueView extends FileEventListView implements Initializable, EventHandler<FileEvent> {
+public class SynchronizationQueueView extends FileEventListView implements Initializable {
 
     private final ResourceBundle resourceBundle;
 
@@ -36,18 +26,18 @@ public class SynchronizationQueueView extends FileEventListView implements Initi
     }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        EventBus.subscribeToFileEvent(this);
-        accounts.setOnAction(event -> EventBus.publish(new QueueContentRequest(QueueType.MAIN, accounts.getActiveAccount())));
-        final ObservableList<ToggleButton> accountsButtons = accounts.getButtons();
-        if (!accountsButtons.isEmpty()) {
-            accountsButtons.get(0).fire();
-        }
+    protected ObservableList<FileEvent> getListSource(final String account) {
+        final Map<String, ObservableList<FileEvent>> submittedEvents = HistoryBundle.getSubmittedEvents();
+        return submittedEvents.get(account);
     }
 
     @Override
-    protected ObservableList<FileEvent> getListSource(final String account) {
-        return null;
+    protected DetailedFileListItem createListItem(final FileEvent event) {
+        final ProcessedDetailedFileListItem listItem = new ProcessedDetailedFileListItem(event, resourceBundle);
+        if (event.isStarted()) {
+            listItem.setStatusIcon(AwesomeDude.createIconLabel(AwesomeIcon.REFRESH, "20"));
+        }
+        return listItem;
     }
 
     @Override
@@ -60,51 +50,59 @@ public class SynchronizationQueueView extends FileEventListView implements Initi
     @Override
     protected StackPane getUploadListPlaceholder() {
         final AwesomeIconsStack iconsStack = AwesomeIconsStack.create();
-        iconsStack.add(new Icon(AwesomeIcon.CLOUD_DOWNLOAD, "150px", "", ""));
+        iconsStack.add(new Icon(AwesomeIcon.CLOUD_UPLOAD, "150px", "", ""));
         return iconsStack;
     }
 
     @Override
-    @Handler(rejectSubtypes = true)
-    public void onEvent(final FileEvent event) {
-        Platform.runLater(() -> {
-            if (StreamDirection.DOWN == event.getDirection()) {
-                handle(event, downloadList.getItems());
-            } else {
-                handle(event, uploadList.getItems());
+    protected void addListenerToListChanges(final String account) {
+        getListSource(account).addListener((ListChangeListener<FileEvent>) change -> {
+            if (account.equals(accounts.getActiveAccount())) {
+                while (change.next()) {
+                    change.getAddedSubList().forEach(event -> Platform.runLater(() -> {
+                        if (StreamDirection.DOWN == event.getDirection()) {
+                            handle(event, downloadList.getItems());
+                        } else {
+                            handle(event, uploadList.getItems());
+                        }
+                    }));
+                }
             }
         });
     }
 
-    private void handle(final FileEvent event, final ObservableList<DetailedFileListItem> items) {
-        if (SUBMITTED == event.getEventType()) {
+    private void handle(final FileEvent event, final Collection<DetailedFileListItem> items) {
+        if (event.isSubmitted()) {
             addListItem(event, items);
         } else {
             updateItems(event, items);
         }
     }
 
-    private void addListItem(final FileEvent event, final ObservableList<DetailedFileListItem> items) {
+    private void addListItem(final FileEvent event, final Collection<DetailedFileListItem> items) {
         DetailedFileListItem item = new ProcessedDetailedFileListItem(event, resourceBundle);
-        items.add(0, item);
+        items.add(item);
     }
 
-    private void updateItems(final FileEvent event, final ObservableList<DetailedFileListItem> items) {
-        final Optional<DetailedFileListItem> match = items.parallelStream().filter(item -> item.getFileEvent().getLocalPath().equals(event.getLocalPath())
-                        && item.getFileEvent().getRemotePath().equals(event.getRemotePath())
-                        && item.getFileEvent().getActionType().equals(event.getActionType())
-        ).findAny();
+    private Optional<DetailedFileListItem> findCorresponding(FileEvent event, Collection<DetailedFileListItem> fileEvents) {
+        return fileEvents.stream().filter(listItem -> listItem.getFileEvent().getDirection().equals(event.getDirection())
+                && listItem.getFileEvent().getLocalPath().equals(event.getLocalPath())
+                && listItem.getFileEvent().getRemotePath().equals(event.getRemotePath())
+                && listItem.getFileEvent().getActionType().equals(event.getActionType()))
+                .findAny();
+    }
 
-        if (match.isPresent()) {
-            final DetailedFileListItem itemToUpdate = match.get();
-            final FileEvent itemEvent = itemToUpdate.getFileEvent();
-            if (itemEvent.getLocalPath().equals(event.getLocalPath()) && itemEvent.getRemotePath().equals(event.getRemotePath()) && itemEvent.getActionType().equals(event.getActionType())) {
-                if (STARTED == event.getEventType()) {
-                    itemToUpdate.setStatusIcon(AwesomeDude.createIconLabel(AwesomeIcon.REFRESH, "20"));
-                } else if (FINISHED == event.getEventType()) {
-                    items.remove(itemToUpdate);
-                }
-            }
+    private void updateItems(final FileEvent event, final Collection<DetailedFileListItem> items) {
+        final Optional<DetailedFileListItem> corresponding = findCorresponding(event, items);
+
+        if (corresponding.isPresent()) {
+            final DetailedFileListItem itemToUpdate = corresponding.get();
+            itemToUpdate.refresh();
+//            if (STARTED == event.getEventType()) {
+//                itemToUpdate.setStatusIcon(AwesomeDude.createIconLabel(AwesomeIcon.REFRESH, "20"));
+//            } else if (FINISHED == event.getEventType()) {
+//                items.remove(itemToUpdate);
+//            }
         }
     }
 
