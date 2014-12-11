@@ -8,7 +8,7 @@
          http://www.springframework.org/schema/context
          http://www.springframework.org/schema/context/spring-context-3.2.xsd
          http://www.springframework.org/schema/tx
-         http://www.springframework.org/schema/tx/spring-tx.xsd
+         http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
          http://www.springframework.org/schema/data/jpa
          http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
@@ -39,7 +39,7 @@
     </bean>
 
     <bean id="synchronizer" class="com.noe.hypercube.synchronization.Synchronizer" destroy-method="shutdown"/>
-    <bean id="accountBoxCollection" class="com.noe.hypercube.collector.AccountBoxCollector" lazy-init="true"/>
+    <bean id="accountBoxCollection" class="com.noe.hypercube.collector.AccountBoxCollector" lazy-init="true" />
     <bean id="accountProperties" class="com.noe.hypercube.collector.AccountPropertiesCollector"/>
 
     <bean id="persistenceController" class="com.noe.hypercube.controller.PersistenceController">

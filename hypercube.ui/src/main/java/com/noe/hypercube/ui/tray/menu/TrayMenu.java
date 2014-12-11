@@ -3,6 +3,7 @@ package com.noe.hypercube.ui.tray.menu;
 import com.noe.hypercube.event.domain.FileEvent;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.HistoryBundle;
+import com.noe.hypercube.ui.dialog.AboutDialog;
 import com.noe.hypercube.ui.dialog.BindManagerDialog;
 import com.noe.hypercube.ui.elements.AccountSegmentedButton;
 import com.noe.hypercube.ui.elements.StateInfoLabel;
@@ -59,14 +60,6 @@ public class TrayMenu extends AnchorPane implements Initializable {
             throw new RuntimeException(e);
         }
         show.setOnAction(actionEvent -> stage.show());
-        accounts.addButton("Local", new Icon(AwesomeIcon.HOME, "18", "", ""));
-        accounts.getButtons().get(0).fire();
-        accounts.setOnAction(e -> Platform.runLater(() -> {
-            final ToggleButton accountButton = (ToggleButton) e.getSource();
-            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(accountButton.getId());
-            fileListView.clearAndSet(createListItems(fileEvents));
-            accountButton.setSelected(true);
-        }));
         addHistoryChangeListenerToStorages();
     }
 
@@ -86,6 +79,14 @@ public class TrayMenu extends AnchorPane implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        accounts.addButton("Local", new Icon(AwesomeIcon.HOME, "18", "", ""));
+        accounts.setOnAction(e -> Platform.runLater(() -> {
+            final ToggleButton accountButton = (ToggleButton) e.getSource();
+            final ObservableList<FileEvent> fileEvents = HistoryBundle.getLastSyncedFiles().get(accountButton.getId());
+            fileListView.clearAndSet(createListItems(fileEvents));
+            accountButton.setSelected(true);
+        }));
+        accounts.getButtons().get(0).fire();
         fileListView.setLimit(6);
         selectActiveLanguage();
         settings.setOnMouseClicked(mouseEvent -> settings.getContextMenu().show(getScene().getWindow(), mouseEvent.getScreenX(), mouseEvent.getScreenY()));
@@ -133,6 +134,10 @@ public class TrayMenu extends AnchorPane implements Initializable {
     @FXML
     public void onManageBindings() {
         new BindManagerDialog().show();
+    }
+    @FXML
+    public void onShowAbout() {
+        new AboutDialog().show();
     }
 
 }

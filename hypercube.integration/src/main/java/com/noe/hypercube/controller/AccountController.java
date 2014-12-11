@@ -10,9 +10,13 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Named
 public class AccountController implements IAccountController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AccountController.class);
 
     @Inject
     private PersistenceController persistenceController;
@@ -30,6 +34,7 @@ public class AccountController implements IAccountController {
         persistenceController.createDaoMap();
         for (AccountBox accountBox : accountBoxList) {
             accountBoxes.put(accountBox.getAccountType(), accountBox);
+            LOG.info("AccountBox for {} has been added", accountBox.getClient().getAccountName());
         }
     }
 

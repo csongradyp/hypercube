@@ -3,6 +3,7 @@ package com.noe.hypercube.ui.bundle;
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
 import com.noe.hypercube.event.domain.FileEvent;
+import com.noe.hypercube.event.domain.type.StreamDirection;
 import com.sun.javafx.collections.ObservableListWrapper;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,9 +79,9 @@ public final class HistoryBundle implements EventHandler<FileEvent> {
 
     private void add(final FileEvent event, final Map<String, ObservableList<FileEvent>> eventMap) {
         ObservableList<FileEvent> fileEvents = eventMap.get(event.getAccount());
-//        if (event.getDirection() == StreamDirection.DOWN) {
-//            fileEvents = eventMap.get(LOCAL_STORAGE);
-//        }
+        if (event.getDirection() == StreamDirection.DOWN) {
+            fileEvents = eventMap.get(LOCAL_STORAGE);
+        }
         removeSame(event, fileEvents);
         if (historySize == fileEvents.size()) {
             fileEvents.remove(fileEvents.size() - 1);

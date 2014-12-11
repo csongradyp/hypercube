@@ -394,14 +394,14 @@ public class FileManager extends VBox implements Initializable, EventHandler<Jum
         ((Stage) getScene().getWindow()).close();
     }
 
-    private FileView getActiveFileView() {
+    public FileView getActiveFileView() {
         if (leftFileView.isActive()) {
             return leftFileView;
         }
         return rightFileView;
     }
 
-    private FileView getInactiveFileView() {
+    public FileView getInactiveFileView() {
         if (!leftFileView.isActive()) {
             return leftFileView;
         }

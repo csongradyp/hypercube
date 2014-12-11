@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+<fx:root type="javafx.scene.control.Dialog" resizable="false" title="%dialog.sync.title" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <dialogPane>
+        <DialogPane prefHeight="300.0" prefWidth="400.0">
+            <content>
+                <VBox spacing="5" alignment="CENTER">
+                    <Label fx:id="productLabel" text="Hypercube File Manager" style="-fx-font-size: 20; -fx-font-weight: bold"/>
+                    <Label text="ver.: 1.0.0"/>
+                    <Label text="Csongrády Péter"/>
+                    <Label text="csongrady.p@gmail.com"/>
+                    <Label text="2014"/>
+                </VBox>
+            </content>
+        </DialogPane>
+    </dialogPane>
+</fx:root>

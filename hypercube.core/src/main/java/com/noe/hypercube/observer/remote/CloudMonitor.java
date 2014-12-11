@@ -40,7 +40,7 @@ public class CloudMonitor {
 
     public void start() {
         if (cloudObservers.isEmpty()) {
-            LOG.error("No clients are added for synchronization");
+            LOG.debug("No clients are added for synchronization");
         }
         executorService = Executors.newScheduledThreadPool(cloudObservers.size());
         cloudObservers.values().stream().filter(CloudObserver::isActive).forEach(observer -> {

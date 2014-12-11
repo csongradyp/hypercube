@@ -88,12 +88,10 @@ public class DbxClientWrapper extends Client<Dropbox, DbxClient, DbxFileEntity, 
         Collection<ServerEntry> serverEntries = new LinkedList<>();
         try {
             DbxDelta<DbxEntry> delta = getClient().getDelta(cursor);
-            for (DbxDelta.Entry<DbxEntry> entry : delta.entries) {
-                if (entry.metadata.isFile()) {
-                    DbxServerEntry dbxServerEntry = new DbxServerEntry(entry.lcPath, entry.metadata.asFile().rev, entry.metadata.asFile().lastModified, entry.metadata.isFolder());
-                    serverEntries.add(dbxServerEntry);
-                }
-            }
+            delta.entries.stream().filter(entry -> entry.metadata.isFile()).forEach(entry -> {
+                DbxServerEntry dbxServerEntry = new DbxServerEntry(entry.lcPath, entry.metadata.asFile().rev, entry.metadata.asFile().lastModified, entry.metadata.isFolder());
+                serverEntries.add(dbxServerEntry);
+            });
             cursor = delta.cursor;
         } catch (Exception e) {
             throw new SynchronizationException("Could not get changes from Dropbox", e);

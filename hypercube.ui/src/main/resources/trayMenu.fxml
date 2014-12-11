@@ -36,7 +36,7 @@
                     <ContextMenu>
                         <items>
                             <!--<MenuItem text="Import" onAction="#ImportDB"/>-->
-                            <MenuItem text="%menu.about">
+                            <MenuItem onAction="#onShowAbout" text="%menu.about">
                                 <graphic>
                                     <Icon awesomeIcon="INFO" size="15" />
                                 </graphic>

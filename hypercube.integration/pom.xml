@@ -91,5 +91,14 @@
 
     </dependencies>
 
+ <build>
+     <plugins>
+         <plugin>
+             <groupId>com.akathist.maven.plugins.launch4j</groupId>
+             <artifactId>launch4j-maven-plugin</artifactId>
+             <version>1.5.1</version>
+         </plugin>
+     </plugins>
+ </build>
 
 </project>

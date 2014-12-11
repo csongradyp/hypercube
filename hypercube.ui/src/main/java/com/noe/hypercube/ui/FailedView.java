@@ -18,14 +18,14 @@ public class FailedView extends FileEventListView {
     @Override
     protected StackPane getDownloadListPlaceholderIcon() {
         final AwesomeIconsStack iconsStack = AwesomeIconsStack.create();
-        iconsStack.add(new Icon(AwesomeIcon.CLOUD_DOWNLOAD, "150px", "", "")).add(new Icon(AwesomeIcon.HISTORY, "70", "-fx-text-fill: blue;", ""));
+        iconsStack.add(new Icon(AwesomeIcon.CLOUD_DOWNLOAD, "150px", "", ""));
         return iconsStack;
     }
 
     @Override
     protected StackPane getUploadListPlaceholder() {
         final AwesomeIconsStack iconsStack = AwesomeIconsStack.create();
-        iconsStack.add(new Icon(AwesomeIcon.CLOUD_UPLOAD, "150px", "", "")).add(new Icon(AwesomeIcon.HISTORY, "40", "", ""));
+        iconsStack.add(new Icon(AwesomeIcon.CLOUD_UPLOAD, "150px", "", ""));
         return iconsStack;
     }
 }

@@ -56,8 +56,8 @@ public class CloudActivityBar extends HBox implements Initializable, EventHandle
     public void initialize(URL location, ResourceBundle resources) {
         accounts = new HashMap<>();
         EventBus.subscribeToFileEvent(this);
-        final ObservableList<AccountInfo> currentaccounts = AccountBundle.getAccounts();
-        for (AccountInfo accountInfo : currentaccounts) {
+        final ObservableList<AccountInfo> connectedAccounts = AccountBundle.getConnectedAccounts();
+        for (AccountInfo accountInfo : connectedAccounts) {
             final ImageView accountImageView = getAccountImageView(accountInfo);
             accounts.put(accountInfo.getName(), accountImageView);
         }
@@ -73,16 +73,14 @@ public class CloudActivityBar extends HBox implements Initializable, EventHandle
     }
 
     private void addListenerForAccountChanges() {
-        AccountBundle.getAccounts().addListener((ListChangeListener<AccountInfo>) change -> {
+        AccountBundle.getConnectedAccounts().addListener((ListChangeListener<AccountInfo>) change -> {
             while (change.next()) {
                 final List<? extends AccountInfo> addedAccount = change.getAddedSubList();
-                for (AccountInfo account : addedAccount) {
-                    if (account.isActive()) {
-                        final ImageView accountImageView = getAccountImageView(account);
-                        accounts.put(account.getName(), accountImageView);
-                        accountIcons.getChildren().add(accountImageView);
-                    }
-                }
+                addedAccount.stream().filter(AccountInfo::isActive).forEach(account -> {
+                    final ImageView accountImageView = getAccountImageView(account);
+                    accounts.put(account.getName(), accountImageView);
+                    accountIcons.getChildren().add(accountImageView);
+                });
                 final List<? extends AccountInfo> removedAccount = change.getRemoved();
                 for (AccountInfo account : removedAccount) {
                     final ImageView accountImageView = accounts.remove(account.getName());

@@ -17,6 +17,7 @@ import com.noe.hypercube.synchronization.SynchronizationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
     @Override
     public void uploadNew(final UploadEntity uploadEntity) throws SynchronizationException {
         final Path remoteFilePath = uploadEntity.getRemoteFilePath();
-        if (isMapped(uploadEntity.getFile())) {
+        if (isMapped(uploadEntity)) {
             LOG.info("file {} already mapped - cannot be new. Upload cancelled", uploadEntity.getFile());
         } else {
             if (client.exist(uploadEntity)) {
@@ -62,8 +63,9 @@ public abstract class Uploader<ACCOUNT_TYPE extends Account, ENTITY_TYPE extends
         }
     }
 
-    private boolean isMapped(final File file) {
-        return persistenceController.get(file.toPath().toString(), getEntityType()) != null;
+    private boolean isMapped(final UploadEntity uploadEntity) {
+        final FileEntity mappedEntity = persistenceController.get(uploadEntity.getFile().toPath().toString(), getEntityType());
+        return mappedEntity != null && Paths.get(mappedEntity.getRemotePath()).equals(uploadEntity.getRemoteFilePath());
     }
 
     @Override

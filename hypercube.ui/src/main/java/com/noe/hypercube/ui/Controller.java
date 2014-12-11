@@ -1,9 +1,9 @@
 package com.noe.hypercube.ui;
 
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
-import com.noe.hypercube.ui.dialog.AddMappingDialog;
-import com.noe.hypercube.ui.dialog.BindManagerDialog;
-import com.noe.hypercube.ui.dialog.SynchronizationViewDialog;
+import com.noe.hypercube.ui.dialog.*;
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -15,9 +15,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.AnchorPane;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 public class Controller implements Initializable {
 
     @FXML
@@ -26,26 +23,31 @@ public class Controller implements Initializable {
     private Button queue;
     @FXML
     private Menu languages;
+    @FXML
+    private FileManager fileManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         final String current = ConfigurationBundle.getLanguageLongName();
         final ObservableList<MenuItem> languageMenuItems = languages.getItems();
-        for (MenuItem languageMenuItem : languageMenuItems) {
-            if(languageMenuItem.getText().equals(current)) {
-              ((CheckMenuItem) languageMenuItem).setSelected(true);
-            }
-        }
+        languageMenuItems.stream().filter(languageMenuItem -> languageMenuItem.getText().equals(current)).forEach(languageMenuItem ->
+                ((CheckMenuItem) languageMenuItem).setSelected(true));
     }
 
     @FXML
     public void onClose() {
         Platform.exit();
     }
+    @FXML
+    public void onRefresh() {
+        fileManager.getActiveFileView().refresh();
+    }
 
     @FXML
     public void onShowSyncView() {
-        new SynchronizationViewDialog().show();
+        final SynchronizationViewDialog synchronizationViewDialog = new SynchronizationViewDialog();
+        synchronizationViewDialog.initOwner(commander.getScene().getWindow());
+        synchronizationViewDialog.show();
     }
 
     @FXML
@@ -60,7 +62,19 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    public void onAddBindings(ActionEvent event) {
-        new AddMappingDialog().show();
+    public void onAddBindings() {
+        final AddMappingDialog addMappingDialog = new AddMappingDialog();
+        addMappingDialog.initOwner(commander.getScene().getWindow());
+        addMappingDialog.show();
+    }
+
+    public void onAddConnection() {
+        final AddConnectionDialog addConnectionDialog = new AddConnectionDialog();
+        addConnectionDialog.initOwner(commander.getScene().getWindow());
+        addConnectionDialog.show();
+    }
+
+    public void onShowAbout() {
+        new AboutDialog().show();
     }
 }

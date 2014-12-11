@@ -30,15 +30,14 @@ public class SynchronizationViewDialog extends Dialog<Boolean> implements Initia
     @FXML
     private SegmentedButton changeViewButtons;
 
-    private final ResourceBundle resourceBundle;
+    private ResourceBundle resourceBundle;
     private SynchronizationQueueView synchronizationQueueView;
     private HistoryView historyView;
     private FailedView failedView;
 
     public SynchronizationViewDialog() {
-        resourceBundle = ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage()));
         FXMLLoader fxmlLoader = new FXMLLoader(BindManagerDialog.class.getClassLoader().getResource("synchronizationViewDialog.fxml"), resourceBundle);
-        fxmlLoader.setResources(resourceBundle);
+        fxmlLoader.setResources(ResourceBundle.getBundle("internationalization/messages", new Locale(ConfigurationBundle.getLanguage())));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         try {
@@ -50,6 +49,7 @@ public class SynchronizationViewDialog extends Dialog<Boolean> implements Initia
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        resourceBundle = resources;
         getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
         setResultConverter(param -> true);
         getDialogPane().autosize();

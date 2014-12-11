@@ -111,6 +111,8 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
                     table.setLocalFileList(newFolder, previousFolder);
                     driveSpaceBar.update(getLocation());
                 }
+            } else {
+                setLocation(previousFolder);
             }
         });
         multiBreadCrumbBar.remoteProperty().bindBidirectional(remote);
@@ -169,13 +171,14 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     }
 
     public void refresh() {
-        table.getItems().clear();
-        final Path location = getLocation();
-        if (isRemote()) {
-            EventBus.publish(new FileListRequest(hashCode(), remoteDrives.getActiveAccount(), getEventPath(location), null));
-        } else {
-            table.setLocalFileList(location, null);
-        }
+//        table.getItems().clear();
+//        final Path location = getLocation();
+//        if (isRemote()) {
+//            EventBus.publish(new FileListRequest(hashCode(), remoteDrives.getActiveAccount(), getEventPath(location), null));
+//        } else {
+//            table.setLocalFileList(location, null);
+//        }
+        setLocation(null);
     }
 
     @Override

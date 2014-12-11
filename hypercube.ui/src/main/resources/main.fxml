@@ -8,10 +8,13 @@
 <AnchorPane fx:id="commander" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.noe.hypercube.ui.Controller">
     <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
         <ToolBar id="buttonBox" focusTraversable="false" prefHeight="30.0" prefWidth="800.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
-            <Button fx:id="refresh" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false">
+            <Button fx:id="refresh" onAction="#onRefresh" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false">
                 <graphic>
                     <Icon awesomeIcon="REFRESH" size="14"/>
                 </graphic>
+                <tooltip>
+                    <Tooltip text="%table.refresh" />
+                </tooltip>
             </Button>
             <Separator orientation="VERTICAL" prefHeight="20.0"/>
             <Button onAction="#onShowSyncView" mnemonicParsing="false" textAlignment="CENTER" focusTraversable="false">
@@ -24,7 +27,7 @@
             </Button>
             <Button onAction="#onManageBindings" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" textAlignment="CENTER" focusTraversable="false">
                 <graphic>
-                    <Icon awesomeIcon="CHAIN" size="14"/>
+                    <Icon awesomeIcon="CHAIN" style="" styleClass="" size="14"/>
                 </graphic>
                 <tooltip>
                     <Tooltip text="%menu.bind.manage"/>
@@ -50,28 +53,36 @@
         </Menu>
         <Menu mnemonicParsing="false" text="%menu.bind">
             <graphic>
-                <Icon awesomeIcon="CHAIN" size="15"/>
+                <Icon awesomeIcon="CHAIN" style="" styleClass="" size="16"/>
             </graphic>
             <MenuItem mnemonicParsing="false" text="%menu.bind.manage" onAction="#onManageBindings">
                 <graphic>
-                    <Icon awesomeIcon="CHAIN" size="15"/>
+                    <Icon awesomeIcon="CHAIN" style="" styleClass="" size="16"/>
+                </graphic>
+            </MenuItem>
+            <MenuItem mnemonicParsing="false" text="%menu.bind.add" onAction="#onAddBindings">
+                <graphic>
+                    <StackPane alignment="BOTTOM_LEFT">
+                        <Icon awesomeIcon="CHAIN" style="-fx-text-fill: darkgreen" styleClass="" size="16"/>
+                        <Icon awesomeIcon="PLUS" style="" styleClass="" size="10"/>
+                    </StackPane>
                 </graphic>
             </MenuItem>
         </Menu>
         <Menu mnemonicParsing="false" text="%menu.cloud">
             <graphic>
-                <Icon awesomeIcon="CLOUD" size="15"/>
+                <Icon awesomeIcon="CLOUD" style="" styleClass="" size="15"/>
             </graphic>
             <MenuItem fx:id="manageCloud" mnemonicParsing="false" text="%menu.cloud.manage">
                 <accelerator>
                     <KeyCodeCombination code="M" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
                 </accelerator>
             </MenuItem>
-            <MenuItem fx:id="addConnection" mnemonicParsing="false" text="%menu.cloud.add">
+            <MenuItem fx:id="addConnection" onAction="#onAddConnection" mnemonicParsing="false" text="%menu.cloud.add">
                 <graphic>
                     <StackPane alignment="BOTTOM_LEFT">
                         <Icon awesomeIcon="CLOUD" style="-fx-text-fill: lightsteelblue" styleClass="" size="15"/>
-                        <Icon awesomeIcon="PLUS" size="10"/>
+                        <Icon awesomeIcon="PLUS" style="" styleClass="" size="10"/>
                     </StackPane>
                 </graphic>
                 <accelerator>
@@ -83,7 +94,7 @@
                     <StackPane alignment="BOTTOM_LEFT">
                         <children>
                             <Icon awesomeIcon="CLOUD" style="-fx-text-fill: lightsteelblue" styleClass="" size="15"/>
-                            <Icon awesomeIcon="MINUS" size="10"/>
+                            <Icon awesomeIcon="MINUS" style="" styleClass="" size="10"/>
                         </children>
                     </StackPane>
                 </graphic>
@@ -94,31 +105,31 @@
         </Menu>
         <Menu mnemonicParsing="false" text="%menu.settings">
             <graphic>
-                <Icon awesomeIcon="GEAR" size="15"/>
+                <Icon awesomeIcon="GEAR" style="" styleClass="" size="15"/>
             </graphic>
             <Menu fx:id="languages" text="%menu.language">
                 <graphic>
-                    <Icon awesomeIcon="FLAG" size="15"/>
+                    <Icon awesomeIcon="FLAG" style="" styleClass="" size="15"/>
                 </graphic>
                 <CheckMenuItem text="English" onAction="#onLanguageChange"/>
                 <CheckMenuItem text="Magyar" onAction="#onLanguageChange"/>
             </Menu>
             <MenuItem fx:id="preferences" mnemonicParsing="false" text="%menu.settings.preferences">
                 <graphic>
-                    <Icon awesomeIcon="WRENCH" size="15"/>
+                    <Icon awesomeIcon="WRENCH" style="" styleClass="" size="15"/>
                 </graphic>
                 <accelerator>
                     <KeyCodeCombination code="S" alt="DOWN" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
                 </accelerator>
             </MenuItem>
         </Menu>
-        <Menu mnemonicParsing="false" text="%menu.about">
+        <Menu onAction="#onShowAbout" mnemonicParsing="false" text="%menu.about">
             <graphic>
-                <Icon awesomeIcon="INFO" size="15"/>
+                <Icon awesomeIcon="INFO" style="" styleClass="" size="15"/>
             </graphic>
             <MenuItem fx:id="about" mnemonicParsing="false" text="%menu.about">
                 <graphic>
-                    <Icon awesomeIcon="INFO_CIRCLE" size="15"/>
+                    <Icon awesomeIcon="INFO_CIRCLE" style="" styleClass="" size="15"/>
                 </graphic>
             </MenuItem>
         </Menu>
