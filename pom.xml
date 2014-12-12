@@ -189,43 +189,6 @@
                 </configuration>
             </plugin>
 
-            <!--Copy project dependency-->
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-dependency-plugin</artifactId>-->
-            <!--<version>2.5.1</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>copy-dependencies</id>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>copy-dependencies</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-            <!--&lt;!&ndash; exclude junit, we need runtime dependency only &ndash;&gt;-->
-            <!--<includeScope>runtime</includeScope>-->
-            <!--<outputDirectory>${project.build.directory}/dependency/</outputDirectory>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
-
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-jar-plugin</artifactId>-->
-            <!--<version>2.3.2</version>-->
-            <!--<configuration>-->
-            <!--<archive>-->
-            <!--<manifest>-->
-            <!--<mainClass>com.noe.hypercube.Runner</mainClass>-->
-            <!--<addClasspath>true</addClasspath>-->
-            <!--<classpathPrefix>dependency/</classpathPrefix>-->
-            <!--<addClasspath>true</addClasspath>-->
-            <!--</manifest>-->
-            <!--</archive>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -266,159 +229,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!--<plugin>-->
-            <!--<artifactId>appassembler-maven-plugin</artifactId>-->
-            <!--<groupId>org.codehaus.mojo</groupId>-->
-            <!--<version>1.1.1</version>-->
-            <!--<configuration>-->
-            <!--<repositoryLayout>flat</repositoryLayout>-->
-            <!--<installBooterArtifacts>false</installBooterArtifacts>-->
-            <!--<target>${project.build.directory}/appassembler</target>-->
-            <!--<defaultJvmSettings>-->
-            <!--<initialMemorySize>256M</initialMemorySize>-->
-            <!--<maxMemorySize>512M</maxMemorySize>-->
-            <!--&lt;!&ndash;<extraArguments>&ndash;&gt;-->
-            <!--&lt;!&ndash;<extraArgument>-Dlog4j.configuration=../etc/log4j/log4j.properties</extraArgument>&ndash;&gt;-->
-            <!--&lt;!&ndash;</extraArguments>&ndash;&gt;-->
-            <!--</defaultJvmSettings>-->
-            <!--<configurationDirectory>etc</configurationDirectory>-->
-            <!--<daemons>-->
-            <!--<daemon>-->
-            <!--<id>Hypercube</id>-->
-            <!--<mainClass>com.noe.hypercube.Runner</mainClass>-->
-            <!--<platforms>-->
-            <!--<platform>booter-unix</platform>-->
-            <!--<platform>booter-windows</platform>-->
-            <!--</platforms>-->
-            <!--</daemon>-->
-            <!--</daemons>-->
-            <!--</configuration>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--&lt;!&ndash;<goal>generate-daemons</goal>&ndash;&gt;-->
-            <!--<goal>create-repository</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
-
-            <!--<plugin>-->
-            <!--<groupId>com.akathist.maven.plugins.launch4j</groupId>-->
-            <!--<artifactId>launch4j-maven-plugin</artifactId>-->
-            <!--<version>1.7.1</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>l4j-clui</id>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>launch4j</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-            <!--<headerType>gui</headerType>-->
-            <!--<jar>${project.build.directory}/${artifactId}-${version}-shaded.jar</jar>-->
-            <!--<outfile>${project.build.directory}/hypercube.exe</outfile>-->
-            <!--&lt;!&ndash;<downloadUrl>http://java.com/download</downloadUrl>&ndash;&gt;-->
-            <!--<classPath>-->
-            <!--<mainClass>com.noe.hypercube.Runner</mainClass>-->
-            <!--<preCp>anything</preCp>-->
-            <!--</classPath>-->
-            <!--<icon>application.ico</icon>-->
-            <!--<jre>-->
-            <!--<minVersion>1.8.0</minVersion>-->
-            <!--<jdkPreference>preferJre</jdkPreference>-->
-            <!--</jre>-->
-            <!--<versionInfo>-->
-            <!--<fileVersion>1.0.0</fileVersion>-->
-            <!--<txtFileVersion>${project.version}</txtFileVersion>-->
-            <!--<fileDescription>${project.name}</fileDescription>-->
-            <!--&lt;!&ndash;<copyright>2012 howtodoinjava.com</copyright>&ndash;&gt;-->
-            <!--<productVersion>1.0.0.0</productVersion>-->
-            <!--<txtProductVersion>1.0.0.0</txtProductVersion>-->
-            <!--<productName>${project.name}</productName>-->
-            <!--&lt;!&ndash;<companyName>howtodoinjava.com</companyName>&ndash;&gt;-->
-            <!--&lt;!&ndash;<internalName>howtodoinjava</internalName>&ndash;&gt;-->
-            <!--<originalFilename>hypercube.exe</originalFilename>-->
-            <!--</versionInfo>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
-
-            <!--<plugin>-->
-                <!--&lt;!&ndash;<groupId>org.bluestemsoftware.open.maven.plugin</groupId>&ndash;&gt;-->
-                <!--&lt;!&ndash;<artifactId>launch4j-plugin</artifactId>&ndash;&gt;-->
-                <!--&lt;!&ndash;<version>1.5.0.0</version>&ndash;&gt;-->
-                <!--<groupId>com.akathist.maven.plugins.launch4j</groupId>-->
-                <!--<artifactId>launch4j-maven-plugin</artifactId>-->
-                <!--<version>1.5.1</version>-->
-
-                <!--<executions>-->
-                    <!--&lt;!&ndash; GUI exe &ndash;&gt;-->
-                    <!--<execution>-->
-                        <!--<id>l4j-gui</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>launch4j</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<headerType>gui</headerType>-->
-                            <!--<outfile>${project.build.directory}/hypercube.exe</outfile>-->
-                            <!--<jar>${project.build.directory}/${artifactId}-${version}-shaded.jar</jar>-->
-                            <!--&lt;!&ndash; 'shaded' is the value set on shadedClassifierName above &ndash;&gt;-->
-                            <!--<errTitle>Hypercube Error</errTitle>-->
-                            <!--<classPath>-->
-                                <!--<mainClass>com.noe.hypercube.Runner</mainClass>-->
-                            <!--</classPath>-->
-                            <!--<icon>./images/hypercube-dfault-icon-big2.png</icon>-->
-                            <!--<jre>-->
-                                <!--<minVersion>1.8.0</minVersion>-->
-                                <!--<maxVersion>1.9.0</maxVersion>-->
-                                <!--<initialHeapSize>256</initialHeapSize>-->
-                                <!--<maxHeapSize>512</maxHeapSize>-->
-                            <!--</jre>-->
-                            <!--<versionInfo>-->
-                                <!--<fileVersion>1.0.0.0</fileVersion>-->
-                                <!--<txtFileVersion>1.0.0.0</txtFileVersion>-->
-                                <!--<fileDescription>Hypercube File Manager</fileDescription>-->
-                                <!--<copyright>C</copyright>-->
-                                <!--<productVersion>1.0.0.0</productVersion>-->
-                                <!--<txtProductVersion>1.0.0.0</txtProductVersion>-->
-                                <!--<productName>Hypercube</productName>-->
-                                <!--<internalName>Hypercube</internalName>-->
-                                <!--<originalFilename>hypercube.exe</originalFilename>-->
-                            <!--</versionInfo>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
-
-            <!--<plugin>-->
-            <!--<groupId>org.bsc.maven</groupId>-->
-            <!--<artifactId>maven-processor-plugin</artifactId>-->
-            <!--<version>2.2.4</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>process</id>-->
-            <!--<goals>-->
-            <!--<goal>process</goal>-->
-            <!--</goals>-->
-            <!--<phase>generate-sources</phase>-->
-            <!--<configuration>-->
-            <!--&lt;!&ndash; Without this, the annotation processor complains about persistence.xml not being present and fail &ndash;&gt;-->
-            <!--<compilerArguments>-Aeclipselink.persistencexml=src/main/resources/META-INF/persistence.xml</compilerArguments>-->
-            <!--&lt;!&ndash; For an unknown reason, the annotation processor is not discovered, have to list it explicitly &ndash;&gt;-->
-            <!--<processors>-->
-            <!--<processor>org.eclipse.persistence.internal.jpa.modelgen.CanonicalModelProcessor</processor>-->
-            <!--</processors>-->
-            <!--&lt;!&ndash; source output directory &ndash;&gt;-->
-            <!--<outputDirectory>${project.build.directory}/generated-sources/meta-model</outputDirectory>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
         </plugins>
 
         <pluginManagement>
@@ -448,7 +258,7 @@
                                 <classPath>
                                     <mainClass>com.noe.hypercube.Runner</mainClass>
                                 </classPath>
-                                <!--<icon>D:\Code\hypercube\images\hypercube-dfault-icon-big2.png</icon>-->
+                                <!--<icon>/hypercube.ico</icon>-->
                                 <jre>
                                     <minVersion>1.8.0</minVersion>
                                     <maxVersion>1.9.0</maxVersion>
