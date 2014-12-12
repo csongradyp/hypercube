@@ -221,10 +221,7 @@ public class FileTableView extends TableView<IFile> implements Initializable {
             getItems().clear();
             dirs.addAll(files);
         }
-        ObservableList<IFile> data = FXCollections.observableArrayList(dirs);
-        setItems(data);
-        getSortOrder().add(fileNameColumn);
-        selectIfSteppedBack(previousFolder);
+        sortAndSetItems(dirs, previousFolder);
     }
 
     public void setCloudFileList(final Path parentFolder, final List<ServerEntry> list) {
@@ -240,23 +237,32 @@ public class FileTableView extends TableView<IFile> implements Initializable {
                 dirs.add(stepBack);
             }
             for (ServerEntry file : list) {
-                final RemoteFile remoteFile = new RemoteFile(file.getAccount(), Paths.get(file.getAccount(), file.getPath().toString()), 0, file.isFolder(), file.lastModified());
-//                remoteFile.share(file.getAccount());
-                if (getItems().contains(remoteFile)) {
-                    final IFile iFile = getItems().filtered(file1 -> file1.equals(remoteFile)).get(0);
-                    iFile.share(remoteFile.sharedWith());
+                RemoteFile remoteFile;
+                Optional<IFile> matchedAlreadyListedFile = dirs.parallelStream().filter(listedFile -> listedFile.getName().equals(file.getPath().getFileName().toString())).findAny();
+                if (matchedAlreadyListedFile.isPresent()) {
+                    matchedAlreadyListedFile.get().share(file.getAccount());
                 } else {
-                    if (file.isFolder()) {
-                        dirs.add(remoteFile);
+                    matchedAlreadyListedFile = files.parallelStream().filter(listedFile -> listedFile.getName().equals(file.getPath().getFileName().toString())).findAny();
+                    if (matchedAlreadyListedFile.isPresent()) {
+                        matchedAlreadyListedFile.get().share(file.getAccount());
                     } else {
-                        files.add(remoteFile);
+                        remoteFile = new RemoteFile(file.getAccount(), Paths.get(file.getAccount(), file.getPath().toString()), 0, file.isFolder(), file.lastModified());
+                        if (file.isFolder()) {
+                            dirs.add(remoteFile);
+                        } else {
+                            files.add(remoteFile);
+                        }
                     }
                 }
             }
             dirs.addAll(files);
         }
+        sortAndSetItems(dirs, previousFolder);
+    }
+
+    private void sortAndSetItems(Collection<IFile> dirs, IFile previousFolder) {
         ObservableList<IFile> data = FXCollections.observableArrayList(dirs);
-        getItems().addAll(data);
+        setItems(data);
         getSortOrder().add(fileNameColumn);
         selectIfSteppedBack(previousFolder);
     }
