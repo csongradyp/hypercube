@@ -26,8 +26,10 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     private static final String SEPARATOR = System.getProperty("file.separator");
     private static final String SEPARATOR_PATTERN = Pattern.quote(SEPARATOR);
     private static final Pattern SLASH_SEPARATOR = Pattern.compile("/");
+    public static final String CLOUD = "Cloud";
 
     private FileBreadCrumbBar localBreadcrumb;
+    private RemoteFileBreadCrumbBar cloudBreadcrumb;
     private Map<String, RemoteFileBreadCrumbBar> remoteBreadcrumbs;
     private EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> remoteEventHandler;
     private EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> localEventHandler;
@@ -49,10 +51,12 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         remoteBreadcrumbs = new HashMap<>();
         localBreadcrumb = new FileBreadCrumbBar();
+        cloudBreadcrumb = new RemoteFileBreadCrumbBar(CLOUD);
+        addRemoteCrumbEventHandler(cloudBreadcrumb);
         localBreadcrumb.setActive(true);
         localBreadcrumb.setOnAddMapping(mouseEvent -> {
             final Optional<MappingRequest> request = AddMappingDialog.showMapLocalDialog(localBreadcrumb.getLocation());
-            if(request.isPresent()) {
+            if (request.isPresent()) {
                 EventBus.publishAddMappingRequest(request.get());
             }
         });
@@ -62,7 +66,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         for (String account : accounts) {
             final RemoteFileBreadCrumbBar remoteBreadcrumb = new RemoteFileBreadCrumbBar(account);
             addRemoteCrumbEventHandler(remoteBreadcrumb);
-            remoteBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapRemoteDialog( remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation()));
+            remoteBreadcrumb.setOnAddMapping(event -> AddMappingDialog.showMapRemoteDialog(remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation()));
             setOnRemoveRemoteMapping(remoteBreadcrumb);
             remoteBreadcrumbs.put(account, remoteBreadcrumb);
         }
@@ -79,7 +83,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
                     addRemoteCrumbEventHandler(remoteBreadcrumb);
                     remoteBreadcrumb.setOnAddMapping(event -> {
                         final Optional<MappingRequest> request = AddMappingDialog.showMapRemoteDialog(remoteBreadcrumb.getAccount(), remoteBreadcrumb.getLocation());
-                        if(request.isPresent()) {
+                        if (request.isPresent()) {
                             EventBus.publishAddMappingRequest(request.get());
                         }
                     });
@@ -109,9 +113,8 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         });
     }
 
-    public Path getNewRemotePath(final BreadCrumbBar.BreadCrumbActionEvent<String> event, final String account) {
-        final RemoteFileBreadCrumbBar remoteFileBreadCrumbBar = remoteBreadcrumbs.get(account);
-        return Paths.get(account, remoteFileBreadCrumbBar.getPath(event).toString());
+    public Path getNewRemotePath(final BreadCrumbBar.BreadCrumbActionEvent<String> event, final RemoteFileBreadCrumbBar remoteFileBreadCrumbBar) {
+        return Paths.get(remoteFileBreadCrumbBar.getAccount(), remoteFileBreadCrumbBar.getPath(event).toString());
     }
 
     public Path getNewLocalPath(final BreadCrumbBar.BreadCrumbActionEvent<String> event) {
@@ -159,12 +162,18 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     }
 
     public void setRemoteBreadCrumbs(final String account, final Path path) {
-        if (account.equals("Cloud")) {
-            getChildren().clear();
-        } else {
+        final String crumbPath = path == null || isRootDirectory(account, path) ? "" : path.toString();
+//        if (CLOUD.equals(account)) {
+//            getChildren().clear();
+//            getChildren().add(cloudBreadcrumb);
+//            cloudBreadcrumb.setActive(true);
+//            if (!crumbPath.isEmpty()) {
+//
+//            }
+//            setRemoteBreadCrumb(crumbPath, account, cloudBreadcrumb);
+//        } else {
             final RemoteFileBreadCrumbBar activeAccountCrumb = remoteBreadcrumbs.get(account);
             activeAccountCrumb.setActive(true);
-            final String crumbPath = path == null || Paths.get(account).equals(path) ? "" : path.toString();
             final String localFolder = PathBundle.getLocalFolder(account, crumbPath);
             if (isMapped(localFolder)) {
                 setBreadCrumbs(Paths.get(localFolder));
@@ -174,7 +183,25 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
                 setRemoteBreadCrumb(crumbPath, account, activeAccountCrumb);
                 getChildren().add(activeAccountCrumb);
             }
+//        }
+    }
+
+    public void setCloudBreadCrumbs(final Collection<String> accounts, final Path folder) {
+        final String crumbPath = folder == null ? "" : folder.toString();
+        getChildren().clear();
+        getChildren().add(cloudBreadcrumb);
+        cloudBreadcrumb.setActive(true);
+        setRemoteBreadCrumb(crumbPath, CLOUD, cloudBreadcrumb);
+        if (!accounts.isEmpty()) {
+            for (String account : accounts) {
+                getChildren().add(remoteBreadcrumbs.get(account));
+                setRemoteBreadCrumb(crumbPath, account, cloudBreadcrumb);
+            }
         }
+    }
+
+    private boolean isRootDirectory(final String account, final Path path) {
+        return Paths.get(account).equals(path);
     }
 
     private boolean isMapped(final String localFolder) {
@@ -188,7 +215,7 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
         }
     }
 
-    private void setRemoteBreadCrumb(final String path, final String account, final RemoteFileBreadCrumbBar breadcrumb) {
+    private void setRemoteBreadCrumb(final String path, final String account, final FileBreadCrumbBar breadcrumb) {
         final Path pathWithAccount = Paths.get(account, path);
         final String breadcrumbPath = SLASH_SEPARATOR.matcher(pathWithAccount.toString()).replaceAll("\\\\");
         final TreeItem<String> model = BreadCrumbBar.buildTreeModel(breadcrumbPath.split(SEPARATOR_PATTERN));
@@ -196,24 +223,26 @@ public class MultiBreadCrumbBar extends VBox implements Initializable {
     }
 
     public RemoteFileBreadCrumbBar getActiveRemoteCrumb() {
+        if (cloudBreadcrumb.isActive()) {
+            return cloudBreadcrumb;
+        }
         for (RemoteFileBreadCrumbBar remoteFileBreadCrumbBar : remoteBreadcrumbs.values()) {
-            if(remoteFileBreadCrumbBar.isActive()) {
+            if (remoteFileBreadCrumbBar.isActive()) {
                 return remoteFileBreadCrumbBar;
             }
         }
-        return null;
+        throw new IllegalStateException("Active breadcrumb was not found in registered breadcrumbs!");
     }
 
-    public void setOnLocalCrumbAction(EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> eventHandler) {
+    public void setOnLocalCrumbAction(final EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> eventHandler) {
         localEventHandler = eventHandler;
     }
 
-    public void setOnRemoteCrumbAction(EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> remoteEventHandler) {
+    public void setOnRemoteCrumbAction(final EventHandler<BreadCrumbBar.BreadCrumbActionEvent<String>> remoteEventHandler) {
         this.remoteEventHandler = remoteEventHandler;
     }
 
     public SimpleBooleanProperty remoteProperty() {
         return remote;
     }
-
 }

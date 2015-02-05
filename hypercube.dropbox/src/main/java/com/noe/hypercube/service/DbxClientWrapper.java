@@ -196,7 +196,7 @@ public class DbxClientWrapper extends Client<Dropbox, DbxClient, DbxFileEntity, 
 
     @Override
     public List<ServerEntry> getFileList(final Path remoteFolder) throws SynchronizationException {
-        final String dropboxPath = remoteFolder.toString().replace("\\", "/");
+        final String dropboxPath = getDropboxPath(remoteFolder);
         final List<ServerEntry> fileList = new ArrayList<>();
         try {
             final DbxEntry.WithChildren metadataWithChildren = getClient().getMetadataWithChildren(dropboxPath);

@@ -18,7 +18,7 @@ public final class EventBus {
     private final MBassador<AccountConnectionRequest> connectionRequestBus;
     private final MBassador<AccountConnectionResponse> connectionResponseBus;
     private final MBassador<FileEvent> fileEventBus;
-    private final MBassador<FileListRequest> fileListRequestBus;
+    private final MBassador<IFileListRequest> fileListRequestBus;
     private final MBassador<FileListResponse> fileListResponseBus;
     private final MBassador<UploadRequest> uploadRequestBus;
     private final MBassador<DownloadRequest> downloadRequestBus;
@@ -107,11 +107,11 @@ public final class EventBus {
         instance.storageEventBus.publish(storageEvent);
     }
 
-    public static void publish(FileListRequest fileListRequest) {
+    public static void publish(final IFileListRequest fileListRequest) {
         instance.fileListRequestBus.publishAsync(fileListRequest);
     }
 
-    public static void publish(FileListResponse fileListResponse) {
+    public static void publish(final FileListResponse fileListResponse) {
         instance.fileListResponseBus.publishAsync(fileListResponse);
     }
 
@@ -212,7 +212,8 @@ public final class EventBus {
     public static void subscribeToFileListRequest(FileEventHandler handler) {
         instance.fileListRequestBus.subscribe(handler);
     }
-    public static void subscribeToFileListRequest(EventHandler<FileListRequest> handler) {
+
+    public static void subscribeToFileListRequest(EventHandler<? extends IFileListRequest> handler) {
         instance.fileListRequestBus.subscribe(handler);
     }
 
@@ -259,4 +260,5 @@ public final class EventBus {
     public static void unsubscribeToDeleteRequest(FileEventHandler handler) {
         instance.deleteRequestBus.unsubscribe(handler);
     }
+
 }

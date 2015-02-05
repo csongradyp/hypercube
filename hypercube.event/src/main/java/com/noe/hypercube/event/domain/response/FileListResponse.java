@@ -18,7 +18,7 @@ public class FileListResponse extends AccountActionEvent {
     private final RemoteQuotaInfo quotaInfo;
     private Boolean cloud;
 
-    public FileListResponse(final Integer target, final String account, final Path previousFolder, final Path folder, List<ServerEntry> fileList, final RemoteQuotaInfo quotaInfo) {
+    public FileListResponse(final Integer target, final String account, final Path previousFolder, final Path folder, final List<ServerEntry> fileList, final RemoteQuotaInfo quotaInfo) {
         super(account);
         this.target = target;
         this.previousFolder = previousFolder;

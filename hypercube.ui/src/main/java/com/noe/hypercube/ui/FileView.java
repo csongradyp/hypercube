@@ -2,12 +2,16 @@ package com.noe.hypercube.ui;
 
 import com.noe.hypercube.event.EventBus;
 import com.noe.hypercube.event.EventHandler;
+import com.noe.hypercube.event.domain.request.CloudFileListRequest;
 import com.noe.hypercube.event.domain.request.FileListRequest;
+import com.noe.hypercube.event.domain.response.CloudFileListResponse;
 import com.noe.hypercube.event.domain.response.FileListResponse;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.domain.file.IFile;
 import com.noe.hypercube.ui.domain.file.LocalFile;
+import com.noe.hypercube.ui.domain.file.MergedRemoteFile;
+import com.noe.hypercube.ui.domain.file.RemoteFile;
 import com.noe.hypercube.ui.elements.AccountSegmentedButton;
 import com.noe.hypercube.ui.elements.LocalDriveSegmentedButton;
 import com.noe.hypercube.ui.util.StyleUtil;
@@ -47,6 +51,7 @@ import static javafx.scene.input.KeyCombination.ModifierValue.UP;
 
 public class FileView extends VBox implements Initializable, EventHandler<FileListResponse> {
 
+    public static final String CLOUD = "Cloud";
     private final KeyCombination enter = new KeyCodeCombination(KeyCode.ENTER);
     private final KeyCombination backSpace = new KeyCodeCombination(KeyCode.BACK_SPACE);
     private final KeyCombination space = new KeyCodeCombination(KeyCode.SPACE);
@@ -97,13 +102,24 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
             if (newFolder != null) {
                 if (isRemote()) {
                     String activeAccount = remoteDrives.getActiveAccount();
-                    if (activeAccount.equals("Cloud")) {
+                    if (CLOUD.equals(activeAccount)) {
                         final IFile selectedFile = getSelectedFile();
-                        if (selectedFile != null && selectedFile.getPath().equals(newFolder)) {
-                            activeAccount = selectedFile.getOrigin();
+                        if (selectedFile != null && isMergedRemoteFile(selectedFile)) {
+                            final MergedRemoteFile mergedRemoteFile = (MergedRemoteFile) selectedFile;
+                            final Collection<FileListRequest> requests = new ArrayList<>(mergedRemoteFile.getFiles().size());
+                            final Collection<RemoteFile> remoteFiles = mergedRemoteFile.getFiles();
+                            for (RemoteFile remoteFile : remoteFiles) {
+                                final FileListRequest fileListRequest = new FileListRequest(hashCode(), remoteFile.getOrigin(), getEventPath(remoteFile.getPath()), previousFolder);
+                                requests.add(fileListRequest);
+                            }
+                            EventBus.publish(new CloudFileListRequest(hashCode(), requests, previousFolder));
+                        } else {
+                            // breadcrumb action occurred
+                            EventBus.publish(new CloudFileListRequest(hashCode(), null, previousFolder));
                         }
+                    } else {
+                        EventBus.publish(new FileListRequest(hashCode(), activeAccount, getEventPath(newFolder), previousFolder));
                     }
-                    EventBus.publish(new FileListRequest(hashCode(), activeAccount, getEventPath(newFolder), previousFolder));
                     showLoadingOverlay(resources);
                 } else {
                     multiBreadCrumbBar.setAllRemoteCrumbsInactive();
@@ -120,7 +136,10 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         multiBreadCrumbBar.setOnRemoteCrumbAction(event -> {
             final RemoteFileBreadCrumbBar activeRemoteCrumb = multiBreadCrumbBar.getActiveRemoteCrumb();
             remoteDrives.select(activeRemoteCrumb.getAccount());
-            setLocation(multiBreadCrumbBar.getNewRemotePath(event, remoteDrives.getActiveAccount()));
+            // TODO
+            table.getSelectionModel().select(null);
+            setLocation(multiBreadCrumbBar.getNewRemotePath(event, activeRemoteCrumb));
+
         });
     }
 
@@ -241,6 +260,10 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
         return LocalFile.class.isAssignableFrom(selectedFile.getClass());
     }
 
+    private boolean isMergedRemoteFile(IFile selectedFile) {
+        return MergedRemoteFile.class.isAssignableFrom(selectedFile.getClass());
+    }
+
     private void openWithDefaultProgram(LocalFile selectedFile) {
         try {
             Desktop.getDesktop().open(selectedFile.getFile());
@@ -354,6 +377,10 @@ public class FileView extends VBox implements Initializable, EventHandler<FileLi
     public void onEvent(final FileListResponse event) {
         if (isRemote() && isTarget(event)) {
             Platform.runLater(() -> {
+                if(event.isCloud()) {
+                    CloudFileListResponse cloudFileListResponse = (CloudFileListResponse) event;
+                    multiBreadCrumbBar.setCloudBreadCrumbs(cloudFileListResponse.getAccounts(), event.getFolder());
+                }
                 multiBreadCrumbBar.setRemoteBreadCrumbs(event.getAccount(), event.getFolder());
                 hideLoadingOverLay();
                 StyleUtil.changeStyle(table, event.getAccount());

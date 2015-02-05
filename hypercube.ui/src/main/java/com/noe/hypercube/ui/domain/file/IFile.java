@@ -27,7 +27,7 @@ public interface IFile {
 
     long lastModified();
 
-    BooleanProperty getMarkedProperty();
+    BooleanProperty markedProperty();
 
     void setMarked(boolean selected);
 

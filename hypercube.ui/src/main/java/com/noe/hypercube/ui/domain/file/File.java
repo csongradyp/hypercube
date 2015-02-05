@@ -65,7 +65,7 @@ public abstract class File implements IFile {
     }
 
     @Override
-    public BooleanProperty getMarkedProperty() {
+    public BooleanProperty markedProperty() {
         return marked;
     }
 

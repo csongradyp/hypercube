@@ -1,30 +1,29 @@
 package com.noe.hypercube.event.domain.request;
 
 import com.noe.hypercube.event.domain.AccountActionEvent;
-
 import java.nio.file.Path;
+import java.util.Collection;
 
-public class FileListRequest extends AccountActionEvent implements IFileListRequest {
+public class CloudFileListRequest extends AccountActionEvent implements IFileListRequest {
 
-    private Path folder;
     private Path previousFolder;
     private final Integer target;
+    private final Collection<FileListRequest> requests;
 
-    public FileListRequest(final Integer target, final String account, final Path remoteFolder, final Path previousFolder) {
-       super(account);
+    public CloudFileListRequest(final Integer target, final Collection<FileListRequest> requests, final Path previousFolder) {
+        super("Cloud");
         this.target = target;
-        this.folder = remoteFolder;
+        this.requests = requests;
         this.previousFolder = previousFolder;
     }
 
-    public FileListRequest(final Integer target, final String account) {
-        super(account);
-        this.target = target;
+    public Collection<FileListRequest> getRequests() {
+        return requests;
     }
 
     @Override
     public Path getFolder() {
-        return folder;
+        return requests.iterator().next().getFolder();
     }
 
     public Path getPreviousFolder() {
@@ -33,7 +32,7 @@ public class FileListRequest extends AccountActionEvent implements IFileListRequ
 
     @Override
     public Boolean isCloud() {
-        return getAccount().equals("Cloud");
+        return true;
     }
 
     @Override

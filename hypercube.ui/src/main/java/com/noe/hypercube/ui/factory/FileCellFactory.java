@@ -35,7 +35,7 @@ public class FileCellFactory implements Callback<TableColumn<IFile, IFile>, Tabl
             public void updateItem(IFile file, boolean empty) {
                 if (file != null && !empty) {
                     super.updateItem(file, empty);
-                    file.getMarkedProperty().addListener((observable, oldValue, newValue) -> updateItem(file, false));
+                    file.markedProperty().addListener((observable, oldValue, newValue) -> updateItem(file, false));
                     if (cellText != null) {
                         setText(cellText.getCellText(file));
                     }

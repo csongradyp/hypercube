@@ -4,10 +4,7 @@ import com.noe.hypercube.domain.ServerEntry;
 import com.noe.hypercube.ui.bundle.ConfigurationBundle;
 import com.noe.hypercube.ui.bundle.ImageBundle;
 import com.noe.hypercube.ui.bundle.PathBundle;
-import com.noe.hypercube.ui.domain.file.IFile;
-import com.noe.hypercube.ui.domain.file.LocalFile;
-import com.noe.hypercube.ui.domain.file.RemoteFile;
-import com.noe.hypercube.ui.domain.file.StepBackFile;
+import com.noe.hypercube.ui.domain.file.*;
 import com.noe.hypercube.ui.elements.FileListComparator;
 import com.noe.hypercube.ui.factory.FileCellFactory;
 import com.noe.hypercube.ui.factory.IconFactory;
@@ -74,11 +71,11 @@ public class FileTableView extends TableView<IFile> implements Initializable {
         cloudColumn.setCellValueFactory(file -> new ReadOnlyObjectWrapper<>(file.getValue()));
         cloudColumn.setCellFactory(new FileCellFactory(file -> {
             HBox content = new HBox(2.0d);
-            if (!file.isStepBack() && !file.isLocal()) {
-                final Label accountMarkLabel = createAccountMarkLabel(file.getOrigin());
-                accountMarkLabel.getStyleClass().add("account-icon");
-                content.getChildren().add(accountMarkLabel);
-            }
+//            if (!file.isStepBack() && !file.isLocal()) {
+//                final Label accountMarkLabel = createAccountMarkLabel(file.getOrigin());
+//                accountMarkLabel.getStyleClass().add("account-icon");
+//                content.getChildren().add(accountMarkLabel);
+//            }
             final Collection<String> sharedWith = file.sharedWith();
             for (final String account : sharedWith) {
                 final Label sharedAccountMarkLabel = createAccountMarkLabel(account);
@@ -237,20 +234,21 @@ public class FileTableView extends TableView<IFile> implements Initializable {
                 dirs.add(stepBack);
             }
             for (ServerEntry file : list) {
-                RemoteFile remoteFile;
+                RemoteFile remoteFile = new RemoteFile(file.getAccount(), Paths.get(file.getAccount(), file.getPath().toString()), 0, file.isFolder(), file.lastModified());
                 Optional<IFile> matchedAlreadyListedFile = dirs.parallelStream().filter(listedFile -> listedFile.getName().equals(file.getPath().getFileName().toString())).findAny();
                 if (matchedAlreadyListedFile.isPresent()) {
-                    matchedAlreadyListedFile.get().share(file.getAccount());
+                    ((MergedRemoteFile) matchedAlreadyListedFile.get()).merge(remoteFile);
                 } else {
                     matchedAlreadyListedFile = files.parallelStream().filter(listedFile -> listedFile.getName().equals(file.getPath().getFileName().toString())).findAny();
                     if (matchedAlreadyListedFile.isPresent()) {
-                        matchedAlreadyListedFile.get().share(file.getAccount());
+                        ((MergedRemoteFile) matchedAlreadyListedFile.get()).merge(remoteFile);
                     } else {
-                        remoteFile = new RemoteFile(file.getAccount(), Paths.get(file.getAccount(), file.getPath().toString()), 0, file.isFolder(), file.lastModified());
+                        final MergedRemoteFile mergedRemoteFile = new MergedRemoteFile(file.isFolder());
+                        mergedRemoteFile.merge(remoteFile);
                         if (file.isFolder()) {
-                            dirs.add(remoteFile);
+                            dirs.add(mergedRemoteFile);
                         } else {
-                            files.add(remoteFile);
+                            files.add(mergedRemoteFile);
                         }
                     }
                 }
